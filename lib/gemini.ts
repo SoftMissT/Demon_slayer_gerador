@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 
 let ai: GoogleGenAI | null = null;
@@ -124,31 +125,6 @@ export const detailedResponseSchema = {
       espaco_que_ocupa: { type: Type.STRING },
       prompts_de_geracao: promptsSchema,
     }
-};
-
-export const serverGenerateImage = async (prompt: string): Promise<string> => {
-    const aiClient = getAiClient();
-    const response = await aiClient.models.generateImages({
-        model: 'imagen-4.0-generate-001',
-        prompt: prompt,
-        config: {
-            numberOfImages: 1,
-            outputMimeType: 'image/jpeg',
-            aspectRatio: '1:1',
-        },
-    });
-
-    if (!response.generatedImages || response.generatedImages.length === 0) {
-        throw new Error('A API de geração de imagem não retornou resultados.');
-    }
-
-    const base64ImageBytes = response.generatedImages[0]?.image?.imageBytes;
-    if (!base64ImageBytes) {
-        throw new Error('A API retornou uma imagem, mas os dados da imagem estão vazios.');
-    }
-    
-    const imageUrl = `data:image/jpeg;base64,${base64ImageBytes}`;
-    return imageUrl;
 };
 
 export { getAiClient };

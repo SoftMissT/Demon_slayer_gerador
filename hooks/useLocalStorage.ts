@@ -1,8 +1,6 @@
 
-
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
-// Fix: Import `Dispatch` and `SetStateAction` to use them directly in the return type annotation, which resolves the 'Cannot find namespace React' error.
 function useLocalStorage<T,>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {

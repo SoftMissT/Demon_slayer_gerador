@@ -29,6 +29,8 @@ export const SKILL_TYPES: { [key in ArchetypeType]: SkillType[] } = {
     GUERREIRO: ['Kenshi', 'Bujin', 'Kyūshi'],
     ALQUIMISTA: ['Kajiya', 'Curandeiro', 'Dokugakusha', 'Ritualista'],
     ESCUDEIRO: ['Tate', 'Ishibumi', 'Shugo', 'Paladino'],
+    // FIX: Added an entry for the empty string key to satisfy the ArchetypeType.
+    '': [],
 };
 
 export const ARMADURA_TYPES: ArmaduraType[] = [

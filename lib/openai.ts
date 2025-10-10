@@ -1,3 +1,4 @@
+
 import OpenAI from 'openai';
 
 let openai: OpenAI | null = null;
@@ -41,22 +42,4 @@ export const serverGenerateTextOpenAI = async (prompt: string, schema: any): Pro
     }
     
     return parsedContent[arrayKey];
-};
-
-
-export const serverGenerateImageOpenAI = async (prompt: string): Promise<string> => {
-    const client = getOpenAiClient();
-    const response = await client.images.generate({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-    });
-
-    const imageUrl = response.data[0]?.url;
-    if (!imageUrl) {
-        throw new Error('A API da OpenAI não retornou uma URL de imagem.');
-    }
-    return imageUrl;
 };

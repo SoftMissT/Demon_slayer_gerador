@@ -1,24 +1,20 @@
 
-
-
-
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { Header } from './components/Header';
-// FIX: Module '"./services/geminiService"' has no exported member 'generateImage'.
-import { generateContent, generateImage } from './services/geminiService';
+import { generateContent } from './services/geminiService';
 import type { FilterState, GeneratedItem, GenerationType, Rarity } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 import { FavoritesModal } from './components/FavoritesModal';
 import { DetailModal } from './components/DetailModal';
-import { buildImagePrompt } from './lib/promptBuilder';
+import PromptEngineeringPanel from './components/PromptEngineeringPanel';
+
+export type ActiveTab = 'generator' | 'prompts';
 
 const App: React.FC = () => {
   const initialFilters: FilterState = {
     generationType: '',
-    // FIX: Property 'aiModel' was missing and is required by the 'FilterState' type.
     aiModel: 'Gemini',
     breathingBase: '',
     weaponType: '',
@@ -41,10 +37,10 @@ const App: React.FC = () => {
   const [results, setResults] = useState<GeneratedItem[]>([]);
   const [selectedResult, setSelectedResult] = useState<GeneratedItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [imageLoadingId, setImageLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('favorites', []);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('generator');
 
   useEffect(() => {
     document.title = "Forjador de ideias kimetsu no yaiba";
@@ -134,35 +130,6 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
-  const handleGenerateImage = async (itemId: string) => {
-      const itemToUpdate = results.find(r => r.id === itemId) || favorites.find(f => f.id === itemId) || selectedResult;
-      if (!itemToUpdate || itemToUpdate.id !== itemId) return;
-
-      setImageLoadingId(itemId);
-      setError(null);
-      try {
-          const imagePrompt = buildImagePrompt(itemToUpdate, filters.era);
-          
-          const imageUrl = await generateImage(imagePrompt);
-          
-          const updateItemWithImage = (item: GeneratedItem) => 
-              item.id === itemId ? { ...item, imageUrl } : item;
-
-          setResults(prevResults => prevResults.map(updateItemWithImage));
-          setFavorites(prevFavorites => prevFavorites.map(updateItemWithImage));
-          
-          if(selectedResult?.id === itemId) {
-              setSelectedResult(prev => prev ? { ...prev, imageUrl } : null);
-          }
-
-      } catch (err) {
-          console.error(err);
-          setError(err instanceof Error ? err.message : 'Falha ao gerar a imagem.');
-      } finally {
-          setImageLoadingId(null);
-      }
-  };
 
   const isFavorite = (itemId: string) => favorites.some(fav => fav.id === itemId);
 
@@ -190,36 +157,47 @@ const App: React.FC = () => {
 
   return (
       <div className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col">
-        <Header onClearResults={handleClearResults} onShowFavorites={() => setIsFavoritesOpen(true)} />
-        <main className="flex-grow flex flex-col md:flex-row p-4 gap-4 overflow-hidden">
-          <div className="w-full md:w-1/3 xl:w-1/4 flex-shrink-0">
-            <FilterPanel 
-              filters={filters} 
-              setFilters={setFilters} 
-              onGenerate={handleGenerate}
-              onQuickGenerate={handleQuickGenerate}
-              onReset={handleResetFilters}
-              isLoading={isLoading}
-            />
-          </div>
-          <div className="w-full md:w-2/3 xl:w-3/4 flex flex-col gap-4">
-              {error && <div className="bg-red-800 border border-red-600 text-white px-4 py-3 rounded-lg text-center" role="alert">{error}</div>}
-            <ResultsPanel 
-                  results={results} 
-                  onSelect={handleSelectResult} 
-                  isLoading={isLoading} 
-                  selectedItemId={selectedResult?.id}
-                  isFavorite={isFavorite}
-                  onToggleFavorite={handleToggleFavorite}
-              />
-          </div>
+        <Header 
+            onClearResults={handleClearResults} 
+            onShowFavorites={() => setIsFavoritesOpen(true)}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+        />
+        <main className="flex-grow p-4 gap-4 overflow-hidden">
+          {activeTab === 'generator' && (
+            <div className="flex flex-col md:flex-row gap-4 h-full">
+              <div className="w-full md:w-1/3 xl:w-1/4 flex-shrink-0">
+                <FilterPanel 
+                  filters={filters} 
+                  setFilters={setFilters} 
+                  onGenerate={handleGenerate}
+                  onReset={handleResetFilters}
+                  isLoading={isLoading}
+                />
+              </div>
+              <div className="w-full md:w-2/3 xl:w-3/4 flex flex-col gap-4">
+                  {error && <div className="bg-red-800 border border-red-600 text-white px-4 py-3 rounded-lg text-center" role="alert">{error}</div>}
+                <ResultsPanel 
+                      results={results} 
+                      onSelect={handleSelectResult} 
+                      isLoading={isLoading} 
+                      selectedItemId={selectedResult?.id}
+                      isFavorite={isFavorite}
+                      onToggleFavorite={handleToggleFavorite}
+                  />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'prompts' && (
+            <PromptEngineeringPanel />
+          )}
+
         </main>
         <DetailModal
           item={selectedResult}
           onClose={handleCloseDetailModal}
           onGenerateVariant={handleGenerateVariant}
-          onGenerateImage={handleGenerateImage}
-          isImageLoading={imageLoadingId === selectedResult?.id}
           isFavorite={selectedResult ? isFavorite(selectedResult.id) : false}
           onToggleFavorite={handleToggleFavorite}
           onUpdate={handleUpdateSelectedItem}

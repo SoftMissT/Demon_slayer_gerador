@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import type { GeneratedItem, DanoPorNivelDetalhado } from '../types';
 import { Modal } from './ui/Modal';
@@ -14,8 +15,6 @@ interface DetailModalProps {
   item: GeneratedItem | null;
   onClose: () => void;
   onGenerateVariant: (baseItem: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onGenerateImage: (itemId: string) => void;
-  isImageLoading: boolean;
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onUpdate: (updatedItem: GeneratedItem) => void;
@@ -100,7 +99,7 @@ const MomentumDisplay: React.FC<{ momentum: GeneratedItem['momentum'] }> = ({ mo
     );
 }
 
-export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGenerateVariant, onGenerateImage, isImageLoading, isFavorite, onToggleFavorite }) => {
+export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGenerateVariant, isFavorite, onToggleFavorite }) => {
   const [copyState, setCopyState] = useState<'idle' | 'text' | 'json'>('idle');
 
   if (!item) {
@@ -191,21 +190,6 @@ export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGener
             {/* Modal Body with scroll */}
             <div className="flex-grow overflow-y-auto pr-2">
                 
-                {item.imageUrl || isImageLoading ? (
-                    <DetailSection title="Visualização">
-                        <div className="aspect-square bg-gray-900 rounded-lg flex items-center justify-center relative">
-                            {isImageLoading ? (
-                                <div className="flex flex-col items-center gap-2">
-                                    <Spinner />
-                                    <span className="text-sm text-gray-400">DALL-E 3 está desenhando...</span>
-                                </div>
-                            ) : (
-                                <img src={item.imageUrl} alt={`Visualização de ${item.nome}`} className="w-full h-full object-cover rounded-lg" />
-                            )}
-                        </div>
-                    </DetailSection>
-                ) : null}
-
                 <DetailSection title="Descrição Narrativa">
                   <p className="whitespace-pre-wrap">{item.descricao}</p>
                 </DetailSection>
@@ -297,9 +281,6 @@ export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGener
 
             {/* Modal Footer */}
             <div className="mt-4 pt-4 border-t border-gray-700 space-y-2 flex-shrink-0">
-                 <Button variant="primary" onClick={() => onGenerateImage(item.id)} disabled={isImageLoading} className="w-full">
-                    {isImageLoading ? <><Spinner size="sm"/> Gerando Imagem...</> : 'Gerar Imagem com DALL-E 3'}
-                 </Button>
                  {item.categoria === "Forma de Respiração" && 
                     <div className="grid grid-cols-3 gap-2">
                         <Button variant="secondary" onClick={() => onGenerateVariant(item, 'agressiva')}><SparklesIcon className="w-4 h-4"/> Agressiva</Button>
