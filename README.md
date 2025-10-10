@@ -1,4 +1,3 @@
-
 # Forjador de ideias kimetsu no yaiba - Vercel Edition
 
 This is a refactored version of the "Forjador de ideias kimetsu no yaiba" generator, designed to be deployed on Vercel or any Node.js hosting environment.
@@ -15,14 +14,14 @@ To use the application, you need a Gemini API key.
   1. Create a file named `.env.local` in the root of the project.
   2. Add your API key to this file:
      ```
-     GEMINI_API_KEY=YOUR_API_KEY_HERE
+     API_KEY=YOUR_API_KEY_HERE
      ```
 
 - **Vercel Deployment:**
   1. Fork this repository and import it into your Vercel account.
   2. In your Vercel project settings, go to the **Environment Variables** section.
   3. Add a new environment variable:
-     - **Name:** `GEMINI_API_KEY`
+     - **Name:** `API_KEY`
      - **Value:** `YOUR_API_KEY_HERE`
   4. Redeploy your project for the changes to take effect.
 
@@ -52,5 +51,5 @@ npm run build
 - **API Calls:** All communication with the Gemini API is handled by two serverless functions located in `pages/api/`:
   - `pages/api/generateContent.ts`: Handles text and structured JSON generation.
   - `pages/api/generateImage.ts`: Handles image generation.
-- **Security:** The `GEMINI_API_KEY` is only accessed on the server-side, never exposed to the client browser.
+- **Security:** The `API_KEY` is only accessed on the server-side, never exposed to the client browser.
 - **Frontend:** The frontend now uses `fetch` to call the internal API routes, which then securely call the Gemini API.
