@@ -22,7 +22,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             <div className="space-y-3 pl-2 border-l-2 border-gray-700">
               {section.content.map((item, itemIndex) => (
                 <div key={itemIndex}>
-                  {item.heading && <h4 className="font-semibold text-white">{item.heading}</h4>}
+                  {'heading' in item && <h4 className="font-semibold text-white">{item.heading}</h4>}
                   <p className="text-sm text-gray-400">{item.text}</p>
                 </div>
               ))}
