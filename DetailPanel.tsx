@@ -1,10 +1,10 @@
 // FIX: Import `useState` from React to resolve 'Cannot find name' errors.
 import React, { useState } from 'react';
-import type { GeneratedItem, MissionNPC, MissionItem, Tone } from '../types';
-import { Card } from './ui/Card';
-import { Button } from './ui/Button';
-import { StarIcon } from './icons/StarIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
+import type { GeneratedItem, MissionNPC, MissionItem, Tone } from './types';
+import { Card } from './components/ui/Card';
+import { Button } from './components/ui/Button';
+import { StarIcon } from './components/icons/StarIcon';
+import { SparklesIcon } from './components/icons/SparklesIcon';
 
 interface DetailPanelProps {
   item: GeneratedItem | null;

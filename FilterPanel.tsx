@@ -1,11 +1,11 @@
 import React from 'react';
-import { Button } from './ui/Button';
-import { Select } from './ui/Select';
-import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
-import { SparklesIcon } from './icons/SparklesIcon';
-import { Slider } from './ui/Slider';
-import type { FilterState, Tone } from '../types';
-import { CATEGORIES, RARITIES, ERAS, BREATHING_STYLES, DEMON_BLOOD_ARTS, TONES } from '../constants';
+import { Button } from './components/ui/Button';
+import { Select } from './components/ui/Select';
+import { SearchableMultiSelect } from './components/ui/SearchableMultiSelect';
+import { SparklesIcon } from './components/icons/SparklesIcon';
+import { Slider } from './components/ui/Slider';
+import type { FilterState, Tone } from './types';
+import { CATEGORIES, RARITIES, ERAS, BREATHING_STYLES, DEMON_BLOOD_ARTS, TONES } from './constants';
 
 interface FilterPanelProps {
   filters: FilterState;
