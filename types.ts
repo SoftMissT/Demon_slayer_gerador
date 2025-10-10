@@ -11,9 +11,11 @@ export type MainItemType = 'Item' | 'Equipamento' | 'Habilidade';
 export type ArchetypeType = 'GUERREIRO' | 'ALQUIMISTA' | 'ESCUDEIRO';
 export type SkillType = 'Kenshi' | 'Bujin' | 'Kyūshi' | 'Kajiya' | 'Curandeiro' | 'Dokugakusha' | 'Ritualista' | 'Tate' | 'Ishibumi' | 'Shugo' | 'Paladino';
 export type SkillActivationType = 'Ativa' | 'Passiva' | 'Toggled' | 'Ultimate';
+export type AiModel = 'Gemini' | 'OpenAI';
 
 export interface FilterState {
   generationType: GenerationType | '';
+  aiModel: AiModel;
   breathingBase: string;
   weaponType: string;
   grip: GripType | '';
@@ -83,6 +85,7 @@ export interface GeneratedItem {
   ganchos_narrativos: string;
   nivel_sugerido: number;
   respiracao_base: string;
+  imageUrl?: string;
 
   // Campos de raridade e bônus
   raridade: Rarity;

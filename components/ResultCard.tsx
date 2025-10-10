@@ -22,6 +22,11 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, onSelect, isSelect
 
   return (
     <div className={`${baseClasses} ${isSelected ? selectedClasses : unselectedClasses}`} onClick={() => onSelect(item)}>
+      {item.imageUrl && (
+        <div className="w-16 h-16 flex-shrink-0 bg-gray-800 rounded-md">
+            <img src={item.imageUrl} alt={`Imagem de ${item.nome}`} className="w-full h-full object-cover rounded-md"/>
+        </div>
+      )}
       <div className="flex-grow overflow-hidden">
         <div className="flex justify-between items-start">
           <h3 className="font-bold text-md text-gray-100 truncate pr-2 font-gangofthree">{item.nome}</h3>

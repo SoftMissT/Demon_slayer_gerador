@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient, simpleResponseSchema, detailedResponseSchema } from '../../lib/gemini';
+import { serverGenerateTextOpenAI } from '../../lib/openai';
 import type { FilterState, GeneratedItem, Rarity, GenerationType } from '../../types';
 import { Type } from '@google/genai';
 import { randomUUID } from 'crypto';
@@ -32,6 +33,18 @@ const calculateBonuses = (rarity: Rarity, category: GenerationType): { dano_extr
     }
     return bonuses;
 };
+
+const buildPromptForModel = (filters: FilterState, count: number, promptModifier?: string, isDetailed = false): string => {
+    const mainPromptBuilder = isDetailed ? buildDetailedPrompt : buildSimplePrompt;
+    let prompt = mainPromptBuilder(filters, count, promptModifier);
+    
+    if (filters.aiModel === 'OpenAI') {
+        const schema = isDetailed ? detailedResponseSchema : simpleResponseSchema;
+        prompt += `\n\nA resposta DEVE ser um objeto JSON contendo uma única chave "items" que é um array de objetos, seguindo este schema: ${JSON.stringify(schema)}`;
+    }
+    return prompt;
+};
+
 
 const buildSimplePrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
     let specificInstructions = '';
@@ -133,36 +146,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { filters, count = 1, promptModifier } = req.body as { filters: FilterState, count: number, promptModifier?: string };
         const isTechniqueType = ['Forma de Respiração', 'Kekkijutsu'].includes(filters.generationType);
         const isSkillType = filters.generationType === 'Arquétipo/Habilidade';
+        const isDetailed = isTechniqueType || isSkillType;
         
-        let prompt: string;
-        let schema: any;
-
-        if (isTechniqueType || isSkillType) {
-            prompt = isSkillType ? buildArchetypePrompt(filters, count, promptModifier) : buildDetailedPrompt(filters, count, promptModifier);
-            schema = detailedResponseSchema;
+        let itemsFromApi: any[];
+        
+        if (filters.aiModel === 'OpenAI') {
+            const prompt = buildPromptForModel(filters, count, promptModifier, isDetailed);
+            const schema = isDetailed ? detailedResponseSchema : simpleResponseSchema;
+            itemsFromApi = await serverGenerateTextOpenAI(prompt, schema);
         } else {
-            prompt = buildSimplePrompt(filters, count, promptModifier);
-            schema = simpleResponseSchema;
+             let prompt: string;
+            let schema: any;
+
+            if (isTechniqueType || isSkillType) {
+                prompt = isSkillType ? buildArchetypePrompt(filters, count, promptModifier) : buildDetailedPrompt(filters, count, promptModifier);
+                schema = detailedResponseSchema;
+            } else {
+                prompt = buildSimplePrompt(filters, count, promptModifier);
+                schema = simpleResponseSchema;
+            }
+
+            const responseSchema = { type: Type.ARRAY, items: schema };
+
+            const aiClient = getAiClient();
+            const response = await aiClient.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema,
+                    temperature: 0.9,
+                },
+            });
+            const rawText = response.text.trim();
+            if (!rawText) {
+                throw new Error("A API não retornou texto.");
+            }
+            itemsFromApi = JSON.parse(rawText);
         }
-
-        const responseSchema = { type: Type.ARRAY, items: schema };
-
-        const aiClient = getAiClient();
-        const response = await aiClient.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-                temperature: 0.9,
-            },
-        });
-
-        const rawText = response.text.trim();
-        if (!rawText) {
-            throw new Error("A API não retornou texto.");
-        }
-        let itemsFromApi = JSON.parse(rawText);
 
         if (!Array.isArray(itemsFromApi)) {
             itemsFromApi = [itemsFromApi];
@@ -171,7 +192,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const processedItems: GeneratedItem[] = itemsFromApi.map((item: any) => {
             const bonuses = calculateBonuses(item.raridade, item.categoria);
 
-            // Validação de CD
             if (item.dano_por_nivel) {
                 item.dano_por_nivel.forEach((dnp: any) => {
                     if (dnp.cd_vit && (parseInt(dnp.cd_vit) < 10 || parseInt(dnp.cd_vit) > 30)) {

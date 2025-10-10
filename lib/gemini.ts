@@ -126,7 +126,6 @@ export const detailedResponseSchema = {
     }
 };
 
-// FIX: Added and exported serverGenerateImage to handle image generation requests.
 export const serverGenerateImage = async (prompt: string): Promise<string> => {
     const aiClient = getAiClient();
     const response = await aiClient.models.generateImages({
@@ -143,7 +142,11 @@ export const serverGenerateImage = async (prompt: string): Promise<string> => {
         throw new Error('A API de geração de imagem não retornou resultados.');
     }
 
-    const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
+    const base64ImageBytes = response.generatedImages[0]?.image?.imageBytes;
+    if (!base64ImageBytes) {
+        throw new Error('A API retornou uma imagem, mas os dados da imagem estão vazios.');
+    }
+    
     const imageUrl = `data:image/jpeg;base64,${base64ImageBytes}`;
     return imageUrl;
 };

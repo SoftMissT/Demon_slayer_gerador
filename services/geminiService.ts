@@ -1,4 +1,3 @@
-
 import type { FilterState, GeneratedItem } from '../types';
 
 /**
@@ -23,18 +22,17 @@ export const generateContent = async (filters: FilterState, count: number = 1, p
     return data.items;
 };
 
-// FIX: Add generateImage function to call the image generation API endpoint.
 /**
  * Generates an image by calling the internal Next.js API route.
  * This keeps the API key secure on the server.
  */
-export const generateImage = async (prompt: string): Promise<string> => {
+export const generateImage = async (prompt: string, service: 'gemini' | 'openai' = 'gemini'): Promise<string> => {
     const response = await fetch('/api/generateImage', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, service }),
     });
 
     if (!response.ok) {

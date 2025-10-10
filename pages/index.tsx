@@ -3,16 +3,19 @@ import Head from 'next/head';
 import { FilterPanel } from '../components/FilterPanel';
 import { ResultsPanel } from '../components/ResultsPanel';
 import { Header } from '../components/Header';
-import { generateContent } from '../services/geminiService';
+import { generateContent, generateImage } from '../services/geminiService';
 import type { FilterState, GeneratedItem, Rarity } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { FavoritesModal } from '../components/FavoritesModal';
 import { DetailModal } from '../components/DetailModal';
 import { ErrorDisplay } from '../components/ui/ErrorDisplay';
+import { buildImagePrompt } from '../lib/promptBuilder';
+
 
 const Home: React.FC = () => {
   const initialFilters: FilterState = {
     generationType: '',
+    aiModel: 'Gemini',
     breathingBase: '',
     weaponType: '',
     grip: '',
@@ -34,6 +37,7 @@ const Home: React.FC = () => {
   const [results, setResults] = useState<GeneratedItem[]>([]);
   const [selectedResult, setSelectedResult] = useState<GeneratedItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [imageLoadingId, setImageLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('favorites', []);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
@@ -51,6 +55,34 @@ const Home: React.FC = () => {
       setIsLoading(false);
     }
   }, [filters]);
+  
+  const handleGenerateImage = async (itemId: string) => {
+      const itemToUpdate = results.find(r => r.id === itemId) || favorites.find(f => f.id === itemId) || (selectedResult?.id === itemId ? selectedResult : null);
+      if (!itemToUpdate) return;
+
+      setImageLoadingId(itemId);
+      setError(null);
+      try {
+          const imagePrompt = buildImagePrompt(itemToUpdate, filters.era);
+          const imageUrl = await generateImage(imagePrompt, 'openai');
+          
+          const updateItemWithImage = (item: GeneratedItem) => 
+              item.id === itemId ? { ...item, imageUrl } : item;
+
+          setResults(prevResults => prevResults.map(updateItemWithImage));
+          setFavorites(prevFavorites => prevFavorites.map(updateItemWithImage));
+          
+          if(selectedResult?.id === itemId) {
+              setSelectedResult(prev => prev ? { ...prev, imageUrl } : null);
+          }
+
+      } catch (err) {
+          console.error(err);
+          setError(err instanceof Error ? err.message : 'Falha ao gerar a imagem com DALL-E.');
+      } finally {
+          setImageLoadingId(null);
+      }
+  };
 
   const handleResetFilters = () => {
     setFilters(initialFilters);
@@ -158,6 +190,8 @@ const Home: React.FC = () => {
           item={selectedResult}
           onClose={handleCloseDetailModal}
           onGenerateVariant={handleGenerateVariant}
+          onGenerateImage={handleGenerateImage}
+          isImageLoading={imageLoadingId === selectedResult?.id}
           isFavorite={selectedResult ? isFavorite(selectedResult.id) : false}
           onToggleFavorite={handleToggleFavorite}
           onUpdate={handleUpdateSelectedItem}

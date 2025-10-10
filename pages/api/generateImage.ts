@@ -1,6 +1,6 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { serverGenerateImage } from '../../lib/gemini';
+import { serverGenerateImage as serverGenerateImageGemini } from '../../lib/gemini';
+import { serverGenerateImageOpenAI } from '../../lib/openai';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -8,12 +8,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     try {
-        const { prompt } = req.body as { prompt: string };
+        const { prompt, service = 'gemini' } = req.body as { prompt: string, service?: 'gemini' | 'openai' };
         if (!prompt) {
             return res.status(400).json({ message: 'O prompt é obrigatório.' });
         }
         
-        const imageUrl = await serverGenerateImage(prompt);
+        let imageUrl: string;
+        if (service === 'openai') {
+            imageUrl = await serverGenerateImageOpenAI(prompt);
+        } else {
+            imageUrl = await serverGenerateImageGemini(prompt);
+        }
         
         res.status(200).json({ imageUrl });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { FilterState, Rarity } from '../types';
+import type { FilterState, Rarity, AiModel } from '../types';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
@@ -24,6 +24,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, o
     setFilters(prev => ({ ...prev, archetypeType: value, skillType: '' }));
   };
 
+  const AI_MODELS: AiModel[] = ['Gemini', 'OpenAI'];
+
   return (
     <Card className="h-full flex flex-col">
       <h2 className="text-lg font-bold mb-4 text-indigo-400 font-gangofthree">Filtros Detalhados</h2>
@@ -31,6 +33,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, o
         <Select label="Tipo de Geração" value={filters.generationType} onChange={(e) => handleInputChange('generationType', e.target.value as FilterState['generationType'])}>
           <option value="" disabled>Selecione um tipo...</option>
           {GENERATION_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+        </Select>
+
+        <Select label="Modelo de IA" value={filters.aiModel} onChange={(e) => handleInputChange('aiModel', e.target.value as FilterState['aiModel'])}>
+            {AI_MODELS.map(model => <option key={model} value={model}>{model === 'OpenAI' ? 'OpenAI (GPT-4)' : 'Gemini'}</option>)}
         </Select>
 
         <div className={`transition-all duration-300 ease-in-out overflow-hidden space-y-4 ${filters.generationType === 'Arquétipo/Habilidade' ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'}`}>

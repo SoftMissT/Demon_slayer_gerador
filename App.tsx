@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
@@ -14,9 +16,10 @@ import { DetailModal } from './components/DetailModal';
 import { buildImagePrompt } from './lib/promptBuilder';
 
 const App: React.FC = () => {
-  // FIX: Add missing properties to align with the FilterState type.
   const initialFilters: FilterState = {
     generationType: '',
+    // FIX: Property 'aiModel' was missing and is required by the 'FilterState' type.
+    aiModel: 'Gemini',
     breathingBase: '',
     weaponType: '',
     grip: '',
@@ -27,7 +30,6 @@ const App: React.FC = () => {
     armaduraType: '',
     itemDeAuxilioType: '',
     consumableType: '',
-    // FIX: Added missing properties 'archetypeType' and 'skillType' to match the FilterState type.
     archetypeType: '',
     skillType: '',
     seed: '',
@@ -70,7 +72,6 @@ const App: React.FC = () => {
         ...initialFilters,
         generationType: type,
         level: Math.floor(Math.random() * 10) + 5,
-        // FIX: Changed 'Mid' to 'Raro' to match the Rarity type.
         rarity: 'Raro',
         theme: 'Sombrio',
         era: 'Período Edo (Japão Feudal)'
@@ -80,7 +81,6 @@ const App: React.FC = () => {
           quickFilters.level = Math.floor(Math.random() * 10) + 10;
       }
       if (type === 'Arma') {
-          // FIX: Changed 'Mid' and 'High' to valid Rarity types 'Raro' and 'Épico'.
           const rarities: Rarity[] = ['Raro', 'Épico'];
           quickFilters.rarity = rarities[Math.floor(Math.random() * rarities.length)];
       }
