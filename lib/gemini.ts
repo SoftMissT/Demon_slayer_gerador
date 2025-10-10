@@ -4,13 +4,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 let ai: GoogleGenAI | null = null;
 
-// FIX: Updated environment variable to API_KEY per coding guidelines.
 const getAiClient = (): GoogleGenAI => {
-    if (!process.env.API_KEY) {
-        throw new Error("A variável de ambiente API_KEY não está definida. Certifique-se de que está configurada corretamente no ambiente de execução.");
+    // Adiciona fallback para GEMINI_API_KEY para compatibilidade com diferentes ambientes de deploy.
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        throw new Error("Nenhuma variável de ambiente de API Key (API_KEY ou GEMINI_API_KEY) foi definida. Certifique-se de que uma delas está configurada corretamente no ambiente de execução.");
     }
+
     if (!ai) {
-        ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        ai = new GoogleGenAI({ apiKey });
     }
     return ai;
 };
