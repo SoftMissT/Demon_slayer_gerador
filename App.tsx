@@ -119,43 +119,45 @@ const App: React.FC = () => {
                 onViewChange={setActiveView}
             />
 
-            <main className="flex-grow p-4 md:p-6 lg:p-8 space-y-6">
-                {activeView === 'forge' ? (
-                    <>
-                        {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-[calc(100vh-150px)]">
-                           <div className="lg:col-span-3 h-full">
-                               <FilterPanel
-                                   filters={filters}
-                                   onFiltersChange={setFilters}
-                                   onGenerate={(count) => handleGenerate(count)}
-                                   isLoading={isLoading}
-                               />
-                           </div>
-                           <div className="lg:col-span-3 h-full">
-                               <ResultsPanel
-                                   items={items}
-                                   isLoading={isLoading}
-                                   selectedItem={selectedItem}
-                                   onSelectItem={setSelectedItem}
-                                   favorites={favorites}
-                                   onToggleFavorite={handleToggleFavorite}
-                               />
-                           </div>
-                           <div className="lg:col-span-6 h-full">
-                                <DetailPanel
-                                    item={selectedItem}
-                                    onGenerateVariant={handleGenerateVariant}
-                                    isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
-                                    onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
-                                    onUpdate={handleUpdateItem}
-                                />
-                           </div>
-                        </div>
-                    </>
-                ) : (
-                    <PromptEngineeringPanel />
-                )}
+            <main className="flex-grow p-4 md:p-6 lg:p-8">
+                <div className="max-w-screen-2xl mx-auto h-full">
+                    {activeView === 'forge' ? (
+                        <>
+                            {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-[calc(100vh-150px)]">
+                               <div className="lg:col-span-3 h-full">
+                                   <FilterPanel
+                                       filters={filters}
+                                       onFiltersChange={setFilters}
+                                       onGenerate={(count) => handleGenerate(count)}
+                                       isLoading={isLoading}
+                                   />
+                               </div>
+                               <div className="lg:col-span-3 h-full">
+                                   <ResultsPanel
+                                       items={items}
+                                       isLoading={isLoading}
+                                       selectedItem={selectedItem}
+                                       onSelectItem={setSelectedItem}
+                                       favorites={favorites}
+                                       onToggleFavorite={handleToggleFavorite}
+                                   />
+                               </div>
+                               <div className="lg:col-span-6 h-full">
+                                    <DetailPanel
+                                        item={selectedItem}
+                                        onGenerateVariant={handleGenerateVariant}
+                                        isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
+                                        onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
+                                        onUpdate={handleUpdateItem}
+                                    />
+                               </div>
+                            </div>
+                        </>
+                    ) : (
+                        <PromptEngineeringPanel />
+                    )}
+                </div>
             </main>
             
             <button

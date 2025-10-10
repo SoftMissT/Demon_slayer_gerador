@@ -74,7 +74,7 @@ Você é um mestre de RPG e escritor de cenários de classe mundial. Sua tarefa 
 10. **Descrição do Oni (oni_desc):** Usando o template de 6 frases.
 11. **NPCs Relevantes (key_npcs):** Gere 3 NPCs. Para cada um, use o template de 6 linhas para preencher todos os campos, garantindo que 'physical_trait' seja uma descrição visual memorável e 'dialogue_example' seja uma fala curta que revele a personalidade do NPC.
 12. **Itens Relevantes (relevant_items):** 3 itens usando o template de 5 linhas para cada um.
-13. **Variações de Tom (tone_variations):** Leve, padrão e extremo.
+13. **Variações de Tom (tone_variations):** Gere um objeto com três chaves: 'leve', 'padrao', e 'extremo', cada uma contendo uma breve descrição de como a missão mudaria com esse tom.
 14. **Ganchos de Escalada (scaling_hooks):** Sugestões para continuar a história.
 15. **Alertas de Conteúdo Sensível (sensitive_flags):** Uma lista de temas sensíveis presentes. Se não houver, retorne um array vazio.
 16. **Kekkijutsu do Vilão (demonBloodArtType):** Retorne o tipo de Kekkijutsu usado como base para a geração.
@@ -148,7 +148,14 @@ const missionSchema = {
                 },
             },
         },
-        tone_variations: { type: Type.OBJECT },
+        tone_variations: {
+            type: Type.OBJECT,
+            properties: {
+                leve: { type: Type.STRING, description: "Uma variação da missão com um tom mais leve ou otimista." },
+                padrao: { type: Type.STRING, description: "A descrição padrão do tom da missão." },
+                extremo: { type: Type.STRING, description: "Uma variação da missão com um tom mais sombrio, intenso ou extremo." },
+            },
+         },
         scaling_hooks: { type: Type.STRING },
         sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
         diff: {
