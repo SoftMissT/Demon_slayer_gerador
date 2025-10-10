@@ -1,39 +1,49 @@
 import React from 'react';
-import type { FilterState, Rarity } from '../types';
+import type { FilterState, Rarity, GenerationType } from '../types';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { GENERATION_TYPES, BREATHING_STYLES, WEAPON_TYPES, GRIP_TYPES, THEMATIC_TONES, RARITIES, ACCESSORY_TYPES, ERAS, KEKKIJUTSU_TYPES } from '../constants';
-import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { Spinner } from './ui/Spinner';
 
 interface FilterPanelProps {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   onGenerate: (count: number) => void;
+  onQuickGenerate: (type: GenerationType) => void;
   onReset: () => void;
   isLoading: boolean;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, onGenerate, onReset, isLoading }) => {
+const QUICK_GEN_TYPES: GenerationType[] = ['Forma de Respiração', 'Arma', 'Inimigo/Oni', 'Caçador'];
+
+export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, onGenerate, onQuickGenerate, onReset, isLoading }) => {
   const handleInputChange = <K extends keyof FilterState,>(key: K, value: FilterState[K]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
-  
-  const handleMultiSelectChange = (key: 'breathingBase' | 'weaponType', value: string) => {
-    setFilters(prev => {
-        const currentValues = prev[key] as string[];
-        const newValues = currentValues.includes(value)
-            ? currentValues.filter(v => v !== value)
-            : [...currentValues, value];
-        return { ...prev, [key]: newValues };
-    });
   };
 
   return (
     <Card className="h-full flex flex-col">
-      <h2 className="text-lg font-bold mb-4 text-indigo-400 font-gangofthree">Filtros de Geração</h2>
+      <div className="mb-4 pb-4 border-b border-gray-700">
+        <h2 className="text-lg font-bold mb-3 text-indigo-400 font-gangofthree">Geração Rápida</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {QUICK_GEN_TYPES.map(type => (
+            <Button
+              key={type}
+              variant="secondary"
+              onClick={() => onQuickGenerate(type)}
+              disabled={isLoading}
+              className="text-xs py-2"
+            >
+              <SparklesIcon className="w-4 h-4" />
+              {type}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <h2 className="text-lg font-bold mb-4 text-indigo-400 font-gangofthree">Filtros Detalhados</h2>
       <div className="space-y-4 flex-grow overflow-y-auto pr-2">
         <Select label="Tipo de Geração" value={filters.generationType} onChange={(e) => handleInputChange('generationType', e.target.value as FilterState['generationType'])}>
           <option value="" disabled>Selecione um tipo...</option>
@@ -72,13 +82,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, o
               {BREATHING_STYLES.map(style => <option key={style} value={style}>{style}</option>)}
             </Select>
 
-            <SearchableMultiSelect
+            <Select
                 label="Tipo de Arma"
-                options={WEAPON_TYPES}
-                selectedValues={filters.weaponType}
-                onChange={(value) => handleMultiSelectChange('weaponType', value)}
-                placeholder="Selecione arma(s)..."
-            />
+                value={filters.weaponType}
+                onChange={(e) => handleInputChange('weaponType', e.target.value)}
+            >
+              <option value="">Selecione uma arma...</option>
+              {WEAPON_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+            </Select>
 
             <Select label="Empunhadura" value={filters.grip} onChange={(e) => handleInputChange('grip', e.target.value as FilterState['grip'])}>
               <option value="" disabled>Selecione uma empunhadura...</option>

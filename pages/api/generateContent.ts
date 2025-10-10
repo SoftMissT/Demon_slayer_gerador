@@ -16,7 +16,7 @@ const buildSimplePrompt = (filters: FilterState, count: number, promptModifier?:
     - Era: ${filters.era || 'Padrão (Período Edo)'}
     - Raridade: ${filters.rarity}
     ${filters.breathingBase ? `- Respiração Base: ${filters.breathingBase}` : ''}
-    ${filters.weaponType.length > 0 ? `- Tipos de Arma: ${filters.weaponType.join(', ')}` : ''}
+    ${filters.weaponType ? `- Tipo de Arma: ${filters.weaponType}` : ''}
     ${filters.kekkijutsu ? `- Kekkijutsu: ${filters.kekkijutsu}` : ''}
     ${promptModifier ? `- Modificador Adicional: ${promptModifier}` : ''}
 

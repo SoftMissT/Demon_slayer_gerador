@@ -13,7 +13,8 @@ const App: React.FC = () => {
   const initialFilters: FilterState = {
     generationType: '',
     breathingBase: '',
-    weaponType: [],
+    // FIX: Changed `weaponType` from an array to a string to match the `FilterState` type.
+    weaponType: '',
     grip: '',
     level: 10,
     theme: '',

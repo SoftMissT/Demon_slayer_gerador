@@ -1,11 +1,10 @@
-
 import React, { useState, useCallback } from 'react';
 import Head from 'next/head';
 import { FilterPanel } from '../components/FilterPanel';
 import { ResultsPanel } from '../components/ResultsPanel';
 import { Header } from '../components/Header';
 import { generateContent, generateImage } from '../services/geminiService';
-import type { FilterState, GeneratedItem } from '../types';
+import type { FilterState, GeneratedItem, GenerationType, Rarity } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { FavoritesModal } from '../components/FavoritesModal';
 import { DetailModal } from '../components/DetailModal';
@@ -16,7 +15,7 @@ const Home: React.FC = () => {
   const initialFilters: FilterState = {
     generationType: '',
     breathingBase: '',
-    weaponType: [],
+    weaponType: '',
     grip: '',
     level: 10,
     theme: '',
@@ -49,6 +48,37 @@ const Home: React.FC = () => {
       setIsLoading(false);
     }
   }, [filters]);
+
+  const handleQuickGenerate = useCallback(async (type: GenerationType) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const quickFilters: FilterState = {
+        ...initialFilters,
+        generationType: type,
+        level: Math.floor(Math.random() * 10) + 5,
+        rarity: 'Mid',
+        theme: 'Sombrio',
+        era: 'Período Edo (Japão Feudal)'
+      };
+
+      if (type === 'Inimigo/Oni') {
+          quickFilters.level = Math.floor(Math.random() * 10) + 10;
+      }
+      if (type === 'Arma') {
+          const rarities: Rarity[] = ['Mid', 'High'];
+          quickFilters.rarity = rarities[Math.floor(Math.random() * rarities.length)];
+      }
+
+      const newItems = await generateContent(quickFilters, 1);
+      setResults(prevResults => [...newItems, ...prevResults]);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro desconhecido durante a geração rápida.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [initialFilters]);
 
   const handleResetFilters = () => {
     setFilters(initialFilters);
@@ -147,7 +177,7 @@ const Home: React.FC = () => {
       <Head>
         <title>Forjador de ideias kimetsu no yaiba</title>
         <meta name="description" content="Um gerador de ideias para classes, origens, equipamentos, armas, missões, onis, vilões, formas de respiração, kekkijutsus e acessórios, ambientado no universo expandido estilo Demon Slayer (KNY)." />
-        <link rel="icon" href="/icon.png" />
+        <link rel="icon" href="https://i.imgur.com/M9BDKmO.png" />
       </Head>
       <div className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col">
         <Header onClearResults={handleClearResults} onShowFavorites={() => setIsFavoritesOpen(true)} />
@@ -157,6 +187,7 @@ const Home: React.FC = () => {
               filters={filters} 
               setFilters={setFilters} 
               onGenerate={handleGenerate}
+              onQuickGenerate={handleQuickGenerate}
               onReset={handleResetFilters}
               isLoading={isLoading}
             />

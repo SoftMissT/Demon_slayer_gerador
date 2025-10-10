@@ -6,7 +6,7 @@ export type AccessoryType = 'Kimono' | 'Brinco' | 'Pulseira' | 'Bainha' | 'Haori
 export interface FilterState {
   generationType: GenerationType | '';
   breathingBase: string;
-  weaponType: string[];
+  weaponType: string;
   grip: GripType | '';
   level: number;
   theme: string | '';
