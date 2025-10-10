@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import { FilterPanel } from '../components/FilterPanel';
 import { ResultsPanel } from '../components/ResultsPanel';
@@ -127,10 +127,13 @@ const Home: React.FC = () => {
         <meta name="description" content="Um gerador de ideias para classes, origens, equipamentos, armas, missões, onis, vilões, formas de respiração, kekkijutsus e acessórios, ambientado no universo expandido estilo Demon Slayer (KNY)." />
         <link rel="icon" href="https://i.imgur.com/M9BDKmO.png" />
       </Head>
-      <div className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col">
-        <Header onClearResults={handleClearResults} onShowFavorites={() => setIsFavoritesOpen(true)} />
+      <div className="min-h-screen font-sans flex flex-col">
+        <Header 
+          onClearResults={handleClearResults} 
+          onShowFavorites={() => setIsFavoritesOpen(true)}
+        />
         <main className="flex-grow flex flex-col md:flex-row p-4 gap-4 overflow-hidden">
-          <div className="w-full md:w-1/3 xl:w-1/4 flex-shrink-0">
+          <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
             <FilterPanel 
               filters={filters} 
               setFilters={setFilters} 
@@ -139,7 +142,7 @@ const Home: React.FC = () => {
               isLoading={isLoading}
             />
           </div>
-          <div className="w-full md:w-2/3 xl:w-3/4 flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-4">
               <ErrorDisplay message={error} onDismiss={() => setError(null)} />
             <ResultsPanel 
                   results={results} 

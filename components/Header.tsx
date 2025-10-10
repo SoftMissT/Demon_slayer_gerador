@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 import { HelpIcon } from './icons/HelpIcon';
-import { SettingsIcon } from './icons/SettingsIcon';
 import { Modal } from './ui/Modal';
 import { StarIcon } from './icons/StarIcon';
 
@@ -32,7 +31,6 @@ export const Header: React.FC<HeaderProps> = ({onClearResults, onShowFavorites})
            <Button variant="danger" onClick={() => setIsConfirmOpen(true)}>Limpar Resultados</Button>
           <Button variant="ghost" onClick={onShowFavorites}><StarIcon className="w-5 h-5" /></Button>
           <Button variant="ghost" onClick={() => setIsHelpOpen(true)}><HelpIcon className="w-5 h-5" /></Button>
-          <Button variant="ghost"><SettingsIcon className="w-5 h-5" /></Button>
         </div>
       </header>
 

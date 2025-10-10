@@ -1,5 +1,5 @@
 import type { GenerationType, GripType, Rarity, AccessoryType, ArmaduraType, ItemDeAuxilioType, ConsumableType, ArchetypeType, SkillType } from './types';
-import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
+import { BREATHING_STYLES_DATA } from './lib/breathingStylesData';
 
 export const GENERATION_TYPES: GenerationType[] = [
   'Forma de Respiração',
