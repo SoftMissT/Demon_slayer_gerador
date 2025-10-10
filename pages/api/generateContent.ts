@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { serverGenerateTextOpenAI } from '../../lib/openai';
@@ -29,7 +28,8 @@ const buildPrompt = (filters: FilterState, count: number, promptModifier?: strin
     let prompt = `Gere ${count} item(ns) para um RPG de mesa com tema de fantasia sombria japonesa, no estilo de "Demon Slayer".
     O tipo de geração é: "${generationType}".
     O nível/patente sugerido é em torno de ${level}.
-    A raridade/impacto é: "${raridade}".
+    // FIX: Corrected variable name from 'raridade' to 'rarity' to match the destructured property.
+    A raridade/impacto é: "${rarity}".
     O tom temático deve ser: "${theme}".
     A era/ambientação é: "${era}".
     `;
