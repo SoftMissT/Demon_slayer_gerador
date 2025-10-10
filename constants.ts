@@ -35,11 +35,48 @@ export const ERAS: string[] = [
 ];
 
 export const TONES: string[] = [
-    "misterioso", "dark", "macabro", "sombrio", "melancólico", 
-    "claustrofóbico", "onírico", "visceral", "ritualístico", 
-    "gótico", "noir", "opressor", "silencioso", "febril", 
-    "septentrional", "crepuscular"
+    'aventura',
+    'combate',
+    'drama',
+    'épico',
+    'high fantasy',
+    'histórico',
+    'investigação',
+    'low-fantasy',
+    'noir',
+    'roleplay',
+    'sci-fi',
+    'slice of life',
+    'sobrevivência',
+    'sobrenatural',
+    'suspense',
+    'terror',
 ];
+
+export const VILLAIN_MOTIVATIONS: string[] = [
+    'Aleatório',
+    'Sobrevivência (Medo de ser morto por caçadores ou por Muzan)',
+    'Vingança (Contra os caçadores ou a humanidade)',
+    'Poder/Dominação (Almeja se tornar um dos Doze Kizuki)',
+    'Corrupção/Caos (Prazer em espalhar sofrimento)',
+    'Busca por Conhecimento Proibido (Tentar superar a fraqueza ao sol)',
+    'Criação de "Arte" (Vê suas vítimas como parte de uma obra macabra)',
+    'Lealdade Cega (A um oni superior ou a Muzan)',
+    'Redenção Distorcida (Acredita que transformar humanos em onis é salvá-los)',
+];
+
+export const DEMON_BLOOD_ART_TYPES: string[] = [
+    'Aleatório',
+    'Manipulação Elemental (Fogo, Gelo, etc.)',
+    'Controle Corporal (Metamorfose, Regeneração Acelerada)',
+    'Ilusório/Mental (Pesadelos, Controle Mental)',
+    'Invocação (Criaturas, Armas)',
+    'Espacial/Dimensional (Portais, Teletransporte)',
+    'Técnicas de Suporte (Cura, Fortalecimento de outros Onis)',
+    'Corrupção Ambiental (Transformar terreno, criar armadilhas)',
+    'Absorção/Roubo de Vida',
+];
+
 
 export const BREATHING_STYLES: string[] = [
   "Respiração da Água",

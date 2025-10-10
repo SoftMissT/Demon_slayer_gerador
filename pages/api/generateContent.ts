@@ -4,7 +4,7 @@ import { Type } from '@google/genai';
 import type { FilterState, GeneratedItem } from '../../types';
 
 const buildMissionPrompt = (filters: FilterState): string => {
-    const { era, tone, intensity, scale, protagonist, targets, moodModifiers } = filters;
+    const { era, tone, intensity, scale, protagonist, targets, moodModifiers, demonBloodArtType, villainMotivation, powerLevel, numberOfSessions } = filters;
 
     return `
 Você é um mestre de RPG e escritor de cenários de classe mundial. Sua tarefa é gerar uma missão detalhada com base nos parâmetros fornecidos, seguindo RIGOROSAMENTE a estrutura de saída JSON e as regras de conteúdo.
@@ -17,11 +17,17 @@ Você é um mestre de RPG e escritor de cenários de classe mundial. Sua tarefa 
 - PROTAGONISTA: "${protagonist}"
 - TARGETS: "${targets}"
 - MOOD_MODIFIERS: "${moodModifiers}"
+- VILLAIN_MOTIVATION: "${villainMotivation}"
+- DEMON_BLOOD_ART_TYPE: "${demonBloodArtType}"
+- VILLAIN_POWER_LEVEL: ${powerLevel} (de 1 a 10)
+- NUMBER_OF_SESSIONS: ${numberOfSessions} (A missão deve ser estruturada para durar aproximadamente esta quantidade de sessões de jogo)
 
 **REGRAS OBRIGATÓRIAS:**
 1. **Estrutura de Saída:** A resposta DEVE ser um único objeto JSON válido, sem markdown ou texto extra, seguindo o schema fornecido.
 2. **Linguagem Sensorial:** Use linguagem concreta e sensorial. Mostre, não diga.
 3. **Templates de Descrição:** Use os templates abaixo VERBATIM para descrever o protagonista, o oni, NPCs e itens.
+4. **Evite Clichês:** Prefira reviravoltas baseadas nas relações e segredos dos NPCs.
+5. **Conteúdo Sensível:** Identifique e sinalize qualquer conteúdo potencialmente sensível (violência gráfica, temas psicológicos pesados, etc.) no campo 'sensitive_flags'.
 
 **TEMPLATES DE DESCRIÇÃO (USE ESTA ESTRUTURA):**
 
@@ -47,25 +53,35 @@ Você é um mestre de RPG e escritor de cenários de classe mundial. Sua tarefa 
 - Propriedade estranha (visual ou mecânica).
 - Uso concreto em cena.
 
-**NPC (5 linhas):**
+**NPC (6 linhas):**
 - Papel social.
 - Objetivo imediato.
 - Flaw ou segredo.
+- Reviravolta (Twist).
 - Traço físico memorável.
 - Linha de diálogo curta que revele caráter.
 
-**SAÍDA REQUERIDA (11 PONTOS):**
-1. **Título:** Título sucinto da missão.
-2. **Sinopse:** 2 frases.
-3. **Gancho, Objetivo, Stakes:** Gancho inicial, objetivo principal e o que está em jogo.
-4. **Três Complicações:** 3 complicações possíveis.
-5. **Ambiente:** Descrição detalhada do local principal (visão, som, cheiro, etc.).
-6. **Descrição do Protagonista:** Usando o template de 5 frases.
-7. **Descrição do Oni:** Usando o template de 6 frases.
-8. **3 NPCs Relevantes:** Usando o template de 5 linhas para cada um.
-9. **3 Itens Relevantes:** Usando o template de 5 linhas para cada um.
-10. **3 Variações de Tom:** Leve, padrão e extremo.
-11. **Ganchos Secundários e Escalada:** Sugestões para continuar a história.
+**SAÍDA REQUERIDA (18 PONTOS):**
+1. **Título (title):** Título sucinto da missão.
+2. **Sinopse (logline):** 1-2 frases.
+3. **Resumo (summary):** 1-2 parágrafos.
+4. **Objetivos (objectives):** Gancho inicial, objetivo principal e o que está em jogo, em formato de lista.
+5. **Complicações (complications):** 3 complicações possíveis, em formato de lista.
+6. **Condições de Falha (failure_states):** O que acontece se os jogadores falharem.
+7. **Recompensas (rewards):** Itens, informações, XP, etc.
+8. **Ambiente (environment):** Descrição detalhada do local principal (visão, som, cheiro, etc.).
+9. **Descrição do Protagonista (protagonist_desc):** Usando o template de 5 frases.
+10. **Descrição do Oni (oni_desc):** Usando o template de 6 frases.
+11. **NPCs Relevantes (key_npcs):** Gere 3 NPCs. Para cada um, use o template de 6 linhas para preencher todos os campos, garantindo que 'physical_trait' seja uma descrição visual memorável e 'dialogue_example' seja uma fala curta que revele a personalidade do NPC.
+12. **Itens Relevantes (relevant_items):** 3 itens usando o template de 5 linhas para cada um.
+13. **Variações de Tom (tone_variations):** Leve, padrão e extremo.
+14. **Ganchos de Escalada (scaling_hooks):** Sugestões para continuar a história.
+15. **Alertas de Conteúdo Sensível (sensitive_flags):** Uma lista de temas sensíveis presentes. Se não houver, retorne um array vazio.
+16. **Kekkijutsu do Vilão (demonBloodArtType):** Retorne o tipo de Kekkijutsu usado como base para a geração.
+17. **Duração Estimada (numberOfSessions):** Retorne o número de sessões para o qual a missão foi projetada.
+18. **Notas de Design e Micro-Variantes:**
+    - **diff:** No campo 'summary', escreva uma frase justificando as principais escolhas de design. No campo 'changes', liste as decisões tomadas (ex: "Foco em mistério", "Vilão com motivação trágica").
+    - **micro_variants:** Crie 3 pequenas variações da missão, cada uma alterando um único elemento (ex: a motivação de um NPC, a natureza do twist, a mecânica de um local).
 
 Agora, gere a missão.
 `;
@@ -79,6 +95,8 @@ const missionSchema = {
         summary: { type: Type.STRING },
         objectives: { type: Type.ARRAY, items: { type: Type.STRING } },
         complications: { type: Type.ARRAY, items: { type: Type.STRING } },
+        failure_states: { type: Type.ARRAY, items: { type: Type.STRING } },
+        rewards: { type: Type.ARRAY, items: { type: Type.STRING } },
         environment: { type: Type.STRING },
         protagonist_desc: {
             type: Type.OBJECT,
@@ -132,6 +150,17 @@ const missionSchema = {
         },
         tone_variations: { type: Type.OBJECT },
         scaling_hooks: { type: Type.STRING },
+        sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
+        diff: {
+            type: Type.OBJECT,
+            properties: {
+                changes: { type: Type.ARRAY, items: { type: Type.STRING } },
+                summary: { type: Type.STRING },
+            }
+        },
+        micro_variants: { type: Type.ARRAY, items: { type: Type.STRING } },
+        demonBloodArtType: { type: Type.STRING },
+        numberOfSessions: { type: Type.INTEGER },
     },
 };
 

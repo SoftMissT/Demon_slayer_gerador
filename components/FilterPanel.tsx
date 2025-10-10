@@ -3,8 +3,9 @@ import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { SparklesIcon } from './icons/SparklesIcon';
-import type { FilterState } from '../types';
-import { CATEGORIES, RARITIES, ERAS, BREATHING_STYLES, DEMON_BLOOD_ARTS } from '../constants';
+import { Slider } from './ui/Slider';
+import type { FilterState, Tone } from '../types';
+import { CATEGORIES, RARITIES, ERAS, BREATHING_STYLES, DEMON_BLOOD_ARTS, TONES, VILLAIN_MOTIVATIONS, DEMON_BLOOD_ART_TYPES } from '../constants';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -16,6 +17,13 @@ interface FilterPanelProps {
 export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onGenerate, isLoading }) => {
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     onFiltersChange({ ...filters, [key]: value });
+  };
+
+  const handleNumericFilterChange = (key: keyof FilterState, value: string) => {
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
+      onFiltersChange({ ...filters, [key]: numValue });
+    }
   };
 
   return (
@@ -30,13 +38,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </Select>
 
-        <Select
-          label="Raridade"
-          value={filters.rarity}
-          onChange={(e) => handleFilterChange('rarity', e.target.value)}
-        >
-          {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
-        </Select>
+        {filters.category !== 'Missão/Cenário' && (
+          <Select
+            label="Raridade"
+            value={filters.rarity}
+            onChange={(e) => handleFilterChange('rarity', e.target.value)}
+          >
+            {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
+          </Select>
+        )}
 
         <Select
           label="Era / Estilo"
@@ -45,6 +55,79 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         >
           {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
         </Select>
+
+        {/* Mission-specific filters */}
+        {filters.category === 'Missão/Cenário' && (
+            <div className="space-y-4 border-t border-indigo-900/50 pt-4">
+                <Select
+                  label="Tom da Missão"
+                  value={filters.tone}
+                  onChange={(e) => handleFilterChange('tone', e.target.value as Tone)}
+                >
+                  {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
+                </Select>
+                <Slider
+                    label={`Intensidade: ${filters.intensity}`}
+                    min={1} max={5} step={1}
+                    value={filters.intensity || 3}
+                    onChange={(e) => handleNumericFilterChange('intensity', e.target.value)}
+                />
+                 <Select
+                  label="Escala da Ameaça"
+                  value={filters.scale}
+                  onChange={(e) => handleFilterChange('scale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}
+                >
+                  <option value="local">Local</option>
+                  <option value="regional">Regional</option>
+                  <option value="nacional">Nacional</option>
+                  <option value="cósmico">Cósmico</option>
+                </Select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Protagonista</label>
+                  <input type="text" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Alvo Principal</label>
+                  <input type="text" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Modificadores de Ambiente</label>
+                  <input type="text" value={filters.moodModifiers} onChange={e => handleFilterChange('moodModifiers', e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm text-white" placeholder="Ex: úmido, nevoento, reverente" />
+                </div>
+                
+                <div className="border-t border-gray-700/50 pt-4">
+                     <h4 className="text-sm font-semibold text-indigo-400 mb-2">Detalhes do Antagonista e Estrutura</h4>
+                     <div className="space-y-4">
+                        <Select
+                          label="Tipo de Kekkijutsu"
+                          value={filters.demonBloodArtType}
+                          onChange={(e) => handleFilterChange('demonBloodArtType', e.target.value)}
+                        >
+                          {DEMON_BLOOD_ART_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        </Select>
+                        <Select
+                          label="Motivação do Vilão"
+                          value={filters.villainMotivation}
+                          onChange={(e) => handleFilterChange('villainMotivation', e.target.value)}
+                        >
+                          {VILLAIN_MOTIVATIONS.map(m => <option key={m} value={m}>{m}</option>)}
+                        </Select>
+                         <Slider
+                            label={`Nível de Poder do Vilão: ${filters.powerLevel}`}
+                            min={1} max={10} step={1}
+                            value={filters.powerLevel || 3}
+                            onChange={(e) => handleNumericFilterChange('powerLevel', e.target.value)}
+                        />
+                        <Slider
+                            label={`Número de Sessões: ${filters.numberOfSessions}`}
+                            min={1} max={5} step={1}
+                            value={filters.numberOfSessions || 1}
+                            onChange={(e) => handleNumericFilterChange('numberOfSessions', e.target.value)}
+                        />
+                     </div>
+                </div>
+            </div>
+        )}
 
         {filters.category === 'Forma de Respiração' && (
           <SearchableMultiSelect
@@ -68,15 +151,24 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       </div>
 
       <div className="mt-6 pt-4 border-t border-gray-700">
-        <div className="grid grid-cols-3 gap-2 mb-4">
-            <Button variant="secondary" onClick={() => onGenerate(1)} disabled={isLoading}>Gerar 1</Button>
-            <Button variant="secondary" onClick={() => onGenerate(3)} disabled={isLoading}>Gerar 3</Button>
-            <Button variant="secondary" onClick={() => onGenerate(5)} disabled={isLoading}>Gerar 5</Button>
-        </div>
-        <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full">
-          <SparklesIcon className="w-5 h-5" />
-          {isLoading ? 'Forjando...' : 'Gerar Item'}
-        </Button>
+        {filters.category === 'Missão/Cenário' ? (
+            <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full">
+              <SparklesIcon className="w-5 h-5" />
+              {isLoading ? 'Forjando...' : 'Gerar Missão'}
+            </Button>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+                <Button variant="secondary" onClick={() => onGenerate(1)} disabled={isLoading}>Gerar 1</Button>
+                <Button variant="secondary" onClick={() => onGenerate(3)} disabled={isLoading}>Gerar 3</Button>
+                <Button variant="secondary" onClick={() => onGenerate(5)} disabled={isLoading}>Gerar 5</Button>
+            </div>
+            <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full">
+              <SparklesIcon className="w-5 h-5" />
+              {isLoading ? 'Forjando...' : 'Gerar Item'}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

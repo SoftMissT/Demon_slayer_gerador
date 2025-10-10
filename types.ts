@@ -3,7 +3,7 @@
 export type Category = 'Arma' | 'Acessório' | 'Inimigo/Oni' | 'Caçador' | 'Classe/Origem' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missão/Cenário';
 export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado';
 export type Era = 'Período Edo (Japão Feudal)' | 'Moderno' | 'Cyberpunk' | 'Steampunk' | 'Medieval Fantasia' | 'Biopunk' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Pós-apocalíptico';
-export type Tone = "misterioso" | "dark" | "macabro" | "sombrio" | "melancólico" | "claustrofóbico" | "onírico" | "visceral" | "ritualístico" | "gótico" | "noir" | "opressor" | "silencioso" | "febril" | "septentrional" | "crepuscular";
+export type Tone = 'aventura' | 'combate' | 'drama' | 'épico' | 'high fantasy' | 'histórico' | 'investigação' | 'low-fantasy' | 'noir' | 'roleplay' | 'sci-fi' | 'slice of life' | 'sobrevivência' | 'sobrenatural' | 'suspense' | 'terror';
 
 
 export interface FilterState {
@@ -19,6 +19,10 @@ export interface FilterState {
   protagonist?: string;
   targets?: string;
   moodModifiers?: string;
+  demonBloodArtType?: string;
+  villainMotivation?: string;
+  powerLevel?: number;
+  numberOfSessions?: number;
 }
 
 // Sub-interfaces for Mission/Scenario
@@ -124,6 +128,9 @@ export interface GeneratedItem {
   environment?: string;
   tone_variations?: any;
   scaling_hooks?: string;
+  tone?: Tone;
+  demonBloodArtType?: string;
+  numberOfSessions?: number;
 }
 
 // Types for Prompt Engineering Panel

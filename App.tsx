@@ -14,7 +14,7 @@ import { generateContent } from './services/geminiService';
 import useLocalStorage from './hooks/useLocalStorage';
 
 import type { FilterState, GeneratedItem, Tone } from './types';
-import { CATEGORIES, RARITIES, ERAS, TONES } from './constants';
+import { CATEGORIES, RARITIES, ERAS, TONES, VILLAIN_MOTIVATIONS, DEMON_BLOOD_ART_TYPES } from './constants';
 
 const DEFAULT_FILTERS: FilterState = {
     category: CATEGORIES[0],
@@ -29,6 +29,10 @@ const DEFAULT_FILTERS: FilterState = {
     protagonist: 'Caçador ex-militar com cicatriz no rosto',
     targets: 'Oni que se esconde em um teatro abandonado',
     moodModifiers: 'nevoento, cheiro de vela podre',
+    demonBloodArtType: DEMON_BLOOD_ART_TYPES[0],
+    villainMotivation: VILLAIN_MOTIVATIONS[0],
+    powerLevel: 3,
+    numberOfSessions: 1,
 };
 
 
