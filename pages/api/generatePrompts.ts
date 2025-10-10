@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -116,7 +115,10 @@ export default async function handler(
             config: config,
         });
 
-        const jsonText = result.text.trim();
+        const jsonText = result.text?.trim();
+        if (!jsonText) {
+            throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
+        }
         const generatedPrompts = JSON.parse(jsonText);
         
         const groundingMetadata = result.candidates?.[0]?.groundingMetadata;
