@@ -1,7 +1,11 @@
+
+
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { Header } from './components/Header';
+// FIX: Module '"./services/geminiService"' has no exported member 'generateImage'.
 import { generateContent, generateImage } from './services/geminiService';
 import type { FilterState, GeneratedItem, GenerationType, Rarity } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
@@ -10,19 +14,24 @@ import { DetailModal } from './components/DetailModal';
 import { buildImagePrompt } from './lib/promptBuilder';
 
 const App: React.FC = () => {
+  // FIX: Add missing properties to align with the FilterState type.
   const initialFilters: FilterState = {
     generationType: '',
     breathingBase: '',
-    // FIX: Changed `weaponType` from an array to a string to match the `FilterState` type.
     weaponType: '',
     grip: '',
     level: 10,
     theme: '',
-    rarity: 'Mid',
+    rarity: 'Raro',
     accessoryType: '',
+    armaduraType: '',
+    itemDeAuxilioType: '',
+    consumableType: '',
+    // FIX: Added missing properties 'archetypeType' and 'skillType' to match the FilterState type.
+    archetypeType: '',
+    skillType: '',
     seed: '',
     era: '',
-    // FIX: Added missing 'kekkijutsu' property to align with the FilterState type.
     kekkijutsu: '',
   };
 
@@ -61,7 +70,8 @@ const App: React.FC = () => {
         ...initialFilters,
         generationType: type,
         level: Math.floor(Math.random() * 10) + 5,
-        rarity: 'Mid',
+        // FIX: Changed 'Mid' to 'Raro' to match the Rarity type.
+        rarity: 'Raro',
         theme: 'Sombrio',
         era: 'Período Edo (Japão Feudal)'
       };
@@ -70,7 +80,8 @@ const App: React.FC = () => {
           quickFilters.level = Math.floor(Math.random() * 10) + 10;
       }
       if (type === 'Arma') {
-          const rarities: Rarity[] = ['Mid', 'High'];
+          // FIX: Changed 'Mid' and 'High' to valid Rarity types 'Raro' and 'Épico'.
+          const rarities: Rarity[] = ['Raro', 'Épico'];
           quickFilters.rarity = rarities[Math.floor(Math.random() * rarities.length)];
       }
 

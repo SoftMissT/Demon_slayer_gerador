@@ -1,19 +1,17 @@
-
-import React from 'react';
-import type { GeneratedItem, DanoPorNivel } from '../types';
+import React, { useState } from 'react';
+import type { GeneratedItem, DanoPorNivelDetalhado } from '../types';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
-import { Spinner } from './ui/Spinner';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { StarIcon } from './icons/StarIcon';
-import { DownloadIcon } from './icons/DownloadIcon';
+import { ClipboardIcon } from './icons/ClipboardIcon';
+import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
+
 
 interface DetailModalProps {
   item: GeneratedItem | null;
   onClose: () => void;
   onGenerateVariant: (baseItem: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onGenerateImage: (itemId: string) => void;
-  isImageLoading: boolean;
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onUpdate: (updatedItem: GeneratedItem) => void;
@@ -26,14 +24,40 @@ const DetailSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   </div>
 );
 
-const DanoPorNivelTable: React.FC<{ data: DanoPorNivel[] }> = ({ data }) => (
+const PromptDisplay: React.FC<{ platform: 'Gemini' | 'ChatGPT' | 'Midjourney' | 'Copilot'; prompt: string; }> = ({ platform, prompt }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async () => {
+        if (!prompt) return;
+        await navigator.clipboard.writeText(prompt);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
+            <div className="flex justify-between items-center mb-2">
+                <h5 className="font-bold text-sm text-indigo-400">{platform}</h5>
+                <Button variant="ghost" className="!p-1 !h-auto" onClick={handleCopy}>
+                    {copied ? <ClipboardCheckIcon className="w-4 h-4 text-green-400" /> : <ClipboardIcon className="w-4 h-4" />}
+                    <span className="ml-2 text-xs">{copied ? 'Copiado!' : 'Copiar'}</span>
+                </Button>
+            </div>
+            <p className="text-xs text-gray-300 font-mono bg-gray-800 p-2 rounded">{prompt || 'N/A'}</p>
+        </div>
+    );
+};
+
+const DanoPorNivelTable: React.FC<{ data: DanoPorNivelDetalhado[] }> = ({ data }) => (
     <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
             <thead className="text-xs text-indigo-300 uppercase bg-gray-700/50">
                 <tr>
                     <th scope="col" className="px-4 py-2">Nível</th>
-                    <th scope="col" className="px-4 py-2">Dano</th>
-                    <th scope="col" className="px-4 py-2">PDR</th>
+                    <th scope="col" className="px-4 py-2">Arma</th>
+                    <th scope="col" className="px-4 py-2">Forma</th>
+                    <th scope="col" className="px-4 py-2">Modificador</th>
+                    <th scope="col" className="px-4 py-2">Exemplo Total</th>
                     <th scope="col" className="px-4 py-2">CD VIT</th>
                 </tr>
             </thead>
@@ -41,8 +65,10 @@ const DanoPorNivelTable: React.FC<{ data: DanoPorNivel[] }> = ({ data }) => (
                 {data.map((row, index) => (
                     <tr key={index} className="border-b border-gray-700">
                         <td className="px-4 py-2 font-medium">{row.nivel}</td>
-                        <td className="px-4 py-2">{row.dano}</td>
-                        <td className="px-4 py-2">{row.pdr || 'N/A'}</td>
+                        <td className="px-4 py-2">{row.arma}</td>
+                        <td className="px-4 py-2">{row.forma}</td>
+                        <td className="px-4 py-2">{row.modificador}</td>
+                        <td className="px-4 py-2 font-mono">{row.dano_total_exemplo}</td>
                         <td className="px-4 py-2">{row.cd_vit || 'N/A'}</td>
                     </tr>
                 ))}
@@ -51,40 +77,34 @@ const DanoPorNivelTable: React.FC<{ data: DanoPorNivel[] }> = ({ data }) => (
     </div>
 );
 
-interface EditableStatProps {
-    label: string;
-    value?: string;
-    field: keyof GeneratedItem;
-    onChange: (field: keyof GeneratedItem, value: string) => void;
-}
-
-const EditableStat: React.FC<EditableStatProps> = ({ label, value, field, onChange }) => {
+const MomentumDisplay: React.FC<{ momentum: GeneratedItem['momentum'] }> = ({ momentum }) => {
+    if (!momentum) return null;
     return (
-        <div>
-            <label className="block text-xs font-medium text-gray-400">{label}</label>
-            <input
-                type="text"
-                value={value === "N/A" ? "" : value || ""}
-                placeholder="N/A"
-                onChange={(e) => onChange(field, e.target.value)}
-                className="w-full bg-gray-800 border border-gray-600 rounded-md py-1 px-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
+        <div className="space-y-2">
+            <p><strong>Ganho:</strong> <span className="font-mono">{momentum.ganho_por_acerto}</span> por acerto, <span className="font-mono">{momentum.ganho_por_crit}</span> por acerto crítico.</p>
+            <div>
+                <p><strong>Gastos:</strong></p>
+                <ul className="list-disc list-inside pl-2 space-y-1 mt-1">
+                    {momentum.gasta.map((gasto, index) => {
+                        const cost = Object.keys(gasto)[0];
+                        const effect = gasto[cost];
+                        return <li key={index}><span className="font-bold font-mono">{cost} Ponto(s):</span> {effect}</li>
+                    })}
+                </ul>
+            </div>
         </div>
     );
-};
+}
 
+export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGenerateVariant, isFavorite, onToggleFavorite }) => {
+  const [copyState, setCopyState] = useState<'idle' | 'text' | 'json'>('idle');
 
-export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGenerateVariant, onGenerateImage, isImageLoading, isFavorite, onToggleFavorite, onUpdate }) => {
   if (!item) {
     return null;
   }
   
-  const canHaveImage = ['Arma', 'Acessório', 'Inimigo/Oni', 'Caçador', 'Classe/Origem'].includes(item.categoria);
-  const isDetailedType = item.dano_por_nivel || item.teste_necessario;
-  const showSimpleCombatMechanics = item.dano && item.dano !== 'N/A';
-  const additionalEffectsTitle = item.categoria === 'Classe/Origem' ? "Habilidades e Bônus" : "Efeitos Adicionais";
-  const showDetailedCombatStats = item.dano_base || item.multiplicador_de_ataque || item.defesa || item.resistencia_magica || item.velocidade_movimento;
-
+  const isTechniqueType = item.dano_por_nivel || item.teste_necessario;
+  const isSkillType = item.arquétipo;
 
   const handleFavoriteClick = () => {
     if (item) {
@@ -92,104 +112,54 @@ export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGener
     }
   };
 
-  const handleStatChange = (field: keyof GeneratedItem, value: string) => {
-    if (!item) return;
-    const updatedItem = { ...item, [field]: value };
-    onUpdate(updatedItem);
+  const copyToClipboard = async (text: string, type: 'text' | 'json') => {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopyState(type);
+        setTimeout(() => setCopyState('idle'), 2000);
+      } catch (err) {
+        console.error('Falha ao copiar:', err);
+        alert('Não foi possível copiar o texto.');
+      }
   };
+  
+  const generatePlainText = (): string => {
+      if(!item) return "";
+      let text = `Nome: ${item.nome}\n`;
+      text += `Tipo: ${item.tipo} | Categoria: ${item.categoria} | Subcategoria: ${item.subcategoria}\n`;
+      if(item.arquétipo) text += `Arquétipo: ${item.arquétipo}\n`;
+      text += `Raridade: ${item.raridade} | Durabilidade: ${item.durabilidade}\n`;
+      if(item.dano_extra && item.dano_extra !== '-') text += `Dano Extra: ${item.dano_extra}\n`;
+      if(item.preco_em_moedas) text += `Preço: ${item.preco_em_moedas} | Espaço: ${item.espaco_que_ocupa}\n`;
 
-  const handleDownloadImage = () => {
-    if (!item?.imageUrl) return;
-    const link = document.createElement('a');
-    link.href = item.imageUrl;
-    const filename = `${item.nome.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_image.png`;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handlePdfExport = async () => {
-    if (!item) return;
-    const { default: jsPDF } = await import('jspdf');
-    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-    
-    const pageW = doc.internal.pageSize.getWidth();
-    const margin = 15;
-    let y = 20;
-
-    doc.addFont('GangofThree', 'Gang of Three', 'normal');
-    doc.setFont('Gang of Three');
-    doc.setFontSize(28);
-    doc.text(item.nome, pageW / 2, y, { align: 'center' });
-    y += 8;
-
-    doc.setFont('helvetica'); // Reset font for body
-    doc.setFontSize(12);
-    doc.setTextColor(128, 128, 128);
-    doc.text(`${item.categoria} | Nível ${item.nivel_sugerido}`, pageW / 2, y, { align: 'center' });
-    y += 15;
-
-    const addSection = (title: string, content: string | string[], isItalic = false) => {
-        if (y > 270) { doc.addPage(); y = 20; }
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text(title, margin, y);
-        y += 7;
-        doc.setFontSize(11);
-        doc.setFont('helvetica', isItalic ? 'italic' : 'normal');
-        const textToSplit = Array.isArray(content) ? content.join('\n') : content;
-        const lines = doc.splitTextToSize(textToSplit, pageW - margin * 2);
-        doc.text(lines, margin, y);
-        y += (Array.isArray(lines) ? lines.length : 1) * 4 + 5;
-    };
-    
-    addSection("Descrição", item.descricao);
-    addSection("Ganchos Narrativos", `"${item.ganchos_narrativos}"`, true);
-
-    if(isDetailedType) {
-        if(item.teste_necessario) addSection("Teste de Ativação", `Tipo: ${item.teste_necessario.tipo} (CD: ${item.teste_necessario.cd})\nFalha: ${item.teste_necessario.efeito_falha}`);
-        if(item.efeito_no_inimigo) addSection("Efeito no Inimigo", `Teste de Resistência: ${item.efeito_no_inimigo.teste} (CD: ${item.efeito_no_inimigo.cd})\nFalha: ${item.efeito_no_inimigo.falha}`);
-        if(item.exaustao) addSection("Exaustão", item.exaustao);
-        if(item.cura_condicional) addSection("Cura Condicional", item.cura_condicional);
+      text += `\n--- DESCRIÇÃO ---\n${item.descricao}\n\n`;
+      if(item.efeito) text += `--- EFEITO ---\n${item.efeito}\n\n`;
+      if(item.historia) text += `--- HISTÓRIA ---\n${item.historia}\n\n`;
+      
+      if(isTechniqueType && item.dano_total_formula) {
+        text += `--- FÓRMULA DE DANO ---\n${item.dano_total_formula}\n\n`;
         if(item.dano_por_nivel) {
-            const danoContent = item.dano_por_nivel.map(d => `Nível ${d.nivel}: ${d.dano} | PDR ${d.pdr || 'N/A'} | CD VIT ${d.cd_vit || 'N/A'}`).join('\n');
-            addSection("Dano por Nível", danoContent);
+            text += `--- DANO POR NÍVEL ---\n`;
+            item.dano_por_nivel.forEach(d => {
+                text += `Nível ${d.nivel}: ${d.dano_total_exemplo} | CD VIT ${d.cd_vit || 'N/A'}\n`;
+            });
+            text += '\n';
         }
-    } else {
-        const statsContent: string[] = [];
-        if (item.dano) statsContent.push(`Dano: ${item.dano}`);
-        if (item.dados) statsContent.push(`Dados: ${item.dados}`);
-        if (item.tipo_de_dano) statsContent.push(`Tipo de Dano: ${item.tipo_de_dano}`);
-        if (statsContent.length > 0 && showSimpleCombatMechanics) {
-            addSection("Mecânicas de Combate", statsContent);
-        }
+      }
+      
+      if(item.momentum) {
+        text += `--- MOMENTUM ---\nGanho: ${item.momentum.ganho_por_acerto} por acerto, ${item.momentum.ganho_por_crit} por crítico.\nGastos:\n`;
+        item.momentum.gasta.forEach(gasto => {
+            const cost = Object.keys(gasto)[0];
+            text += `- ${cost} Ponto(s): ${gasto[cost]}\n`;
+        });
+        text += '\n';
+      }
 
-        const effectsContent: string[] = [];
-        if (item.status_aplicado && item.status_aplicado !== "Nenhum") {
-            effectsContent.push(`Status Aplicado: ${item.status_aplicado}`);
-        }
-        if (item.efeitos_secundarios && item.efeitos_secundarios !== "Nenhum") {
-            effectsContent.push(`Efeitos Secundários: ${item.efeitos_secundarios}`);
-        }
-        if (effectsContent.length > 0) {
-            addSection(additionalEffectsTitle, effectsContent);
-        }
-    }
+      if (item.ganchos_narrativos) text += `--- GANCHOS NARRATIVOS ---\n"${item.ganchos_narrativos}"\n\n`;
 
-    const detailedCombatStats: string[] = [];
-    if (item.dano_base && item.dano_base !== "N/A") detailedCombatStats.push(`Dano Base: ${item.dano_base}`);
-    if (item.multiplicador_de_ataque && item.multiplicador_de_ataque !== "N/A") detailedCombatStats.push(`Multiplicador de Ataque: ${item.multiplicador_de_ataque}`);
-    if (item.defesa && item.defesa !== "N/A") detailedCombatStats.push(`Defesa: ${item.defesa}`);
-    if (item.resistencia_magica && item.resistencia_magica !== "N/A") detailedCombatStats.push(`Resistência Mágica: ${item.resistencia_magica}`);
-    if (item.velocidade_movimento && item.velocidade_movimento !== "N/A") detailedCombatStats.push(`Velocidade: ${item.velocidade_movimento}`);
-
-    if (detailedCombatStats.length > 0) {
-        addSection("Estatísticas de Combate Detalhadas", detailedCombatStats);
-    }
-
-    doc.save(`${item.nome.replace(/\s/g, '_')}.pdf`);
-  };
+      return text;
+  }
 
   return (
     <Modal isOpen={!!item} onClose={onClose}>
@@ -199,7 +169,10 @@ export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGener
             <div className="flex justify-between items-start mb-4 border-b border-gray-700 pb-3 flex-shrink-0 pr-12">
                 <div>
                     <h3 className="text-2xl font-bold text-gray-100 font-gangofthree">{item.nome}</h3>
-                    <p className="text-sm text-indigo-400">{item.categoria} (Nível {item.nivel_sugerido})</p>
+                     <p className="text-sm text-indigo-400">
+                        {item.tipo} | {item.categoria} | {item.subcategoria}
+                        {item.arquétipo && ` | ${item.arquétipo}`}
+                    </p>
                 </div>
                 <button 
                     onClick={handleFavoriteClick} 
@@ -213,112 +186,99 @@ export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGener
 
             {/* Modal Body with scroll */}
             <div className="flex-grow overflow-y-auto pr-2">
-                {canHaveImage && (
-                    <div className="relative w-full aspect-square bg-gray-900 rounded-lg mb-4 flex items-center justify-center">
-                        {isImageLoading && <Spinner />}
-                        {!isImageLoading && item.imageUrl && (
-                            <>
-                                <img src={item.imageUrl} alt={`Imagem de ${item.nome}`} className="w-full h-full object-cover rounded-lg" />
-                                <Button 
-                                    variant="ghost" 
-                                    onClick={handleDownloadImage}
-                                    className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 !p-2 rounded-full"
-                                    title="Baixar Imagem"
-                                >
-                                    <DownloadIcon className="w-5 h-5" />
-                                </Button>
-                            </>
-                        )}
-                         {!isImageLoading && !item.imageUrl && (
-                            <div className="text-center">
-                                <p className="text-gray-500 text-sm mb-2">Sem imagem</p>
-                                <Button variant="secondary" onClick={() => onGenerateImage(item.id)} disabled={isImageLoading}>
-                                      <SparklesIcon className="w-4 h-4" />
-                                      Gerar Imagem
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                )}
-              
+                
                 <DetailSection title="Descrição Narrativa">
                   <p className="whitespace-pre-wrap">{item.descricao}</p>
                 </DetailSection>
 
-                {item.ganchos_narrativos && item.ganchos_narrativos !== "N/A" && (
-                    <DetailSection title="Ganchos Narrativos">
-                        <p className="italic">"{item.ganchos_narrativos}"</p>
+                {item.efeito && item.efeito !== "N/A" && (
+                    <DetailSection title="Efeito Mecânico Principal">
+                        <p>{item.efeito}</p>
                     </DetailSection>
                 )}
 
-                {isDetailedType ? (
+                {isSkillType && (
+                    <DetailSection title="Detalhes da Habilidade">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+                            <div className="bg-gray-800 p-2 rounded-md">
+                                <div className="text-xs text-gray-400">Tipo</div>
+                                <div className="font-bold">{item.tipo_habilidade || 'N/A'}</div>
+                            </div>
+                            <div className="bg-gray-800 p-2 rounded-md">
+                                <div className="text-xs text-gray-400">Cooldown</div>
+                                <div className="font-bold">{item.cd || 'N/A'}</div>
+                            </div>
+                            <div className="bg-gray-800 p-2 rounded-md col-span-2">
+                                <div className="text-xs text-gray-400">Custo</div>
+                                <div className="font-bold">
+                                    {item.custo ? Object.entries(item.custo).map(([key, value]) => `${value} ${key}`).join(' / ') : 'Nenhum'}
+                                </div>
+                            </div>
+                        </div>
+                        {item.interacao_respirações && <p className="text-xs italic mt-3 text-center"><strong>Interação:</strong> {item.interacao_respirações}</p>}
+                    </DetailSection>
+                )}
+
+                {isTechniqueType && (
                     <>
-                        {item.teste_necessario && (
+                        {item.dano_total_formula && <DetailSection title="Fórmula de Dano"><p className="font-mono text-center">{item.dano_total_formula}</p></DetailSection>}
+                        {item.dano_por_nivel && item.dano_por_nivel.length > 0 && (
+                           <DetailSection title="Dano Progressivo por Nível">
+                               <DanoPorNivelTable data={item.dano_por_nivel} />
+                           </DetailSection>
+                        )}
+                        {item.momentum && (
+                            <DetailSection title="Sistema de Momentum">
+                                <MomentumDisplay momentum={item.momentum} />
+                            </DetailSection>
+                        )}
+                         {item.teste_necessario && (
                             <DetailSection title="Teste de Ativação">
                                 <p><strong>Tipo:</strong> {item.teste_necessario.tipo} (CD: {item.teste_necessario.cd})</p>
                                 <p className="mt-1"><strong>Em Falha:</strong> {item.teste_necessario.efeito_falha}</p>
                             </DetailSection>
                         )}
-                        {item.efeito_no_inimigo && (
-                             <DetailSection title="Efeito no Inimigo">
-                                <p><strong>Teste de Resistência:</strong> {item.efeito_no_inimigo.teste} (CD: {item.efeito_no_inimigo.cd})</p>
-                                <p className="mt-1"><strong>Em Falha:</strong> {item.efeito_no_inimigo.falha}</p>
-                            </DetailSection>
-                        )}
-                        {item.dano_por_nivel && item.dano_por_nivel.length > 0 && (
-                           <DetailSection title="Dano por Nível">
-                               <DanoPorNivelTable data={item.dano_por_nivel} />
-                           </DetailSection>
-                        )}
-                        {item.exaustao && item.exaustao !== "Nenhuma" && <DetailSection title="Custo / Exaustão"><p>{item.exaustao}</p></DetailSection>}
-                        {item.cura_condicional && item.cura_condicional !== "Nenhuma" && <DetailSection title="Efeito de Cura"><p>{item.cura_condicional}</p></DetailSection>}
-
-                    </>
-                ) : (
-                    <>
-                        {showSimpleCombatMechanics && (
-                        <DetailSection title="Mecânicas de Combate">
-                            <div className="space-y-1">
-                                <p><strong>Dano:</strong> {item.dano || 'N/A'}</p>
-                                <p><strong>Dados:</strong> {item.dados || 'N/A'}</p>
-                                <p><strong>Tipo de Dano:</strong> {item.tipo_de_dano || 'N/A'}</p>
-                            </div>
-                        </DetailSection>
-                        )}
-                        
-                        {(item.status_aplicado && item.status_aplicado !== "Nenhum") || (item.efeitos_secundarios && item.efeitos_secundarios !== "Nenhum") ? (
-                        <DetailSection title={additionalEffectsTitle}>
-                                <div className="space-y-1">
-                                    {item.status_aplicado && item.status_aplicado !== "Nenhum" && <p><strong>Status Aplicado:</strong> {item.status_aplicado}</p>}
-                                    {item.efeitos_secundarios && item.efeitos_secundarios !== "Nenhum" && <p><strong>Efeitos Secundários:</strong> {item.efeitos_secundarios}</p>}
-                                </div>
-                        </DetailSection>
-                        ) : null}
                     </>
                 )}
-
-                {showDetailedCombatStats && (
-                    <DetailSection title="Estatísticas de Combate Detalhadas">
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                           <EditableStat label="Dano Base" value={item.dano_base} field="dano_base" onChange={handleStatChange} />
-                           <EditableStat label="Multiplicador" value={item.multiplicador_de_ataque} field="multiplicador_de_ataque" onChange={handleStatChange} />
-                           <EditableStat label="Defesa" value={item.defesa} field="defesa" onChange={handleStatChange} />
-                           <EditableStat label="Res. Mágica" value={item.resistencia_magica} field="resistencia_magica" onChange={handleStatChange} />
-                           <EditableStat label="Velocidade" value={item.velocidade_movimento} field="velocidade_movimento" onChange={handleStatChange} />
-                        </div>
+                
+                 {item.historia && item.historia !== "N/A" && (
+                    <DetailSection title="História e Lore">
+                        <p className="italic">"{item.historia}"</p>
                     </DetailSection>
                 )}
 
+
+                {item.prompts_de_geracao && (
+                    <DetailSection title="Prompts de Geração (Copie e Cole)">
+                        <div className="space-y-2">
+                            <PromptDisplay platform="Gemini" prompt={item.prompts_de_geracao.Gemini} />
+                            <PromptDisplay platform="ChatGPT" prompt={item.prompts_de_geracao.ChatGPT} />
+                            <PromptDisplay platform="Midjourney" prompt={item.prompts_de_geracao.Midjourney} />
+                            <PromptDisplay platform="Copilot" prompt={item.prompts_de_geracao.Copilot} />
+                        </div>
+                    </DetailSection>
+                )}
             </div>
 
             {/* Modal Footer */}
             <div className="mt-4 pt-4 border-t border-gray-700 space-y-2 flex-shrink-0">
-                 <div className="grid grid-cols-3 gap-2">
-                    <Button variant="secondary" onClick={() => onGenerateVariant(item, 'agressiva')}>Agressiva</Button>
-                    <Button variant="secondary" onClick={() => onGenerateVariant(item, 'técnica')}>Técnica</Button>
-                    <Button variant="secondary" onClick={() => onGenerateVariant(item, 'defensiva')}>Defensiva</Button>
+                 {item.categoria === "Forma de Respiração" && 
+                    <div className="grid grid-cols-3 gap-2">
+                        <Button variant="secondary" onClick={() => onGenerateVariant(item, 'agressiva')}><SparklesIcon className="w-4 h-4"/> Agressiva</Button>
+                        <Button variant="secondary" onClick={() => onGenerateVariant(item, 'técnica')}><SparklesIcon className="w-4 h-4"/> Técnica</Button>
+                        <Button variant="secondary" onClick={() => onGenerateVariant(item, 'defensiva')}><SparklesIcon className="w-4 h-4"/> Defensiva</Button>
+                    </div>
+                 }
+                 <div className="grid grid-cols-2 gap-2">
+                    <Button variant="secondary" onClick={() => copyToClipboard(generatePlainText(), 'text')}>
+                        {copyState === 'text' ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                        {copyState === 'text' ? 'Copiado!' : 'Copiar Texto'}
+                    </Button>
+                    <Button variant="secondary" onClick={() => copyToClipboard(JSON.stringify(item, null, 2), 'json')}>
+                        {copyState === 'json' ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                        {copyState === 'json' ? 'Copiado!' : 'Copiar JSON'}
+                    </Button>
                  </div>
-                 <Button variant="primary" className="w-full" onClick={handlePdfExport}>Exportar PDF</Button>
             </div>
         </div>
     </Modal>

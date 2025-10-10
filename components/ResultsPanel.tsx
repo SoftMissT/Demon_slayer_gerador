@@ -11,10 +11,9 @@ interface ResultsPanelProps {
   selectedItemId?: string | null;
   isFavorite: (itemId: string) => boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
-  imageLoadingId?: string | null;
 }
 
-export const ResultsPanel: React.FC<ResultsPanelProps> = ({ results, onSelect, isLoading, selectedItemId, isFavorite, onToggleFavorite, imageLoadingId }) => {
+export const ResultsPanel: React.FC<ResultsPanelProps> = ({ results, onSelect, isLoading, selectedItemId, isFavorite, onToggleFavorite }) => {
   return (
     <Card className="h-full flex flex-col">
       <h2 className="text-lg font-bold mb-4 text-indigo-400 flex-shrink-0 font-gangofthree">Resultados Gerados</h2>
@@ -23,6 +22,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ results, onSelect, i
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-800/80">
             <Spinner size="lg" />
             <p className="text-gray-400">Gerando inspiração...</p>
+            <p className="text-gray-500 text-sm">Técnicas detalhadas e personagens podem levar um momento.</p>
           </div>
         )}
         {!isLoading && results.length === 0 && (
@@ -40,7 +40,6 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ results, onSelect, i
                 isSelected={item.id === selectedItemId}
                 isFavorite={isFavorite(item.id)}
                 onToggleFavorite={onToggleFavorite}
-                isImageLoading={imageLoadingId === item.id}
               />
             ))}
           </div>

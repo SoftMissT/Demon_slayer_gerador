@@ -1,48 +1,63 @@
-import type { GenerationType, GripType, Rarity, AccessoryType } from './types';
+import type { GenerationType, GripType, Rarity, AccessoryType, ArmaduraType, ItemDeAuxilioType, ConsumableType, ArchetypeType, SkillType } from './types';
+import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
 
 export const GENERATION_TYPES: GenerationType[] = [
   'Forma de Respiração',
+  'Kekkijutsu',
+  'Arquétipo/Habilidade',
   'Arma',
+  'Armadura',
   'Acessório',
+  'Item de Auxílio',
+  'Item Consumível',
   'Missão',
   'Inimigo/Oni',
-  'Kekkijutsu',
   'Classe/Origem',
   'Caçador',
   'Híbrido Humano-Oni',
   'NPC',
+  'Local/Cenário',
 ];
 
-export const BREATHING_STYLES: string[] = [
-  'Respiração da Água',
-  'Respiração do Amor',
-  'Respiração da Aranha',
-  'Respiração da Areia',
-  'Respiração da Besta',
-  'Respiração do Sangue',
-  'Respiração da Cerejeira',
-  'Respiração das Chamas',
-  'Respiração dos Sonhos',
-  'Respiração da Flor',
-  'Respiração da Grama',
-  'Respiração do Inseto',
-  'Respiração do Ferro',
-  'Respiração da Lua',
-  'Respiração da Névoa',
-  'Respiração da Neve',
-  'Respiração da Pedra',
-  'Respiração da Raposa',
-  'Respiração do Relampago',
-  'Respiração da Serpente',
-  'Respiração do Sol',
-  'Respiração das Sombras',
-  'Respiração do Som',
-  'Respiração do Tempestade',
-  'Respiração do Tigre',
-  'Respiração do Trovão',
-  'Respiração do Vagalume',
-  'Respiração do Vento',
+export const ARCHETYPE_TYPES: ArchetypeType[] = [
+    'GUERREIRO',
+    'ALQUIMISTA',
+    'ESCUDEIRO'
 ];
+
+export const SKILL_TYPES: { [key in ArchetypeType]: SkillType[] } = {
+    GUERREIRO: ['Kenshi', 'Bujin', 'Kyūshi'],
+    ALQUIMISTA: ['Kajiya', 'Curandeiro', 'Dokugakusha', 'Ritualista'],
+    ESCUDEIRO: ['Tate', 'Ishibumi', 'Shugo', 'Paladino'],
+};
+
+export const ARMADURA_TYPES: ArmaduraType[] = [
+    'Armadura Leve',
+    'Armadura Pesada',
+    'Uniforme dos Caçadores de Onis'
+];
+
+export const ITEM_DE_AUXILIO_TYPES: ItemDeAuxilioType[] = [
+    'Luva Yugake',
+    'Kit Marcial'
+];
+
+export const CONSUMABLE_TYPES: ConsumableType[] = [
+    'Venenos',
+    'Medicamentos',
+    'Bandagens',
+    'Cantil',
+    'Kit Cirúrgico',
+    'Saco de Dormir',
+    'Bomba Explosiva',
+    'Injeção de Adrenalina',
+    'Munição de Armas',
+    'Metal Ancestral',
+    'Vidro de Sol',
+    'Tinta Especial Hamaki'
+];
+
+export const BREATHING_STYLES: string[] = BREATHING_STYLES_DATA.map(style => style.nome);
 
 export const WEAPON_TYPES: string[] = [
   'Alabarda',
@@ -150,9 +165,25 @@ export const ERAS: string[] = [
   'Pós-apocalíptico',
 ];
 
-export const RARITIES: Rarity[] = ['Low', 'Mid', 'High', 'Peça-lendária'];
+export const RARITIES: Rarity[] = ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'];
 
-export const ACCESSORY_TYPES: AccessoryType[] = ['Kimono', 'Brinco', 'Pulseira', 'Bainha', 'Haori'];
+export const ACCESSORY_TYPES: AccessoryType[] = [
+    'Kimono', 
+    'Brinco', 
+    'Pulseira', 
+    'Bainha', 
+    'Haori', 
+    'Máscara', 
+    'Chapéu',
+    'Talisman', 
+    'Sandálias de Palha (Waraji)', 
+    'Faixa Espiritual (Obi)', 
+    'Guarda de Espada (Tsuba)', 
+    'Colar de Foco (Magatama)', 
+    'Luvas de Oni', 
+    'Patuá de Caçador', 
+    'Capa de Neblina'
+];
 
 export const KEKKIJUTSU_TYPES: string[] = [
   'Manipulação de Sangue',

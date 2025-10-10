@@ -3,12 +3,11 @@ import Head from 'next/head';
 import { FilterPanel } from '../components/FilterPanel';
 import { ResultsPanel } from '../components/ResultsPanel';
 import { Header } from '../components/Header';
-import { generateContent, generateImage } from '../services/geminiService';
-import type { FilterState, GeneratedItem, GenerationType, Rarity } from '../types';
+import { generateContent } from '../services/geminiService';
+import type { FilterState, GeneratedItem, Rarity } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { FavoritesModal } from '../components/FavoritesModal';
 import { DetailModal } from '../components/DetailModal';
-import { buildImagePrompt } from '../lib/promptBuilder';
 import { ErrorDisplay } from '../components/ui/ErrorDisplay';
 
 const Home: React.FC = () => {
@@ -19,8 +18,13 @@ const Home: React.FC = () => {
     grip: '',
     level: 10,
     theme: '',
-    rarity: 'Mid',
+    rarity: 'Raro',
     accessoryType: '',
+    armaduraType: '',
+    itemDeAuxilioType: '',
+    consumableType: '',
+    archetypeType: '',
+    skillType: '',
     seed: '',
     era: '',
     kekkijutsu: '',
@@ -30,7 +34,6 @@ const Home: React.FC = () => {
   const [results, setResults] = useState<GeneratedItem[]>([]);
   const [selectedResult, setSelectedResult] = useState<GeneratedItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [imageLoadingId, setImageLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('favorites', []);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
@@ -48,37 +51,6 @@ const Home: React.FC = () => {
       setIsLoading(false);
     }
   }, [filters]);
-
-  const handleQuickGenerate = useCallback(async (type: GenerationType) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const quickFilters: FilterState = {
-        ...initialFilters,
-        generationType: type,
-        level: Math.floor(Math.random() * 10) + 5,
-        rarity: 'Mid',
-        theme: 'Sombrio',
-        era: 'Período Edo (Japão Feudal)'
-      };
-
-      if (type === 'Inimigo/Oni') {
-          quickFilters.level = Math.floor(Math.random() * 10) + 10;
-      }
-      if (type === 'Arma') {
-          const rarities: Rarity[] = ['Mid', 'High'];
-          quickFilters.rarity = rarities[Math.floor(Math.random() * rarities.length)];
-      }
-
-      const newItems = await generateContent(quickFilters, 1);
-      setResults(prevResults => [...newItems, ...prevResults]);
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : 'Ocorreu um erro desconhecido durante a geração rápida.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [initialFilters]);
 
   const handleResetFilters = () => {
     setFilters(initialFilters);
@@ -102,11 +74,16 @@ const Home: React.FC = () => {
     setError(null);
     try {
       const variantFilters: FilterState = {
+        ...initialFilters,
         ...filters,
         generationType: baseItem.categoria,
         breathingBase: baseItem.respiracao_base,
         level: baseItem.nivel_sugerido,
-        accessoryType: '', // Reset accessory type for variants
+        weaponType: baseItem.categoria === 'Arma' ? baseItem.subcategoria : '',
+        accessoryType: baseItem.categoria === 'Acessório' ? baseItem.subcategoria as any : '',
+        armaduraType: baseItem.categoria === 'Armadura' ? baseItem.subcategoria as any : '',
+        itemDeAuxilioType: baseItem.categoria === 'Item de Auxílio' ? baseItem.subcategoria as any : '',
+        consumableType: baseItem.categoria === 'Item Consumível' ? baseItem.subcategoria as any : '',
       };
       const promptModifier = `Gere uma variante ${variantType} para o seguinte item: ${JSON.stringify(baseItem)}.`;
       const newItems = await generateContent(variantFilters, 1, promptModifier);
@@ -117,35 +94,6 @@ const Home: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  const handleGenerateImage = async (itemId: string) => {
-      const itemToUpdate = results.find(r => r.id === itemId) || favorites.find(f => f.id === itemId) || selectedResult;
-      if (!itemToUpdate || itemToUpdate.id !== itemId) return;
-
-      setImageLoadingId(itemId);
-      setError(null);
-      try {
-          const imagePrompt = buildImagePrompt(itemToUpdate, filters.era);
-          
-          const imageUrl = await generateImage(imagePrompt);
-          
-          const updateItemWithImage = (item: GeneratedItem) => 
-              item.id === itemId ? { ...item, imageUrl } : item;
-
-          setResults(prevResults => prevResults.map(updateItemWithImage));
-          setFavorites(prevFavorites => prevFavorites.map(updateItemWithImage));
-          
-          if(selectedResult?.id === itemId) {
-              setSelectedResult(prev => prev ? { ...prev, imageUrl } : null);
-          }
-
-      } catch (err) {
-          console.error(err);
-          setError(err instanceof Error ? err.message : 'Falha ao gerar a imagem.');
-      } finally {
-          setImageLoadingId(null);
-      }
   };
 
   const isFavorite = (itemId: string) => favorites.some(fav => fav.id === itemId);
@@ -187,7 +135,6 @@ const Home: React.FC = () => {
               filters={filters} 
               setFilters={setFilters} 
               onGenerate={handleGenerate}
-              onQuickGenerate={handleQuickGenerate}
               onReset={handleResetFilters}
               isLoading={isLoading}
             />
@@ -201,7 +148,6 @@ const Home: React.FC = () => {
                   selectedItemId={selectedResult?.id}
                   isFavorite={isFavorite}
                   onToggleFavorite={handleToggleFavorite}
-                  imageLoadingId={imageLoadingId}
               />
           </div>
         </main>
@@ -209,8 +155,6 @@ const Home: React.FC = () => {
           item={selectedResult}
           onClose={handleCloseDetailModal}
           onGenerateVariant={handleGenerateVariant}
-          onGenerateImage={handleGenerateImage}
-          isImageLoading={imageLoadingId === selectedResult?.id}
           isFavorite={selectedResult ? isFavorite(selectedResult.id) : false}
           onToggleFavorite={handleToggleFavorite}
           onUpdate={handleUpdateSelectedItem}

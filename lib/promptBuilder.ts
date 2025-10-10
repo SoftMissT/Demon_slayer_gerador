@@ -1,6 +1,6 @@
 import type { GeneratedItem } from '../types';
 
-type ImageCategory = 'Inimigo/Oni' | 'Caçador' | 'Arma' | 'Acessório' | 'Classe/Origem';
+type ImageCategory = 'Inimigo/Oni' | 'Caçador' | 'Arma' | 'Acessório' | 'Classe/Origem' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário';
 
 /**
  * Retorna a string de fundo apropriada para a categoria de imagem.
@@ -8,11 +8,16 @@ type ImageCategory = 'Inimigo/Oni' | 'Caçador' | 'Arma' | 'Acessório' | 'Class
 const getBackgroundPrompt = (category: ImageCategory): string => {
   switch (category) {
     case 'Inimigo/Oni':
-      return 'fundo dramático';
+      return 'fundo dramático e sombrio';
     case 'Caçador':
-      return 'fundo de dojo diurno';
+      return 'fundo de dojo diurno ou floresta de bambu';
     case 'Classe/Origem':
       return 'fundo de paisagem épica com um templo antigo';
+    case 'Forma de Respiração':
+    case 'Kekkijutsu':
+        return 'fundo de campo de batalha noturno e místico';
+    case 'Local/Cenário':
+        return 'atmosfera cinematográfica';
     case 'Arma':
     case 'Acessório':
       return 'fundo neutro para focar no design';
@@ -80,10 +85,10 @@ const buildItemImagePrompt = (
  * Constrói um prompt de imagem otimizado com base na categoria do item.
  */
 export const buildImagePrompt = (
-  item: Pick<GeneratedItem, 'categoria' | 'nome' | 'descricao_curta'>,
+  item: GeneratedItem,
   era?: string
 ): string => {
-  const { categoria, nome, descricao_curta } = item;
+  const { categoria, nome, descricao_curta, descricao } = item;
 
   switch (categoria) {
     case 'Inimigo/Oni': {
@@ -105,6 +110,15 @@ export const buildImagePrompt = (
     case 'Acessório': {
       const background = getBackgroundPrompt('Acessório');
       return buildItemImagePrompt(nome, descricao_curta, background, 'Acessório', era);
+    }
+    case 'Forma de Respiração':
+    case 'Kekkijutsu': {
+        const background = getBackgroundPrompt(categoria);
+        return `Uma ilustração cinematográfica de um guerreiro da era Taisho executando a técnica "${nome}", descrita como: ${descricao}. O efeito visual da técnica é o foco principal. ${background}, iluminação dramática, arte conceitual estilo anime de alta resolução, movimento dinâmico, arte de fantasia sombria.`
+    }
+    case 'Local/Cenário': {
+        const background = getBackgroundPrompt(categoria);
+        return `Uma paisagem cinematográfica de ${nome}, um lugar descrito como: ${descricao_curta}. O clima é ${item.clima} e o bioma é ${item.bioma}. Estilo de arte do período Taisho do Japão, ${background}, enevoado, altamente detalhado, 4k, arte conceitual.`
     }
     default:
       return `Uma ilustração de fantasia sombria no estilo anime de: ${nome}, ${descricao_curta}.`;
