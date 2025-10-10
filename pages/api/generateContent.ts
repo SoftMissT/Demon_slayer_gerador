@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { serverGenerateTextOpenAI } from '../../lib/openai';
-import { Type } from '@google/genai';
+import { Type, GenerationConfig } from '@google/genai';
 import { v4 as uuidv4 } from 'uuid';
 import type { FilterState, GeneratedItem } from '../../types';
 
@@ -149,16 +149,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (filters.aiModel === 'Gemini') {
             const aiClient = getAiClient();
-            const seedValue = filters.seed ? parseInt(filters.seed, 10) : undefined;
+            const seedValue = filters.seed ? parseInt(filters.seed, 10) : NaN;
+            
+            const config: GenerationConfig = {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema,
+                temperature: 0.8,
+            };
+
+            if (!isNaN(seedValue)) {
+                config.seed = seedValue;
+            }
+
             const response = await aiClient.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: prompt,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: responseSchema,
-                    temperature: 0.8,
-                    seed: !isNaN(seedValue) ? seedValue : undefined
-                },
+                config: config,
             });
 
             const rawText = response.text.trim();
