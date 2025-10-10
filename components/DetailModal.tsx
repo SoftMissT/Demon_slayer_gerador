@@ -215,6 +215,22 @@ export const DetailModal: React.FC<DetailModalProps> = ({ item, onClose, onGener
                                 </div>
                             </div>
                         </div>
+
+                        {item.efeitos && item.efeitos.length > 0 && (
+                            <div className="mt-3 text-left">
+                                <h5 className="text-xs text-gray-400 font-bold mb-1">Efeitos Detalhados:</h5>
+                                <ul className="list-disc list-inside pl-2 space-y-1 text-sm">
+                                    {item.efeitos.map((efeito, index) => (
+                                        <li key={index}>
+                                            <strong>{efeito.tipo}:</strong> {efeito.valor}
+                                            <span className="text-gray-400"> (Alvo: {efeito.alvo})</span>
+                                            {efeito.obs && <em className="text-xs block pl-4 text-gray-500">- {efeito.obs}</em>}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
                         {item.interacao_respirações && <p className="text-xs italic mt-3 text-center"><strong>Interação:</strong> {item.interacao_respirações}</p>}
                     </DetailSection>
                 )}

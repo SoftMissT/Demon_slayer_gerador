@@ -3,16 +3,11 @@ import React from 'react';
 import type { GeneratedItem } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { Spinner } from './ui/Spinner';
-import { SparklesIcon } from './icons/SparklesIcon';
 import { StarIcon } from './icons/StarIcon';
-
 
 interface DetailPanelProps {
   item: GeneratedItem | null;
   onGenerateVariant: (baseItem: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onGenerateImage: (itemId: string) => void;
-  isImageLoading: boolean;
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onUpdate: (updatedItem: GeneratedItem) => void;
@@ -46,7 +41,7 @@ const EditableStat: React.FC<EditableStatProps> = ({ label, value, field, onChan
     );
 };
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, onGenerateImage, isImageLoading, isFavorite, onToggleFavorite, onUpdate }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   if (!item) {
     return (
       <Card className="h-full flex items-center justify-center">
@@ -55,7 +50,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     );
   }
   
-  const canHaveImage = ['Arma', 'Acessório', 'Inimigo/Oni'].includes(item.categoria);
   const showDetailedCombatStats = item && (item.dano_base || item.multiplicador_de_ataque || item.defesa || item.resistencia_magica || item.velocidade_movimento);
 
 
@@ -93,18 +87,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     doc.text(`${item.categoria} | Nível ${item.nivel_sugerido}`, pageW / 2, y, { align: 'center' });
     y += 15;
 
-    let imageEndY = y;
-    if (item.imageUrl) {
-        try {
-            doc.addImage(item.imageUrl, 'PNG', margin, y, 60, 60);
-            imageEndY = y + 60 + 5;
-        } catch (e) {
-            console.error("Não foi possível adicionar a imagem ao PDF:", e);
-        }
-    }
-
-    const textStartX = item.imageUrl ? margin + 60 + 10 : margin;
-    const textWidth = item.imageUrl ? pageW - textStartX - margin : pageW - margin * 2;
+    const textStartX = margin;
+    const textWidth = pageW - margin * 2;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -114,12 +98,11 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
 
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    // FIX: Property 'descricao_longa' does not exist on type 'GeneratedItem'. Use 'descricao' instead.
     const descLines = doc.splitTextToSize(item.descricao, textWidth);
     doc.text(descLines, textStartX, y);
     const textEndY = y + descLines.length * 4;
     
-    y = Math.max(imageEndY, textEndY);
+    y = textEndY;
 
     const addSection = (title: string, content: string | string[], isItalic = false) => {
         if (y > 270) { doc.addPage(); y = 20; }
@@ -135,12 +118,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         y += (Array.isArray(lines) ? lines.length : 1) * 4 + 5;
     };
     
-    // FIX: Property 'roleplay_tip' does not exist on type 'GeneratedItem'. Use 'ganchos_narrativos' instead.
     if (item.ganchos_narrativos && item.ganchos_narrativos !== "N/A") {
         addSection("Ganchos Narrativos", `"${item.ganchos_narrativos}"`, true);
     }
     
-    // FIX: Properties 'dano.formula', 'ki_custo', 'momentum_ganho' do not exist. Use 'dano', 'dados', 'tipo_de_dano'.
     const statsContent: string[] = [];
     if (item.dano) statsContent.push(`Dano: ${item.dano}`);
     if (item.dados) statsContent.push(`Dados: ${item.dados}`);
@@ -149,7 +130,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         addSection("Mecânicas de Combate", statsContent);
     }
 
-    // FIX: Property 'efeitos' does not exist. Use 'status_aplicado' and 'efeitos_secundarios'.
     const effectsContent: string[] = [];
     if (item.status_aplicado && item.status_aplicado !== "Nenhum") {
         effectsContent.push(`Status Aplicado: ${item.status_aplicado}`);
@@ -178,23 +158,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   return (
     <Card className="h-full flex flex-col">
       <div className="flex-grow overflow-y-auto pr-2">
-        
-        {canHaveImage && (
-            <div className="relative w-full aspect-square bg-gray-900 rounded-lg mb-4 flex items-center justify-center">
-                {isImageLoading ? (
-                    <Spinner />
-                ) : item.imageUrl ? (
-                    <img src={item.imageUrl} alt={`Imagem de ${item.nome}`} className="w-full h-full object-cover rounded-lg" />
-                ) : (
-                    <div className="text-center">
-                        <p className="text-gray-500 text-sm mb-2">Sem imagem</p>
-                        <Button variant="secondary" onClick={() => onGenerateImage(item.id)} disabled={isImageLoading}>
-                            <SparklesIcon className="w-4 h-4" /> Gerar Imagem
-                        </Button>
-                    </div>
-                )}
-            </div>
-        )}
       
         <h3 className="text-xl font-bold text-gray-100 mb-1">{item.nome}</h3>
         <div className="flex justify-between items-start mb-4">
@@ -210,16 +173,13 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         </div>
 
         <DetailSection title="Descrição Longa">
-          {/* FIX: Property 'descricao_longa' does not exist on type 'GeneratedItem'. Use 'descricao' instead. */}
           <p className="whitespace-pre-wrap">{item.descricao}</p>
         </DetailSection>
 
-        {/* FIX: Property 'roleplay_tip' does not exist on type 'GeneratedItem'. Use 'ganchos_narrativos' instead. */}
         {item.ganchos_narrativos && item.ganchos_narrativos !== "N/A" && <DetailSection title="Ganchos Narrativos">
           <p className="italic">"{item.ganchos_narrativos}"</p>
         </DetailSection>}
 
-        {/* FIX: Properties 'dano.formula', 'ki_custo', 'momentum_ganho' do not exist. Use 'dano', 'dados', 'tipo_de_dano'. */}
         <DetailSection title="Mecânicas de Combate">
             <div className="space-y-1">
                 <p><strong>Dano:</strong> {item.dano || 'N/A'}</p>
@@ -228,7 +188,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
             </div>
         </DetailSection>
         
-        {/* FIX: Property 'efeitos' does not exist. Use 'status_aplicado' and 'efeitos_secundarios'. */}
         {(item.status_aplicado && item.status_aplicado !== "Nenhum") || (item.efeitos_secundarios && item.efeitos_secundarios !== "Nenhum") ? (
            <DetailSection title="Efeitos Adicionais">
                 <div className="space-y-1">
@@ -249,11 +208,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 </div>
             </DetailSection>
         )}
-
-
-        {/* FIX: Property 'estatisticas_inimigo' does not exist on type 'GeneratedItem'. This section has been removed. */}
-
-        {/* FIX: Property 'tags' does not exist on type 'GeneratedItem'. This section has been removed. */}
 
       </div>
       <div className="mt-4 pt-4 border-t border-gray-700 space-y-2">
