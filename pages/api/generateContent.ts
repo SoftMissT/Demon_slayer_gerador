@@ -256,7 +256,11 @@ export default async function handler(
       },
     });
     
-    const jsonText = result.text.trim();
+    const jsonText = result.text?.trim();
+    if (!jsonText) {
+        throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
+    }
+    
     let generatedItems;
 
     if (isSingleItem) {
