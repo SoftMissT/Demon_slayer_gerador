@@ -20,6 +20,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, onSelect, isSelect
   };
 
   const rarityColor: { [key in GeneratedItem['raridade']]: string } = {
+    // FIX: Added 'Aleatória' to match the Rarity type and fix the TypeScript error.
+    'Aleatória': 'text-gray-400',
     'Comum': 'text-gray-400',
     'Incomum': 'text-green-400',
     'Raro': 'text-blue-400',

@@ -2,98 +2,138 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
+import type { PromptGenerationResult, MidjourneyParameters, GptParameters } from '../../types';
+
+const buildMidjourneyParamsString = (params: Partial<Record<keyof MidjourneyParameters, any>>): string => {
+    let paramString = '';
+    if (!params || Object.keys(params).length === 0) return '';
+
+    // Handle version separately due to --niji flag
+    if (params.version) {
+        if (params.version === 'Niji 6') {
+            paramString += ' --niji 6';
+        } else {
+            paramString += ` --v ${params.version}`;
+        }
+    }
+    
+    // Handle other parameters
+    for (const key in params) {
+        if (key !== 'version' && params[key as keyof MidjourneyParameters] !== undefined) {
+             const paramKey = {
+                aspectRatio: 'ar',
+                chaos: 'c',
+                quality: 'q',
+                stylize: 's',
+                style: 'style',
+                weird: 'w'
+            }[key];
+            if(paramKey) {
+                paramString += ` --${paramKey} ${params[key as keyof MidjourneyParameters]}`;
+            }
+        }
+    }
+    return paramString.trim();
+};
+
+
+const buildPromptForPrompts = (
+    topic: string,
+    negativePrompt: string,
+    mjParams: Partial<Record<keyof MidjourneyParameters, any>>, // Now receives only active params
+    gptParams: GptParameters,
+    useWebSearch: boolean
+): string => {
+    
+    const mjParamsString = buildMidjourneyParamsString(mjParams);
+
+    let prompt = `Você é um engenheiro de prompt de IA especialista, mestre em criar prompts para geradores de imagem como Midjourney e DALL-E 3.
+Sua tarefa é criar dois prompts de imagem distintos e otimizados com base na ideia do usuário.
+${useWebSearch ? 'Use a ferramenta de busca (Google Search) para encontrar referências visuais, artistas, estilos e detalhes relevantes sobre o tópico para enriquecer os prompts.' : 'Use seu conhecimento interno para criar os prompts.'}
+A resposta DEVE ser um objeto JSON, seguindo o schema fornecido.
+
+**Tópico da Imagem:** "${topic}"
+
+**Elementos a Evitar (Prompt Negativo):** "${negativePrompt || 'Nenhum'}"
+
+**1. Crie um Prompt para Midjourney:**
+- Seja conciso e direto. Use palavras-chave e frases curtas separadas por vírgulas.
+- Incorpore os seguintes parâmetros no final do prompt, se eles forem fornecidos: ${mjParamsString || 'Nenhum parâmetro específico fornecido.'}
+- O prompt deve ser em INGLÊS.
+
+**2. Crie um Prompt para DALL-E / GPT:**
+- Seja descritivo e use linguagem natural. Crie uma cena detalhada como se estivesse descrevendo uma fotografia ou pintura.
+- Incorpore os seguintes conceitos:
+    - Tom/Atmosfera: ${gptParams.tone}
+    - Estilo de Arte: ${gptParams.style}
+    - Composição/Ângulo: ${gptParams.composition}
+- O prompt deve ser em INGLÊS.
+
+Analise o tópico, aplique os parâmetros e gere os dois prompts.
+`;
+    return prompt;
+};
 
 const responseSchema = {
     type: Type.OBJECT,
     properties: {
-        prompts: {
-            type: Type.OBJECT,
-            properties: {
-                midjourney: { type: Type.STRING, description: "Prompt conciso e descritivo para Midjourney, começando com /imagine prompt: e incluindo parâmetros como --v 6." },
-                gemini: { type: Type.STRING, description: "Prompt verboso e instrutivo para Gemini, pedindo detalhes de iluminação, paleta e referências artísticas." },
-                copilot: { type: Type.STRING, description: "Prompt focado em assets para Copilot (DALL-E), descrevendo o objeto em termos de camadas e mapas de textura." },
-                gpt: { type: Type.STRING, description: "Prompt para ChatGPT (DALL-E) pedindo 5 variações curtas do conceito, cada uma com uma frase e 3 tags de estilo." }
-            },
-            required: ["midjourney", "gemini", "copilot", "gpt"]
-        },
-        references: {
-            type: Type.ARRAY,
-            description: "Array de até 3 referências conceituais ou de inspiração encontradas na web. Não precisam ser URLs diretas de imagens, mas sim artigos, conceitos ou galerias que enriqueçam a ideia.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    title: { type: Type.STRING, description: "O título da página ou do conceito de referência." },
-                    url: { type: Type.STRING, description: "A URL da referência." },
-                    source: { type: Type.STRING, description: "O nome do site ou da fonte (ex: ArtStation, Wikipedia)." }
-                },
-                required: ["title", "url", "source"]
-            }
-        }
-    }
+        midjourneyPrompt: { type: Type.STRING, description: 'O prompt otimizado para Midjourney, em inglês, terminando com os parâmetros corretos, se fornecidos.' },
+        gptPrompt: { type: Type.STRING, description: 'O prompt descritivo e detalhado para DALL-E/GPT, em inglês.' },
+    },
+    required: ["midjourneyPrompt", "gptPrompt"]
 };
 
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse<PromptGenerationResult | { message: string }>
+) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
     try {
-        const { query } = req.body;
-        
-        if (!query || typeof query !== 'string' || query.trim().length === 0) {
-            return res.status(400).json({ message: 'O campo "query" é obrigatório.' });
-        }
+        const { topic, negativePrompt, mjParams, gptParams, useWebSearch } = req.body;
 
-        const sanitizedQuery = query.trim().slice(0, 500);
+        if (!topic || !gptParams) { // mjParams is now optional
+            return res.status(400).json({ message: 'Tópico e parâmetros GPT são obrigatórios.' });
+        }
 
         const aiClient = getAiClient();
+        const prompt = buildPromptForPrompts(topic, negativePrompt, mjParams, gptParams, useWebSearch);
 
-        const prompt = `
-            O usuário quer criar uma imagem baseada na seguinte ideia: "${sanitizedQuery}".
-            Sua tarefa é atuar como um engenheiro de prompts especialista. NÃO GERE IMAGENS.
-            Sua única saída DEVE ser um objeto JSON válido que corresponde ao schema fornecido.
-
-            1.  **Gere 4 prompts de texto distintos** para as seguintes plataformas de IA, adaptando o estilo para cada uma:
-                *   **midjourney:** Crie um prompt conciso, visual e cheio de adjetivos, começando com "/imagine prompt:" e incluindo parâmetros técnicos relevantes como "--v 6" e "--ar 2:3".
-                *   **gemini:** Crie um prompt mais verboso e instrutivo, como se estivesse dando uma direção de arte. Peça detalhes sobre iluminação, paleta de cores, e cite referências artísticas.
-                *   **copilot:** Crie um prompt descritivo focado na criação de um "asset" de jogo ou 3D. Mencione camadas, mapas de textura (como normal_map, roughness), e como o objeto deve ser estruturado.
-                *   **gpt:** Crie um prompt que peça ao ChatGPT para gerar 5 variações curtas da ideia principal, onde cada variação é uma frase com 3 tags de estilo.
-
-            2.  **Encontre 3 referências conceituais** usando sua ferramenta de busca. As referências devem ser inspirações (artigos, galerias, conceitos de arte, páginas da Wikipedia sobre o tema) que ajudem o usuário a refinar a ideia. Para cada referência, forneça o título, a URL e a fonte.
-        `;
-
-        const response = await aiClient.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-                temperature: 0.7,
-            },
-            // A ferramenta de busca é habilitada por padrão no modelo flash, 
-            // não sendo necessário especificar `tools: [{googleSearch: {}}]`
-            // a menos que queiramos um controle mais fino, que não é o caso aqui.
-        });
-
-        const rawText = response.text.trim();
-        if (!rawText) {
-            throw new Error("A API não retornou texto.");
-        }
-        
-        const data = JSON.parse(rawText);
-
-        const finalResponse = {
-            query: sanitizedQuery,
-            prompts: data.prompts,
-            references: data.references,
+        const config: any = {
+            responseMimeType: "application/json",
+            responseSchema: responseSchema,
         };
 
-        res.status(200).json(finalResponse);
+        if (useWebSearch) {
+            config.tools = [{ googleSearch: {} }];
+        }
+
+        const result = await aiClient.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: config,
+        });
+
+        const jsonText = result.text.trim();
+        const generatedPrompts = JSON.parse(jsonText);
+        
+        const groundingMetadata = result.candidates?.[0]?.groundingMetadata;
+        const webSearchQueries = groundingMetadata?.groundingChunks
+            ?.map((chunk: any) => chunk.web)
+            .filter(Boolean) ?? [];
+
+        const finalResult: PromptGenerationResult = {
+            ...generatedPrompts,
+            webSearchQueries: webSearchQueries,
+        };
+
+        res.status(200).json(finalResult);
 
     } catch (error) {
         console.error("Erro em /api/generatePrompts:", error);
         const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
-        res.status(500).json({ message: errorMessage });
+        res.status(500).json({ message: `Falha ao gerar prompts. Detalhes: ${errorMessage}` });
     }
 }

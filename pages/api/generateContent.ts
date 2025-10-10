@@ -1,187 +1,248 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
-import { serverGenerateTextOpenAI } from '../../lib/openai';
-import type { FilterState, GeneratedItem } from '../../types';
 import { Type } from '@google/genai';
-import { v4 as uuidv4 } from 'uuid';
+import type { FilterState, GeneratedItem } from '../../types';
 
-// This function builds the prompt based on user-selected filters.
-const buildPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
-    let prompt = `Gere ${count} ${count > 1 ? 'itens únicos' : 'item único'} para um RPG de mesa no universo de Demon Slayer (Kimetsu no Yaiba).
-    O tipo de geração é: "${filters.generationType}".
-    
-    Detalhes:
-    - Nível/Patente Sugerido: ${filters.level}
-    - Tom Temático: ${filters.theme}
-    - Era/Ambientação: ${filters.era}
-    - Raridade/Impacto: ${filters.rarity}
-    ${filters.seed ? `- Seed para inspiração: "${filters.seed}"` : ''}
-    `;
+const buildMissionPrompt = (filters: FilterState): string => {
+    const { era, tone, intensity, scale, protagonist, targets, moodModifiers } = filters;
 
-    switch (filters.generationType) {
-        case 'Forma de Respiração':
-            prompt += `\n- Respiração Base (se houver): ${filters.breathingBase || 'Nenhuma'}`;
-            prompt += `\n- Foco da forma: Criar uma técnica original e criativa.`;
-            break;
-        case 'Kekkijutsu':
-            prompt += `\n- Kekkijutsu Específico (se houver): ${filters.kekkijutsu || 'Nenhum'}`;
-            prompt += `\n- Foco: Criar uma técnica de arte demoníaca de sangue (Kekkijutsu) original.`;
-            break;
-        case 'Arma':
-            prompt += `\n- Tipo de Arma (se houver): ${filters.weaponType || 'Qualquer'}`;
-            prompt += `\n- Empunhadura (se houver): ${filters.grip || 'Qualquer'}`;
-            break;
-        case 'Acessório':
-            prompt += `\n- Tipo de Acessório: ${filters.accessoryType || 'Qualquer'}`;
-            break;
-        case 'Armadura':
-            prompt += `\n- Tipo de Armadura: ${filters.armaduraType || 'Qualquer'}`;
-            break;
-        case 'Item de Auxílio':
-            prompt += `\n- Tipo de Item: ${filters.itemDeAuxilioType || 'Qualquer'}`;
-            break;
-        case 'Item Consumível':
-            prompt += `\n- Tipo de Item: ${filters.consumableType || 'Qualquer'}`;
-            break;
-        case 'Arquétipo/Habilidade':
-            prompt += `\n- Arquétipo: ${filters.archetypeType || 'Qualquer'}`;
-            prompt += `\n- Habilidade Específica: ${filters.skillType || 'Qualquer'}`;
-            break;
-        case 'Inimigo/Oni':
-        case 'Híbrido Humano-Oni':
-             prompt += `\n- Kekkijutsu (se houver): ${filters.kekkijutsu || 'Nenhum'}`;
-            break;
-        // Default case for other types like 'Missão', 'NPC', 'Caçador', 'Local/Cenário', etc.
-        default:
-            prompt += `\n- Crie um conceito original e detalhado para "${filters.generationType}".`;
-            break;
-    }
-    
-    if (promptModifier) {
-        prompt += `\n\nModificador Adicional: ${promptModifier}\n`;
-    }
+    return `
+Você é um mestre de RPG e escritor de cenários de classe mundial. Sua tarefa é gerar uma missão detalhada com base nos parâmetros fornecidos, seguindo RIGOROSAMENTE a estrutura de saída JSON e as regras de conteúdo.
 
-    prompt += `\nResponda APENAS com um array JSON válido, seguindo o schema fornecido.`;
-    return prompt;
-}
+**PARÂMETROS DA MISSÃO:**
+- ERA: "${era}"
+- TONE: "${tone}"
+- INTENSITY: ${intensity} (de 1 a 5)
+- SCALE: "${scale}"
+- PROTAGONISTA: "${protagonist}"
+- TARGETS: "${targets}"
+- MOOD_MODIFIERS: "${moodModifiers}"
 
-// Defines the JSON schema for the expected AI response.
-const responseSchema = {
+**REGRAS OBRIGATÓRIAS:**
+1. **Estrutura de Saída:** A resposta DEVE ser um único objeto JSON válido, sem markdown ou texto extra, seguindo o schema fornecido.
+2. **Linguagem Sensorial:** Use linguagem concreta e sensorial. Mostre, não diga.
+3. **Templates de Descrição:** Use os templates abaixo VERBATIM para descrever o protagonista, o oni, NPCs e itens.
+
+**TEMPLATES DE DESCRIÇÃO (USE ESTA ESTRUTURA):**
+
+**Caçador (5 frases):**
+- Silhueta e postura.
+- Traços faciais e pele.
+- Roupa e armadura; sinais de uso.
+- Movimento e gestos característicos.
+- Marca ou relíquia identificadora + cheiro/efeito.
+
+**Oni (6 frases):**
+- Tamanho e proporção fora do humano.
+- Pele/textura e cor.
+- Apêndices e deformidades.
+- Olhos e expressão.
+- Som/odor que o acompanha.
+- Sinal místico ou ferida que conta história.
+
+**Item (5 linhas):**
+- Aparência imediata.
+- Material e procedência.
+- Sinais de uso e dano.
+- Propriedade estranha (visual ou mecânica).
+- Uso concreto em cena.
+
+**NPC (5 linhas):**
+- Papel social.
+- Objetivo imediato.
+- Flaw ou segredo.
+- Traço físico memorável.
+- Linha de diálogo curta que revele caráter.
+
+**SAÍDA REQUERIDA (11 PONTOS):**
+1. **Título:** Título sucinto da missão.
+2. **Sinopse:** 2 frases.
+3. **Gancho, Objetivo, Stakes:** Gancho inicial, objetivo principal e o que está em jogo.
+4. **Três Complicações:** 3 complicações possíveis.
+5. **Ambiente:** Descrição detalhada do local principal (visão, som, cheiro, etc.).
+6. **Descrição do Protagonista:** Usando o template de 5 frases.
+7. **Descrição do Oni:** Usando o template de 6 frases.
+8. **3 NPCs Relevantes:** Usando o template de 5 linhas para cada um.
+9. **3 Itens Relevantes:** Usando o template de 5 linhas para cada um.
+10. **3 Variações de Tom:** Leve, padrão e extremo.
+11. **Ganchos Secundários e Escalada:** Sugestões para continuar a história.
+
+Agora, gere a missão.
+`;
+};
+
+const missionSchema = {
     type: Type.OBJECT,
     properties: {
-        items: {
+        title: { type: Type.STRING },
+        logline: { type: Type.STRING },
+        summary: { type: Type.STRING },
+        objectives: { type: Type.ARRAY, items: { type: Type.STRING } },
+        complications: { type: Type.ARRAY, items: { type: Type.STRING } },
+        environment: { type: Type.STRING },
+        protagonist_desc: {
+            type: Type.OBJECT,
+            properties: {
+                silhouette: { type: Type.STRING },
+                face: { type: Type.STRING },
+                attire: { type: Type.STRING },
+                movement: { type: Type.STRING },
+                defining_feature: { type: Type.STRING },
+            },
+        },
+        oni_desc: {
+            type: Type.OBJECT,
+            properties: {
+                scale: { type: Type.STRING },
+                skin: { type: Type.STRING },
+                appendages: { type: Type.STRING },
+                eyes: { type: Type.STRING },
+                sound_smell: { type: Type.STRING },
+                mystic_sign: { type: Type.STRING },
+            },
+        },
+        key_npcs: {
             type: Type.ARRAY,
-            description: "Um array de itens gerados.",
             items: {
                 type: Type.OBJECT,
                 properties: {
-                    nome: { type: Type.STRING, description: "Nome criativo e único do item/técnica/personagem." },
-                    categoria: { type: Type.STRING, description: `A categoria do item gerado, que deve ser "${"DEVE SER O VALOR DE generationType"}"` },
-                    descricao_curta: { type: Type.STRING, description: "Uma descrição de uma frase, impactante e evocativa." },
-                    descricao: { type: Type.STRING, description: "Descrição detalhada (2-3 parágrafos) sobre a aparência, história e funcionamento." },
-                    nivel_sugerido: { type: Type.INTEGER, description: "Nível ou patente sugerido para o item/personagem, entre 1 e 20." },
-                    raridade: { type: Type.STRING, description: "A raridade, conforme especificado (Comum, Raro, etc.)." },
-                    dano: { type: Type.STRING, description: "Dano base da arma ou técnica (ex: '1d10', '2d6+FOR'). N/A se não aplicável." },
-                    dados: { type: Type.STRING, description: "Os dados de dano (ex: 'd10', '2d6'). N/A se não aplicável." },
-                    tipo_de_dano: { type: Type.STRING, description: "Tipo de dano (ex: 'Cortante', 'Perfurante', 'Elemental'). N/A se não aplicável." },
-                    status_aplicado: { type: Type.STRING, description: "Status negativo aplicado (ex: 'Sangramento', 'Atordoado', 'Envenenado'). 'Nenhum' se não houver." },
-                    efeitos_secundarios: { type: Type.STRING, description: "Qualquer efeito adicional passivo ou ativo. 'Nenhum' se não houver." },
-                    ganchos_narrativos: { type: Type.STRING, description: "Uma pequena frase ou pergunta que sirva como gancho para aventuras. N/A se não aplicável." },
-                    clima: { type: Type.STRING, description: "O clima predominante do local (apenas para Local/Cenário). N/A para outros tipos." },
-                    bioma: { type: Type.STRING, description: "O bioma do local (ex: Floresta, Montanha) (apenas para Local/Cenário). N/A para outros tipos." },
+                    id: { type: Type.STRING },
+                    name: { type: Type.STRING },
+                    role: { type: Type.STRING },
+                    goal: { type: Type.STRING },
+                    secret: { type: Type.STRING },
+                    twist: { type: Type.STRING },
+                    physical_trait: { type: Type.STRING },
+                    dialogue_example: { type: Type.STRING },
                 },
-                 required: ["nome", "categoria", "descricao_curta", "descricao", "nivel_sugerido", "raridade"]
-            }
-        }
-    }
+            },
+        },
+        relevant_items: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    appearance: { type: Type.STRING },
+                    origin: { type: Type.STRING },
+                    wear: { type: Type.STRING },
+                    quirk: { type: Type.STRING },
+                    use: { type: Type.STRING },
+                },
+            },
+        },
+        tone_variations: { type: Type.OBJECT },
+        scaling_hooks: { type: Type.STRING },
+    },
 };
 
-const getResponseSchemaForOpenAI = (generationType: string) => {
-    // A simple conversion for OpenAI, removing the 'Type' enum.
-    // The main difference is that we are not using the 'Type' enum from @google/genai
-    const schema = JSON.parse(JSON.stringify(responseSchema));
+
+const buildDefaultPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
+    const { category, rarity, era, breathingStyles, demonArts } = filters;
+
+    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de Demon Slayer. Sua tarefa é gerar ${count} ${count > 1 ? 'itens únicos' : 'item único'} com base nos seguintes critérios. A resposta DEVE ser um array JSON de objetos, seguindo o schema fornecido, mesmo que gere apenas um item.
+
+**Categoria:** ${category}
+**Raridade:** ${rarity}
+**Era/Estilo:** ${era}
+`;
+
+    if (category === 'Forma de Respiração' && breathingStyles && breathingStyles.length > 0) {
+        prompt += `**Inspiração (Respirações Existentes):** ${breathingStyles.join(', ')}. Crie uma nova Forma de Respiração que combine elementos ou se inspire nestes estilos.\n`;
+    }
+
+    if (category === 'Kekkijutsu' && demonArts && demonArts.length > 0) {
+        prompt += `**Inspiração (Kekkijutsus Existentes):** ${demonArts.join(', ')}. Crie um novo Kekkijutsu que combine elementos ou se inspire nestas artes.\n`;
+    }
     
-    const fixProperties = (props: any) => {
-        for (const key in props) {
-            if (props[key].type) {
-                props[key].type = props[key].type.toLowerCase();
-            }
-            if(props[key].properties) {
-                fixProperties(props[key].properties);
-            }
-            if(props[key].items && props[key].items.properties) {
-                fixProperties(props[key].items.properties)
-            }
-        }
-    }
-    fixProperties(schema.properties);
-    // Inject the specific generationType into the schema description for better results
-    schema.properties.items.properties.categoria.description = `A categoria do item gerado, que deve ser "${generationType}"`;
-    return schema;
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
+    if (promptModifier) {
+        prompt += `**Modificador Adicional:** ${promptModifier}\n`;
     }
 
-    try {
-        const { filters, count = 1, promptModifier } = req.body as { filters: FilterState, count: number, promptModifier?: string };
+    prompt += `
+Para cada item, forneça todos os campos definidos no schema. Seja criativo e detalhado.
+Gere o JSON diretamente, sem markdown ou texto extra.
+`;
 
-        if (!filters || !filters.generationType) {
-            return res.status(400).json({ message: 'O tipo de geração é obrigatório.' });
-        }
+    return prompt;
+};
 
-        const prompt = buildPrompt(filters, count, promptModifier);
-        let generatedItems: Omit<GeneratedItem, 'id'>[] = [];
+const defaultResponseSchema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            nome: { type: Type.STRING },
+            categoria: { type: Type.STRING },
+            raridade: { type: Type.STRING },
+            nivel_sugerido: { type: Type.INTEGER },
+            descricao_curta: { type: Type.STRING },
+            descricao: { type: Type.STRING },
+            dano: { type: Type.STRING },
+            dados: { type: Type.STRING },
+            tipo_de_dano: { type: Type.STRING },
+            status_aplicado: { type: Type.STRING },
+            efeitos_secundarios: { type: Type.STRING },
+            ganchos_narrativos: { type: Type.STRING },
+            clima: { type: Type.STRING },
+            bioma: { type: Type.STRING },
+        },
+    },
+};
 
-        if (filters.aiModel === 'OpenAI') {
-            const schemaForOpenAI = getResponseSchemaForOpenAI(filters.generationType);
-            const openAIPrompt = `${prompt}\n\nSchema JSON esperado:\n${JSON.stringify(schemaForOpenAI)}`;
-            generatedItems = await serverGenerateTextOpenAI(openAIPrompt, schemaForOpenAI);
-        } else { // Gemini
-            const aiClient = getAiClient();
-            
-            // Inject the specific generationType into the schema description for better results
-            const finalSchema = JSON.parse(JSON.stringify(responseSchema));
-            finalSchema.properties.items.properties.categoria.description = `A categoria do item gerado, que deve ser "${filters.generationType}"`;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<{ items: GeneratedItem[] } | { message: string }>
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method Not Allowed' });
+  }
 
-            // FIX: Use models.generateContent instead of deprecated methods.
-            const result = await aiClient.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: prompt,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: finalSchema,
-                    temperature: 0.9,
-                },
-            });
-            
-            // FIX: Extract text directly from the .text property of the response.
-            const rawText = result.text.trim();
-            if (!rawText) {
-                throw new Error("A API da Gemini não retornou texto.");
-            }
-            const data = JSON.parse(rawText);
-            generatedItems = data.items;
-        }
+  try {
+    const { filters, count, promptModifier } = req.body;
 
-        if (!generatedItems || !Array.isArray(generatedItems)) {
-             throw new Error("A resposta da IA não continha o array de itens esperado.");
-        }
-
-        // Add unique IDs to each item
-        const itemsWithIds: GeneratedItem[] = generatedItems.map(item => ({
-            ...item,
-            id: uuidv4(),
-        }));
-
-        res.status(200).json({ items: itemsWithIds });
-
-    } catch (error) {
-        console.error("Erro em /api/generateContent:", error);
-        const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
-        res.status(500).json({ message: errorMessage });
+    if (!filters) {
+      return res.status(400).json({ message: 'Filtros são obrigatórios.' });
     }
+
+    const aiClient = getAiClient();
+    let prompt;
+    let responseSchema;
+    let isSingleItem = true;
+
+    if (filters.category === 'Missão/Cenário') {
+        prompt = buildMissionPrompt(filters);
+        responseSchema = missionSchema;
+        isSingleItem = false; // The mission generator returns a single object, not an array
+    } else {
+        prompt = buildDefaultPrompt(filters, count || 1, promptModifier);
+        responseSchema = defaultResponseSchema;
+    }
+
+    const result = await aiClient.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+      },
+    });
+    
+    const jsonText = result.text.trim();
+    let generatedItems;
+
+    if (isSingleItem) {
+        generatedItems = JSON.parse(jsonText);
+    } else {
+        const singleMission = JSON.parse(jsonText);
+        // Wrap the single mission object in an array to match the expected return type
+        generatedItems = [{ ...singleMission, nome: singleMission.title, categoria: 'Missão/Cenário' }];
+    }
+
+    res.status(200).json({ items: generatedItems });
+
+  } catch (error) {
+    console.error("Erro em /api/generateContent:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
+    res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${errorMessage}` });
+  }
 }
