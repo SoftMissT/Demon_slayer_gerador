@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { Button } from './components/ui/Button';
 import { Select } from './components/ui/Select';
@@ -108,12 +107,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             </div>
         )}
 
-        {/* FIX: Corrected 'baseBreathingStyle' to 'baseBreathingStyles' and adapted the Select component to work with the string array type. */}
+        {/* FIX: Replaced SearchableMultiSelect with Select to match FilterState type for 'baseBreathingStyle'. */}
         {filters.category === 'Forma de Respiração' && (
           <Select
             label="Respiração Base (Derivação)"
-            value={filters.baseBreathingStyles[0] || 'Aleatória'}
-            onChange={(e) => handleFilterChange('baseBreathingStyles', e.target.value === 'Aleatória' ? [] : [e.target.value])}
+            value={filters.baseBreathingStyle}
+            onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}
           >
             <option value="Aleatória">Aleatória</option>
             {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}

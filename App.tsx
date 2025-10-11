@@ -12,54 +12,63 @@ import useLocalStorage from './hooks/useLocalStorage';
 import type { FilterState, GeneratedItem } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
-const initialFilterState: FilterState = {
-    category: 'Arma',
-    rarity: '',
-    era: '',
-    missionTone: 'investigação',
-    intensity: 3,
-    missionScale: 'local',
-    protagonist: '',
-    targets: '',
-    moodModifiers: '',
-    profession: '',
-    relation_with_pcs: '',
-    level_detail: 'Médio',
-    origem: '',
-    hunterWeapon: '',
-    hunterBreathingStyles: [],
-    hunterTone: 'investigação',
-    hunterPersonality: '',
-    hunterArchetype: '',
-    oniWeapon: '',
-    oniInspirationBreathing: 'Nenhuma',
-    oniPowerLevel: '',
-    oniInspirationKekkijutsu: 'Nenhuma',
-    accessoryInspirationKekkijutsu: 'Nenhuma',
-    accessoryInspirationBreathing: 'Nenhuma',
-    accessoryWeaponInspiration: 'Nenhuma',
-    accessoryOriginInspiration: '',
-    weaponMetalColor: '',
-    locationTone: 'aventura',
-    locationCountry: '',
-    locationTerrain: '',
-    wbTone: 'aventura',
-    wbCountry: '',
-    wbScale: 'local',
-    baseBreathingStyles: [],
-    breathingFormWeapon: '',
-    breathingFormTone: 'ação',
-    breathingFormOrigin: '',
-    breathingFormArchetype: '',
-    kekkijutsuInspiration: 'Nenhuma',
-    kekkijutsuInspirationBreathing: 'Nenhuma',
-    kekkijutsuWeapon: '',
-};
-
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
-    const [filters, setFilters] = useState<FilterState>(initialFilterState);
+    const [filters, setFilters] = useState<FilterState>({
+        category: 'Arma',
+        rarity: 'Aleatória',
+        era: 'Aleatória',
+        // Mission filters
+        missionTone: 'investigação',
+        intensity: 3,
+        missionScale: 'local',
+        protagonist: '',
+        targets: '',
+        moodModifiers: '',
+        // NPC Filters
+        profession: 'Aleatória',
+        relation_with_pcs: 'Aleatória',
+        level_detail: 'Médio',
+        // Hunter/NPC Origin
+        origem: '',
+        // Hunter Filters
+        hunterWeapon: '',
+        hunterBreathingStyles: [],
+        hunterTone: 'investigação',
+        hunterPersonality: '',
+        hunterArchetype: '',
+        // Oni Filters
+        oniWeapon: '',
+        oniInspirationBreathing: 'Nenhuma',
+        oniPowerLevel: '',
+        oniInspirationKekkijutsu: 'Nenhuma',
+        // Accessory Filters
+        accessoryInspirationKekkijutsu: 'Nenhuma',
+        accessoryInspirationBreathing: 'Nenhuma',
+        accessoryWeaponInspiration: 'Nenhuma',
+        accessoryOriginInspiration: '',
+        // Weapon Filters
+        weaponMetalColor: '',
+        // Location Filters
+        locationTone: 'aventura',
+        locationCountry: '',
+        locationTerrain: '',
+        // World Building Filters
+        wbTone: 'aventura',
+        wbCountry: '',
+        wbScale: 'local',
+        // Breathing Form Filters
+        baseBreathingStyle: '',
+        breathingFormWeapon: '',
+        breathingFormTone: 'ação',
+        breathingFormOrigin: '',
+        breathingFormArchetype: '',
+        // Kekkijutsu Filters
+        kekkijutsuInspiration: 'Nenhuma',
+        kekkijutsuInspirationBreathing: 'Nenhuma',
+        kekkijutsuWeapon: '',
+    });
 
     const [items, setItems] = useState<GeneratedItem[]>([]);
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
@@ -71,29 +80,12 @@ const App: React.FC = () => {
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-    // Effect to dynamically set the header height for perfect layout calculations
-    useEffect(() => {
-        const updateHeaderHeight = () => {
-            const header = document.querySelector('header');
-            if (header) {
-                const headerHeight = header.getBoundingClientRect().height;
-                document.documentElement.style.setProperty('--header-height', `${Math.ceil(headerHeight)}px`);
-            }
-        };
-        
-        updateHeaderHeight();
-        window.addEventListener('resize', updateHeaderHeight);
-
-        return () => window.removeEventListener('resize', updateHeaderHeight);
-    }, []);
-
     // Auto-select the newest item
     useEffect(() => {
         if (items.length > 0) {
             const latestItem = items[items.length - 1];
             setSelectedItem(latestItem);
-            // On screens smaller than desktop, open detail modal automatically
-            if (window.innerWidth < 1024) { 
+            if (window.innerWidth < 1024) { // On mobile, open detail modal automatically
                 setIsDetailModalOpen(true);
             }
         }
@@ -106,6 +98,7 @@ const App: React.FC = () => {
             const newItems = await generateContent(filters, count, promptModifier);
             const itemsWithIds = newItems.map(item => ({ ...item, id: uuidv4() }));
             
+            // If it's a variant, add diff info
             if (originalItem && itemsWithIds.length > 0) {
                 itemsWithIds[0].diff = {
                     summary: `Variação "${promptModifier}" de "${originalItem.nome}"`,
@@ -136,7 +129,7 @@ const App: React.FC = () => {
 
     const handleSelectItem = (item: GeneratedItem) => {
         setSelectedItem(item);
-        if (window.innerWidth < 1024) {
+        if (window.innerWidth < 1024) { // On mobile, open detail modal on select
             setIsDetailModalOpen(true);
         }
     };
@@ -154,17 +147,13 @@ const App: React.FC = () => {
         setItems([]);
         setSelectedItem(null);
     }, []);
-
-    const handleResetFilters = useCallback(() => {
-        setFilters(initialFilterState);
-    }, []);
     
     const ForgeView = () => (
-        <main className="main-content-area">
-            <div className="content-column">
-                <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} onResetFilters={handleResetFilters} />
+        <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 lg:p-6 h-[calc(100vh-81px)]">
+            <div className="lg:col-span-3 h-full">
+                <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} />
             </div>
-            <div className="content-column scrollable-content">
+            <div className="lg:col-span-5 h-full">
                  <ResultsPanel 
                     items={items} 
                     isLoading={isLoading} 
@@ -176,7 +165,7 @@ const App: React.FC = () => {
                     onClearResults={handleClearResults}
                 />
             </div>
-            <div className="content-column scrollable-content">
+            <div className="hidden lg:block lg:col-span-4 h-full">
                  <DetailPanel
                     item={selectedItem}
                     onGenerateVariant={handleGenerateVariant}
@@ -195,14 +184,6 @@ const App: React.FC = () => {
                 activeView={activeView}
                 onViewChange={setActiveView}
             />
-            
-            {/* Loading Bar */}
-            <div className={`relative w-full h-1 ${isLoading ? 'visible' : 'invisible'}`}>
-                <div className="absolute top-0 h-1 w-full bg-indigo-900/50 overflow-hidden">
-                    {isLoading && <div className="w-full h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent animate-loading-bar"></div>}
-                </div>
-            </div>
-
             
              {error && (
                 <div className="p-4 lg:p-6">

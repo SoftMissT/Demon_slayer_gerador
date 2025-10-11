@@ -1,6 +1,5 @@
 
 
-
 import type { Category, Rarity, Era, Tone } from './types';
 
 export const CATEGORIES: Category[] = [
