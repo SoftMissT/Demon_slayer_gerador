@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
 import { Card } from './ui/Card';
@@ -441,7 +439,9 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
                 <ul className="list-disc pl-5 space-y-2 text-xs">
                      {item.micro_variants.map((variant, i) => (
                         <li key={i}>
-                            {Object.entries(variant).map(([key, value]) => `${key}: ${value}`).join(', ')}
+                            {typeof variant === 'string'
+                                ? variant
+                                : Object.entries(variant).map(([key, value]) => `${key}: ${value}`).join(', ')}
                         </li>
                     ))}
                 </ul>

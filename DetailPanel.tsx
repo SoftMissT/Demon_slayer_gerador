@@ -169,7 +169,14 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.micro_variants && item.micro_variants.length > 0 && (
             <DetailSection title="Micro-Variantes">
                 <ul className="list-disc pl-5 space-y-1 text-xs">
-                    {item.micro_variants.map((variant, i) => <li key={i}>{variant}</li>)}
+                    {/* FIX: Handle both string and object types for `variant` to prevent rendering errors. */}
+                    {item.micro_variants.map((variant, i) => (
+                        <li key={i}>
+                            {typeof variant === 'string'
+                                ? variant
+                                : Object.entries(variant).map(([key, value]) => `${key}: ${value}`).join(', ')}
+                        </li>
+                    ))}
                 </ul>
             </DetailSection>
         )}

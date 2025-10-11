@@ -1,55 +1,40 @@
-# Forjador de ideias kimetsu no yaiba - Vercel Edition
+# Forja de Lendas - Ferramenta de Fã para RPG (Google Gemini)
 
-This is a refactored version of the "Forjador de ideias kimetsu no yaiba" generator, designed to be deployed on Vercel or any Node.js hosting environment.
+![Forja de Lendas](https://img.shields.io/badge/Forja%20de%20Lendas-fan--made-brightgreen)
 
-The original application ran the Gemini API SDK directly in the browser, which is not secure for production use as it exposes the API key. This version moves all Gemini API calls to server-side API routes, ensuring your API key remains private.
+## Descrição
 
-## Setup and Deployment
+**Forja de Lendas** é uma ferramenta não oficial, criada por fãs para a comunidade de RPG, com o objetivo de ajudar mestres e jogadores a gerar ideias, NPCs, armas e cenários inspirados no universo de *Demon Slayer: Kimetsu no Yaiba*. O projeto utiliza o poder da IA do Google Gemini para criar conteúdo criativo e detalhado, agilizando a preparação de sessões e inspirando novas aventuras.
 
-### 1. Environment Variable
+## Como Funciona
 
-To use the application, you need a Gemini API key.
+A aplicação integra a IA do **Google Gemini** para interpretar os filtros selecionados pelo usuário e gerar conteúdo textual rico e estruturado. O objetivo é fornecer um ponto de partida sólido que os mestres e jogadores possam adaptar para suas próprias campanhas. O conteúdo gerado é uma sugestão, e a criatividade do mestre é o ingrediente final para dar vida a essas ideias na mesa de jogo.
 
-- **Local Development:**
-  1. Create a file named `.env.local` in the root of the project.
-  2. Add your API key to this file:
-     ```
-     API_KEY=YOUR_API_KEY_HERE
-     ```
+## Uso e Responsabilidade
 
-- **Vercel Deployment:**
-  1. Fork this repository and import it into your Vercel account.
-  2. In your Vercel project settings, go to the **Environment Variables** section.
-  3. Add a new environment variable:
-     - **Name:** `API_KEY`
-     - **Value:** `YOUR_API_KEY_HERE`
-  4. Redeploy your project for the changes to take effect.
+Esta é uma ferramenta de auxílio criativo. Todo o conteúdo gerado deve ser revisado e adaptado pelo mestre do jogo para garantir que se encaixe perfeitamente em sua campanha. A Forja de Lendas não se responsabiliza pelo uso do conteúdo gerado.
 
-### 2. Running Locally
+## Limitações e Privacidade
 
-```bash
-# Install dependencies
-npm install
+O histórico de gerações é salvo localmente no seu navegador (LocalStorage) e não é sincronizado entre dispositivos. Nenhuma informação pessoal ou de geração é enviada para um servidor central, garantindo sua privacidade.
 
-# Run the development server
-npm run dev
-```
+## Créditos e Agradecimentos
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Este projeto foi construído com a paixão e o esforço de uma equipe dedicada.
 
-### 3. Building for Production
+*   **Criadores:** SoftMissT & Mathzin
+*   **Colaboradores:** ZeratulBr, Cardhial, VK, Dan
 
-To verify the build and check for TypeScript errors, you can run the production build command locally. This is the same command Vercel uses for deployment.
+Agradecemos a toda a comunidade de RPG e aos fãs de Demon Slayer por inspirarem a criação desta ferramenta.
 
-```bash
-npm run build
-```
+## Apoie o Projeto
 
-## Technical Changes
+Se você gostou desta ferramenta, considere apoiar os criadores. Seu apoio nos ajuda a manter e desenvolver novos projetos para a comunidade.
 
-- **Framework:** The application is now a Next.js project.
-- **API Calls:** All communication with the Gemini API is handled by two serverless functions located in `pages/api/`:
-  - `pages/api/generateContent.ts`: Handles text and structured JSON generation.
-  - `pages/api/generateImage.ts`: Handles image generation.
-- **Security:** The `API_KEY` is only accessed on the server-side, never exposed to the client browser.
-- **Frontend:** The frontend now uses `fetch` to call the internal API routes, which then securely call the Gemini API.
+---
+
+### Aviso Legal
+
+Este é um projeto de fã, não oficial. Os direitos autorais de *Demon Slayer: Kimetsu no Yaiba* pertencem a Koyoharu Gotouge, Shueisha e Ufotable.
+
+**Assista Demon Slayer legalmente em [Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba).**

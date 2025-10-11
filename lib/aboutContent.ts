@@ -1,58 +1,21 @@
 export const aboutContent = {
-  title: "Sobre o Forja de Lendas",
-  introduction: "O Forja de Lendas é uma ferramenta criativa projetada para mestres e jogadores de RPG de mesa, com um foco especial no universo sombrio e fascinante de Demon Slayer (Kimetsu no Yaiba). Utilizando o poder da IA generativa do Google Gemini, esta aplicação ajuda a criar conteúdo rico e detalhado para suas campanhas.",
-  
-  sections: [
-    {
-      title: "O que você pode fazer?",
-      content: [
-        {
-          heading: "Forja de Lendas",
-          text: "Gere itens, armas, inimigos, caçadores, kekkijutsus, formas de respiração e até mesmo cenários completos. Use os filtros para refinar os resultados e encontrar exatamente o que você precisa para sua próxima sessão.",
-        },
-        {
-          heading: "Engenheiro de Prompt de Imagem",
-          text: "Transforme suas ideias em prompts de imagem otimizados para diversas plataformas de IA, como Midjourney e DALL-E. A ferramenta analisa sua descrição, busca referências na web e constrói prompts detalhados para você obter os melhores resultados visuais.",
-        }
-      ],
-    },
-    {
-      title: "Tecnologias Utilizadas",
-      content: [
-        {
-          heading: "Google Gemini API",
-          text: "O coração da aplicação. O modelo Gemini 2.5 Flash é responsável por toda a geração de conteúdo textual, desde as descrições dos itens até a criação dos prompts de imagem.",
-        },
-        {
-          heading: "Next.js & React",
-          text: "A aplicação é construída com Next.js, um framework React que oferece uma experiência de desenvolvimento moderna e performática.",
-        },
-        {
-          heading: "Tailwind CSS",
-          text: "Para um design rápido, responsivo e customizável, utilizamos o framework de CSS utilitário Tailwind CSS.",
-        }
-      ]
-    },
-    {
-      title: "Aviso Legal",
-      content: [
-        {
-          text: "Este é um projeto não oficial, criado por fãs para fãs. Demon Slayer (Kimetsu no Yaiba) é uma propriedade de Koyoharu Gotouge, Shueisha e Ufotable. Todos os direitos sobre o universo e seus personagens pertencem a seus respectivos donos. O conteúdo gerado é fictício e destinado apenas para uso em entretenimento pessoal em jogos de RPG.",
-        }
-      ]
-    },
-    {
-      title: "Agradecimentos",
-      content: [
-        {
-          text: "Obrigado a todos os criadores de conteúdo e artistas da comunidade de RPG e de Demon Slayer que inspiram a criação de ferramentas como esta. Seu trabalho enriquece o hobby de inúmeras maneiras.",
-        }
-      ]
-    }
+  "app_short": "Forja de Lendas é uma ferramenta de fã, não oficial, para gerar ideias de RPG com a IA do Google Gemini. Assista Demon Slayer legalmente na Crunchyroll.",
+  "readme_long": "# Forja de Lendas - Ferramenta de Fã para RPG (Google Gemini)\\n\\n![Forja de Lendas](https://img.shields.io/badge/Forja%20de%20Lendas-fan--made-brightgreen)\\n\\n## Descrição\\n\\n**Forja de Lendas** é uma ferramenta não oficial, criada por fãs para a comunidade de RPG, com o objetivo de ajudar mestres e jogadores a gerar ideias, NPCs, armas e cenários inspirados no universo de *Demon Slayer: Kimetsu no Yaiba*. O projeto utiliza o poder da IA do Google Gemini para criar conteúdo criativo e detalhado, agilizando a preparação de sessões e inspirando novas aventuras.\\n\\n## Como Funciona\\n\\nA aplicação integra a IA do **Google Gemini** para interpretar os filtros selecionados pelo usuário e gerar conteúdo textual rico e estruturado. O objetivo é fornecer um ponto de partida sólido que os mestres e jogadores possam adaptar para suas próprias campanhas. O conteúdo gerado é uma sugestão, e a criatividade do mestre é o ingrediente final para dar vida a essas ideias na mesa de jogo.\\n\\n## Uso e Responsabilidade\\n\\nEsta é uma ferramenta de auxílio criativo. Todo o conteúdo gerado deve ser revisado e adaptado pelo mestre do jogo para garantir que se encaixe perfeitamente em sua campanha. A Forja de Lendas não se responsabiliza pelo uso do conteúdo gerado.\\n\\n## Limitações e Privacidade\\n\\nO histórico de gerações é salvo localmente no seu navegador (LocalStorage) e não é sincronizado entre dispositivos. Nenhuma informação pessoal ou de geração é enviada para um servidor central, garantindo sua privacidade.\\n\\n## Créditos e Agradecimentos\\n\\nEste projeto foi construído com a paixão e o esforço de uma equipe dedicada.\\n\\n*   **Criadores:** SoftMissT & Mathzin\\n*   **Colaboradores:** ZeratulBr, Cardhial, VK, Dan\\n\\nAgradecemos a toda a comunidade de RPG e aos fãs de Demon Slayer por inspirarem a criação desta ferramenta.\\n\\n## Apoie o Projeto\\n\\nSe você gostou desta ferramenta, considere apoiar os criadores. Seu apoio nos ajuda a manter e desenvolver novos projetos para a comunidade.\\n\\n---\\n\\n### Aviso Legal\\n\\nEste é um projeto de fã, não oficial. Os direitos autorais de *Demon Slayer: Kimetsu no Yaiba* pertencem a Koyoharu Gotouge, Shueisha e Ufotable.\\n\\n**Assista Demon Slayer legalmente em [Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba).**",
+  "badge_md": "![Forja de Lendas](https://img.shields.io/badge/Forja%20de%20Lendas-fan--made-brightgreen) — Ferramenta de fã para RPG (Google Gemini).",
+  "html_footer_snippet": "<footer class=\"text-xs text-center p-2 text-gray-500\">Forja de Lendas, uma ferramenta não oficial. <button onclick=\"document.dispatchEvent(new Event('openAboutModal'))\" class=\"underline hover:text-white\">Saiba mais</button></footer>",
+  "clipboard_plain": "Forja de Lendas: Ferramenta não oficial para RPG (Google Gemini). Assista legalmente em https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba. Criado por: SoftMissT & Mathzin. Colaboradores: ZeratulBr, Cardhial, VK, Dan.",
+  "notes": [
+    "Validação de `integrations` concluída.",
+    "Validação de `official_watch_link` concluída.",
+    "Validação de `use_purpose_short` concluída.",
+    "Validação de créditos concluída.",
+    "Validação de `license_notice_short` concluída.",
+    "Geração de `app_short` e `readme_long` concluída.",
+    "Geração de snippets e badge concluída."
   ],
-
-  support: {
-    title: "Apoie o Projeto",
-    text: "Se você gostou desta ferramenta e quer ver mais projetos como este, considere apoiar o desenvolvedor. Qualquer gesto é muito apreciado!",
-  },
+  "metadata": {
+    "locale": "pt-BR",
+    "tone": "neutral",
+    "version": "v1"
+  }
 };

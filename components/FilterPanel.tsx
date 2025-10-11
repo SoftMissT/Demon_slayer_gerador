@@ -4,8 +4,8 @@ import { Select } from './ui/Select';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { Slider } from './ui/Slider';
-// FIX: Import 'Category' and 'Era' types to resolve 'Cannot find name' errors.
-import type { FilterState, Tone, Category, Era } from '../types';
+// FIX: Import 'Category', 'Era', and 'Rarity' types to resolve 'Cannot find name' errors.
+import type { FilterState, Tone, Category, Era, Rarity } from '../types';
 import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES, RELATIONS, DETAIL_LEVELS, ORIGINS, ONI_POWER_LEVELS, PERSONALITIES, METAL_COLORS, COUNTRIES, TERRAINS } from '../constants';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
 import { PROFESSIONS_BY_ERA } from '../lib/professionsData';
@@ -94,7 +94,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       case 'Acessório':
         return (
           <>
-            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value)}>
+            {/* FIX: Cast e.target.value to Rarity to match the FilterState type. */}
+            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}>
                <option value="" disabled>Selecione...</option>
               {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
             </Select>
@@ -120,7 +121,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       case 'Arma':
         return (
           <>
-            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value)}>
+            {/* FIX: Cast e.target.value to Rarity to match the FilterState type. */}
+            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}>
                <option value="" disabled>Selecione...</option>
               {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
             </Select>
@@ -291,7 +293,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       default:
         // Default filters for Arma, or Aleatória
         return (
-            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value)}>
+            // FIX: Cast e.target.value to Rarity to match the FilterState type.
+            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}>
                 <option value="" disabled>Selecione...</option>
                 {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
             </Select>

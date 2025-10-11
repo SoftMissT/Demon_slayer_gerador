@@ -7,7 +7,7 @@ import { SearchableMultiSelect } from './components/ui/SearchableMultiSelect';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { Slider } from './components/ui/Slider';
 // FIX: Corrected type imports from the now separate types.ts file.
-import type { FilterState, Tone } from './types';
+import type { FilterState, Tone, Category, Rarity, Era } from './types';
 // FIX: Removed BREATHING_STYLES from constants import as it's not exported there.
 import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES } from './constants';
 // FIX: Import BREATHING_STYLES_DATA from its source file.
@@ -43,7 +43,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         <Select
           label="Categoria"
           value={filters.category}
-          onChange={(e) => handleFilterChange('category', e.target.value)}
+          // FIX: Cast e.target.value to Category to match the FilterState type.
+          onChange={(e) => handleFilterChange('category', e.target.value as Category)}
         >
           {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </Select>
@@ -52,7 +53,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
            <Select
             label="Raridade"
             value={filters.rarity}
-            onChange={(e) => handleFilterChange('rarity', e.target.value)}
+            // FIX: Cast e.target.value to Rarity to match the FilterState type.
+            onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}
           >
             {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
           </Select>
@@ -61,7 +63,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         <Select
           label="Era / Estilo"
           value={filters.era}
-          onChange={(e) => handleFilterChange('era', e.target.value)}
+          // FIX: Cast e.target.value to Era to match the FilterState type.
+          onChange={(e) => handleFilterChange('era', e.target.value as Era)}
         >
           {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
         </Select>
