@@ -5,10 +5,7 @@ import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { DetailPanel } from './components/DetailPanel';
 import { AboutModal } from './components/AboutModal';
-import { FavoritesModal } from './components/FavoritesModal';
 import { DetailModal } from './components/DetailModal';
-import { Button } from './components/ui/Button';
-import { StarIcon } from './components/icons/StarIcon';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { generateContent } from './services/geminiService';
@@ -23,11 +20,10 @@ const App: React.FC = () => {
         category: 'Arma',
         rarity: 'Aleatória',
         era: 'Aleatória',
-        breathingStyles: [],
-        demonArts: [],
-        tone: 'investigação',
+        // Mission filters
+        missionTone: 'investigação',
         intensity: 3,
-        scale: 'local',
+        missionScale: 'local',
         protagonist: '',
         targets: '',
         moodModifiers: '',
@@ -35,6 +31,44 @@ const App: React.FC = () => {
         profession: 'Aleatória',
         relation_with_pcs: 'Aleatória',
         level_detail: 'Médio',
+        // Hunter/NPC Origin
+        origem: 'Aleatória',
+        // Hunter Filters
+        hunterWeapon: 'Aleatório',
+        hunterBreathingStyles: [],
+        hunterTone: 'investigação',
+        hunterPersonality: 'Aleatória',
+        hunterArchetype: 'Aleatório',
+        // Oni Filters
+        oniWeapon: 'Aleatório',
+        oniInspirationBreathing: 'Nenhuma',
+        oniPowerLevel: 'Aleatório',
+        oniInspirationKekkijutsu: 'Nenhuma',
+        // Accessory Filters
+        accessoryInspirationKekkijutsu: 'Nenhuma',
+        accessoryInspirationBreathing: 'Nenhuma',
+        accessoryWeaponInspiration: 'Nenhuma',
+        accessoryOriginInspiration: 'Aleatória',
+        // Weapon Filters
+        weaponMetalColor: 'Aleatória',
+        // Location Filters
+        locationTone: 'aventura',
+        locationCountry: 'Aleatório',
+        locationTerrain: 'Aleatório',
+        // World Building Filters
+        wbTone: 'aventura',
+        wbCountry: 'Aleatório',
+        wbScale: 'local',
+        // Breathing Form Filters
+        baseBreathingStyle: 'Aleatória',
+        breathingFormWeapon: 'Aleatório',
+        breathingFormTone: 'ação',
+        breathingFormOrigin: 'Aleatória',
+        breathingFormArchetype: 'Aleatório',
+        // Kekkijutsu Filters
+        kekkijutsuInspiration: 'Nenhuma',
+        kekkijutsuInspirationBreathing: 'Nenhuma',
+        kekkijutsuWeapon: 'Aleatório',
     });
 
     const [items, setItems] = useState<GeneratedItem[]>([]);
@@ -45,7 +79,6 @@ const App: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
     // Auto-select the newest item
@@ -110,6 +143,11 @@ const App: React.FC = () => {
             setSelectedItem(updatedItem);
         }
     }
+
+    const handleClearResults = useCallback(() => {
+        setItems([]);
+        setSelectedItem(null);
+    }, []);
     
     const ForgeView = () => (
         <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 lg:p-6 h-[calc(100vh-81px)]">
@@ -134,6 +172,7 @@ const App: React.FC = () => {
                     favorites={favorites}
                     onToggleFavorite={handleToggleFavorite}
                     onGenerateVariant={handleGenerateVariant}
+                    onClearResults={handleClearResults}
                 />
             </div>
         </main>
@@ -146,13 +185,6 @@ const App: React.FC = () => {
                 activeView={activeView}
                 onViewChange={setActiveView}
             />
-
-            <div className="absolute top-24 right-6 z-50">
-                <Button variant="secondary" onClick={() => setIsFavoritesModalOpen(true)}>
-                    <StarIcon className="w-5 h-5" />
-                    Favoritos ({favorites.length})
-                </Button>
-            </div>
             
              {error && (
                 <div className="p-4 lg:p-6">
@@ -169,16 +201,6 @@ const App: React.FC = () => {
             )}
 
             <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
-            <FavoritesModal 
-                isOpen={isFavoritesModalOpen} 
-                onClose={() => setIsFavoritesModalOpen(false)} 
-                favorites={favorites}
-                onSelect={(item) => {
-                    handleSelectItem(item);
-                    setIsFavoritesModalOpen(false);
-                }}
-                onToggleFavorite={handleToggleFavorite}
-            />
              <DetailModal
                 isOpen={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}

@@ -26,7 +26,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   const handleNumericFilterChange = (key: keyof FilterState, value: string) => {
     const numValue = parseInt(value, 10);
     if (!isNaN(numValue)) {
-      onFiltersChange({ ...filters, [key]: numValue });
+      // FIX: Added 'as any' to fix TypeScript error for assigning number to a potentially string property.
+      onFiltersChange({ ...filters, [key]: numValue as any });
     }
   };
 
@@ -66,10 +67,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         {/* Mission-specific filters */}
         {filters.category === 'Missão/Cenário' && (
             <div className="space-y-4 border-t border-indigo-900/50 pt-4">
+                {/* FIX: Corrected property 'tone' to 'missionTone' to match FilterState type. */}
                 <Select
                   label="Tom da Missão"
-                  value={filters.tone}
-                  onChange={(e) => handleFilterChange('tone', e.target.value as Tone)}
+                  value={filters.missionTone}
+                  onChange={(e) => handleFilterChange('missionTone', e.target.value as Tone)}
                 >
                   {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                 </Select>
@@ -79,10 +81,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                     value={filters.intensity || 3}
                     onChange={(e) => handleNumericFilterChange('intensity', e.target.value)}
                 />
+                 {/* FIX: Corrected property 'scale' to 'missionScale' to match FilterState type. */}
                  <Select
                   label="Escala da Ameaça"
-                  value={filters.scale}
-                  onChange={(e) => handleFilterChange('scale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}
+                  value={filters.missionScale}
+                  onChange={(e) => handleFilterChange('missionScale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}
                 >
                   <option value="local">Local</option>
                   <option value="regional">Regional</option>
@@ -104,24 +107,28 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             </div>
         )}
 
+        {/* FIX: Replaced SearchableMultiSelect with Select to match FilterState type for 'baseBreathingStyle'. */}
         {filters.category === 'Forma de Respiração' && (
-          <SearchableMultiSelect
-            label="Inspiração (Respirações)"
-            options={breathingStyleOptions}
-            selected={filters.breathingStyles}
-            onChange={(selected) => handleFilterChange('breathingStyles', selected)}
-            placeholder="Selecione estilos..."
-          />
+          <Select
+            label="Respiração Base (Derivação)"
+            value={filters.baseBreathingStyle}
+            onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}
+          >
+            <option value="Aleatória">Aleatória</option>
+            {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
+          </Select>
         )}
         
+        {/* FIX: Replaced SearchableMultiSelect with Select for 'kekkijutsuInspiration' to match the FilterState type. */}
         {filters.category === 'Kekkijutsu' && (
-          <SearchableMultiSelect
+          <Select
             label="Inspiração (Kekkijutsu)"
-            options={DEMON_BLOOD_ARTS}
-            selected={filters.demonArts}
-            onChange={(selected) => handleFilterChange('demonArts', selected)}
-            placeholder="Selecione artes..."
-          />
+            value={filters.kekkijutsuInspiration}
+            onChange={(e) => handleFilterChange('kekkijutsuInspiration', e.target.value)}
+          >
+            <option value="Nenhuma">Nenhuma</option>
+            {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}
+          </Select>
         )}
       </div>
 

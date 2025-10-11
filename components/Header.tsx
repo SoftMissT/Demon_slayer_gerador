@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AboutTooltip } from './AboutTooltip';
 import { SparklesIcon } from './icons/SparklesIcon';
@@ -33,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, activeView, onView
             Forja
         </button>
         <button onClick={() => onViewChange('prompt')} className={getButtonClasses('prompt')}>
-            Eng. de Prompt
+            Alquimista dos Prompts
         </button>
       </nav>
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -43,30 +42,6 @@ export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ result
             <PromptCard title="Prompt para Midjourney" prompt={result.midjourneyPrompt} />
             <PromptCard title="Prompt para DALL-E / GPT" prompt={result.gptPrompt} />
         </div>
-        
-        {result.webSearchQueries && result.webSearchQueries.length > 0 && (
-            <Card>
-                 <h3 className="text-lg font-bold text-white font-gangofthree mb-3">Fontes da Web Utilizadas</h3>
-                 <div className="bg-blue-900/30 border border-blue-700 text-blue-200 p-3 rounded-lg flex gap-3 text-sm">
-                    <AlertTriangleIcon className="w-8 h-8 flex-shrink-0 text-blue-400" />
-                    <p>A IA usou o Google Search para se basear em informações da web. As fontes a seguir foram consultadas para gerar os prompts. É recomendado verificar os links para mais contexto.</p>
-                 </div>
-                 <ul className="mt-3 space-y-2">
-                    {result.webSearchQueries.map((source, index) => (
-                        <li key={index} className="text-sm">
-                           <a 
-                             href={source.uri} 
-                             target="_blank" 
-                             rel="noopener noreferrer"
-                             className="text-indigo-400 hover:text-indigo-300 hover:underline break-all"
-                           >
-                            [{index + 1}] {source.title || source.uri}
-                           </a>
-                        </li>
-                    ))}
-                 </ul>
-            </Card>
-        )}
     </div>
   );
 };

@@ -52,6 +52,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, onSelect, isSelect
     setMenuOpen(false);
   };
 
+  // FIX: Added 'N/A' to the rarityColor map to satisfy the Rarity type.
   const rarityColor: { [key in GeneratedItem['raridade']]: string } = {
     'Aleatória': 'text-gray-400',
     'Comum': 'text-gray-400',
@@ -60,6 +61,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, onSelect, isSelect
     'Épico': 'text-purple-400',
     'Lendário': 'text-yellow-400',
     'Amaldiçoado': 'text-red-500',
+    'N/A': 'text-gray-400',
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -41,16 +40,21 @@ const buildPromptForPrompts = (
     topic: string,
     negativePrompt: string,
     mjParams: Partial<Record<keyof MidjourneyParameters, any>>, // Now receives only active params
-    gptParams: GptParameters,
-    useWebSearch: boolean
+    gptParams: GptParameters
 ): string => {
     
     const mjParamsString = buildMidjourneyParamsString(mjParams);
 
     let prompt = `Você é um engenheiro de prompt de IA especialista, mestre em criar prompts para geradores de imagem como Midjourney e DALL-E 3.
-Sua tarefa é criar dois prompts de imagem distintos e otimizados com base na ideia do usuário.
-${useWebSearch ? 'Use a ferramenta de busca (Google Search) para encontrar referências visuais, artistas, estilos e detalhes relevantes sobre o tópico para enriquecer os prompts.' : 'Use seu conhecimento interno para criar os prompts.'}
-A resposta DEVE ser um objeto JSON${useWebSearch ? '.' : ', seguindo o schema fornecido.'}
+Sua tarefa é criar dois prompts de imagem distintos e otimizados com base na ideia do usuário, **seguindo estritamente as políticas de conteúdo e segurança do Midjourney.**
+A resposta DEVE ser um objeto JSON, seguindo o schema fornecido.
+
+**REGRAS CRÍTICAS DE SEGURANÇA PARA MIDJOURNEY:**
+- **NÃO use palavras explícitas** relacionadas a gore, violência gráfica, mutilação, sangue excessivo ou ferimentos detalhados. Em vez disso, use linguagem metafórica e descritiva (ex: "atmosfera sombria", "consequências de uma batalha feroz", "essência carmesim estilizada").
+- **NÃO use termos sexualmente explícitos, pornográficos ou que possam ser interpretados como sexualização.** Mantenha o conteúdo SFW (Safe for Work).
+- **EVITE nomes de figuras políticas ou celebridades** para prevenir a criação de deepfakes.
+- **EVITE citar nomes de artistas diretamente** para respeitar direitos autorais. Em vez disso, descreva o *estilo* do artista (ex: "no estilo de uma pintura expressionista com pinceladas grossas e alto contraste").
+- **SEMPRE priorize a segurança e a conformidade com as regras.** O objetivo é criar arte poderosa sem acionar os filtros de conteúdo.
 
 **Tópico da Imagem:** "${topic}"
 
@@ -71,10 +75,6 @@ A resposta DEVE ser um objeto JSON${useWebSearch ? '.' : ', seguindo o schema fo
 
 Analise o tópico, aplique os parâmetros e gere os dois prompts.
 `;
-
-    if (useWebSearch) {
-        prompt += `\nLembre-se: sua resposta final DEVE ser apenas o objeto JSON, sem nenhum texto introdutório, explicação ou formatação de markdown.`
-    }
 
     return prompt;
 };
@@ -97,23 +97,19 @@ export default async function handler(
     }
 
     try {
-        const { topic, negativePrompt, mjParams, gptParams, useWebSearch } = req.body;
+        const { topic, negativePrompt, mjParams, gptParams } = req.body;
 
         if (!topic || !gptParams) { // mjParams is now optional
             return res.status(400).json({ message: 'Tópico e parâmetros GPT são obrigatórios.' });
         }
 
         const aiClient = getAiClient();
-        const prompt = buildPromptForPrompts(topic, negativePrompt, mjParams, gptParams, useWebSearch);
+        const prompt = buildPromptForPrompts(topic, negativePrompt, mjParams, gptParams);
 
-        const config: any = {};
-
-        if (useWebSearch) {
-            config.tools = [{ googleSearch: {} }];
-        } else {
-            config.responseMimeType = "application/json";
-            config.responseSchema = responseSchema;
-        }
+        const config: any = {
+            responseMimeType: "application/json",
+            responseSchema: responseSchema,
+        };
 
         const result = await aiClient.models.generateContent({
             model: "gemini-2.5-flash",
@@ -125,32 +121,11 @@ export default async function handler(
         if (!jsonText) {
             throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
         }
-
-        if (useWebSearch) {
-            // Extract JSON from markdown code block if present
-            const match = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
-            if (match && match[1]) {
-                jsonText = match[1];
-            } else {
-                // Fallback for plain JSON object
-                const startIndex = jsonText.indexOf('{');
-                const endIndex = jsonText.lastIndexOf('}');
-                if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-                    jsonText = jsonText.substring(startIndex, endIndex + 1);
-                }
-            }
-        }
         
         const generatedPrompts = JSON.parse(jsonText);
         
-        const groundingMetadata = result.candidates?.[0]?.groundingMetadata;
-        const webSearchQueries = groundingMetadata?.groundingChunks
-            ?.map((chunk: any) => chunk.web)
-            .filter(Boolean) ?? [];
-
         const finalResult: PromptGenerationResult = {
             ...generatedPrompts,
-            webSearchQueries: webSearchQueries,
         };
 
         res.status(200).json(finalResult);

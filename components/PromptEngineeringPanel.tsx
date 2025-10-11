@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -14,7 +13,6 @@ import type { MidjourneyParameters as MidjourneyParametersType, GptParameters as
 export const PromptEngineeringPanel: React.FC = () => {
     const [topic, setTopic] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
-    const [useWebSearch, setUseWebSearch] = useState(true);
 
     const [mjParams, setMjParams] = useState<MidjourneyParametersType>({
         aspectRatio: { active: true, value: '16:9' },
@@ -67,7 +65,6 @@ export const PromptEngineeringPanel: React.FC = () => {
                     negativePrompt,
                     mjParams: activeMjParams, // Send only active params
                     gptParams,
-                    useWebSearch
                 })
             });
             if (!response.ok) {
@@ -86,9 +83,9 @@ export const PromptEngineeringPanel: React.FC = () => {
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             <Card className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-4 font-gangofthree">Engenharia de Prompt de Imagem</h2>
+                <h2 className="text-2xl font-bold text-white mb-4 font-gangofthree">Alquimista dos Prompts</h2>
                 <p className="text-gray-400 mb-4">
-                    Descreva sua ideia, ajuste os parâmetros e deixe a IA construir prompts otimizados para Midjourney e DALL-E.
+                    Descreva sua ideia, ajuste os parâmetros e deixe o Alquimista construir prompts otimizados para Midjourney e DALL-E.
                 </p>
                 
                 <div className="space-y-4">
@@ -126,12 +123,7 @@ export const PromptEngineeringPanel: React.FC = () => {
                    <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
                 </div>
 
-                 <div className="mt-6 border-t border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <Checkbox
-                        label="Usar Google Search para melhores resultados"
-                        checked={useWebSearch}
-                        onChange={(e) => setUseWebSearch(e.target.checked)}
-                    />
+                 <div className="mt-6 border-t border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-end gap-4">
                     <Button onClick={handleGenerate} disabled={isLoading} className="w-full sm:w-auto">
                         <SparklesIcon className="w-5 h-5" />
                         {isLoading ? 'Gerando...' : 'Gerar Prompts'}

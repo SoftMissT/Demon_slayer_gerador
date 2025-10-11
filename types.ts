@@ -1,5 +1,5 @@
-
-export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado';
+// FIX: Removed the circular import of 'Rarity' from the same file.
+export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
 
 export type Category = 
   | 'Aleatória'
@@ -7,12 +7,12 @@ export type Category =
   | 'Acessório'
   | 'Caçador'
   | 'Inimigo/Oni'
-  | 'Classe/Origem'
   | 'Forma de Respiração'
   | 'Kekkijutsu'
   | 'Local/Cenário'
   | 'Missão/Cenário'
-  | 'NPC';
+  | 'NPC'
+  | 'World Building';
 
 export type Era = 
   | 'Aleatória'
@@ -34,19 +34,66 @@ export interface FilterState {
   category: string;
   rarity: string;
   era: string;
-  breathingStyles: string[];
-  demonArts: string[];
+  
   // Mission filters
-  tone: Tone;
+  missionTone: Tone;
   intensity: number;
-  scale: 'local' | 'regional' | 'nacional' | 'cósmico';
+  missionScale: 'local' | 'regional' | 'nacional' | 'cósmico';
   protagonist: string;
   targets: string;
   moodModifiers: string;
+
   // NPC filters
   profession: string;
   relation_with_pcs: string;
   level_detail: string;
+  
+  // Shared Hunter/NPC Origin
+  origem: string;
+
+  // Hunter Filters
+  hunterWeapon: string;
+  hunterBreathingStyles: string[];
+  hunterTone: Tone;
+  hunterPersonality: string;
+  hunterArchetype: string;
+
+  // Oni Filters
+  oniWeapon: string;
+  oniInspirationBreathing: string;
+  oniPowerLevel: string;
+  oniInspirationKekkijutsu: string;
+
+  // Accessory Filters
+  accessoryInspirationKekkijutsu: string;
+  accessoryInspirationBreathing: string;
+  accessoryWeaponInspiration: string;
+  accessoryOriginInspiration: string;
+
+  // Weapon Filters
+  weaponMetalColor: string;
+
+  // Location Filters
+  locationTone: Tone;
+  locationCountry: string;
+  locationTerrain: string;
+
+  // World Building Filters
+  wbTone: Tone;
+  wbCountry: string;
+  wbScale: string;
+  
+  // Breathing Form Filters
+  baseBreathingStyle: string;
+  breathingFormWeapon: string;
+  breathingFormTone: Tone;
+  breathingFormOrigin: string;
+  breathingFormArchetype: string;
+
+  // Kekkijutsu Filters
+  kekkijutsuInspiration: string;
+  kekkijutsuInspirationBreathing: string;
+  kekkijutsuWeapon: string;
 }
 
 export interface MissionNPC {
@@ -68,6 +115,63 @@ export interface MissionItem {
     use: string;
 }
 
+// World Building Types
+export interface WBPlotThread {
+    title: string;
+    description: string;
+}
+
+export interface WBKeyNpc {
+    name: string;
+    role: string;
+    description: string;
+}
+
+export interface WBPointOfInterest {
+    name: string;
+    type: string;
+    description: string;
+}
+
+export interface WBMiniMission {
+    title: string;
+    objective: string;
+    reward: string;
+}
+
+// Breathing Form Types
+export interface BreathingFormMechanics {
+    activation: string;
+    target: string;
+    initial_test: {
+        type: string;
+        dc_formula: string;
+    };
+    on_success_target: string;
+    on_fail_target: string;
+    damage_formula_rank: Record<string, string>;
+    weapon_heat?: {
+        weapon: number;
+        target: number;
+        duration: string;
+    };
+    critical_rule?: string;
+    exhaustion_cost: number;
+    exhaustion_transfer?: {
+        vit_test_dc: string;
+        transfer_on_fail: number;
+    };
+    cooldown: string;
+    scaling_notes?: string;
+}
+
+export interface BreathingFormRequirements {
+    min_rank: number;
+    cooldown: string;
+    exhaustion_cost: number;
+}
+
+
 export interface GeneratedItem {
   id: string;
   nome: string;
@@ -81,10 +185,13 @@ export interface GeneratedItem {
   tipo_de_dano?: string;
   status_aplicado?: string;
   efeitos_secundarios?: string;
-  ganchos_narrativos?: string;
+  ganchos_narrativos?: string | string[];
   // For locations
   clima?: string;
   bioma?: string;
+  pais?: string;
+  terreno?: string;
+  tom_local?: string;
   // For missions
   title?: string;
   logline?: string;
@@ -120,7 +227,7 @@ export interface GeneratedItem {
       summary: string;
       changes: string[];
   };
-  micro_variants?: string[];
+  micro_variants?: any[];
   tone?: string;
   // For NPCs
   role?: string;
@@ -130,8 +237,65 @@ export interface GeneratedItem {
   motivation?: string;
   secret?: string;
   relationship_to_pcs?: string;
-  hooks?: string[];
   dialogue_lines?: string[];
+  // For Hunters and NPCs
+  origem?: string;
+  // For Hunters
+  classe?: string;
+  personalidade?: string;
+  descricao_fisica?: string;
+  background?: string;
+  arsenal?: {
+    arma: string;
+    empunhadura: {
+      nome: string;
+      descricao: string;
+    };
+  };
+  habilidades_especiais?: {
+    respiracao: string;
+    variacoes_tecnica: string[];
+  };
+  acessorio?: {
+    nome: string;
+    descricao: string;
+  };
+  uso_em_cena?: string[];
+  // For Onis
+  power_level?: string;
+  descricao_fisica_detalhada?: string;
+  kekkijutsu?: {
+    nome: string;
+    descricao: string;
+  };
+  comportamento_combate?: string[];
+  comportamento_fora_combate?: string[];
+  fraquezas_unicas?: string[];
+  trofeus_loot?: string[];
+  // For World Building
+  plot_threads?: WBPlotThread[];
+  adventure_hooks?: string[];
+  key_npcs_wb?: WBKeyNpc[];
+  points_of_interest?: WBPointOfInterest[];
+  mini_missions?: WBMiniMission[];
+  // For Breathing Forms
+  base_breathing_id?: string;
+  base_form_id?: string;
+  derivation_type?: string;
+  name_native?: string;
+  name_pt?: string;
+  description_flavor?: string;
+  mechanics?: BreathingFormMechanics;
+  requirements?: BreathingFormRequirements;
+  level_scaling?: Record<string, Record<string, string>>;
+  balance_variants?: {
+      leve: any;
+      padrao: any;
+      brutal: any;
+  };
+  clipboard_plain?: string;
+  clipboard_markdown?: string;
+  notes_for_gm?: string;
 }
 
 // Prompt Engineering Panel Types
