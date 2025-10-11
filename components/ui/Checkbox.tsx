@@ -1,4 +1,3 @@
-// FIX: Implement the Checkbox component to resolve placeholder issues.
 import React from 'react';
 
 interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {

@@ -1,4 +1,3 @@
-// FIX: Implemented the HeartIcon component to resolve placeholder errors. It now renders an SVG of a heart, suitable for 'support' or 'favorite' actions.
 import React from 'react';
 
 export const HeartIcon: React.FC<{ className?: string }> = ({ className }) => (

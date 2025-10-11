@@ -1,10 +1,11 @@
 // FIX: Import `useState` from React to resolve 'Cannot find name' errors.
 import React, { useState } from 'react';
-import type { GeneratedItem, MissionNPC, MissionItem, Tone } from './types';
+import type { GeneratedItem, MissionNPC, MissionItem } from './types';
 import { Card } from './components/ui/Card';
 import { Button } from './components/ui/Button';
 import { StarIcon } from './components/icons/StarIcon';
 import { SparklesIcon } from './components/icons/SparklesIcon';
+import { AlertTriangleIcon } from './components/icons/AlertTriangleIcon';
 
 interface DetailPanelProps {
   item: GeneratedItem | null;
@@ -28,6 +29,7 @@ const NpcCard: React.FC<{ npc: MissionNPC }> = ({ npc }) => (
         <p className="text-xs text-gray-400 mt-1"><strong>Traço Físico:</strong> {npc.physical_trait}</p>
         <p className="text-xs text-gray-400"><strong>Objetivo:</strong> {npc.goal}</p>
         <p className="text-xs text-gray-400"><strong>Segredo:</strong> {npc.secret}</p>
+        <p className="text-xs text-red-400"><strong>Reviravolta:</strong> {npc.twist}</p>
     </Card>
 );
 
@@ -46,16 +48,45 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     <>
         <DetailSection title="Sinopse">{item.logline || 'N/A'}</DetailSection>
         <DetailSection title="Resumo da Missão">{item.summary || 'N/A'}</DetailSection>
-        <DetailSection title="Ganchos e Objetivos">
-            <ul className="list-disc pl-5 space-y-1">
-                {item.objectives?.map((obj, i) => <li key={i}>{obj}</li>)}
-            </ul>
-        </DetailSection>
-        <DetailSection title="Complicações Possíveis">
-             <ul className="list-disc pl-5 space-y-1">
-                {item.complications?.map((comp, i) => <li key={i}>{comp}</li>)}
-            </ul>
-        </DetailSection>
+
+        {item.objectives && item.objectives.length > 0 && (
+            <DetailSection title="Ganchos e Objetivos">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.objectives?.map((obj, i) => <li key={i}>{obj}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+        
+        {item.complications && item.complications.length > 0 && (
+            <DetailSection title="Complicações Possíveis">
+                 <ul className="list-disc pl-5 space-y-1">
+                    {item.complications?.map((comp, i) => <li key={i}>{comp}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.failure_states && item.failure_states.length > 0 && (
+            <DetailSection title="Condições de Falha">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.failure_states.map((state, i) => <li key={i}>{state}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.rewards && item.rewards.length > 0 && (
+            <DetailSection title="Recompensas">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.rewards.map((reward, i) => <li key={i}>{reward}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.numberOfSessions && item.numberOfSessions > 0 && (
+            <DetailSection title="Duração Estimada">
+                <p>{item.numberOfSessions} {item.numberOfSessions > 1 ? 'sessões' : 'sessão'}</p>
+            </DetailSection>
+        )}
+
         <DetailSection title="Ambiente (Visão, Som, Cheiro)">{item.environment || 'N/A'}</DetailSection>
         
         {item.protagonist_desc && (
@@ -79,6 +110,12 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
+        {item.demonBloodArtType && (
+            <DetailSection title="Kekkijutsu do Vilão">
+                <p>{item.demonBloodArtType}</p>
+            </DetailSection>
+        )}
+
         {item.key_npcs && item.key_npcs.length > 0 && (
             <DetailSection title="NPCs Relevantes">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -96,6 +133,44 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         )}
         
          <DetailSection title="Ganchos Secundários e Escalada">{item.scaling_hooks || 'N/A'}</DetailSection>
+
+        {item.tone_variations && typeof item.tone_variations === 'object' && Object.keys(item.tone_variations).length > 0 && (
+            <DetailSection title="Variações de Tom">
+                <div className="space-y-1 text-xs">
+                    {Object.entries(item.tone_variations).map(([key, value]) => (
+                        <p key={key}><strong className="capitalize text-indigo-300">{key}:</strong> {String(value)}</p>
+                    ))}
+                </div>
+            </DetailSection>
+        )}
+
+        {item.sensitive_flags && item.sensitive_flags.length > 0 && (
+            <DetailSection title="Alertas de Conteúdo Sensível">
+                 <div className="bg-yellow-900/30 border border-yellow-700 text-yellow-200 p-3 rounded-lg flex gap-3 text-sm">
+                    <AlertTriangleIcon className="w-6 h-6 flex-shrink-0 text-yellow-400" />
+                    <ul className="list-disc pl-4">
+                        {item.sensitive_flags.map((flag, i) => <li key={i}>{flag}</li>)}
+                    </ul>
+                </div>
+            </DetailSection>
+        )}
+        
+        {item.diff && (
+            <DetailSection title="Notas de Design (Diff)">
+                <p className="italic text-gray-400">"{item.diff.summary}"</p>
+                <ul className="list-disc pl-5 space-y-1 mt-2 text-xs">
+                    {item.diff.changes?.map((change, i) => <li key={i}>{change}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.micro_variants && item.micro_variants.length > 0 && (
+            <DetailSection title="Micro-Variantes">
+                <ul className="list-disc pl-5 space-y-1 text-xs">
+                    {item.micro_variants.map((variant, i) => <li key={i}>{variant}</li>)}
+                </ul>
+            </DetailSection>
+        )}
     </>
 );
 

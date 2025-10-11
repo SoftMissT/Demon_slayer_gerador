@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from './components/ui/Button';
 import { Select } from './components/ui/Select';
@@ -5,7 +6,10 @@ import { SearchableMultiSelect } from './components/ui/SearchableMultiSelect';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { Slider } from './components/ui/Slider';
 import type { FilterState, Tone } from './types';
-import { CATEGORIES, RARITIES, ERAS, BREATHING_STYLES, DEMON_BLOOD_ARTS, TONES } from './constants';
+// FIX: Removed BREATHING_STYLES from constants import as it's not exported there.
+import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES } from './constants';
+// FIX: Import BREATHING_STYLES_DATA from its source file.
+import { BREATHING_STYLES_DATA } from './lib/breathingStylesData';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -25,6 +29,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       onFiltersChange({ ...filters, [key]: numValue });
     }
   };
+
+  // FIX: Create an array of style names from the imported data object.
+  const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => style.nome);
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
@@ -100,7 +107,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         {filters.category === 'Forma de Respiração' && (
           <SearchableMultiSelect
             label="Inspiração (Respirações)"
-            options={BREATHING_STYLES}
+            options={breathingStyleOptions}
             selected={filters.breathingStyles}
             onChange={(selected) => handleFilterChange('breathingStyles', selected)}
             placeholder="Selecione estilos..."

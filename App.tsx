@@ -1,189 +1,190 @@
 
-import React, { useState, useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { DetailPanel } from './components/DetailPanel';
-import { FavoritesModal } from './components/FavoritesModal';
 import { AboutModal } from './components/AboutModal';
+import { FavoritesModal } from './components/FavoritesModal';
+import { DetailModal } from './components/DetailModal';
+import { Button } from './components/ui/Button';
+import { StarIcon } from './components/icons/StarIcon';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
-
 import { generateContent } from './services/geminiService';
 import useLocalStorage from './hooks/useLocalStorage';
-
-import type { FilterState, GeneratedItem, Tone } from './types';
-import { CATEGORIES, RARITIES, ERAS, TONES, VILLAIN_MOTIVATIONS, DEMON_BLOOD_ART_TYPES } from './constants';
-
-const DEFAULT_FILTERS: FilterState = {
-    category: CATEGORIES[0],
-    rarity: RARITIES[0],
-    era: ERAS[0],
-    breathingStyles: [],
-    demonArts: [],
-    // Mission Defaults
-    tone: TONES[0] as Tone,
-    intensity: 3,
-    scale: 'local',
-    protagonist: 'Caçador ex-militar com cicatriz no rosto',
-    targets: 'Oni que se esconde em um teatro abandonado',
-    moodModifiers: 'nevoento, cheiro de vela podre',
-    demonBloodArtType: DEMON_BLOOD_ART_TYPES[0],
-    villainMotivation: VILLAIN_MOTIVATIONS[0],
-    powerLevel: 3,
-    numberOfSessions: 1,
-};
+import type { FilterState, GeneratedItem } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
-    const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+    const [filters, setFilters] = useState<FilterState>({
+        category: 'Arma',
+        rarity: 'Aleatória',
+        era: 'Aleatória',
+        breathingStyles: [],
+        demonArts: [],
+        tone: 'investigação',
+        intensity: 3,
+        scale: 'local',
+        protagonist: '',
+        targets: '',
+        moodModifiers: '',
+    });
 
-    const [items, setItems] = useLocalStorage<GeneratedItem[]>('generatedItems', []);
-    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('favoriteItems', []);
-    
+    const [items, setItems] = useState<GeneratedItem[]>([]);
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
+    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('legend-forge-favorites', []);
+    
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-    const handleGenerate = useCallback(async (count: number, promptModifier?: string, itemToVary?: GeneratedItem) => {
+    // Auto-select the newest item
+    useEffect(() => {
+        if (items.length > 0) {
+            const latestItem = items[items.length - 1];
+            setSelectedItem(latestItem);
+            if (window.innerWidth < 1024) { // On mobile, open detail modal automatically
+                setIsDetailModalOpen(true);
+            }
+        }
+    }, [items]);
+
+    const handleGenerate = useCallback(async (count: number = 1, promptModifier?: string, originalItem?: GeneratedItem) => {
         setIsLoading(true);
         setError(null);
-        if (!itemToVary) {
-            setSelectedItem(null);
-        }
-
         try {
-            const generationFilters = itemToVary ? {
-                ...DEFAULT_FILTERS,
-                category: itemToVary.categoria,
-                rarity: itemToVary.raridade,
-                era: filters.era,
-            } : filters;
-
-            const newItems = await generateContent(generationFilters, count, promptModifier);
-            const itemsWithIds = newItems.map((item, index) => ({ ...item, id: `${Date.now()}-${index}` }));
-
-            setItems(prevItems => [...prevItems, ...itemsWithIds]);
-            if (itemsWithIds.length > 0 && !itemToVary) {
-                setSelectedItem(itemsWithIds[0]);
+            const newItems = await generateContent(filters, count, promptModifier);
+            const itemsWithIds = newItems.map(item => ({ ...item, id: uuidv4() }));
+            
+            // If it's a variant, add diff info
+            if (originalItem && itemsWithIds.length > 0) {
+                itemsWithIds[0].diff = {
+                    summary: `Variação "${promptModifier}" de "${originalItem.nome}"`,
+                    changes: ["Detalhes e mecânicas foram ajustados para refletir a nova variação."]
+                }
             }
+            
+            setItems(prevItems => [...prevItems, ...itemsWithIds]);
         } catch (err: any) {
             setError(err.message || 'Ocorreu um erro desconhecido.');
         } finally {
             setIsLoading(false);
         }
-    }, [filters, setItems]);
+    }, [filters]);
 
     const handleGenerateVariant = (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
-        const promptModifier = `Gere uma variação ${variantType} do seguinte item: ${JSON.stringify(item)}`;
+        const promptModifier = `Crie uma variação **${variantType}** do seguinte item: ${JSON.stringify(item)}. A nova variação deve manter a essência do original, mas com um foco claro no novo estilo.`;
         handleGenerate(1, promptModifier, item);
     };
 
-    const handleUpdateItem = (updatedItem: GeneratedItem) => {
-        const newItems = items.map(item => item.id === updatedItem.id ? updatedItem : item);
-        setItems(newItems);
-        if (selectedItem?.id === updatedItem.id) {
-            setSelectedItem(updatedItem);
-        }
-        if (favorites.some(fav => fav.id === updatedItem.id)) {
-            const newFavorites = favorites.map(fav => fav.id === updatedItem.id ? updatedItem : fav);
-            setFavorites(newFavorites);
-        }
+    const handleToggleFavorite = (item: GeneratedItem) => {
+        setFavorites(prev => 
+            prev.some(fav => fav.id === item.id)
+                ? prev.filter(fav => fav.id !== item.id)
+                : [...prev, item]
+        );
     };
 
-    const handleToggleFavorite = (itemToToggle: GeneratedItem) => {
-        const isFavorite = favorites.some(fav => fav.id === itemToToggle.id);
-        if (isFavorite) {
-            setFavorites(favorites.filter(fav => fav.id !== itemToToggle.id));
-        } else {
-            setFavorites([...favorites, itemToToggle]);
+    const handleSelectItem = (item: GeneratedItem) => {
+        setSelectedItem(item);
+        if (window.innerWidth < 1024) { // On mobile, open detail modal on select
+            setIsDetailModalOpen(true);
         }
     };
     
-    const handleSelectFavorite = (item: GeneratedItem) => {
-        setSelectedItem(item);
-        setIsFavoritesModalOpen(false);
-        setActiveView('forge');
+    const handleUpdateItem = (updatedItem: GeneratedItem) => {
+        const update = (list: GeneratedItem[]) => list.map(i => i.id === updatedItem.id ? updatedItem : i);
+        setItems(update);
+        setFavorites(update);
+        if (selectedItem?.id === updatedItem.id) {
+            setSelectedItem(updatedItem);
+        }
     }
+    
+    const ForgeView = () => (
+        <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 lg:p-6 h-[calc(100vh-81px)]">
+            <div className="lg:col-span-3 h-full">
+                <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} />
+            </div>
+            <div className="hidden lg:block lg:col-span-5 h-full">
+                 <DetailPanel
+                    item={selectedItem}
+                    onGenerateVariant={handleGenerateVariant}
+                    isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
+                    onToggleFavorite={handleToggleFavorite}
+                    onUpdate={handleUpdateItem}
+                 />
+            </div>
+            <div className="lg:col-span-4 h-full">
+                 <ResultsPanel 
+                    items={items} 
+                    isLoading={isLoading} 
+                    selectedItem={selectedItem}
+                    onSelectItem={handleSelectItem}
+                    favorites={favorites}
+                    onToggleFavorite={handleToggleFavorite}
+                />
+            </div>
+        </main>
+    );
 
     return (
-        <div className="bg-gray-900 text-white min-h-screen font-sans flex flex-col">
+        <div className="bg-gray-900 text-gray-200 min-h-screen flex flex-col font-sans">
             <Header
                 onAboutClick={() => setIsAboutModalOpen(true)}
                 activeView={activeView}
                 onViewChange={setActiveView}
             />
 
-            <main className="flex-grow p-4 md:p-6 lg:p-8">
-                <div className="max-w-screen-2xl mx-auto h-full">
-                    {activeView === 'forge' ? (
-                        <>
-                            {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-[calc(100vh-150px)]">
-                               <div className="lg:col-span-3 h-full">
-                                   <FilterPanel
-                                       filters={filters}
-                                       onFiltersChange={setFilters}
-                                       onGenerate={(count) => handleGenerate(count)}
-                                       isLoading={isLoading}
-                                   />
-                               </div>
-                               <div className="lg:col-span-3 h-full">
-                                   <ResultsPanel
-                                       items={items}
-                                       isLoading={isLoading}
-                                       selectedItem={selectedItem}
-                                       onSelectItem={setSelectedItem}
-                                       favorites={favorites}
-                                       onToggleFavorite={handleToggleFavorite}
-                                   />
-                               </div>
-                               <div className="lg:col-span-6 h-full">
-                                    <DetailPanel
-                                        item={selectedItem}
-                                        onGenerateVariant={handleGenerateVariant}
-                                        isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
-                                        onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
-                                        onUpdate={handleUpdateItem}
-                                    />
-                               </div>
-                            </div>
-                        </>
-                    ) : (
-                        <PromptEngineeringPanel />
-                    )}
-                </div>
-            </main>
+            <div className="absolute top-24 right-6 z-50">
+                <Button variant="secondary" onClick={() => setIsFavoritesModalOpen(true)}>
+                    <StarIcon className="w-5 h-5" />
+                    Favoritos ({favorites.length})
+                </Button>
+            </div>
             
-            <button
-                onClick={() => setIsFavoritesModalOpen(true)}
-                className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-transform hover:scale-110"
-                title="Ver Favoritos"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                 {favorites.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {favorites.length}
-                    </span>
-                 )}
-            </button>
+             {error && (
+                <div className="p-4 lg:p-6">
+                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                </div>
+            )}
+            
+            {activeView === 'forge' ? (
+                <ForgeView />
+            ) : (
+                <main className="flex-grow p-4 lg:p-6">
+                    <PromptEngineeringPanel />
+                </main>
+            )}
 
-
-            <FavoritesModal
-                isOpen={isFavoritesModalOpen}
-                onClose={() => setIsFavoritesModalOpen(false)}
+            <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+            <FavoritesModal 
+                isOpen={isFavoritesModalOpen} 
+                onClose={() => setIsFavoritesModalOpen(false)} 
                 favorites={favorites}
-                onSelect={handleSelectFavorite}
+                onSelect={(item) => {
+                    handleSelectItem(item);
+                    setIsFavoritesModalOpen(false);
+                }}
                 onToggleFavorite={handleToggleFavorite}
             />
-            <AboutModal
-                isOpen={isAboutModalOpen}
-                onClose={() => setIsAboutModalOpen(false)}
+             <DetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                item={selectedItem}
+                onGenerateVariant={(item, type) => {
+                    handleGenerateVariant(item, type);
+                    setIsDetailModalOpen(false);
+                }}
+                isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
+                onToggleFavorite={handleToggleFavorite}
+                onUpdate={handleUpdateItem}
             />
         </div>
     );

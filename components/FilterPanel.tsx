@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -5,7 +6,8 @@ import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { Slider } from './ui/Slider';
 import type { FilterState, Tone } from '../types';
-import { CATEGORIES, RARITIES, ERAS, BREATHING_STYLES, DEMON_BLOOD_ARTS, TONES, VILLAIN_MOTIVATIONS, DEMON_BLOOD_ART_TYPES } from '../constants';
+import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES } from '../constants';
+import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -22,9 +24,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   const handleNumericFilterChange = (key: keyof FilterState, value: string) => {
     const numValue = parseInt(value, 10);
     if (!isNaN(numValue)) {
-      onFiltersChange({ ...filters, [key]: numValue });
+      onFiltersChange({ ...filters, [key]: numValue as any });
     }
   };
+
+  const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => style.nome);
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
@@ -39,7 +43,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         </Select>
 
         {filters.category !== 'Missão/Cenário' && (
-          <Select
+           <Select
             label="Raridade"
             value={filters.rarity}
             onChange={(e) => handleFilterChange('rarity', e.target.value)}
@@ -55,7 +59,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         >
           {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
         </Select>
-
+        
         {/* Mission-specific filters */}
         {filters.category === 'Missão/Cenário' && (
             <div className="space-y-4 border-t border-indigo-900/50 pt-4">
@@ -94,45 +98,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                   <label className="block text-sm font-medium text-gray-400 mb-1">Modificadores de Ambiente</label>
                   <input type="text" value={filters.moodModifiers} onChange={e => handleFilterChange('moodModifiers', e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm text-white" placeholder="Ex: úmido, nevoento, reverente" />
                 </div>
-                
-                <div className="border-t border-gray-700/50 pt-4">
-                     <h4 className="text-sm font-semibold text-indigo-400 mb-2">Detalhes do Antagonista e Estrutura</h4>
-                     <div className="space-y-4">
-                        <Select
-                          label="Tipo de Kekkijutsu"
-                          value={filters.demonBloodArtType}
-                          onChange={(e) => handleFilterChange('demonBloodArtType', e.target.value)}
-                        >
-                          {DEMON_BLOOD_ART_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <Select
-                          label="Motivação do Vilão"
-                          value={filters.villainMotivation}
-                          onChange={(e) => handleFilterChange('villainMotivation', e.target.value)}
-                        >
-                          {VILLAIN_MOTIVATIONS.map(m => <option key={m} value={m}>{m}</option>)}
-                        </Select>
-                         <Slider
-                            label={`Nível de Poder do Vilão: ${filters.powerLevel}`}
-                            min={1} max={10} step={1}
-                            value={filters.powerLevel || 3}
-                            onChange={(e) => handleNumericFilterChange('powerLevel', e.target.value)}
-                        />
-                        <Slider
-                            label={`Número de Sessões: ${filters.numberOfSessions}`}
-                            min={1} max={5} step={1}
-                            value={filters.numberOfSessions || 1}
-                            onChange={(e) => handleNumericFilterChange('numberOfSessions', e.target.value)}
-                        />
-                     </div>
-                </div>
             </div>
         )}
 
         {filters.category === 'Forma de Respiração' && (
           <SearchableMultiSelect
             label="Inspiração (Respirações)"
-            options={BREATHING_STYLES}
+            options={breathingStyleOptions}
             selected={filters.breathingStyles}
             onChange={(selected) => handleFilterChange('breathingStyles', selected)}
             placeholder="Selecione estilos..."
@@ -151,24 +123,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       </div>
 
       <div className="mt-6 pt-4 border-t border-gray-700">
-        {filters.category === 'Missão/Cenário' ? (
-            <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full">
-              <SparklesIcon className="w-5 h-5" />
-              {isLoading ? 'Forjando...' : 'Gerar Missão'}
-            </Button>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-                <Button variant="secondary" onClick={() => onGenerate(1)} disabled={isLoading}>Gerar 1</Button>
-                <Button variant="secondary" onClick={() => onGenerate(3)} disabled={isLoading}>Gerar 3</Button>
-                <Button variant="secondary" onClick={() => onGenerate(5)} disabled={isLoading}>Gerar 5</Button>
-            </div>
-            <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full">
-              <SparklesIcon className="w-5 h-5" />
-              {isLoading ? 'Forjando...' : 'Gerar Item'}
-            </Button>
-          </>
-        )}
+        <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full">
+          <SparklesIcon className="w-5 h-5" />
+          {isLoading ? 'Forjando...' : 'Gerar'}
+        </Button>
       </div>
     </div>
   );

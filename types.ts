@@ -1,10 +1,31 @@
-// Defines the core data structures and types used throughout the application.
 
-export type Category = 'Arma' | 'Acessório' | 'Inimigo/Oni' | 'Caçador' | 'Classe/Origem' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missão/Cenário';
 export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado';
-export type Era = 'Período Edo (Japão Feudal)' | 'Moderno' | 'Cyberpunk' | 'Steampunk' | 'Medieval Fantasia' | 'Biopunk' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Pós-apocalíptico';
-export type Tone = 'aventura' | 'combate' | 'drama' | 'épico' | 'high fantasy' | 'histórico' | 'investigação' | 'low-fantasy' | 'noir' | 'roleplay' | 'sci-fi' | 'slice of life' | 'sobrevivência' | 'sobrenatural' | 'suspense' | 'terror';
 
+export type Category = 
+  | 'Aleatória'
+  | 'Arma'
+  | 'Acessório'
+  | 'Caçador'
+  | 'Inimigo/Oni'
+  | 'Classe/Origem'
+  | 'Forma de Respiração'
+  | 'Kekkijutsu'
+  | 'Local/Cenário'
+  | 'Missão/Cenário';
+
+export type Era = 
+  | 'Aleatória'
+  | 'Período Edo (Japão Feudal)'
+  | 'Medieval Fantasia'
+  | 'Steampunk'
+  | 'Cyberpunk'
+  | 'Pós-apocalíptico'
+  | 'Moderno'
+  | 'Tempos Atuais'
+  | 'Futurista (Sci-Fi)'
+  | 'Biopunk';
+
+export type Tone = 'investigação' | 'terror' | 'ação' | 'drama' | 'mistério' | 'aventura' | 'político';
 
 export interface FilterState {
   category: string;
@@ -12,50 +33,24 @@ export interface FilterState {
   era: string;
   breathingStyles: string[];
   demonArts: string[];
-  // Mission Specific Filters
-  tone?: Tone;
-  intensity?: number;
-  scale?: 'local' | 'regional' | 'nacional' | 'cósmico';
-  protagonist?: string;
-  targets?: string;
-  moodModifiers?: string;
-  demonBloodArtType?: string;
-  villainMotivation?: string;
-  powerLevel?: number;
-  numberOfSessions?: number;
+  // Mission filters
+  tone: Tone;
+  intensity: number;
+  scale: 'local' | 'regional' | 'nacional' | 'cósmico';
+  protagonist: string;
+  targets: string;
+  moodModifiers: string;
 }
 
-// Sub-interfaces for Mission/Scenario
 export interface MissionNPC {
-  id: string;
-  name: string;
-  role: string;
-  goal: string;
-  secret: string;
-  twist: string;
-  physical_trait: string;
-  dialogue_example: string;
-}
-
-export interface MissionLocation {
-  id: string;
-  name: string;
-  descr_short: string;
-  mechanic_hook: string;
-}
-
-export interface MissionEncounter {
-  id: string;
-  type: 'combat' | 'social' | 'puzzle' | 'exploration';
-  descr: string;
-  difficulty: number;
-  modular_template: string;
-}
-
-export interface MissionClue {
-  text: string;
-  difficulty: number;
-  location_id: string;
+    id: string;
+    name: string;
+    role: string;
+    dialogue_example: string;
+    physical_trait: string;
+    goal: string;
+    secret: string;
+    twist: string;
 }
 
 export interface MissionItem {
@@ -66,32 +61,10 @@ export interface MissionItem {
     use: string;
 }
 
-export interface MissionProtagonist {
-    silhouette: string;
-    face: string;
-    attire: string;
-    movement: string;
-    defining_feature: string;
-}
-
-export interface MissionOni {
-    scale: string;
-    skin: string;
-    appendages: string;
-    eyes: string;
-    sound_smell: string;
-    mystic_sign: string;
-}
-
-export interface MissionDiff {
-    changes: string[];
-    summary: string;
-}
-
 export interface GeneratedItem {
   id: string;
   nome: string;
-  categoria: Category;
+  categoria: string;
   raridade: Rarity;
   nivel_sugerido: number;
   descricao_curta: string;
@@ -102,38 +75,49 @@ export interface GeneratedItem {
   status_aplicado?: string;
   efeitos_secundarios?: string;
   ganchos_narrativos?: string;
-  clima?: string; 
-  bioma?: string; 
-
-  // Mission/Scenario fields
+  // For locations
+  clima?: string;
+  bioma?: string;
+  // For missions
   title?: string;
   logline?: string;
   summary?: string;
   objectives?: string[];
-  failure_states?: string[];
-  key_npcs?: MissionNPC[];
-  locations?: MissionLocation[];
-  encounters?: MissionEncounter[];
-  clues?: MissionClue[];
-  major_twist?: string;
-  rewards?: string[];
-  design_notes?: string;
-  diff?: MissionDiff;
-  micro_variants?: any[];
-  sensitive_flags?: string[];
-  protagonist_desc?: MissionProtagonist;
-  oni_desc?: MissionOni;
-  relevant_items?: MissionItem[];
   complications?: string[];
-  environment?: string;
-  tone_variations?: any;
-  scaling_hooks?: string;
-  tone?: Tone;
-  demonBloodArtType?: string;
+  failure_states?: string[];
+  rewards?: string[];
   numberOfSessions?: number;
+  environment?: string;
+  protagonist_desc?: {
+      silhouette: string;
+      face: string;
+      attire: string;
+      movement: string;
+      defining_feature: string;
+  };
+  oni_desc?: {
+      scale: string;
+      skin: string;
+      appendages: string;
+      eyes: string;
+      sound_smell: string;
+      mystic_sign: string;
+  };
+  demonBloodArtType?: string;
+  key_npcs?: MissionNPC[];
+  relevant_items?: MissionItem[];
+  scaling_hooks?: string;
+  tone_variations?: Record<string, string>;
+  sensitive_flags?: string[];
+  diff?: {
+      summary: string;
+      changes: string[];
+  };
+  micro_variants?: string[];
+  tone?: string;
 }
 
-// Types for Prompt Engineering Panel
+// Prompt Engineering Panel Types
 export interface MidjourneyParameter<T> {
     active: boolean;
     value: T;
@@ -155,7 +139,7 @@ export interface GptParameters {
     composition: string;
 }
 
-export interface WebSearchQueryResult {
+export interface WebSearchQuery {
     uri: string;
     title: string;
 }
@@ -163,5 +147,5 @@ export interface WebSearchQueryResult {
 export interface PromptGenerationResult {
     midjourneyPrompt: string;
     gptPrompt: string;
-    webSearchQueries?: WebSearchQueryResult[];
+    webSearchQueries?: WebSearchQuery[];
 }

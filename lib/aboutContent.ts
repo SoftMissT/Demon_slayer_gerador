@@ -1,4 +1,3 @@
-// FIX: Created content for the About modal to resolve placeholder errors. This file now exports a structured object with titles, sections, and text explaining the application's purpose, features, and technologies.
 export const aboutContent = {
   title: "Sobre o Forja de Lendas",
   introduction: "O Forja de Lendas é uma ferramenta criativa projetada para mestres e jogadores de RPG de mesa, com um foco especial no universo sombrio e fascinante de Demon Slayer (Kimetsu no Yaiba). Utilizando o poder da IA generativa do Google Gemini, esta aplicação ajuda a criar conteúdo rico e detalhado para suas campanhas.",

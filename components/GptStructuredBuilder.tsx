@@ -1,4 +1,3 @@
-// FIX: Create content for GptStructuredBuilder.tsx to resolve placeholder issues.
 import React from 'react';
 import type { GptParameters } from '../types';
 import { Select } from './ui/Select';

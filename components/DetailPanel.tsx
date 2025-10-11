@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -178,7 +179,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEditedItem(item);
     setIsEditing(false); // Always reset editing state when item changes
   }, [item]);
@@ -211,7 +212,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
 
   const renderField = (label: string, field: keyof GeneratedItem, type: 'text' | 'textarea' | 'number' = 'text') => {
     if (!editedItem) return null;
-    const value = editedItem[field] as string || '';
+    const value = editedItem[field] as string | number | undefined || '';
     
     if (isEditing) {
         if (type === 'textarea') {
@@ -219,7 +220,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         }
         return <input type={type} value={value} onChange={e => handleEditChange(field, type === 'number' ? parseInt(e.target.value) || 0 : e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-2 text-sm" />;
     }
-    return <p className="whitespace-pre-wrap">{value || 'N/A'}</p>;
+    return <p className="whitespace-pre-wrap">{String(value) || 'N/A'}</p>;
   }
 
 

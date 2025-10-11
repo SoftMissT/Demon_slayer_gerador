@@ -1,4 +1,3 @@
-// FIX: Implemented the AboutModal component to resolve placeholder errors. This component now renders the content from `lib/aboutContent.ts` inside a modal dialog, providing users with information about the application.
 import React from 'react';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';

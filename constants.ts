@@ -1,137 +1,66 @@
-// Defines constant arrays used for populating UI elements like select dropdowns.
 
-export const CATEGORIES: string[] = [
-    'Forma de Respiração',
-    'Kekkijutsu',
-    'Arma',
-    'Acessório',
-    'Caçador',
-    'Inimigo/Oni',
-    'Classe/Origem',
-    'Local/Cenário',
-    'Missão/Cenário',
+import type { Category, Rarity, Era, Tone } from './types';
+
+export const CATEGORIES: Category[] = [
+  'Aleatória',
+  'Arma',
+  'Acessório',
+  'Caçador',
+  'Inimigo/Oni',
+  'Classe/Origem',
+  'Forma de Respiração',
+  'Kekkijutsu',
+  'Local/Cenário',
+  'Missão/Cenário'
 ];
 
-export const RARITIES: string[] = [
-    'Aleatória',
-    'Comum',
-    'Incomum',
-    'Raro',
-    'Épico',
-    'Lendário',
-    'Amaldiçoado',
+export const RARITIES: Rarity[] = [
+  'Aleatória',
+  'Comum',
+  'Incomum',
+  'Raro',
+  'Épico',
+  'Lendário',
+  'Amaldiçoado'
 ];
 
-export const ERAS: string[] = [
-    'Período Edo (Japão Feudal)',
-    'Moderno',
-    'Cyberpunk',
-    'Steampunk',
-    'Medieval Fantasia',
-    'Biopunk',
-    'Tempos Atuais',
-    'Futurista (Sci-Fi)',
-    'Pós-apocalíptico',
+export const ERAS: Era[] = [
+  'Aleatória',
+  'Período Edo (Japão Feudal)',
+  'Medieval Fantasia',
+  'Steampunk',
+  'Cyberpunk',
+  'Pós-apocalíptico',
+  'Moderno',
+  'Tempos Atuais',
+  'Futurista (Sci-Fi)',
+  'Biopunk'
 ];
 
-export const TONES: string[] = [
-    'aventura',
-    'combate',
-    'drama',
-    'épico',
-    'high fantasy',
-    'histórico',
+export const TONES: Tone[] = [
     'investigação',
-    'low-fantasy',
-    'noir',
-    'roleplay',
-    'sci-fi',
-    'slice of life',
-    'sobrevivência',
-    'sobrenatural',
-    'suspense',
     'terror',
+    'ação',
+    'drama',
+    'mistério',
+    'aventura',
+    'político'
 ];
 
-export const VILLAIN_MOTIVATIONS: string[] = [
-    'Aleatório',
-    'Sobrevivência (Medo de ser morto por caçadores ou por Muzan)',
-    'Vingança (Contra os caçadores ou a humanidade)',
-    'Poder/Dominação (Almeja se tornar um dos Doze Kizuki)',
-    'Corrupção/Caos (Prazer em espalhar sofrimento)',
-    'Busca por Conhecimento Proibido (Tentar superar a fraqueza ao sol)',
-    'Criação de "Arte" (Vê suas vítimas como parte de uma obra macabra)',
-    'Lealdade Cega (A um oni superior ou a Muzan)',
-    'Redenção Distorcida (Acredita que transformar humanos em onis é salvá-los)',
-];
-
-export const DEMON_BLOOD_ART_TYPES: string[] = [
-    'Aleatório',
-    'Manipulação Elemental (Fogo, Gelo, etc.)',
-    'Controle Corporal (Metamorfose, Regeneração Acelerada)',
-    'Ilusório/Mental (Pesadelos, Controle Mental)',
-    'Invocação (Criaturas, Armas)',
-    'Espacial/Dimensional (Portais, Teletransporte)',
-    'Técnicas de Suporte (Cura, Fortalecimento de outros Onis)',
-    'Corrupção Ambiental (Transformar terreno, criar armadilhas)',
-    'Absorção/Roubo de Vida',
-];
-
-
-export const BREATHING_STYLES: string[] = [
-  "Respiração da Água",
-  "Respiração das Chamas",
-  "Respiração da Lua",
-  "Hinokami Kagura",
-  "Respiração da Flor",
-  "Respiração da Besta",
-  "Respiração da Pedra",
-  "Respiração do Vento",
-  "Respiração do Trovão",
-  "Respiração do Som",
-  "Respiração da Serpente",
-  "Respiração do Inseto",
-  "Respiração do Amor",
-  "Respiração do Sangue",
-  "Respiração do Ferro",
-  "Respiração do Relampago",
-  "Respiração da Neve",
-  "Respiração da Areia",
-  "Respiração dos Sonhos",
-  "Respiração das Sombras",
-  "Respiração da Raposa",
-  "Respiração do Tigre",
-  "Respiração da Cerejeira",
-  "Respiração da Grama",
-  "Respiração da Aranha",
-  "Respiração do Vagalume",
-  "Respiração da Tempestade",
-];
-
+// Sample data for Demon Blood Arts as it's not provided elsewhere.
 export const DEMON_BLOOD_ARTS: string[] = [
     "Manipulação de Sangue",
-    "Pirocinese Demoníaca",
-    "Criocinese Sombria",
-    "Técnica de Fios",
-    "Manipulação Espacial (Tambores)",
-    "Ilusões de Sonhos",
-    "Regeneração Acelerada",
+    "Fios Cortantes",
+    "Ilusões Espaciais",
+    "Controle de Sombras",
+    "Gelo Eterno",
+    "Chamas Negras",
     "Metamorfose Corporal",
-    "Controle de Insetos Venenosos",
-    "Ondas de Choque Sônicas",
-    "Criação de Faixas de Carne",
-    "Técnica de Veneno de Glicínias",
-    "Manipulação de Ossos",
+    "Espinhos Ósseos",
+    "Névoa Venenosa",
+    "Criação de Marionetes",
     "Absorção de Vida",
-    "Criação de Clones de Gelo",
-    "Controle de Plantas Carnívoras",
-    "Manipulação de Gravidade",
-    "Técnica de Névoa Corrosiva",
-    "Invocação de Marionetes",
-    "Endurecimento Corporal (Vajra)",
+    "Gravitocinese",
     "Desintegração Molecular",
-    "Mimetismo de Sombras",
-    "Controle de Eletricidade Negra",
-    "Criação de Espelhos Dimensionais",
-    "Técnica de Maldição Voodoo",
+    "Cúpula Dimensional"
 ];

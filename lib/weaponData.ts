@@ -1,0 +1,95 @@
+export const WEAPON_TYPES = [
+    { name: 'Aleatório', description: 'Deixe a forja decidir o tipo de arma.' },
+    { name: 'Alabarda', description: 'Arma de haste com lâmina larga e ponta perfurante' },
+    { name: 'Arco Composto', description: 'Arco de alta potência com design compacto' },
+    { name: 'Arco Longo', description: 'Arco tradicional de longo alcance' },
+    { name: 'Bacalhau (Mace)', description: 'Maça de combate com cabeça pesada e cravos' },
+    { name: 'Báculo', description: 'Bastão longo e resistente usado para defesa e ataque' },
+    { name: 'Baioneta', description: 'Lâmina acoplável a rifles para combate corpo a corpo' },
+    { name: 'Balestra', description: 'Besta pesada com virotes poderosos' },
+    { name: 'Bastão Retrátil', description: 'Bastão telescópico que pode estender seu alcance' },
+    { name: 'Bō', description: 'Bastão tradicional japonês de madeira dura' },
+    { name: 'Bō Segmentado', description: 'Bastão articulado que pode ser usado como chicote' },
+    { name: 'Chakram', description: 'Disco de lâmina circular que retorna ao usuário' },
+    { name: 'Chicote', description: 'Chicote longo e flexível para controle de alcance' },
+    { name: 'Cimitarra', description: 'Sabre curvo de lâmina única' },
+    { name: 'Cutelos Gêmeos', description: 'Par de cutelos largos usados simultaneamente' },
+    { name: 'Dao (Sabre Chinês)', description: 'Sabre chinês de lâmina larga e pesada' },
+    { name: 'Double Blade', description: 'Arma com lâminas em ambas as extremidades' },
+    { name: 'Escopeta Cano Duplo', description: 'Escopeta com dois canos para disparo em área' },
+    { name: 'Escudo de Batalha', description: 'Escudo pesado usado também como arma' },
+    { name: 'Espada Longa', description: 'Espada clássica de lâmina reta e versátil' },
+    { name: 'Espada Ondular (Kris)', description: 'Adaga com lâmina ondulada característica' },
+    { name: 'Faca Bowie', description: 'Faca grande e robusta para combate próximo' },
+    { name: 'Foice', description: 'Lâmina curva montada em cabo curto' },
+    { name: 'Fuuma Shuriken', description: 'Shuriken gigante de quatro pontas' },
+    { name: 'Guandao', description: 'Alabarda chinesa com lâmina larga curva' },
+    { name: 'Hook Shuang', description: 'Par de ganchos chineses com lâminas curvas' },
+    { name: 'Hwando', description: 'Sabre coreano tradicional de lâmina única' },
+    { name: 'Hwandudaedo', description: 'Espada coreana grande de duas mãos' },
+    { name: 'Ioiô de Lâmina', description: 'Ioiô com lâminas afiadas nas bordas' },
+    { name: 'Jambiya', description: 'Adaga curva árabe com lâmina larga' },
+    { name: 'Jian', description: 'Espada reta chinesa de lâmina fina' },
+    { name: 'Kama', description: 'Foice pequena tradicional de Okinawa' },
+    { name: 'Katana', description: 'Espada japonesa tradicional dos samurais' },
+    { name: 'Katana chicote', description: 'Katana que pode se transformar em chicote segmentado' },
+    { name: 'Katana Ferrão', description: 'Katana modificada com ponta perfurante reforçada' },
+    { name: 'Katana Serrilhada', description: 'Katana com lâmina serrilhada brutal' },
+    { name: 'Kunai', description: 'Faca de arremesso ninja multiuso' },
+    { name: 'Kusarigama', description: 'Foice conectada a corrente com peso' },
+    { name: 'Lança (Rumh)', description: 'Lança tradicional de haste longa' },
+    { name: 'Machado de Batalha', description: 'Machado pesado de guerra' },
+    { name: 'Macuahuitl', description: 'Espada asteca com lâminas de obsidiana' },
+    { name: 'Manoplas / Soqueiras', description: 'Luvas reforçadas com metal para combate desarmado' },
+    { name: 'Montante', description: 'Espada gigante de duas mãos' },
+    { name: 'Nagamaki', description: 'Espada japonesa de cabo longo' },
+    { name: 'Naginata', description: 'Lança japonesa com lâmina curva' },
+    { name: 'Ngalo', description: 'Espada curta africana de lâmina larga' },
+    { name: 'Nunchaku', description: 'Par de bastões conectados por corrente' },
+    { name: 'Ono & Mangual', description: 'Combinação de machado e mangual' },
+    { name: 'Ōtsuchi', description: 'Martelo de guerra gigante japonês' },
+    { name: 'Pistolas Híbridas', description: 'Par de pistolas com lâminas acopladas' },
+    { name: 'Punho de Aço', description: 'Proteção de metal para os punhos' },
+    { name: 'Qiang', description: 'Lança chinesa de haste flexível' },
+    { name: 'Rapieira', description: 'Espada fina de estocada elegante' },
+    { name: 'Revólver', description: 'Pistola de tambor giratório' },
+    { name: 'Rifle', description: 'Arma de fogo de longo alcance' },
+    { name: 'Rifle Murata', description: 'Rifle japonês histórico aprimorado' },
+    { name: 'Shamshir', description: 'Sabre persa de lâmina fortemente curva' },
+    { name: 'Shotel', description: 'Espada etíope com lâmina em forma de foice' },
+    { name: 'Sicrimos', description: 'Par de lâminas curvas em forma de meia-lua' },
+    { name: 'Tepoztopilli', description: 'Lança asteca com lâminas de obsidiana' },
+    { name: 'Tessen', description: 'Leque de guerra japonês dobrável' },
+    { name: 'Tetsubo', description: 'Bastão de ferro japonês com cravos' },
+    { name: 'Tomahawk', description: 'Machado de arremesso nativo americano' },
+    { name: 'Woldo', description: 'Alabarda coreana de lâmina longa curva' },
+    { name: 'Zweihänder', description: 'Espada alemã gigante de duas mãos' },
+];
+
+export const GRIP_TYPES = [
+    { name: 'Aleatório', description: 'Deixe a forja decidir o estilo de empunhadura.' },
+    {
+        name: 'Ittō-ryū (Estilo de Uma Espada)',
+        description: 'Estilo clássico e purista focado no uso de uma única lâmina. Prioriza a postura perfeita, cortes fundamentais e a eficiência máxima em cada movimento. É a base de quase todo Kenjutsu, ensinando que um único golpe bem aplicado é mais letal que dez mal executados.'
+    },
+    {
+        name: 'Nitō-ryū (Estilo de Duas Espadas)',
+        description: 'Estilo avançado e de rara maestria que emprega duas espadas simultaneamente (geralmente uma katana longa e uma wakizashi curta). Foca em uma defesa ofensiva implacável, criando uma barreira de aço e atacando de múltiplos ângulos ao mesmo tempo. O estilo de Miyamoto Musashi.'
+    },
+    {
+        name: 'Ryōtō (Duas Lâminas / Espadas Gêmeas)',
+        description: 'Diferente do Nitō-ryū, este termo pode se referir ao uso de duas armas do mesmo tipo e tamanho (como duas katanas ou duas espadas curtas). A tática é a pura ofensiva: uma chuva de golpes contínuos e sincronizados para sobrepujar o inimigo com velocidade e força bruta.'
+    },
+    {
+        name: 'Battōjutsu (Técnica do Desembainhar)',
+        description: 'Arte do golpe único e desembainhado. Concentra toda a força, velocidade e espírito em um único movimento para desembainhar e cortar no mesmo instante. É a essência do Iaijutsu, usado para contra-ataques fulminantes ou para decidir um duelo antes mesmo que ele comece.'
+    },
+    {
+        name: 'Kyūdō (O Caminho do Arco)',
+        description: 'Mais do que apenas atirar flechas, o Kyūdō é uma arte marcial espiritual que busca a forma perfeita, a respiração correta e a união entre atirador, arco e alvo. No contexto de combate, produz arqueiros com precisão sobrenatural, capazes de atingir pontos vitais à distância com serenidade absoluta.'
+    },
+    {
+        name: 'Taijutsu (Técnica Corporal)',
+        description: 'Refere-se ao combate desarmado, usando o corpo como arma. Inclui socos, chutes, agarrões, esquivas e projeções. Para um Caçador de Demônios, é uma habilidade de suporte vital, permitindo defender-se quando desarmado ou controlar um inimigo em close combat para criar uma abertura para a lâmina.'
+    }
+];

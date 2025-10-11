@@ -1,288 +1,220 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
 import type { FilterState, GeneratedItem } from '../../types';
 
-const buildMissionPrompt = (filters: FilterState): string => {
-    const { era, tone, intensity, scale, protagonist, targets, moodModifiers, demonBloodArtType, villainMotivation, powerLevel, numberOfSessions } = filters;
+// --- Start of inlined promptSchemas.ts content ---
 
-    return `
-Você é um mestre de RPG e escritor de cenários de classe mundial. Sua tarefa é gerar uma missão detalhada com base nos parâmetros fornecidos, seguindo RIGOROSAMENTE a estrutura de saída JSON e as regras de conteúdo.
-
-**PARÂMETROS DA MISSÃO:**
-- ERA: "${era}"
-- TONE: "${tone}"
-- INTENSITY: ${intensity} (de 1 a 5)
-- SCALE: "${scale}"
-- PROTAGONISTA: "${protagonist}"
-- TARGETS: "${targets}"
-- MOOD_MODIFIERS: "${moodModifiers}"
-- VILLAIN_MOTIVATION: "${villainMotivation}"
-- DEMON_BLOOD_ART_TYPE: "${demonBloodArtType}"
-- VILLAIN_POWER_LEVEL: ${powerLevel} (de 1 a 10)
-- NUMBER_OF_SESSIONS: ${numberOfSessions} (A missão deve ser estruturada para durar aproximadamente esta quantidade de sessões de jogo)
-
-**REGRAS OBRIGATÓRIAS:**
-1. **Estrutura de Saída:** A resposta DEVE ser um único objeto JSON válido, sem markdown ou texto extra, seguindo o schema fornecido.
-2. **Linguagem Sensorial:** Use linguagem concreta e sensorial. Mostre, não diga.
-3. **Templates de Descrição:** Use os templates abaixo VERBATIM para descrever o protagonista, o oni, NPCs e itens.
-4. **Evite Clichês:** Prefira reviravoltas baseadas nas relações e segredos dos NPCs.
-5. **Conteúdo Sensível:** Identifique e sinalize qualquer conteúdo potencialmente sensível (violência gráfica, temas psicológicos pesados, etc.) no campo 'sensitive_flags'.
-
-**TEMPLATES DE DESCRIÇÃO (USE ESTA ESTRUTURA):**
-
-**Caçador (5 frases):**
-- Silhueta e postura.
-- Traços faciais e pele.
-- Roupa e armadura; sinais de uso.
-- Movimento e gestos característicos.
-- Marca ou relíquia identificadora + cheiro/efeito.
-
-**Oni (6 frases):**
-- Tamanho e proporção fora do humano.
-- Pele/textura e cor.
-- Apêndices e deformidades.
-- Olhos e expressão.
-- Som/odor que o acompanha.
-- Sinal místico ou ferida que conta história.
-
-**Item (5 linhas):**
-- Aparência imediata.
-- Material e procedência.
-- Sinais de uso e dano.
-- Propriedade estranha (visual ou mecânica).
-- Uso concreto em cena.
-
-**NPC (6 linhas):**
-- Papel social.
-- Objetivo imediato.
-- Flaw ou segredo.
-- Reviravolta (Twist).
-- Traço físico memorável.
-- Linha de diálogo curta que revele caráter.
-
-**SAÍDA REQUERIDA (18 PONTOS):**
-1. **Título (title):** Título sucinto da missão.
-2. **Sinopse (logline):** 1-2 frases.
-3. **Resumo (summary):** 1-2 parágrafos.
-4. **Objetivos (objectives):** Gancho inicial, objetivo principal e o que está em jogo, em formato de lista.
-5. **Complicações (complications):** 3 complicações possíveis, em formato de lista.
-6. **Condições de Falha (failure_states):** O que acontece se os jogadores falharem.
-7. **Recompensas (rewards):** Itens, informações, XP, etc.
-8. **Ambiente (environment):** Descrição detalhada do local principal (visão, som, cheiro, etc.).
-9. **Descrição do Protagonista (protagonist_desc):** Usando o template de 5 frases.
-10. **Descrição do Oni (oni_desc):** Usando o template de 6 frases.
-11. **NPCs Relevantes (key_npcs):** Gere 3 NPCs. Para cada um, use o template de 6 linhas para preencher todos os campos, garantindo que 'physical_trait' seja uma descrição visual memorável e 'dialogue_example' seja uma fala curta que revele a personalidade do NPC.
-12. **Itens Relevantes (relevant_items):** 3 itens usando o template de 5 linhas para cada um.
-13. **Variações de Tom (tone_variations):** Gere um objeto com três chaves: 'leve', 'padrao', e 'extremo', cada uma contendo uma breve descrição de como a missão mudaria com esse tom.
-14. **Ganchos de Escalada (scaling_hooks):** Sugestões para continuar a história.
-15. **Alertas de Conteúdo Sensível (sensitive_flags):** Uma lista de temas sensíveis presentes. Se não houver, retorne um array vazio.
-16. **Kekkijutsu do Vilão (demonBloodArtType):** Retorne o tipo de Kekkijutsu usado como base para a geração.
-17. **Duração Estimada (numberOfSessions):** Retorne o número de sessões para o qual a missão foi projetada.
-18. **Notas de Design e Micro-Variantes:**
-    - **diff:** No campo 'summary', escreva uma frase justificando as principais escolhas de design. No campo 'changes', liste as decisões tomadas (ex: "Foco em mistério", "Vilão com motivação trágica").
-    - **micro_variants:** Crie 3 pequenas variações da missão, cada uma alterando um único elemento (ex: a motivação de um NPC, a natureza do twist, a mecânica de um local).
-
-Agora, gere a missão.
-`;
+// Schemas for individual item types
+const baseItemSchema = {
+    type: Type.OBJECT,
+    properties: {
+        nome: { type: Type.STRING },
+        categoria: { type: Type.STRING },
+        raridade: { type: Type.STRING },
+        nivel_sugerido: { type: Type.INTEGER },
+        descricao_curta: { type: Type.STRING },
+        descricao: { type: Type.STRING },
+        dano: { type: Type.STRING, description: "Ex: 'Médio', 'Baixo', 'Alto'" },
+        dados: { type: Type.STRING, description: "Ex: '2d8', '1d12'" },
+        tipo_de_dano: { type: Type.STRING, description: "Ex: 'Cortante', 'Perfurante', 'Fogo'" },
+        status_aplicado: { type: Type.STRING, description: "Ex: 'Queimadura', 'Lentidão', 'Nenhum'" },
+        efeitos_secundarios: { type: Type.STRING, description: "Efeitos passivos ou secundários." },
+        ganchos_narrativos: { type: Type.STRING, description: "Ideias de como integrar o item na história." },
+    },
+    required: ["nome", "categoria", "raridade", "nivel_sugerido", "descricao_curta", "descricao"]
 };
+
+const locationSchema = {
+    type: Type.OBJECT,
+    properties: {
+        nome: { type: Type.STRING },
+        categoria: { type: Type.STRING, description: "Deve ser 'Local/Cenário'" },
+        descricao_curta: { type: Type.STRING },
+        descricao: { type: Type.STRING },
+        clima: { type: Type.STRING },
+        bioma: { type: Type.STRING },
+        ganchos_narrativos: { type: Type.STRING },
+    },
+    required: ["nome", "categoria", "descricao_curta", "descricao", "clima", "bioma", "ganchos_narrativos"]
+};
+
+const missionNpcSchema = {
+    type: Type.OBJECT,
+    properties: {
+        id: { type: Type.STRING },
+        name: { type: Type.STRING },
+        role: { type: Type.STRING },
+        dialogue_example: { type: Type.STRING },
+        physical_trait: { type: Type.STRING },
+        goal: { type: Type.STRING },
+        secret: { type: Type.STRING },
+        twist: { type: Type.STRING },
+    },
+    required: ["id", "name", "role", "dialogue_example", "physical_trait", "goal", "secret", "twist"]
+}
+
+const missionItemSchema = {
+    type: Type.OBJECT,
+    properties: {
+        appearance: { type: Type.STRING },
+        origin: { type: Type.STRING },
+        wear: { type: Type.STRING },
+        quirk: { type: Type.STRING },
+        use: { type: Type.STRING },
+    },
+    required: ["appearance", "origin", "wear", "quirk", "use"]
+}
 
 const missionSchema = {
     type: Type.OBJECT,
     properties: {
         title: { type: Type.STRING },
+        categoria: { type: Type.STRING, description: "Deve ser 'Missão/Cenário'" },
         logline: { type: Type.STRING },
         summary: { type: Type.STRING },
         objectives: { type: Type.ARRAY, items: { type: Type.STRING } },
         complications: { type: Type.ARRAY, items: { type: Type.STRING } },
         failure_states: { type: Type.ARRAY, items: { type: Type.STRING } },
         rewards: { type: Type.ARRAY, items: { type: Type.STRING } },
-        environment: { type: Type.STRING },
+        numberOfSessions: { type: Type.INTEGER },
+        environment: { type: Type.STRING, description: "Detalhes sobre a visão, som e cheiro do ambiente principal." },
         protagonist_desc: {
             type: Type.OBJECT,
             properties: {
-                silhouette: { type: Type.STRING },
-                face: { type: Type.STRING },
-                attire: { type: Type.STRING },
-                movement: { type: Type.STRING },
-                defining_feature: { type: Type.STRING },
-            },
-        },
-        oni_desc: {
-            type: Type.OBJECT,
-            properties: {
-                scale: { type: Type.STRING },
-                skin: { type: Type.STRING },
-                appendages: { type: Type.STRING },
-                eyes: { type: Type.STRING },
-                sound_smell: { type: Type.STRING },
-                mystic_sign: { type: Type.STRING },
-            },
-        },
-        key_npcs: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    id: { type: Type.STRING },
-                    name: { type: Type.STRING },
-                    role: { type: Type.STRING },
-                    goal: { type: Type.STRING },
-                    secret: { type: Type.STRING },
-                    twist: { type: Type.STRING },
-                    physical_trait: { type: Type.STRING },
-                    dialogue_example: { type: Type.STRING },
-                },
-            },
-        },
-        relevant_items: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    appearance: { type: Type.STRING },
-                    origin: { type: Type.STRING },
-                    wear: { type: Type.STRING },
-                    quirk: { type: Type.STRING },
-                    use: { type: Type.STRING },
-                },
-            },
-        },
-        tone_variations: {
-            type: Type.OBJECT,
-            properties: {
-                leve: { type: Type.STRING, description: "Uma variação da missão com um tom mais leve ou otimista." },
-                padrao: { type: Type.STRING, description: "A descrição padrão do tom da missão." },
-                extremo: { type: Type.STRING, description: "Uma variação da missão com um tom mais sombrio, intenso ou extremo." },
-            },
-         },
-        scaling_hooks: { type: Type.STRING },
-        sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
-        diff: {
-            type: Type.OBJECT,
-            properties: {
-                changes: { type: Type.ARRAY, items: { type: Type.STRING } },
-                summary: { type: Type.STRING },
+                silhouette: { type: Type.STRING }, face: { type: Type.STRING }, attire: { type: Type.STRING }, movement: { type: Type.STRING }, defining_feature: { type: Type.STRING },
             }
         },
-        micro_variants: { type: Type.ARRAY, items: { type: Type.STRING } },
+        oni_desc: {
+             type: Type.OBJECT,
+            properties: {
+                scale: { type: Type.STRING }, skin: { type: Type.STRING }, appendages: { type: Type.STRING }, eyes: { type: Type.STRING }, sound_smell: { type: Type.STRING }, mystic_sign: { type: Type.STRING },
+            }
+        },
         demonBloodArtType: { type: Type.STRING },
-        numberOfSessions: { type: Type.INTEGER },
+        key_npcs: { type: Type.ARRAY, items: missionNpcSchema },
+        relevant_items: { type: Type.ARRAY, items: missionItemSchema },
+        scaling_hooks: { type: Type.STRING, description: "Ganchos para missões futuras e como a ameaça pode escalar." },
+        tone_variations: { type: Type.OBJECT, description: "Como a missão mudaria com tons de 'Horror', 'Ação' e 'Mistério'." },
+        sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
+        micro_variants: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 pequenas variações, como 'O alvo é um traidor' ou 'O NPC chave está mentindo'." },
     },
+    required: ["title", "categoria", "logline", "summary", "objectives", "complications", "failure_states", "rewards", "numberOfSessions", "environment", "key_npcs", "scaling_hooks"]
+}
+
+
+const getResponseSchema = (category: string, count: number) => {
+    let itemSchema;
+    switch (category) {
+        case 'Local/Cenário':
+            itemSchema = locationSchema;
+            break;
+        case 'Missão/Cenário':
+            itemSchema = missionSchema;
+            break;
+        default:
+            itemSchema = baseItemSchema;
+    }
+    
+    // Always wrap in items array
+    return {
+        type: Type.OBJECT,
+        properties: {
+            items: {
+                type: Type.ARRAY,
+                items: itemSchema,
+            },
+        },
+        required: ["items"]
+    };
 };
 
 
-const buildDefaultPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
-    const { category, rarity, era, breathingStyles, demonArts } = filters;
+const buildItemGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
+    let prompt = `Você é um mestre de RPG e escritor criativo, especializado no universo de Demon Slayer (Kimetsu no Yaiba).
+Sua tarefa é gerar ${count} item(s) de RPG detalhado(s) com base nos filtros fornecidos.
+A resposta DEVE ser um objeto JSON, seguindo o schema fornecido.
+Seja criativo, evocativo e forneça detalhes que inspirem a narrativa e a jogabilidade.
 
-    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de Demon Slayer. Sua tarefa é gerar ${count} ${count > 1 ? 'itens únicos' : 'item único'} com base nos seguintes critérios. A resposta DEVE ser um array JSON de objetos, seguindo o schema fornecido, mesmo que gere apenas um item.
-
-**Categoria:** ${category}
-**Raridade:** ${rarity}
-**Era/Estilo:** ${era}
+Filtros:
+- Categoria: ${filters.category}
+- Raridade: ${filters.rarity}
+- Era/Estilo: ${filters.era}
 `;
 
-    if (category === 'Forma de Respiração' && breathingStyles && breathingStyles.length > 0) {
-        prompt += `**Inspiração (Respirações Existentes):** ${breathingStyles.join(', ')}. Crie uma nova Forma de Respiração que combine elementos ou se inspire nestes estilos.\n`;
+    if (filters.category === 'Forma de Respiração' && filters.breathingStyles.length > 0) {
+        prompt += `- Inspiração (Respirações): ${filters.breathingStyles.join(', ')}\n`;
     }
-
-    if (category === 'Kekkijutsu' && demonArts && demonArts.length > 0) {
-        prompt += `**Inspiração (Kekkijutsus Existentes):** ${demonArts.join(', ')}. Crie um novo Kekkijutsu que combine elementos ou se inspire nestas artes.\n`;
+    if (filters.category === 'Kekkijutsu' && filters.demonArts.length > 0) {
+        prompt += `- Inspiração (Kekkijutsu): ${filters.demonArts.join(', ')}\n`;
+    }
+    if (filters.category === 'Missão/Cenário') {
+        prompt += `- Tom: ${filters.tone}\n`;
+        prompt += `- Intensidade (1-5): ${filters.intensity}\n`;
+        prompt += `- Escala da Ameaça: ${filters.scale}\n`;
+        if(filters.protagonist) prompt += `- Protagonista: ${filters.protagonist}\n`;
+        if(filters.targets) prompt += `- Alvo: ${filters.targets}\n`;
+        if(filters.moodModifiers) prompt += `- Modificadores de Ambiente: ${filters.moodModifiers}\n`;
     }
     
     if (promptModifier) {
-        prompt += `**Modificador Adicional:** ${promptModifier}\n`;
+        prompt += `\nInstrução Adicional: ${promptModifier}\n`;
     }
 
-    prompt += `
-Para cada item, forneça todos os campos definidos no schema. Seja criativo e detalhado.
-Gere o JSON diretamente, sem markdown ou texto extra.
-`;
-
+    prompt += "\nPor favor, gere os itens no formato JSON solicitado."
     return prompt;
-};
+}
 
-const defaultResponseSchema = {
-    type: Type.ARRAY,
-    items: {
-        type: Type.OBJECT,
-        properties: {
-            nome: { type: Type.STRING },
-            categoria: { type: Type.STRING },
-            raridade: { type: Type.STRING },
-            nivel_sugerido: { type: Type.INTEGER },
-            descricao_curta: { type: Type.STRING },
-            descricao: { type: Type.STRING },
-            dano: { type: Type.STRING },
-            dados: { type: Type.STRING },
-            tipo_de_dano: { type: Type.STRING },
-            status_aplicado: { type: Type.STRING },
-            efeitos_secundarios: { type: Type.STRING },
-            ganchos_narrativos: { type: Type.STRING },
-            clima: { type: Type.STRING },
-            bioma: { type: Type.STRING },
-        },
-    },
-};
+// --- End of inlined promptSchemas.ts content ---
+
 
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<{ items: GeneratedItem[] } | { message: string }>
+    req: NextApiRequest,
+    res: NextApiResponse<{ items: GeneratedItem[] } | { message: string }>
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
-  }
-
-  try {
-    const { filters, count, promptModifier } = req.body;
-
-    if (!filters) {
-      return res.status(400).json({ message: 'Filtros são obrigatórios.' });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    const aiClient = getAiClient();
-    let prompt;
-    let responseSchema;
-    let isSingleItem = true;
+    try {
+        const { filters, count = 1, promptModifier } = req.body;
 
-    if (filters.category === 'Missão/Cenário') {
-        prompt = buildMissionPrompt(filters);
-        responseSchema = missionSchema;
-        isSingleItem = false; // The mission generator returns a single object, not an array
-    } else {
-        prompt = buildDefaultPrompt(filters, count || 1, promptModifier);
-        responseSchema = defaultResponseSchema;
+        if (!filters) {
+            return res.status(400).json({ message: 'Filtros são obrigatórios.' });
+        }
+
+        const aiClient = getAiClient();
+        const prompt = buildItemGenerationPrompt(filters, count, promptModifier);
+        const schema = getResponseSchema(filters.category, count);
+
+        const result = await aiClient.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: schema,
+            },
+        });
+        
+        const jsonText = result.text?.trim();
+        if (!jsonText) {
+            throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
+        }
+
+        const data = JSON.parse(jsonText);
+        
+        // The schema returns an object with an "items" property.
+        const items = data.items || [];
+
+        // Ensure the response is always an array
+        const finalItems = Array.isArray(items) ? items : [items];
+
+        res.status(200).json({ items: finalItems });
+
+    } catch (error) {
+        console.error("Erro em /api/generateContent:", error);
+        const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
+        res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${errorMessage}` });
     }
-
-    const result = await aiClient.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema,
-      },
-    });
-    
-    const jsonText = result.text?.trim();
-    if (!jsonText) {
-        throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
-    }
-    
-    let generatedItems;
-
-    if (isSingleItem) {
-        generatedItems = JSON.parse(jsonText);
-    } else {
-        const singleMission = JSON.parse(jsonText);
-        // Wrap the single mission object in an array to match the expected return type
-        generatedItems = [{ ...singleMission, nome: singleMission.title, categoria: 'Missão/Cenário' }];
-    }
-
-    res.status(200).json({ items: generatedItems });
-
-  } catch (error) {
-    console.error("Erro em /api/generateContent:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
-    res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${errorMessage}` });
-  }
 }
