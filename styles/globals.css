@@ -45,13 +45,12 @@ body {
 }
 
 .content-column {
-    overflow-y: auto;
     min-height: 0; /* Prevents grid blowout with flex items inside */
 }
 
-/* Fix for dropdowns being clipped by the filter panel's column */
-.filter-column-wrapper {
-    overflow-y: visible;
+/* Apply scrolling behavior only to designated columns */
+.scrollable-content {
+    overflow-y: auto;
 }
 
 

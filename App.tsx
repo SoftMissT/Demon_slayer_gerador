@@ -161,10 +161,10 @@ const App: React.FC = () => {
     
     const ForgeView = () => (
         <main className="main-content-area">
-            <div className="content-column filter-column-wrapper">
+            <div className="content-column">
                 <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} onResetFilters={handleResetFilters} />
             </div>
-            <div className="content-column">
+            <div className="content-column scrollable-content">
                  <ResultsPanel 
                     items={items} 
                     isLoading={isLoading} 
@@ -176,7 +176,7 @@ const App: React.FC = () => {
                     onClearResults={handleClearResults}
                 />
             </div>
-            <div className="content-column">
+            <div className="content-column scrollable-content">
                  <DetailPanel
                     item={selectedItem}
                     onGenerateVariant={handleGenerateVariant}
