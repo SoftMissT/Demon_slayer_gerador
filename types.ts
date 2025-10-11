@@ -11,7 +11,8 @@ export type Category =
   | 'Forma de Respiração'
   | 'Kekkijutsu'
   | 'Local/Cenário'
-  | 'Missão/Cenário';
+  | 'Missão/Cenário'
+  | 'NPC';
 
 export type Era = 
   | 'Aleatória'
@@ -26,6 +27,8 @@ export type Era =
   | 'Biopunk';
 
 export type Tone = 'investigação' | 'terror' | 'ação' | 'drama' | 'mistério' | 'aventura' | 'político';
+export type Relation = 'Aleatória' | 'Amigo' | 'Inimigo' | 'Neutro' | 'Mentor' | 'Contato';
+export type DetailLevel = 'Baixo' | 'Médio' | 'Alto';
 
 export interface FilterState {
   category: string;
@@ -40,6 +43,10 @@ export interface FilterState {
   protagonist: string;
   targets: string;
   moodModifiers: string;
+  // NPC filters
+  profession: string;
+  relation_with_pcs: string;
+  level_detail: string;
 }
 
 export interface MissionNPC {
@@ -115,6 +122,16 @@ export interface GeneratedItem {
   };
   micro_variants?: string[];
   tone?: string;
+  // For NPCs
+  role?: string;
+  profession?: string;
+  voice_and_mannerisms?: string;
+  inventory_focal?: string;
+  motivation?: string;
+  secret?: string;
+  relationship_to_pcs?: string;
+  hooks?: string[];
+  dialogue_lines?: string[];
 }
 
 // Prompt Engineering Panel Types

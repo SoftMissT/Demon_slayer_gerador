@@ -31,6 +31,10 @@ const App: React.FC = () => {
         protagonist: '',
         targets: '',
         moodModifiers: '',
+        // NPC Filters
+        profession: 'Aleatória',
+        relation_with_pcs: 'Aleatória',
+        level_detail: 'Médio',
     });
 
     const [items, setItems] = useState<GeneratedItem[]>([]);

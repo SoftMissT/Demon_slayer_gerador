@@ -107,6 +107,27 @@ const missionSchema = {
     required: ["title", "categoria", "raridade", "nivel_sugerido", "logline", "summary", "objectives", "complications", "failure_states", "rewards", "numberOfSessions", "environment", "key_npcs", "scaling_hooks"]
 }
 
+const npcSchema = {
+    type: Type.OBJECT,
+    properties: {
+        nome: { type: Type.STRING },
+        categoria: { type: Type.STRING, description: "Deve ser 'NPC'" },
+        raridade: { type: Type.STRING, description: "A 'raridade' ou importância do NPC, ex: Comum, Raro, Lendário." },
+        nivel_sugerido: { type: Type.INTEGER, description: "Nível de desafio/importância do NPC." },
+        descricao_curta: { type: Type.STRING, description: "Aparência curta do NPC." },
+        descricao: { type: Type.STRING, description: "Aparência completa e detalhada e história de fundo do NPC." },
+        role: { type: Type.STRING, description: "O papel do NPC na história (ex: 'Vendedor Misterioso', 'Guarda Leal', 'Informante Ardiloso')." },
+        profession: { type: Type.STRING },
+        voice_and_mannerisms: { type: Type.STRING, description: "Como o NPC fala e se comporta." },
+        inventory_focal: { type: Type.STRING, description: "Um item importante ou propriedade que o NPC possui." },
+        motivation: { type: Type.STRING, description: "O que impulsiona as ações do NPC." },
+        secret: { type: Type.STRING, description: "Um segredo que o NPC esconde." },
+        relationship_to_pcs: { type: Type.STRING, description: "A relação inicial do NPC com os personagens dos jogadores." },
+        hooks: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Três ganchos de missão/plot prontos envolvendo o NPC." },
+        dialogue_lines: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Três exemplos de falas do NPC." },
+    },
+    required: ["nome", "categoria", "raridade", "nivel_sugerido", "descricao_curta", "descricao", "role", "profession", "voice_and_mannerisms", "inventory_focal", "motivation", "secret", "relationship_to_pcs", "hooks", "dialogue_lines"]
+};
 
 const getResponseSchema = (category: string, count: number) => {
     let itemSchema;
@@ -116,6 +137,9 @@ const getResponseSchema = (category: string, count: number) => {
             break;
         case 'Missão/Cenário':
             itemSchema = missionSchema;
+            break;
+        case 'NPC':
+            itemSchema = npcSchema;
             break;
         default:
             itemSchema = baseItemSchema;
@@ -160,6 +184,13 @@ Filtros:
         if(filters.protagonist) prompt += `- Protagonista: ${filters.protagonist}\n`;
         if(filters.targets) prompt += `- Alvo: ${filters.targets}\n`;
         if(filters.moodModifiers) prompt += `- Modificadores de Ambiente: ${filters.moodModifiers}\n`;
+    }
+    if (filters.category === 'NPC') {
+        prompt += `- Tom: ${filters.tone}\n`;
+        prompt += `- Profissão: ${filters.profession}\n`;
+        prompt += `- Relação com PJs: ${filters.relation_with_pcs}\n`;
+        prompt += `- Nível de Detalhe: ${filters.level_detail}\n`;
+        prompt += `Gere um NPC completo e memorável. A 'descricao_curta' deve ser a aparência física, e a 'descricao' deve ser a história de fundo e personalidade.\n`;
     }
     
     if (promptModifier) {

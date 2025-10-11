@@ -18,7 +18,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, onSelect, isSelect
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const canHaveVariants = item.categoria !== 'Missão/Cenário';
+  const canHaveVariants = item.categoria !== 'Missão/Cenário' && item.categoria !== 'NPC';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

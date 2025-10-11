@@ -6,8 +6,9 @@ import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { Slider } from './ui/Slider';
 import type { FilterState, Tone } from '../types';
-import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES } from '../constants';
+import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES, RELATIONS, DETAIL_LEVELS } from '../constants';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
+import { PROFESSIONS_BY_ERA } from '../lib/professionsData';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -29,6 +30,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   };
 
   const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => style.nome);
+  
+  const professionOptions = React.useMemo(() => {
+    const eraKey = filters.era;
+    if (eraKey === 'Aleatória') {
+        return PROFESSIONS_BY_ERA.all;
+    }
+    return PROFESSIONS_BY_ERA[eraKey] || [];
+  }, [filters.era]);
+  
+  // Reset profession if it's not in the new list of options when era changes
+  React.useEffect(() => {
+    if (!professionOptions.includes(filters.profession)) {
+        handleFilterChange('profession', 'Aleatória');
+    }
+  }, [professionOptions, filters.profession]);
+
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
@@ -42,7 +59,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </Select>
 
-        {filters.category !== 'Missão/Cenário' && (
+        {filters.category !== 'Missão/Cenário' && filters.category !== 'NPC' && (
            <Select
             label="Raridade"
             value={filters.rarity}
@@ -98,6 +115,40 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                   <label className="block text-sm font-medium text-gray-400 mb-1">Modificadores de Ambiente</label>
                   <input type="text" value={filters.moodModifiers} onChange={e => handleFilterChange('moodModifiers', e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm text-white" placeholder="Ex: úmido, nevoento, reverente" />
                 </div>
+            </div>
+        )}
+        
+        {/* NPC-specific filters */}
+        {filters.category === 'NPC' && (
+             <div className="space-y-4 border-t border-indigo-900/50 pt-4">
+                <Select
+                  label="Tom do NPC"
+                  value={filters.tone}
+                  onChange={(e) => handleFilterChange('tone', e.target.value as Tone)}
+                >
+                  {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
+                </Select>
+                 <Select
+                  label="Profissão"
+                  value={filters.profession}
+                  onChange={(e) => handleFilterChange('profession', e.target.value)}
+                >
+                  {professionOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                </Select>
+                <Select
+                  label="Relação com PJs"
+                  value={filters.relation_with_pcs}
+                  onChange={(e) => handleFilterChange('relation_with_pcs', e.target.value)}
+                >
+                  {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </Select>
+                <Select
+                  label="Nível de Detalhe"
+                  value={filters.level_detail}
+                  onChange={(e) => handleFilterChange('level_detail', e.target.value)}
+                >
+                  {DETAIL_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                </Select>
             </div>
         )}
 

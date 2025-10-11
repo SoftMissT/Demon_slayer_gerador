@@ -11,7 +11,8 @@ export const CATEGORIES: Category[] = [
   'Forma de Respiração',
   'Kekkijutsu',
   'Local/Cenário',
-  'Missão/Cenário'
+  'Missão/Cenário',
+  'NPC'
 ];
 
 export const RARITIES: Rarity[] = [
@@ -46,6 +47,9 @@ export const TONES: Tone[] = [
     'aventura',
     'político'
 ];
+
+export const RELATIONS: string[] = ['Aleatória', 'Amigo', 'Inimigo', 'Neutro', 'Mentor', 'Contato'];
+export const DETAIL_LEVELS: string[] = ['Médio', 'Baixo', 'Alto'];
 
 // Sample data for Demon Blood Arts as it's not provided elsewhere.
 export const DEMON_BLOOD_ARTS: string[] = [

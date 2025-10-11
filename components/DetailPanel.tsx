@@ -174,6 +174,33 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     </>
 );
 
+const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+    <>
+        <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>
+        <DetailSection title="História e Aparência Completa">{item.descricao || 'N/A'}</DetailSection>
+        <DetailSection title="Voz e Maneirismos">{item.voice_and_mannerisms || 'N/A'}</DetailSection>
+        <DetailSection title="Item Focal / Propriedade">{item.inventory_focal || 'N/A'}</DetailSection>
+        <DetailSection title="Motivação">{item.motivation || 'N/A'}</DetailSection>
+        <DetailSection title="Segredo">{item.secret || 'N/A'}</DetailSection>
+
+        {item.hooks && item.hooks.length > 0 && (
+            <DetailSection title="Ganchos de Aventura">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.hooks?.map((hook, i) => <li key={i}>{hook}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.dialogue_lines && item.dialogue_lines.length > 0 && (
+            <DetailSection title="Exemplos de Diálogo">
+                <ul className="pl-5 space-y-2 italic text-indigo-200">
+                    {item.dialogue_lines?.map((line, i) => <li key={i}>"{line}"</li>)}
+                </ul>
+            </DetailSection>
+        )}
+    </>
+);
+
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -196,6 +223,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   }
   
   const isMission = item.categoria === 'Missão/Cenário';
+  const isNpc = item.categoria === 'NPC';
 
   const handleSave = () => {
     if (editedItem) {
@@ -229,15 +257,17 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         <div className="flex justify-between items-start mb-2 flex-shrink-0">
             <div>
                  <h2 className="text-xl font-bold text-white font-gangofthree">
-                    {isEditing && !isMission ? <input value={editedItem?.nome || ''} onChange={e => handleEditChange('nome', e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-1 text-lg" /> : (item.title || item.nome)}
+                    {isEditing && !isMission && !isNpc ? <input value={editedItem?.nome || ''} onChange={e => handleEditChange('nome', e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-1 text-lg" /> : (item.title || item.nome)}
                  </h2>
                  <p className="text-sm text-indigo-400 pt-1 capitalize">
-                    {isMission ? `${item.categoria} • Tom ${item.tone || 'N/A'}` : `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
+                    {isMission ? `${item.categoria} • Tom ${item.tone || 'N/A'}` : 
+                     isNpc ? `${item.role || item.profession || item.categoria} • ${item.relationship_to_pcs}` :
+                     `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
                  </p>
             </div>
             <div className="flex gap-2">
-                {!isMission && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)}>{isEditing ? 'Cancelar' : 'Editar'}</Button>}
-                {isEditing && !isMission && <Button onClick={handleSave}>Salvar</Button>}
+                {!isMission && !isNpc && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)}>{isEditing ? 'Cancelar' : 'Editar'}</Button>}
+                {isEditing && !isMission && !isNpc && <Button onClick={handleSave}>Salvar</Button>}
                 <button 
                     onClick={() => onToggleFavorite(item)}
                     className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
@@ -249,7 +279,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         </div>
 
         <div className="flex-grow overflow-y-auto pr-2">
-            {isMission ? <MissionDetailView item={item} /> : (
+            {isMission ? <MissionDetailView item={item} /> :
+             isNpc ? <NpcDetailView item={item} /> :
+            (
                 <>
                     <DetailSection title="Descrição Curta">
                         {renderField('Descrição Curta', 'descricao_curta', 'textarea')}
@@ -283,7 +315,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
             )}
         </div>
         
-        {!isEditing && !isMission && (
+        {!isEditing && !isMission && !isNpc && (
             <div className="mt-4 pt-4 border-t border-gray-700 flex-shrink-0">
                 <h4 className="text-sm font-bold text-indigo-400 mb-2 font-gangofthree">Gerar Variação</h4>
                 <div className="grid grid-cols-3 gap-2">
