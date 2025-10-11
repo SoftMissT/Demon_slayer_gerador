@@ -531,14 +531,23 @@ Por favor, gere a nova Forma de Respiração Derivada no formato JSON solicitado
             break;
 
         case 'Kekkijutsu':
-            prompt = `Gere um Kekkijutsu (Arte Demoníaca de Sangue) para um RPG no estilo Demon Slayer. A raridade deve ser adequada à complexidade da arte, não é um filtro.
-O Kekkijutsu deve ser tematicamente inspirado pelos seguintes filtros:
+            prompt = `Você é um game designer especialista em criar habilidades sombrias e temáticas para um RPG no universo de Demon Slayer.
+Sua tarefa é criar UM Kekkijutsu (Arte Demoníaca de Sangue) único e detalhado, seguindo estritamente a estrutura JSON do schema base.
+
+**Filtros de Inspiração:**
 - **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Inspiração (Kekkijutsu Existente)**: ${filters.kekkijutsuInspiration}
 - **Inspiração (Respiração de Caçador)**: ${filters.kekkijutsuInspirationBreathing}
 - **Inspiração (Arma)**: ${getFilterInstruction(filters.kekkijutsuWeapon, 'uma arma como inspiração, ou nenhuma')}
 
-Crie uma arte demoníaca que seja uma manifestação sombria e distorcida das inspirações. Por exemplo, um Kekkijutsu inspirado na 'Respiração da Água' pode ser a capacidade de criar lâminas de sangue pressurizado. Um Kekkijutsu inspirado em 'Machado' pode ser a habilidade de cristalizar o sangue em armas pesadas. Seja criativo e detalhado. Use o schema base, focando em 'descricao', 'efeitos_secundarios', e 'ganchos_narrativos'.
+**Instruções de Geração:**
+1.  **Nome Criativo**: O campo 'nome' deve ser um nome evocativo e único para a arte demoníaca.
+2.  **Descrição Detalhada**: O campo 'descricao' deve explicar vividamente como o Kekkijutsu funciona, sua aparência e seus efeitos no mundo.
+3.  **Manifestação Sombria**: A arte DEVE ser uma manifestação sombria e distorcida das inspirações. Por exemplo, um Kekkijutsu inspirado na 'Respiração da Água' pode ser a capacidade de criar lâminas de sangue pressurizado. Um Kekkijutsu inspirado em 'Machado' pode ser a habilidade de cristalizar o sangue em armas pesadas.
+4.  **Mecânica de Jogo**: Preencha os campos de mecânica ('dano', 'dados', 'tipo_de_dano', 'status_aplicado', 'efeitos_secundarios') com sugestões de regras claras e concisas. Pense em como um mestre de RPG usaria isso em jogo. Por exemplo, em 'efeitos_secundarios', você poderia descrever "Cria uma área de terreno difícil ao redor do alvo" ou "O alvo deve passar em um teste de resistência ou ficará cego por uma rodada."
+5.  **Ganchos Narrativos**: Forneça ideias criativas de como este Kekkijutsu pode ser usado em uma história.
+
+A raridade deve ser adequada à complexidade da arte, não é um filtro direto. Gere o Kekkijutsu no formato JSON solicitado.
 `;
             break;
 
