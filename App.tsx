@@ -5,6 +5,7 @@ import { ResultsPanel } from './components/ResultsPanel';
 import { DetailPanel } from './components/DetailPanel';
 import { AboutModal } from './components/AboutModal';
 import { DetailModal } from './components/DetailModal';
+import { HistoryModal } from './components/HistoryModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { generateContent } from './services/geminiService';
@@ -12,73 +13,77 @@ import useLocalStorage from './hooks/useLocalStorage';
 import type { FilterState, GeneratedItem } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
+const initialFilters: FilterState = {
+    category: 'Arma',
+    rarity: 'Aleatória',
+    era: 'Aleatória',
+    // Mission filters
+    missionTone: 'investigação',
+    intensity: 3,
+    missionScale: 'local',
+    protagonist: '',
+    targets: '',
+    moodModifiers: '',
+    // NPC Filters
+    profession: 'Aleatória',
+    relation_with_pcs: 'Aleatória',
+    level_detail: 'Médio',
+    // Hunter/NPC Origin
+    origem: '',
+    // Hunter Filters
+    hunterWeapon: '',
+    hunterBreathingStyles: [],
+    hunterTone: 'investigação',
+    hunterPersonality: '',
+    hunterArchetype: '',
+    // Oni Filters
+    oniWeapon: '',
+    oniInspirationBreathing: 'Nenhuma',
+    oniPowerLevel: '',
+    oniInspirationKekkijutsu: 'Nenhuma',
+    // Accessory Filters
+    accessoryInspirationKekkijutsu: 'Nenhuma',
+    accessoryInspirationBreathing: 'Nenhuma',
+    accessoryWeaponInspiration: 'Nenhuma',
+    accessoryOriginInspiration: '',
+    // Weapon Filters
+    weaponMetalColor: '',
+    // Location Filters
+    locationTone: 'aventura',
+    locationCountry: '',
+    locationTerrain: '',
+    // World Building Filters
+    wbTone: 'aventura',
+    wbCountry: '',
+    wbScale: 'local',
+    // Breathing Form Filters
+    baseBreathingStyles: [],
+    breathingFormWeapon: '',
+    breathingFormTone: 'ação',
+    breathingFormOrigin: '',
+    breathingFormArchetype: '',
+    // Kekkijutsu Filters
+    kekkijutsuInspiration: 'Nenhuma',
+    kekkijutsuInspirationBreathing: 'Nenhuma',
+    kekkijutsuWeapon: '',
+};
+
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
-    const [filters, setFilters] = useState<FilterState>({
-        category: 'Arma',
-        rarity: 'Aleatória',
-        era: 'Aleatória',
-        // Mission filters
-        missionTone: 'investigação',
-        intensity: 3,
-        missionScale: 'local',
-        protagonist: '',
-        targets: '',
-        moodModifiers: '',
-        // NPC Filters
-        profession: 'Aleatória',
-        relation_with_pcs: 'Aleatória',
-        level_detail: 'Médio',
-        // Hunter/NPC Origin
-        origem: '',
-        // Hunter Filters
-        hunterWeapon: '',
-        hunterBreathingStyles: [],
-        hunterTone: 'investigação',
-        hunterPersonality: '',
-        hunterArchetype: '',
-        // Oni Filters
-        oniWeapon: '',
-        oniInspirationBreathing: 'Nenhuma',
-        oniPowerLevel: '',
-        oniInspirationKekkijutsu: 'Nenhuma',
-        // Accessory Filters
-        accessoryInspirationKekkijutsu: 'Nenhuma',
-        accessoryInspirationBreathing: 'Nenhuma',
-        accessoryWeaponInspiration: 'Nenhuma',
-        accessoryOriginInspiration: '',
-        // Weapon Filters
-        weaponMetalColor: '',
-        // Location Filters
-        locationTone: 'aventura',
-        locationCountry: '',
-        locationTerrain: '',
-        // World Building Filters
-        wbTone: 'aventura',
-        wbCountry: '',
-        wbScale: 'local',
-        // Breathing Form Filters
-        baseBreathingStyles: [],
-        breathingFormWeapon: '',
-        breathingFormTone: 'ação',
-        breathingFormOrigin: '',
-        breathingFormArchetype: '',
-        // Kekkijutsu Filters
-        kekkijutsuInspiration: 'Nenhuma',
-        kekkijutsuInspirationBreathing: 'Nenhuma',
-        kekkijutsuWeapon: '',
-    });
+    const [filters, setFilters] = useState<FilterState>(initialFilters);
 
     const [items, setItems] = useState<GeneratedItem[]>([]);
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('legend-forge-favorites', []);
+    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('legend-forge-history', []);
     
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const headerRef = useRef<HTMLElement>(null);
 
     // Dynamically set header height for full-page layout
@@ -101,9 +106,11 @@ const App: React.FC = () => {
     useEffect(() => {
         if (items.length > 0) {
             const latestItem = items[items.length - 1];
-            setSelectedItem(latestItem);
-            if (window.innerWidth < 1024) { // On mobile, open detail modal automatically
-                setIsDetailModalOpen(true);
+            if (latestItem.id !== selectedItem?.id) {
+                 setSelectedItem(latestItem);
+                if (window.innerWidth < 1024) { // On mobile, open detail modal automatically
+                    setIsDetailModalOpen(true);
+                }
             }
         }
     }, [items]);
@@ -113,9 +120,12 @@ const App: React.FC = () => {
         setError(null);
         try {
             const newItems = await generateContent(filters, count, promptModifier);
-            const itemsWithIds = newItems.map(item => ({ ...item, id: uuidv4() }));
+            const itemsWithIds = newItems.map(item => ({ 
+                ...item, 
+                id: uuidv4(),
+                createdAt: new Date().toISOString() // Add creation timestamp
+            }));
             
-            // If it's a variant, add diff info
             if (originalItem && itemsWithIds.length > 0) {
                 itemsWithIds[0].diff = {
                     summary: `Variação "${promptModifier}" de "${originalItem.nome}"`,
@@ -124,12 +134,14 @@ const App: React.FC = () => {
             }
             
             setItems(prevItems => [...prevItems, ...itemsWithIds]);
+            setHistory(prevHistory => [...itemsWithIds, ...prevHistory]); // Add to the beginning of history
+
         } catch (err: any) {
             setError(err.message || 'Ocorreu um erro desconhecido.');
         } finally {
             setIsLoading(false);
         }
-    }, [filters]);
+    }, [filters, setHistory]);
 
     const handleGenerateVariant = (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
         const promptModifier = `Crie uma variação **${variantType}** do seguinte item: ${JSON.stringify(item)}. A nova variação deve manter a essência do original, mas com um foco claro no novo estilo.`;
@@ -155,6 +167,7 @@ const App: React.FC = () => {
         const update = (list: GeneratedItem[]) => list.map(i => i.id === updatedItem.id ? updatedItem : i);
         setItems(update);
         setFavorites(update);
+        setHistory(update);
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
@@ -165,12 +178,38 @@ const App: React.FC = () => {
         setSelectedItem(null);
     }, []);
     
+    const handleResetFilters = useCallback(() => {
+        setFilters(initialFilters);
+    }, []);
+
+    const handleSelectItemFromHistory = (item: GeneratedItem) => {
+        setSelectedItem(item);
+        setIsHistoryModalOpen(false); // Close history modal on selection
+        if (window.innerWidth < 1024) {
+            setIsDetailModalOpen(true);
+        }
+    };
+
+    const handleDeleteItemFromHistory = (itemId: string) => {
+        setHistory(prev => prev.filter(item => item.id !== itemId));
+    };
+
+    const handleClearHistory = () => {
+        setHistory([]);
+    };
+
     const ForgeView = () => (
         <main className="main-grid-container">
             <div className="grid-column-wrapper">
-                <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} />
+                <FilterPanel 
+                    filters={filters} 
+                    onFiltersChange={setFilters} 
+                    onGenerate={handleGenerate} 
+                    isLoading={isLoading} 
+                    onResetFilters={handleResetFilters}
+                />
             </div>
-            <div className="grid-column-wrapper">
+            <div className="grid-column-wrapper scrollable-content">
                  <ResultsPanel 
                     items={items} 
                     isLoading={isLoading} 
@@ -182,7 +221,7 @@ const App: React.FC = () => {
                     onClearResults={handleClearResults}
                 />
             </div>
-            <div className="hidden lg:block grid-column-wrapper">
+            <div className="hidden lg:block grid-column-wrapper scrollable-content">
                  <DetailPanel
                     item={selectedItem}
                     onGenerateVariant={handleGenerateVariant}
@@ -199,6 +238,7 @@ const App: React.FC = () => {
             <Header
                 ref={headerRef}
                 onAboutClick={() => setIsAboutModalOpen(true)}
+                onHistoryClick={() => setIsHistoryModalOpen(true)}
                 activeView={activeView}
                 onViewChange={setActiveView}
             />
@@ -229,6 +269,14 @@ const App: React.FC = () => {
                 isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
                 onToggleFavorite={handleToggleFavorite}
                 onUpdate={handleUpdateItem}
+            />
+             <HistoryModal
+                isOpen={isHistoryModalOpen}
+                onClose={() => setIsHistoryModalOpen(false)}
+                history={history}
+                onSelect={handleSelectItemFromHistory}
+                onDelete={handleDeleteItemFromHistory}
+                onClear={handleClearHistory}
             />
         </div>
     );

@@ -1,13 +1,16 @@
 import React from 'react';
 import { AboutTooltip } from './AboutTooltip';
+import { HistoryIcon } from './icons/HistoryIcon';
+import { Tooltip } from './ui/Tooltip';
 
 interface HeaderProps {
   onAboutClick: () => void;
+  onHistoryClick: () => void;
   activeView: 'forge' | 'prompt';
   onViewChange: (view: 'forge' | 'prompt') => void;
 }
 
-export const Header = React.forwardRef<HTMLElement, HeaderProps>(({ onAboutClick, activeView, onViewChange }, ref) => {
+export const Header = React.forwardRef<HTMLElement, HeaderProps>(({ onAboutClick, onHistoryClick, activeView, onViewChange }, ref) => {
     
     const getButtonClasses = (view: 'forge' | 'prompt') => {
         const base = "px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200";
@@ -36,6 +39,15 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(({ onAboutClick
       </nav>
 
       <div className="flex items-center gap-4">
+        <Tooltip text="Histórico de Gerações">
+            <button 
+                onClick={onHistoryClick}
+                className="text-gray-400 hover:text-white transition-colors"
+                aria-label="Histórico de Gerações"
+            >
+                <HistoryIcon className="w-6 h-6" />
+            </button>
+        </Tooltip>
         <AboutTooltip onClick={onAboutClick} />
       </div>
     </header>

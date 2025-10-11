@@ -398,7 +398,7 @@ const getResponseSchema = (category: string) => {
  * @param defaultValue A default value to use if the instruction is not desired.
  */
 const getFilterInstruction = (value: string | undefined | null, instruction: string): string => {
-    if (!value || value === 'Aleatório' || value === 'Aleatória') {
+    if (!value || value === 'Aleatório' || value === 'Aleatória' || value.trim() === '') {
         return instruction;
     }
     return value;

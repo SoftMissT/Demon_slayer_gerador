@@ -1,4 +1,5 @@
 
+
 // FIX: Define and export all types. This file should only contain type definitions.
 
 export type Category = 'Aleatória' | 'Arma' | 'Acessório' | 'Caçador' | 'Inimigo/Oni' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missão/Cenário' | 'NPC' | 'World Building';
@@ -100,6 +101,7 @@ type BaseGeneratedItem = {
     nivel_sugerido: number;
     descricao_curta: string;
     diff?: Diff; // Added for variants
+    createdAt?: string; // Added for history feature
 };
 
 // For Arma, Acessório, Kekkijutsu, etc.

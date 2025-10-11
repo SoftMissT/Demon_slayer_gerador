@@ -64,3 +64,7 @@ body {
     min-height: 0; /* Prevents grid children from overflowing their container */
     height: 100%;
 }
+
+.scrollable-content {
+    overflow-y: auto;
+}

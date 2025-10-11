@@ -1,9 +1,9 @@
-
 import React from 'react';
 import type { GeneratedItem } from '../types';
 import { ResultCard } from './ResultCard';
 import { ResultCardSkeleton } from './ResultCardSkeleton';
 import { Button } from './ui/Button';
+import { TrashIcon } from './icons/TrashIcon';
 
 interface ResultsPanelProps {
   items: GeneratedItem[];
@@ -27,7 +27,8 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ items, isLoading, se
             disabled={items.length === 0}
             className="text-xs !py-1 !px-2"
         >
-            Limpar
+            <TrashIcon className="w-4 h-4 mr-1" />
+            Limpar Tudo
         </Button>
       </div>
       <div className="overflow-y-auto space-y-2 pr-2 flex-grow">

@@ -7,6 +7,9 @@ import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
+import { buildPlainTextForItem } from '../lib/textFormatters';
+import { ClipboardIcon } from './icons/ClipboardIcon';
+import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface DetailPanelProps {
   item: GeneratedItem | null;
@@ -445,11 +448,20 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setEditedItem(item);
     setIsEditing(false); // Always reset editing state when item changes
   }, [item]);
+
+  const handleCopy = () => {
+    if (!item) return;
+    const textToCopy = buildPlainTextForItem(item);
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!item) {
     return (
@@ -516,9 +528,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                      `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
                  </p>
             </div>
-            <div className="flex gap-2">
-                {canEdit && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)}>{isEditing ? 'Cancelar' : 'Editar'}</Button>}
-                {isEditing && canEdit && <Button onClick={handleSave}>Salvar</Button>}
+            <div className="flex gap-1 items-center">
+                <Button variant="ghost" onClick={handleCopy} className="!p-2">
+                    {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                </Button>
                 <button 
                     onClick={() => onToggleFavorite(item)}
                     className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
@@ -582,6 +595,12 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 </div>
             </div>
         )}
+         {isEditing && canEdit && (
+             <div className="mt-4 pt-4 border-t border-gray-700 flex-shrink-0 flex gap-2">
+                <Button onClick={handleSave} className="w-full">Salvar Alterações</Button>
+                <Button variant="secondary" onClick={() => setIsEditing(false)} className="w-full">Cancelar</Button>
+            </div>
+         )}
     </Card>
   );
 };
