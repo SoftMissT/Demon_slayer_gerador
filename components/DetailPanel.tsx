@@ -55,6 +55,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'objectives' in item && item.objectives && item.objectives.length > 0 && (
             <DetailSection title="Ganchos e Objetivos">
                 <ul className="list-disc pl-5 space-y-1">
+                    {/* FIX: Explicitly type 'obj' to resolve implicit 'any' error. */}
                     {item.objectives?.map((obj: any, i: number) => <li key={i}>{obj}</li>)}
                 </ul>
             </DetailSection>
@@ -552,7 +553,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 </button>
             </div>
         </div>
-{/* FIX: Corrected syntax error and completed the conditional rendering for all item categories. */}
         <div className="flex-grow overflow-y-auto pr-2">
             {isMission ? <MissionDetailView item={item} /> :
              isNpc ? <NpcDetailView item={item} /> :
@@ -560,6 +560,23 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
              isOni ? <OniDetailView item={item} /> :
              isWorldBuilding ? <WorldBuildingDetailView item={item} /> :
              isBreathingForm ? <BreathingFormDetailView item={item} /> :
+             isKekkijutsu ? (
+                <>
+                    <DetailSection title="Descrição Curta">
+                        {renderField('Descrição Curta', 'descricao_curta', 'textarea')}
+                    </DetailSection>
+
+                    <DetailSection title="Descrição Longa">
+                      {renderField('Descrição Longa', 'descricao', 'textarea')}
+                    </DetailSection>
+
+                    {(typeof item.ganchos_narrativos === 'string' && item.ganchos_narrativos && item.ganchos_narrativos !== "N/A") && 
+                        <DetailSection title="Ganchos Narrativos">
+                            {renderField('Ganchos Narrativos', 'ganchos_narrativos', 'textarea')}
+                        </DetailSection>
+                    }
+                </>
+             ) :
             (
                 <>
                     <DetailSection title="Descrição Curta">
