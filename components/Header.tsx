@@ -1,18 +1,16 @@
 import React from 'react';
-import { AboutTooltip } from './AboutTooltip';
 import { HistoryIcon } from './icons/HistoryIcon';
 import { Tooltip } from './ui/Tooltip';
 
 interface HeaderProps {
-  onAboutClick: () => void;
   onHistoryClick: () => void;
-  activeView: 'forge' | 'prompt';
-  onViewChange: (view: 'forge' | 'prompt') => void;
+  activeView: 'forge' | 'prompt' | 'sobre';
+  onViewChange: (view: 'forge' | 'prompt' | 'sobre') => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick, onHistoryClick, activeView, onViewChange }) => {
+export const Header: React.FC<HeaderProps> = ({ onHistoryClick, activeView, onViewChange }) => {
     
-    const getButtonClasses = (view: 'forge' | 'prompt') => {
+    const getButtonClasses = (view: 'forge' | 'prompt' | 'sobre') => {
         const base = "px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200";
         if (activeView === view) {
             return `${base} bg-indigo-600 text-white`;
@@ -36,6 +34,9 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onHistoryClick, ac
         <button onClick={() => onViewChange('prompt')} className={getButtonClasses('prompt')}>
             Alquimia
         </button>
+        <button onClick={() => onViewChange('sobre')} className={getButtonClasses('sobre')}>
+            Sobre
+        </button>
       </nav>
 
       <div className="flex items-center gap-4">
@@ -48,7 +49,6 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onHistoryClick, ac
                 <HistoryIcon className="w-6 h-6" />
             </button>
         </Tooltip>
-        <AboutTooltip onClick={onAboutClick} />
       </div>
     </header>
   );

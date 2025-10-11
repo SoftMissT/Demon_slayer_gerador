@@ -4,30 +4,79 @@ import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { DetailPanel } from './components/DetailPanel';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
-import { AboutModal } from './components/AboutModal';
+import { AboutPanel } from './components/AboutPanel';
 import { HistoryModal } from './components/HistoryModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
+import { Footer } from './components/Footer';
 import type { FilterState, GeneratedItem } from './types';
 import { generateContent } from './services/geminiService';
 import useLocalStorage from './hooks/useLocalStorage';
 
 const INITIAL_FILTERS: FilterState = {
-    category: 'Aleatória',
-    rarity: 'Aleatória',
-    era: 'Aleatória',
+    category: 'Caçador',
+    // Hunter
+    hunterWeapon: 'Aleatório',
+    hunterBreathingStyles: [],
+    hunterAccessory: 'Aleatório',
+    hunterEra: 'Aleatória',
+    hunterPersonality: 'Aleatório',
+    hunterOrigin: 'Aleatória',
+    hunterArchetype: 'Aleatório',
+    // Accessory
+    accessoryRarity: 'Aleatória',
+    accessoryEra: 'Aleatória',
+    accessoryKekkijutsuInspiration: 'Nenhuma',
+    accessoryBreathingInspiration: 'Nenhuma',
+    accessoryWeaponInspiration: 'Aleatório',
+    accessoryOrigin: 'Aleatória',
+    // Weapon
+    weaponRarity: 'Aleatória',
+    weaponMetalColor: 'Aleatória',
+    weaponEra: 'Aleatória',
+    weaponType: 'Aleatório',
+    // Location
+    locationTone: 'aventura',
+    locationCountry: 'Aleatório',
+    locationEra: 'Aleatória',
+    locationTerrain: 'Aleatório',
+    // World Building
+    wbTone: 'aventura',
+    wbCountry: 'Aleatório',
+    wbEra: 'Aleatória',
+    wbThreatScale: 'Aleatória',
+    wbLocation: 'Aleatório',
+    // Breathing Form
+    breathingFormEra: 'Aleatória',
+    breathingFormWeapon: 'Aleatório',
+    baseBreathingStyles: [],
+    breathingFormTone: 'ação',
+    breathingFormOrigin: 'Aleatória',
+    breathingFormArchetype: 'Aleatório',
+    // Kekkijutsu
+    kekkijutsuEra: 'Aleatória',
+    kekkijutsuKekkijutsuInspiration: 'Nenhuma',
+    kekkijutsuBreathingInspiration: 'Nenhuma',
+    kekkijutsuWeaponInspiration: 'Aleatório',
+    // NPC
+    npcOrigin: 'Aleatória',
+    npcProfession: 'Aleatório',
+    npcEra: 'Aleatória',
+    // Oni
+    oniPowerLevel: 'Aleatório',
+    oniInspirationKekkijutsu: 'Nenhuma',
+    oniInspirationBreathing: 'Nenhuma',
+    oniWeapon: 'Aleatório',
+    // Mission
     missionTone: 'aventura',
     intensity: 3,
     missionScale: 'local',
     protagonist: '',
     targets: '',
     moodModifiers: '',
-    baseBreathingStyle: 'Aleatória',
-    kekkijutsuInspiration: 'Nenhuma',
 };
 
 const App: React.FC = () => {
-    const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
-    const [isAboutModalOpen, setAboutModalOpen] = useState(false);
+    const [activeView, setActiveView] = useState<'forge' | 'prompt' | 'sobre'>('forge');
     const [isHistoryModalOpen, setHistoryModalOpen] = useState(false);
     
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
@@ -69,7 +118,10 @@ const App: React.FC = () => {
         }
 
         try {
-            const currentFilters = itemToVary ? { category: itemToVary.categoria, rarity: itemToVary.raridade, era: itemToVary.era } as FilterState : filters;
+            // FIX: The generated object for currentFilters was not a valid FilterState.
+            // When varying an item, the prompt modifier already contains the full item context.
+            // We only need to reset filters and set the correct category.
+            const currentFilters = itemToVary ? { ...INITIAL_FILTERS, category: itemToVary.categoria } as FilterState : filters;
             const newItems = await generateContent(currentFilters, count, promptModifier);
             
             setItems(prev => [...prev, ...newItems]);
@@ -118,7 +170,7 @@ const App: React.FC = () => {
     };
 
     const handleResetFilters = () => {
-        setFilters(INITIAL_FILTERS);
+        setFilters(prev => ({ ...INITIAL_FILTERS, category: prev.category }));
     };
 
     const handleHistorySelect = (item: GeneratedItem) => {
@@ -187,7 +239,6 @@ const App: React.FC = () => {
     return (
         <div className="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
             <Header
-                onAboutClick={() => setAboutModalOpen(true)}
                 onHistoryClick={() => setHistoryModalOpen(true)}
                 activeView={activeView}
                 onViewChange={setActiveView}
@@ -195,15 +246,22 @@ const App: React.FC = () => {
             
             {error && <div className="p-4"><ErrorDisplay message={error} onDismiss={() => setError(null)} /></div>}
             
-            {activeView === 'forge' ? (
-                <ForgeView />
-            ) : (
-                <div className="p-4 flex-grow max-h-[calc(100vh-80px)] overflow-y-auto">
-                    <PromptEngineeringPanel />
-                </div>
-            )}
+            <div className="flex-grow flex flex-col overflow-hidden">
+                {activeView === 'forge' && <ForgeView />}
+                {activeView === 'prompt' && (
+                    <div className="p-4 flex-grow max-h-[calc(100vh-80px-28px)] overflow-y-auto">
+                        <PromptEngineeringPanel />
+                    </div>
+                )}
+                {activeView === 'sobre' && (
+                    <div className="p-4 flex-grow max-h-[calc(100vh-80px-28px)] overflow-y-auto">
+                        <AboutPanel />
+                    </div>
+                )}
+            </div>
             
-            <AboutModal isOpen={isAboutModalOpen} onClose={() => setAboutModalOpen(false)} />
+            <Footer onViewChange={setActiveView} />
+
             <HistoryModal 
                 isOpen={isHistoryModalOpen} 
                 onClose={() => setHistoryModalOpen(false)}

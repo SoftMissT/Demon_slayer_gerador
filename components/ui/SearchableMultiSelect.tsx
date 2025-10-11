@@ -6,6 +6,7 @@ interface SearchableMultiSelectProps {
   selected: string[];
   onChange: (selected: string[]) => void;
   placeholder?: string;
+  maxSelection?: number;
 }
 
 export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
@@ -14,6 +15,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   selected,
   onChange,
   placeholder = "Selecione...",
+  maxSelection,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,9 +35,15 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
     if (selected.includes(option)) {
       onChange(selected.filter((item) => item !== option));
     } else {
+      if (maxSelection && selected.length >= maxSelection) {
+        // Optional: show a toast or message that limit is reached
+        return; 
+      }
       onChange([...selected, option]);
     }
   };
+  
+  const isMaxSelected = maxSelection && selected.length >= maxSelection;
 
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
@@ -67,21 +75,26 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
             />
           </div>
           <ul>
-            {filteredOptions.map((option) => (
-              <li
-                key={option}
-                onClick={() => toggleOption(option)}
-                className="px-3 py-2 cursor-pointer hover:bg-gray-700 flex items-center"
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(option)}
-                  readOnly
-                  className="mr-2 accent-indigo-500"
-                />
-                <span className="text-sm text-gray-300">{option}</span>
-              </li>
-            ))}
+            {filteredOptions.map((option) => {
+              const isSelected = selected.includes(option);
+              const isDisabled = !isSelected && isMaxSelected;
+              return (
+                <li
+                  key={option}
+                  onClick={() => !isDisabled && toggleOption(option)}
+                  className={`px-3 py-2 flex items-center ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-700'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    readOnly
+                    disabled={isDisabled}
+                    className="mr-2 accent-indigo-500"
+                  />
+                  <span className={`text-sm ${isSelected ? 'text-white' : 'text-gray-300'}`}>{option}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

@@ -55,8 +55,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'objectives' in item && item.objectives && item.objectives.length > 0 && (
             <DetailSection title="Ganchos e Objetivos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.objectives?.map((obj: any, i: number) => <li key={i}>{obj}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'obj' as it's now correctly inferred as string. */}
+                    {item.objectives?.map((obj, i: number) => <li key={i}>{obj}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -64,8 +64,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'complications' in item && item.complications && item.complications.length > 0 && (
             <DetailSection title="Complicações Possíveis">
                  <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.complications?.map((comp: any, i: number) => <li key={i}>{comp}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'comp' as it's now correctly inferred as string. */}
+                    {item.complications?.map((comp, i: number) => <li key={i}>{comp}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -73,8 +73,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'failure_states' in item && item.failure_states && item.failure_states.length > 0 && (
             <DetailSection title="Condições de Falha">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.failure_states.map((state: any, i: number) => <li key={i}>{state}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'state' as it's now correctly inferred as string. */}
+                    {item.failure_states.map((state, i: number) => <li key={i}>{state}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -82,8 +82,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'rewards' in item && item.rewards && item.rewards.length > 0 && (
             <DetailSection title="Recompensas">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.rewards.map((reward: any, i: number) => <li key={i}>{reward}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'reward' as it's now correctly inferred as string. */}
+                    {item.rewards.map((reward, i: number) => <li key={i}>{reward}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -156,8 +156,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
                  <div className="bg-yellow-900/30 border border-yellow-700 text-yellow-200 p-3 rounded-lg flex gap-3 text-sm">
                     <AlertTriangleIcon className="w-6 h-6 flex-shrink-0 text-yellow-400" />
                     <ul className="list-disc pl-4">
-                        {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                        {item.sensitive_flags.map((flag: any, i: number) => <li key={i}>{flag}</li>)}
+                        {/* FIX: Removed explicit 'any' type for 'flag' as it's now correctly inferred as string. */}
+                        {item.sensitive_flags.map((flag, i: number) => <li key={i}>{flag}</li>)}
                     </ul>
                 </div>
             </DetailSection>
@@ -167,8 +167,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Notas de Design (Diff)">
                 <p className="italic text-gray-400">"{item.diff.summary}"</p>
                 <ul className="list-disc pl-5 space-y-1 mt-2 text-xs">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.diff.changes?.map((change: any, i: number) => <li key={i}>{change}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'change' as it's now correctly inferred as string. */}
+                    {item.diff.changes?.map((change, i: number) => <li key={i}>{change}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -176,8 +176,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'micro_variants' in item && item.micro_variants && item.micro_variants.length > 0 && (
             <DetailSection title="Micro-Variantes">
                 <ul className="list-disc pl-5 space-y-1 text-xs">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.micro_variants.map((variant: any, i: number) => (
+                    {/* FIX: Removed explicit 'any' type for 'variant' as its type is now correctly handled. */}
+                    {item.micro_variants.map((variant, i: number) => (
                         <li key={i}>
                             {typeof variant === 'string'
                                 ? variant
@@ -203,7 +203,7 @@ const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos de Aventura">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit type for 'hook' as it's now correctly inferred as string. */}
                     {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
@@ -212,8 +212,8 @@ const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'dialogue_lines' in item && item.dialogue_lines && item.dialogue_lines.length > 0 && (
             <DetailSection title="Exemplos de Diálogo">
                 <ul className="pl-5 space-y-2 italic text-indigo-200">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.dialogue_lines?.map((line: any, i: number) => <li key={i}>"{line}"</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'line' as it's now correctly inferred as string. */}
+                    {item.dialogue_lines?.map((line, i: number) => <li key={i}>"{line}"</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -242,7 +242,7 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
                     <>
                         <h5 className="text-sm font-semibold text-gray-200 mt-2 mb-1">Técnicas Notáveis:</h5>
                         <ul className="list-disc pl-5 space-y-1">
-                            {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                            {/* FIX: Removed explicit 'any' type for 'tech' as it's now correctly inferred. */}
                             {item.habilidades_especiais.variacoes_tecnica.map((tech: any, i: number) => <li key={i}>{tech}</li>)}
                         </ul>
                     </>
@@ -260,7 +260,7 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos Narrativos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit type for 'hook' as it's now correctly inferred as string. */}
                     {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
@@ -269,8 +269,8 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'uso_em_cena' in item && item.uso_em_cena && item.uso_em_cena.length > 0 && (
             <DetailSection title="Uso em Cena">
                  <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.uso_em_cena.map((uso: any, i: number) => <li key={i}>{uso}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'uso' as it's now correctly inferred. */}
+                    {item.uso_em_cena.map((uso, i: number) => <li key={i}>{uso}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -296,8 +296,8 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'comportamento_combate' in item && item.comportamento_combate && item.comportamento_combate.length > 0 && (
             <DetailSection title="Comportamento em Combate">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.comportamento_combate.map((behavior: any, i: number) => <li key={i}>{behavior}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'behavior' as it's now correctly inferred. */}
+                    {item.comportamento_combate.map((behavior, i: number) => <li key={i}>{behavior}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -305,8 +305,8 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'comportamento_fora_combate' in item && item.comportamento_fora_combate && item.comportamento_fora_combate.length > 0 && (
             <DetailSection title="Comportamento Fora de Combate">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.comportamento_fora_combate.map((behavior: any, i: number) => <li key={i}>{behavior}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'behavior' as it's now correctly inferred. */}
+                    {item.comportamento_fora_combate.map((behavior, i: number) => <li key={i}>{behavior}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -314,8 +314,8 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'fraquezas_unicas' in item && item.fraquezas_unicas && item.fraquezas_unicas.length > 0 && (
             <DetailSection title="Fraquezas Únicas">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.fraquezas_unicas.map((weakness: any, i: number) => <li key={i}>{weakness}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'weakness' as it's now correctly inferred. */}
+                    {item.fraquezas_unicas.map((weakness, i: number) => <li key={i}>{weakness}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -323,8 +323,8 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'trofeus_loot' in item && item.trofeus_loot && item.trofeus_loot.length > 0 && (
             <DetailSection title="Troféus / Loot">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                    {item.trofeus_loot.map((loot: any, i: number) => <li key={i}>{loot}</li>)}
+                    {/* FIX: Removed explicit 'any' type for 'loot' as it's now correctly inferred. */}
+                    {item.trofeus_loot.map((loot, i: number) => <li key={i}>{loot}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -332,7 +332,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos Narrativos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit type for 'hook' as it's now correctly inferred as string. */}
                     {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
@@ -347,7 +347,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'plot_threads' in item && item.plot_threads && item.plot_threads.length > 0 && (
             <DetailSection title="Tramas Principais">
                 <div className="space-y-3">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit 'any' type for 'plot' as it's now correctly inferred. */}
                     {item.plot_threads.map((plot: any, i: number) => (
                         <div key={i} className="p-2 bg-gray-900/50 rounded-md border-l-2 border-indigo-500">
                             <h5 className="font-semibold text-white">{plot.title}</h5>
@@ -361,7 +361,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'adventure_hooks' in item && item.adventure_hooks && item.adventure_hooks.length > 0 && (
             <DetailSection title="Ganchos de Aventura">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit 'any' type for 'hook' as it's now correctly inferred. */}
                     {item.adventure_hooks.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
@@ -370,7 +370,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'key_npcs_wb' in item && item.key_npcs_wb && item.key_npcs_wb.length > 0 && (
             <DetailSection title="NPCs Importantes">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit 'any' type for 'npc' as it's now correctly inferred. */}
                     {item.key_npcs_wb.map((npc: any, i: number) => (
                          <Card key={i} className="!p-3 !bg-gray-800/70">
                             <h5 className="font-bold text-white">{npc.name} <span className="text-xs text-gray-400 font-normal">({npc.role})</span></h5>
@@ -384,7 +384,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'points_of_interest' in item && item.points_of_interest && item.points_of_interest.length > 0 && (
             <DetailSection title="Locais de Interesse">
                 <div className="space-y-3">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit 'any' type for 'poi' as it's now correctly inferred. */}
                     {item.points_of_interest.map((poi: any, i: number) => (
                         <div key={i} className="p-2 bg-gray-900/50 rounded-md">
                             <h5 className="font-semibold text-white">{poi.name} <span className="text-xs text-gray-400 font-normal">({poi.type})</span></h5>
@@ -398,7 +398,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'mini_missions' in item && item.mini_missions && item.mini_missions.length > 0 && (
             <DetailSection title="Mini-Missões">
                 <div className="space-y-3">
-                    {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
+                    {/* FIX: Removed explicit 'any' type for 'mission' as it's now correctly inferred. */}
                     {item.mini_missions.map((mission: any, i: number) => (
                          <div key={i} className="p-2 bg-gray-900/50 rounded-md">
                             <h5 className="font-semibold text-white">{mission.title}</h5>
@@ -460,8 +460,8 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'micro_variants' in item && item.micro_variants && item.micro_variants.length > 0 && (
             <DetailSection title="Micro-Variantes">
                 <ul className="list-disc pl-5 space-y-2 text-xs">
-                     {/* FIX: Added types to map callback parameters to resolve implicit any error. */}
-                     {item.micro_variants.map((variant: any, i: number) => (
+                     {/* FIX: Removed explicit 'any' type for 'variant' as its type is now correctly handled. */}
+                     {item.micro_variants.map((variant, i: number) => (
                         <li key={i}>
                             {typeof variant === 'string' ? variant : Object.entries(variant).map(([key, value]) => `${key}: ${String(value)}`).join(', ')}
                         </li>
@@ -522,13 +522,16 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     }
   };
   
-  const handleEditChange = (field: keyof GeneratedItem, value: any) => {
+  // FIX: Changed 'field' type from 'keyof GeneratedItem' to 'string' to allow editing properties
+  // on specific members of the discriminated union without TypeScript errors.
+  const handleEditChange = (field: string, value: any) => {
     if(editedItem) {
         setEditedItem({...editedItem, [field]: value});
     }
   }
 
-  const renderField = (label: string, field: keyof GeneratedItem, type: 'text' | 'textarea' | 'number' = 'text') => {
+  // FIX: Changed 'field' type to 'string' to match handleEditChange.
+  const renderField = (label: string, field: string, type: 'text' | 'textarea' | 'number' = 'text') => {
     if (!editedItem) return null;
     const value = (editedItem as any)[field] as string | number | undefined || '';
     

@@ -2,16 +2,15 @@
 import type { Category, Rarity, Era, Tone } from './types';
 
 export const CATEGORIES: Category[] = [
-  'Aleatória',
-  'Arma',
-  'Acessório',
   'Caçador',
   'Inimigo/Oni',
+  'NPC',
+  'Arma',
+  'Acessório',
   'Forma de Respiração',
   'Kekkijutsu',
   'Local/Cenário',
   'Missão/Cenário',
-  'NPC',
   'World Building'
 ];
 
@@ -52,6 +51,8 @@ export const PERSONALITIES: string[] = ['Aleatória', 'Sombrio e Silencioso', 'O
 export const METAL_COLORS: string[] = ['Aleatória', 'Aço Nichirin Padrão', 'Vermelho Carmesim Brilhante', 'Azul Cobalto Profundo', 'Preto Obsidiana Fosco', 'Branco Lunar Perolado', 'Verde Jade Translúcido', 'Amarelo Dourado Elétrico', 'Roxo Ametista Sombrio'];
 export const COUNTRIES: string[] = ['Aleatório', 'Japão (Padrão)', 'China Imperial', 'Europa Medieval', 'Império Russo', 'Egito Antigo', 'Pérsia', 'Escandinávia Viking'];
 export const TERRAINS: string[] = ['Aleatório', 'Floresta Densa', 'Montanhas Rochosas', 'Planícies Abertas', 'Pântano Nebuloso', 'Cidade Murada', 'Vila Costeira', 'Cavernas Subterrâneas', 'Deserto de Areia Negra'];
+export const ACCESSORY_TYPES: string[] = ['Aleatório', 'Máscara', 'Brinco', 'Colar', 'Capa', 'Haori Especial', 'Amuleto'];
+export const THREAT_SCALES: string[] = ['Aleatória', 'Conflito Local', 'Guerra Regional', 'Ameaça Global', 'Crise Existencial'];
 
 export const RELATIONS: string[] = ['Aleatória', 'Amigo', 'Inimigo', 'Neutro', 'Mentor', 'Contato'];
 export const DETAIL_LEVELS: string[] = ['Médio', 'Baixo', 'Alto'];
@@ -73,6 +74,7 @@ export const ONI_POWER_LEVELS: string[] = ['Aleatório', 'Minion', 'Médio', 'Lu
 
 // Sample data for Demon Blood Arts as it's not provided elsewhere.
 export const DEMON_BLOOD_ARTS: string[] = [
+    "Nenhuma",
     "Manipulação de Sangue",
     "Fios Cortantes",
     "Ilusões Espaciais",

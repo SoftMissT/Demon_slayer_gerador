@@ -55,6 +55,7 @@ const HistoryItem: React.FC<{
             onClick={() => onSelect(item)}
         >
             <div className="flex-grow overflow-hidden">
+                {/* FIX: The check for 'title' in item is now type-safe due to updates in types.ts */}
                 <p className="font-bold truncate text-white">{('title' in item && item.title) || item.nome || 'Item Sem Nome'}</p>
                 <p className="text-xs text-indigo-400">{item.categoria} <span className="text-gray-500">• {formattedDate}</span></p>
             </div>

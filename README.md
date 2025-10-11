@@ -1,40 +1,34 @@
-# Forja de Lendas - Ferramenta de Fã para RPG (Google Gemini)
+# 🛠️ Kimetsu Forge (Forge of Legends)
 
-![Forja de Lendas](https://img.shields.io/badge/Forja%20de%20Lendas-fan--made-brightgreen)
+Kimetsu Forge is a fan-made creative tool for tabletop RPG masters and players, inspired by the dark and thrilling world of Demon Slayer (Kimetsu no Yaiba).  
+It helps generate weapons, enemies, breathing forms, NPCs, and entire scenarios using generative AI.
 
-## Descrição
+## 🧩 Technologies
+- Google Gemini API – Core text generation engine.  
+- GPT API Integration – Provides extended narrative and creative support.  
+- Next.js & React – Modern, high-performance frontend architecture.  
+- Tailwind CSS – Fast, responsive, and customizable design.
 
-**Forja de Lendas** é uma ferramenta não oficial, criada por fãs para a comunidade de RPG, com o objetivo de ajudar mestres e jogadores a gerar ideias, NPCs, armas e cenários inspirados no universo de *Demon Slayer: Kimetsu no Yaiba*. O projeto utiliza o poder da IA do Google Gemini para criar conteúdo criativo e detalhado, agilizando a preparação de sessões e inspirando novas aventuras.
+## ⚙️ What You Can Do
+- Generate RPG elements like weapons, demons, breathing techniques, and story hooks.  
+- Create detailed image prompts optimized for platforms like Midjourney and DALL·E.  
+- Speed up your storytelling process with AI-assisted content generation.
 
-## Como Funciona
+## ⚠️ Legal Notice
+This is an unofficial fan project created for educational and entertainment purposes only.  
+Demon Slayer: Kimetsu no Yaiba is a property of Koyoharu Gotouge, Shueisha, and Ufotable.  
+All rights to the original universe and characters belong to their respective owners.
 
-A aplicação integra a IA do **Google Gemini** para interpretar os filtros selecionados pelo usuário e gerar conteúdo textual rico e estruturado. O objetivo é fornecer um ponto de partida sólido que os mestres e jogadores possam adaptar para suas próprias campanhas. O conteúdo gerado é uma sugestão, e a criatividade do mestre é o ingrediente final para dar vida a essas ideias na mesa de jogo.
+Watch the anime legally on Crunchyroll:  
+👉 [Demon Slayer on Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
 
-## Uso e Responsabilidade
+## 👥 Credits
+Created by: SoftMisst & Mathzin  
+Collaborators: ZeratulBr, Cardhial, VK, Dan, Akira
 
-Esta é uma ferramenta de auxílio criativo. Todo o conteúdo gerado deve ser revisado e adaptado pelo mestre do jogo para garantir que se encaixe perfeitamente em sua campanha. A Forja de Lendas não se responsabiliza pelo uso do conteúdo gerado.
+## 💬 About This Project
+Kimetsu Forge is designed to assist Game Masters by accelerating idea generation and worldbuilding.  
+The generated content is fictional and should be customized to fit each player’s story or campaign style.
 
-## Limitações e Privacidade
-
-O histórico de gerações é salvo localmente no seu navegador (LocalStorage) e não é sincronizado entre dispositivos. Nenhuma informação pessoal ou de geração é enviada para um servidor central, garantindo sua privacidade.
-
-## Créditos e Agradecimentos
-
-Este projeto foi construído com a paixão e o esforço de uma equipe dedicada.
-
-*   **Criadores:** SoftMissT & Mathzin
-*   **Colaboradores:** ZeratulBr, Cardhial, VK, Dan
-
-Agradecemos a toda a comunidade de RPG e aos fãs de Demon Slayer por inspirarem a criação desta ferramenta.
-
-## Apoie o Projeto
-
-Se você gostou desta ferramenta, considere apoiar os criadores. Seu apoio nos ajuda a manter e desenvolver novos projetos para a comunidade.
-
----
-
-### Aviso Legal
-
-Este é um projeto de fã, não oficial. Os direitos autorais de *Demon Slayer: Kimetsu no Yaiba* pertencem a Koyoharu Gotouge, Shueisha e Ufotable.
-
-**Assista Demon Slayer legalmente em [Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba).**
+## ❤️ Support the Project
+If you enjoy this tool and want to see more creative projects like it, please support the developer. Every gesture helps.
