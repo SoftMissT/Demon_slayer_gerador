@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { PromptGenerationResult } from '../../types';
 
 // Helper to format Midjourney params into a string

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from './ui/Modal';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { GeneratedItem } from '../types';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';

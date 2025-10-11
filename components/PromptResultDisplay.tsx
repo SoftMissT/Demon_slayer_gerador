@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { PromptGenerationResult } from '../types';
 
 interface PromptResultDisplayProps {

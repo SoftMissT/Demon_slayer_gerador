@@ -1,18 +1,11 @@
 import React from 'react';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
-import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { Slider } from './ui/Slider';
-// FIX: Import 'Category', 'Era', and 'Rarity' types to resolve 'Cannot find name' errors.
-import type { FilterState, Tone, Category, Era, Rarity } from '../types';
-import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES, RELATIONS, DETAIL_LEVELS, ORIGINS, ONI_POWER_LEVELS, PERSONALITIES, METAL_COLORS, COUNTRIES, TERRAINS } from '../constants';
+import type { FilterState, Tone, Category, Rarity, Era } from '../types';
+import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES } from '../constants';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
-import { PROFESSIONS_BY_ERA } from '../lib/professionsData';
-import { WEAPON_TYPES } from '../lib/weaponData';
-import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
-import { Tooltip } from './ui/Tooltip';
-import { RefreshIcon } from './icons/RefreshIcon';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -35,242 +28,57 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   };
 
   const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => style.nome);
-  const weaponOptions = WEAPON_TYPES.map(weapon => weapon.name);
-  const hunterArchetypeOptions = HUNTER_ARCHETYPES_DATA.map(arch => arch.nome);
-  
-  const professionOptions = React.useMemo(() => {
-    const eraKey = filters.era;
-    if (eraKey === 'Aleatória') {
-        return PROFESSIONS_BY_ERA.all;
-    }
-    return PROFESSIONS_BY_ERA[eraKey] || [];
-  }, [filters.era]);
-  
-  React.useEffect(() => {
-    if (!professionOptions.includes(filters.profession)) {
-        handleFilterChange('profession', 'Aleatória');
-    }
-  }, [professionOptions, filters.profession]);
 
-  const renderFiltersByCategory = () => {
-    switch(filters.category) {
-      case 'Caçador':
-        return (
-          <>
-            <Select label="Arma Principal" value={filters.hunterWeapon} onChange={(e) => handleFilterChange('hunterWeapon', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Aleatória">Aleatória</option>
-              {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
-            </Select>
-            <SearchableMultiSelect
-                label="Respiração (até 2)"
-                options={breathingStyleOptions}
-                selected={filters.hunterBreathingStyles}
-                onChange={(selected) => {
-                    if (selected.length <= 2) {
-                        handleFilterChange('hunterBreathingStyles', selected);
-                    }
-                }}
-                placeholder="Selecione estilos..."
-            />
-            <Select label="Origem" value={filters.origem} onChange={(e) => handleFilterChange('origem', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-            </Select>
-            <Select label="Arquétipo (Classe)" value={filters.hunterArchetype} onChange={(e) => handleFilterChange('hunterArchetype', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Aleatório">Aleatório</option>
-              {hunterArchetypeOptions.map(arch => <option key={arch} value={arch}>{arch}</option>)}
-            </Select>
-            <Select label="Personalidade" value={filters.hunterPersonality} onChange={(e) => handleFilterChange('hunterPersonality', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
-            </Select>
-             <Select label="Tom do Personagem" value={filters.hunterTone} onChange={(e) => handleFilterChange('hunterTone', e.target.value as Tone)}>
-              {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-            </Select>
-          </>
-        );
-      case 'Acessório':
-        return (
-          <>
-            {/* FIX: Cast e.target.value to Rarity to match the FilterState type. */}
-            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}>
-               <option value="" disabled>Selecione...</option>
-              {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
-            </Select>
-            <Select label="Inspiração (Respiração)" value={filters.accessoryInspirationBreathing} onChange={(e) => handleFilterChange('accessoryInspirationBreathing', e.target.value)}>
-              <option value="Nenhuma">Nenhuma</option>
-              {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
-            </Select>
-            <Select label="Inspiração (Kekkijutsu)" value={filters.accessoryInspirationKekkijutsu} onChange={(e) => handleFilterChange('accessoryInspirationKekkijutsu', e.target.value)}>
-              <option value="Nenhuma">Nenhuma</option>
-              {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}
-            </Select>
-            <Select label="Inspiração (Arma)" value={filters.accessoryWeaponInspiration} onChange={(e) => handleFilterChange('accessoryWeaponInspiration', e.target.value)}>
-               <option value="Nenhuma">Nenhuma</option>
-              {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
-            </Select>
-            <Select label="Inspiração (Origem)" value={filters.accessoryOriginInspiration} onChange={(e) => handleFilterChange('accessoryOriginInspiration', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-               <option value="Aleatória">Aleatória</option>
-              {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-            </Select>
-          </>
-        );
-      case 'Arma':
-        return (
-          <>
-            {/* FIX: Cast e.target.value to Rarity to match the FilterState type. */}
-            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}>
-               <option value="" disabled>Selecione...</option>
-              {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
-            </Select>
-             <Select label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={(e) => handleFilterChange('weaponMetalColor', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              {METAL_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
-            </Select>
-          </>
-        );
-      case 'Local/Cenário':
-        return (
-          <>
-            <Select label="Tom" value={filters.locationTone} onChange={(e) => handleFilterChange('locationTone', e.target.value as Tone)}>
-              {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-            </Select>
-            <Select label="País/Cultura" value={filters.locationCountry} onChange={(e) => handleFilterChange('locationCountry', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </Select>
-            <Select label="Tipo de Terreno" value={filters.locationTerrain} onChange={(e) => handleFilterChange('locationTerrain', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              {TERRAINS.map(t => <option key={t} value={t}>{t}</option>)}
-            </Select>
-          </>
-        );
-       case 'World Building':
-        return (
-          <>
-            <Select label="Tom" value={filters.wbTone} onChange={(e) => handleFilterChange('wbTone', e.target.value as Tone)}>
-              {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-            </Select>
-            <Select label="País/Cultura" value={filters.wbCountry} onChange={(e) => handleFilterChange('wbCountry', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </Select>
-            <Select label="Escala da Ameaça" value={filters.wbScale} onChange={(e) => handleFilterChange('wbScale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}>
-              <option value="local">Local</option>
-              <option value="regional">Regional</option>
-              <option value="nacional">Nacional</option>
-              <option value="cósmico">Cósmico</option>
-            </Select>
-          </>
-        );
-      case 'Forma de Respiração':
-        return (
-          <>
-            <SearchableMultiSelect
-                label="Respiração Base (até 2)"
-                options={breathingStyleOptions}
-                selected={filters.baseBreathingStyles}
-                onChange={(selected) => {
-                    if (selected.length <= 2) {
-                        handleFilterChange('baseBreathingStyles', selected);
-                    }
-                }}
-                placeholder="Selecione até 2 estilos"
-            />
-            <Select label="Arma" value={filters.breathingFormWeapon} onChange={(e) => handleFilterChange('breathingFormWeapon', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Aleatória">Aleatória</option>
-              {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
-            </Select>
-            <Select label="Tom" value={filters.breathingFormTone} onChange={(e) => handleFilterChange('breathingFormTone', e.target.value as Tone)}>
-              {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-            </Select>
-            <Select label="Origem" value={filters.breathingFormOrigin} onChange={(e) => handleFilterChange('breathingFormOrigin', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Aleatória">Aleatória</option>
-              {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-            </Select>
-            <Select label="Arquétipo (Classe)" value={filters.breathingFormArchetype} onChange={(e) => handleFilterChange('breathingFormArchetype', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Aleatório">Aleatório</option>
-              {hunterArchetypeOptions.map(arch => <option key={arch} value={arch}>{arch}</option>)}
-            </Select>
-          </>
-        );
-       case 'Kekkijutsu':
-        return (
-          <>
-            <Select label="Inspiração (Kekkijutsu)" value={filters.kekkijutsuInspiration} onChange={(e) => handleFilterChange('kekkijutsuInspiration', e.target.value)}>
-              <option value="Nenhuma">Nenhuma</option>
-              {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}
-            </Select>
-            <Select label="Inspiração (Respiração)" value={filters.kekkijutsuInspirationBreathing} onChange={(e) => handleFilterChange('kekkijutsuInspirationBreathing', e.target.value)}>
-              <option value="Nenhuma">Nenhuma</option>
-              {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
-            </Select>
-            <Select label="Inspiração (Arma)" value={filters.kekkijutsuWeapon} onChange={(e) => handleFilterChange('kekkijutsuWeapon', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Nenhuma">Nenhuma</option>
-              {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
-            </Select>
-          </>
-        );
-      case 'Inimigo/Oni':
-         return (
-            <>
-                 <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={(e) => handleFilterChange('oniPowerLevel', e.target.value)}>
-                  <option value="" disabled>Selecione...</option>
-                  {ONI_POWER_LEVELS.map(p => <option key={p} value={p}>{p}</option>)}
-                </Select>
-                <Select label="Arma do Oni" value={filters.oniWeapon} onChange={(e) => handleFilterChange('oniWeapon', e.target.value)}>
-                  <option value="" disabled>Selecione...</option>
-                   <option value="Aleatória">Aleatória</option>
-                  {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
-                </Select>
-                 <Select label="Inspiração (Respiração)" value={filters.oniInspirationBreathing} onChange={(e) => handleFilterChange('oniInspirationBreathing', e.target.value)}>
-                  <option value="Nenhuma">Nenhuma</option>
-                  {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
-                </Select>
-                <Select label="Inspiração (Kekkijutsu)" value={filters.oniInspirationKekkijutsu} onChange={(e) => handleFilterChange('oniInspirationKekkijutsu', e.target.value)}>
-                  <option value="Nenhuma">Nenhuma</option>
-                  {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}
-                </Select>
-            </>
-        );
-      case 'NPC':
-        return (
-            <>
-                <Select label="Origem" value={filters.origem} onChange={(e) => handleFilterChange('origem', e.target.value)}>
-                    <option value="" disabled>Selecione...</option>
-                    {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-                </Select>
-                <Select label="Tom do NPC" value={filters.missionTone} onChange={(e) => handleFilterChange('missionTone', e.target.value as Tone)}>
+  return (
+    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
+      <h2 className="text-xl font-bold text-white mb-4 font-gangofthree">Forja de Lendas</h2>
+      <div className="space-y-4 flex-grow overflow-y-auto pr-2">
+        <Select
+          label="Categoria"
+          value={filters.category}
+          onChange={(e) => handleFilterChange('category', e.target.value as Category)}
+        >
+          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+        </Select>
+
+        {filters.category !== 'Missão/Cenário' && (
+           <Select
+            label="Raridade"
+            value={filters.rarity}
+            onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}
+          >
+            {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
+          </Select>
+        )}
+
+        <Select
+          label="Era / Estilo"
+          value={filters.era}
+          onChange={(e) => handleFilterChange('era', e.target.value as Era)}
+        >
+          {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
+        </Select>
+        
+        {filters.category === 'Missão/Cenário' && (
+            <div className="space-y-4 border-t border-indigo-900/50 pt-4">
+                <Select
+                  label="Tom da Missão"
+                  value={filters.missionTone}
+                  onChange={(e) => handleFilterChange('missionTone', e.target.value as Tone)}
+                >
                   {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                 </Select>
-                 <Select label="Profissão" value={filters.profession} onChange={(e) => handleFilterChange('profession', e.target.value)}>
-                  <option value="" disabled>Selecione...</option>
-                  {professionOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                </Select>
-                <Select label="Relação com PJs" value={filters.relation_with_pcs} onChange={(e) => handleFilterChange('relation_with_pcs', e.target.value)}>
-                  <option value="" disabled>Selecione...</option>
-                  {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                </Select>
-                <Select label="Nível de Detalhe" value={filters.level_detail} onChange={(e) => handleFilterChange('level_detail', e.target.value)}>
-                  {DETAIL_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                </Select>
-            </>
-        );
-      case 'Missão/Cenário':
-        return (
-            <>
-                <Select label="Tom da Missão" value={filters.missionTone} onChange={(e) => handleFilterChange('missionTone', e.target.value as Tone)}>
-                  {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-                </Select>
-                <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity || 3} onChange={(e) => handleNumericFilterChange('intensity', e.target.value)} />
-                 <Select label="Escala da Ameaça" value={filters.missionScale} onChange={(e) => handleFilterChange('missionScale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}>
+                <Slider
+                    label={`Intensidade: ${filters.intensity}`}
+                    min={1} max={5} step={1}
+                    value={filters.intensity || 3}
+                    onChange={(e) => handleNumericFilterChange('intensity', e.target.value)}
+                />
+                 <Select
+                  label="Escala da Ameaça"
+                  value={filters.missionScale}
+                  onChange={(e) => handleFilterChange('missionScale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}
+                >
                   <option value="local">Local</option>
                   <option value="regional">Regional</option>
                   <option value="nacional">Nacional</option>
@@ -288,70 +96,48 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                   <label className="block text-sm font-medium text-gray-400 mb-1">Modificadores de Ambiente</label>
                   <input type="text" value={filters.moodModifiers} onChange={e => handleFilterChange('moodModifiers', e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm text-white" placeholder="Ex: úmido, nevoento, reverente" />
                 </div>
-            </>
-        );
-      default:
-        // Default filters for Arma, or Aleatória
-        return (
-            // FIX: Cast e.target.value to Rarity to match the FilterState type.
-            <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}>
-                <option value="" disabled>Selecione...</option>
-                {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
-            </Select>
-        )
-    }
-  }
+            </div>
+        )}
 
-
-  return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white font-gangofthree">Forja de Lendas</h2>
-        </div>
-      <div className="space-y-4 flex-grow pr-2">
-        <Select
-          label="Categoria"
-          value={filters.category}
-          onChange={(e) => {
-              handleFilterChange('category', e.target.value as Category)
-          }}
-        >
-          <option value="" disabled>Selecione...</option>
-          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </Select>
+        {filters.category === 'Forma de Respiração' && (
+          <Select
+            label="Respiração Base (Derivação)"
+            value={filters.baseBreathingStyle || 'Aleatória'}
+            onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}
+          >
+            <option value="Aleatória">Aleatória</option>
+            {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
+          </Select>
+        )}
         
-        <Select
-          label="Era / Estilo"
-          value={filters.era}
-          onChange={(e) => handleFilterChange('era', e.target.value as Era)}
-        >
-          <option value="" disabled>Selecione...</option>
-          {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
-        </Select>
-
-        <div className="space-y-4 border-t border-indigo-900/50 pt-4">
-            {renderFiltersByCategory()}
-        </div>
-
+        {filters.category === 'Kekkijutsu' && (
+          <Select
+            label="Inspiração (Kekkijutsu)"
+            value={filters.kekkijutsuInspiration}
+            onChange={(e) => handleFilterChange('kekkijutsuInspiration', e.target.value)}
+          >
+            <option value="Nenhuma">Nenhuma</option>
+            {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}
+          </Select>
+        )}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-gray-700">
-        <div className="grid grid-cols-3 gap-2">
-            <Button onClick={() => onGenerate(1)} disabled={isLoading}>
+      <div className="mt-6 pt-4 border-t border-gray-700 space-y-3">
+        <div className="grid grid-cols-4 gap-2">
+            <Button onClick={() => onGenerate(1)} disabled={isLoading} className="w-full text-xs !px-2">
                 {isLoading ? '...' : 'Gerar 1'}
             </Button>
-            <Button onClick={() => onGenerate(3)} disabled={isLoading}>
+            <Button onClick={() => onGenerate(3)} disabled={isLoading} className="w-full text-xs !px-2">
                 {isLoading ? '...' : 'Gerar 3'}
             </Button>
-            <Button onClick={() => onGenerate(6)} disabled={isLoading}>
+            <Button onClick={() => onGenerate(6)} disabled={isLoading} className="w-full text-xs !px-2">
                 {isLoading ? '...' : 'Gerar 6'}
             </Button>
+            <Button onClick={() => onGenerate(10)} disabled={isLoading} className="w-full text-xs !px-2">
+                {isLoading ? '...' : 'Gerar 10'}
+            </Button>
         </div>
-        <Button 
-            variant="secondary" 
-            onClick={onResetFilters} 
-            className="w-full mt-2"
-        >
+        <Button variant="secondary" onClick={onResetFilters} disabled={isLoading} className="w-full">
             Resetar Filtros
         </Button>
       </div>

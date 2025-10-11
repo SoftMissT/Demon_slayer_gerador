@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Modal } from './ui/Modal';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { GeneratedItem } from '../types';
-import { Button } from './ui/Button';
+// FIX: Corrected import path for the text formatter utility.
 import { buildPlainTextForItem } from '../lib/textFormatters';
+import { Button } from './ui/Button';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { TrashIcon } from './icons/TrashIcon';
@@ -53,7 +55,7 @@ const HistoryItem: React.FC<{
             onClick={() => onSelect(item)}
         >
             <div className="flex-grow overflow-hidden">
-                <p className="font-bold truncate text-white">{item.nome || item.title || 'Item Sem Nome'}</p>
+                <p className="font-bold truncate text-white">{('title' in item && item.title) || item.nome || 'Item Sem Nome'}</p>
                 <p className="text-xs text-indigo-400">{item.categoria} <span className="text-gray-500">• {formattedDate}</span></p>
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
@@ -86,7 +88,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
         {history.length === 0 ? (
           <p className="text-gray-500 text-center py-8">Nenhum item no histórico ainda.</p>
         ) : (
-          history.map(item => (
+          [...history].reverse().map(item => (
             <HistoryItem 
                 key={item.id} 
                 item={item}

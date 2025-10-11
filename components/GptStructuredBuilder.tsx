@@ -1,4 +1,5 @@
 import React from 'react';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { GptParameters } from '../types';
 import { Select } from './ui/Select';
 

@@ -1,5 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { GeneratedItem } from '../types';
 import { Card } from './ui/Card';
 import { StarIcon } from './icons/StarIcon';

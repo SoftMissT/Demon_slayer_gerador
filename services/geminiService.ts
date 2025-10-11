@@ -1,5 +1,4 @@
-
-
+// FIX: Corrected type import from the now separate types.ts file.
 import type { FilterState, GeneratedItem } from '../types';
 
 /**

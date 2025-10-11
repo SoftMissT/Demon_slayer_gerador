@@ -1,4 +1,5 @@
 import React from 'react';
+// FIX: Corrected type import from the now separate types.ts file.
 import type { GeneratedItem } from '../types';
 import { ResultCard } from './ResultCard';
 import { ResultCardSkeleton } from './ResultCardSkeleton';
