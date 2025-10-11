@@ -1,12 +1,14 @@
-// FIX: Import `useState` from React to resolve 'Cannot find name' errors.
 import React, { useState, useEffect } from 'react';
-// FIX: Corrected import paths for types and components.
 import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
+import { buildPlainTextForItem } from '../lib/textFormatters';
+import { ClipboardIcon } from './icons/ClipboardIcon';
+import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
+
 
 interface DetailPanelProps {
   item: GeneratedItem | null;
@@ -168,7 +170,6 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {'micro_variants' in item && item.micro_variants && item.micro_variants.length > 0 && (
             <DetailSection title="Micro-Variantes">
                 <ul className="list-disc pl-5 space-y-1 text-xs">
-                    {/* FIX: Handle both string and object types for `variant` and cast object values to string to prevent rendering errors. */}
                     {item.micro_variants.map((variant: any, i: number) => (
                         <li key={i}>
                             {typeof variant === 'string'
@@ -423,7 +424,7 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         
         {'level_scaling' in item && item.level_scaling && (
             <DetailSection title="Escala por Nível">
-                {Object.entries(item.level_scaling).map(([rank, scaling]) => (
+                {Object.entries(item.level_scaling).map(([rank, scaling]: [string, any]) => (
                     <div key={rank}>
                         <h5 className="font-semibold text-white text-sm mt-1">{rank}</h5>
                         {Object.entries(scaling).map(([stat, value]) => (
@@ -452,11 +453,22 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setEditedItem(item);
     setIsEditing(false); // Always reset editing state when item changes
   }, [item]);
+  
+  const handleCopy = () => {
+    if (item) {
+        const textToCopy = buildPlainTextForItem(item);
+        navigator.clipboard.writeText(textToCopy);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
 
   if (!item) {
     return (
@@ -475,8 +487,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   const isOni = item.categoria === 'Inimigo/Oni';
   const isWorldBuilding = item.categoria === 'World Building';
   const isBreathingForm = item.categoria === 'Forma de Respiração';
+  const isKekkijutsu = item.categoria === 'Kekkijutsu';
   
-  const canEdit = !isMission && !isNpc && !isHunter && !isOni && !isWorldBuilding && !isBreathingForm;
+  const canEdit = !isMission && !isNpc && !isHunter && !isOni && !isWorldBuilding && !isBreathingForm && !isKekkijutsu;
   const canGenerateVariant = canEdit;
 
   const handleSave = () => {
@@ -520,12 +533,16 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                      isOni ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
                      isWorldBuilding ? `${item.categoria}` :
                      isBreathingForm ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
+                     isKekkijutsu ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
                      `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
                  </p>
             </div>
-            <div className="flex gap-2">
-                {canEdit && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)}>{isEditing ? 'Cancelar' : 'Editar'}</Button>}
-                {isEditing && canEdit && <Button onClick={handleSave}>Salvar</Button>}
+            <div className="flex gap-1 items-center">
+                <Button variant="ghost" onClick={handleCopy} className="!p-2">
+                    {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                </Button>
+                {canEdit && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)} className="text-xs !py-1 !px-2">{isEditing ? 'Cancelar' : 'Editar'}</Button>}
+                {isEditing && canEdit && <Button onClick={handleSave} className="text-xs !py-1 !px-2">Salvar</Button>}
                 <button 
                     onClick={() => onToggleFavorite(item)}
                     className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
@@ -535,7 +552,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 </button>
             </div>
         </div>
-
+{/* FIX: Corrected syntax error and completed the conditional rendering for all item categories. */}
         <div className="flex-grow overflow-y-auto pr-2">
             {isMission ? <MissionDetailView item={item} /> :
              isNpc ? <NpcDetailView item={item} /> :
