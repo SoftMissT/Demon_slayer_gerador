@@ -8,6 +8,7 @@ module.exports = {
     extend: {
       fontFamily: {
         gangofthree: ['"Gang of Three"', 'cursive'],
+        kimetsu: ['"Cinzel Decorative"', 'serif'],
       },
     },
   },

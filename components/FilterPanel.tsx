@@ -31,7 +31,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
-      <h2 className="text-xl font-bold text-white mb-4 font-gangofthree">Forja de Lendas</h2>
+      <h2 className="text-lg md:text-xl font-bold text-white mb-4 font-gangofthree">Forja de Lendas</h2>
       <div className="space-y-4 flex-grow overflow-y-auto pr-2">
         <Select
           label="Categoria"

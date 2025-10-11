@@ -21,7 +21,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ items, isLoading, se
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-white font-gangofthree">Resultados</h2>
+        <h2 className="text-lg md:text-xl font-bold text-white font-gangofthree">Resultados</h2>
         <Button
             variant="secondary"
             onClick={onClearResults}

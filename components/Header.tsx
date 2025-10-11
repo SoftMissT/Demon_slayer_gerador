@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onHistoryClick, ac
     <header className="py-4 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 flex justify-between items-center sticky top-0 z-40">
       <div className="flex items-center gap-3">
         <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-10 h-10" />
-        <h1 className="text-2xl font-bold text-white font-gangofthree tracking-wider bg-gradient-to-r from-red-600 to-yellow-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold text-red-500 font-kimetsu tracking-wider">
           Kimetsu Forge
         </h1>
       </div>

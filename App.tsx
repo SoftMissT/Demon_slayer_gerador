@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Header } from './components/Header';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
@@ -6,7 +6,6 @@ import { DetailPanel } from './components/DetailPanel';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { HistoryModal } from './components/HistoryModal';
-import { DetailModal } from './components/DetailModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import type { FilterState, GeneratedItem } from './types';
 import { generateContent } from './services/geminiService';
@@ -30,7 +29,6 @@ const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
     const [isAboutModalOpen, setAboutModalOpen] = useState(false);
     const [isHistoryModalOpen, setHistoryModalOpen] = useState(false);
-    const [isDetailModalOpen, setDetailModalOpen] = useState(false);
     
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
     const [items, setItems] = useLocalStorage<GeneratedItem[]>('kf-generated-items', []);
@@ -40,6 +38,8 @@ const App: React.FC = () => {
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const mainContainerRef = useRef<HTMLElement>(null);
     
     // Select the first item on initial load if items exist
     useEffect(() => {
@@ -90,8 +90,13 @@ const App: React.FC = () => {
     
     const handleSelectItem = (item: GeneratedItem) => {
         setSelectedItem(item);
-        if (window.innerWidth < 1024) { // On smaller screens, open a modal for details
-            setDetailModalOpen(true);
+        // On mobile/tablet, scroll smoothly to the Detail Panel
+        if (window.innerWidth < 1024 && mainContainerRef.current) {
+            const panelWidth = mainContainerRef.current.offsetWidth;
+            mainContainerRef.current.scrollTo({
+                left: panelWidth * 2, // The 3rd panel
+                behavior: 'smooth',
+            });
         }
     };
     
@@ -130,36 +135,51 @@ const App: React.FC = () => {
     };
     
     const ForgeView = () => (
-        <main className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 flex-grow max-h-[calc(100vh-80px)] overflow-hidden">
-            <div className="lg:col-span-3 h-full overflow-y-auto">
-                <FilterPanel 
-                    filters={filters} 
-                    onFiltersChange={setFilters} 
-                    onGenerate={handleGenerate} 
-                    isLoading={isLoading}
-                    onResetFilters={handleResetFilters}
-                />
+        <main 
+            ref={mainContainerRef}
+            className="
+            flex-grow max-h-[calc(100vh-80px)] 
+            flex overflow-x-auto snap-x snap-mandatory no-scrollbar
+            lg:grid lg:grid-cols-12 lg:gap-4 lg:p-4 lg:overflow-hidden
+        ">
+            {/* Panel 1: Filters */}
+            <div className="flex-shrink-0 w-full snap-center p-2 h-full lg:p-0 lg:col-span-3 lg:w-auto">
+                <div className="h-full overflow-y-auto no-scrollbar">
+                    <FilterPanel 
+                        filters={filters} 
+                        onFiltersChange={setFilters} 
+                        onGenerate={handleGenerate} 
+                        isLoading={isLoading}
+                        onResetFilters={handleResetFilters}
+                    />
+                </div>
             </div>
-            <div className="lg:col-span-3 h-full overflow-y-auto">
-                <ResultsPanel
-                    items={items}
-                    isLoading={isLoading}
-                    selectedItem={selectedItem}
-                    onSelectItem={handleSelectItem}
-                    favorites={favorites}
-                    onToggleFavorite={handleToggleFavorite}
-                    onGenerateVariant={handleGenerateVariant}
-                    onClearResults={handleClearResults}
-                />
+            {/* Panel 2: Results */}
+            <div className="flex-shrink-0 w-full snap-center p-2 h-full lg:p-0 lg:col-span-3 lg:w-auto">
+                <div className="h-full overflow-y-auto no-scrollbar">
+                    <ResultsPanel
+                        items={items}
+                        isLoading={isLoading}
+                        selectedItem={selectedItem}
+                        onSelectItem={handleSelectItem}
+                        favorites={favorites}
+                        onToggleFavorite={handleToggleFavorite}
+                        onGenerateVariant={handleGenerateVariant}
+                        onClearResults={handleClearResults}
+                    />
+                </div>
             </div>
-            <div className="hidden lg:block lg:col-span-6 h-full overflow-y-auto">
-                <DetailPanel
-                    item={selectedItem}
-                    onGenerateVariant={handleGenerateVariant}
-                    isFavorite={isFavorite}
-                    onToggleFavorite={handleToggleFavorite}
-                    onUpdate={handleUpdateItem}
-                />
+            {/* Panel 3: Details */}
+            <div className="flex-shrink-0 w-full snap-center p-2 h-full lg:p-0 lg:col-span-6 lg:w-auto">
+                 <div className="h-full overflow-y-auto no-scrollbar">
+                    <DetailPanel
+                        item={selectedItem}
+                        onGenerateVariant={handleGenerateVariant}
+                        isFavorite={isFavorite}
+                        onToggleFavorite={handleToggleFavorite}
+                        onUpdate={handleUpdateItem}
+                    />
+                </div>
             </div>
         </main>
     );
@@ -191,16 +211,6 @@ const App: React.FC = () => {
                 onSelect={handleHistorySelect}
                 onDelete={handleHistoryDelete}
                 onClear={handleHistoryClear}
-            />
-            {/* For mobile/tablet view */}
-            <DetailModal
-                isOpen={isDetailModalOpen}
-                onClose={() => setDetailModalOpen(false)}
-                item={selectedItem}
-                onGenerateVariant={handleGenerateVariant}
-                isFavorite={isFavorite}
-                onToggleFavorite={handleToggleFavorite}
-                onUpdate={handleUpdateItem}
             />
         </div>
     );
