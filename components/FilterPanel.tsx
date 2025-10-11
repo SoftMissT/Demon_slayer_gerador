@@ -304,15 +304,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
         <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-white font-gangofthree">Forja de Lendas</h2>
-            <Tooltip text="Resetar Filtros">
-                <button 
-                    onClick={onResetFilters} 
-                    className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-gray-700 transition-colors"
-                    aria-label="Resetar Filtros"
-                >
-                    <RefreshIcon className="w-5 h-5" />
-                </button>
-            </Tooltip>
         </div>
       <div className="space-y-4 flex-grow pr-2">
         <Select
@@ -353,6 +344,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                 {isLoading ? '...' : 'Gerar 6'}
             </Button>
         </div>
+        <Button 
+            variant="secondary" 
+            onClick={onResetFilters} 
+            className="w-full mt-2"
+        >
+            Resetar Filtros
+        </Button>
       </div>
     </div>
   );
