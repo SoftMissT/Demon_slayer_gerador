@@ -28,3 +28,18 @@ html {
 body {
     @apply bg-gray-900 text-gray-200;
 }
+
+@layer utilities {
+  .animate-loading-bar {
+    animation: loading-bar 1.5s infinite linear;
+  }
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

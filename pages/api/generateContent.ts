@@ -1,5 +1,3 @@
-
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -392,6 +390,19 @@ const getResponseSchema = (category: string) => {
     };
 };
 
+/**
+ * Helper function to interpret a filter value. If it's 'Aleatório' or empty,
+ * it returns a descriptive string for the AI. Otherwise, it returns the value itself.
+ * @param value The filter value from the state.
+ * @param instruction The instruction for the AI if the value is random/empty.
+ * @param defaultValue A default value to use if the instruction is not desired.
+ */
+const getFilterInstruction = (value: string | undefined | null, instruction: string): string => {
+    if (!value || value === 'Aleatório' || value === 'Aleatória') {
+        return instruction;
+    }
+    return value;
+};
 
 const buildItemGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
     let prompt = `Você é um mestre de RPG e escritor criativo, especializado no universo de Demon Slayer (Kimetsu no Yaiba).
@@ -407,19 +418,19 @@ Sua tarefa é gerar um Caçador de Onis completo e memorável, seguindo estritam
 O personagem deve ser único, inspirado nos filtros, e pronto para ser usado em uma campanha de RPG. A notoriedade/raridade do caçador deve ser inferida criativamente a partir dos filtros, não é uma entrada direta.
 
 **Filtros a serem utilizados:**
-- **Era/Estilo**: ${filters.era}
-- **Origem**: ${filters.origem}
-- **Arquétipo/Classe**: ${filters.hunterArchetype}
-- **Personalidade**: ${filters.hunterPersonality}
-- **Arma Principal**: ${filters.hunterWeapon}
-- **Estilos de Respiração**: ${filters.hunterBreathingStyles.join(', ') || 'Não especificado, escolha uma apropriada.'}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era ou estilo visual apropriado')}
+- **Origem**: ${getFilterInstruction(filters.origem, 'uma origem criativa e adequada')}
+- **Arquétipo/Classe**: ${getFilterInstruction(filters.hunterArchetype, 'um arquétipo de caçador interessante')}
+- **Personalidade**: ${getFilterInstruction(filters.hunterPersonality, 'uma personalidade marcante')}
+- **Arma Principal**: ${getFilterInstruction(filters.hunterWeapon, 'uma arma principal adequada')}
+- **Estilos de Respiração**: ${filters.hunterBreathingStyles.length > 0 ? filters.hunterBreathingStyles.join(', ') : 'um ou dois estilos de respiração que combinem com o personagem'}
 - **Tom do Personagem**: ${filters.hunterTone}
 
 **Instruções Detalhadas:**
 1.  **Coerência Total**: Todos os campos devem ser coerentes entre si. A Origem, Arquétipo, Personalidade, Arma, Respiração e Tom devem se refletir na história, aparência e habilidades.
-2.  **Arquétipo (Classe)**: Use o arquétipo '${filters.hunterArchetype}' como a principal inspiração para o estilo de luta e a história do personagem.
-3.  **Personalidade e Tom**: A personalidade '${filters.hunterPersonality}' e o tom '${filters.hunterTone}' devem ditar o comportamento, o background e os ganchos narrativos.
-4.  **Arsenal**: A arma principal DEVE ser '${filters.hunterWeapon}' (se não for 'Aleatório'). A 'empunhadura' deve descrever o estilo de combate de forma detalhada.
+2.  **Arquétipo (Classe)**: Use o arquétipo como a principal inspiração para o estilo de luta e a história do personagem.
+3.  **Personalidade e Tom**: A personalidade e o tom devem ditar o comportamento, o background e os ganchos narrativos.
+4.  **Arsenal**: A arma principal DEVE ser a definida no filtro (se não for aleatória). A 'empunhadura' deve descrever o estilo de combate de forma detalhada.
 5.  **Habilidades Especiais**: O campo 'respiracao' deve listar o(s) estilo(s) selecionado(s). Se dois estilos forem fornecidos, descreva como o caçador os combina. Forneça exemplos de técnicas únicas.
 6.  **Acessório Distintivo**: Crie um acessório único e funcional que complemente a história, aparência ou estilo de luta do caçador.
 
@@ -430,12 +441,12 @@ Preencha todos os campos do schema com criatividade, garantindo um personagem co
         case 'Acessório':
             prompt = `Gere um Acessório para um RPG no estilo Demon Slayer.
 O acessório deve ser tematicamente inspirado pelos seguintes filtros:
-- **Raridade**: ${filters.rarity}
-- **Era/Estilo**: ${filters.era}
+- **Raridade**: ${getFilterInstruction(filters.rarity, 'uma raridade adequada')}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Inspiração (Respiração)**: ${filters.accessoryInspirationBreathing}
 - **Inspiração (Kekkijutsu)**: ${filters.accessoryInspirationKekkijutsu}
 - **Inspiração (Arma)**: ${filters.accessoryWeaponInspiration}
-- **Inspiração (Origem)**: ${filters.accessoryOriginInspiration}
+- **Inspiração (Origem)**: ${getFilterInstruction(filters.accessoryOriginInspiration, 'uma origem adequada')}
 
 Crie um item que combine essas influências de forma criativa. Por exemplo, um acessório inspirado na 'Respiração das Chamas' e na 'Katana' poderia ser uma guarda de espada que emite calor. Um acessório inspirado na origem 'Ninja' e no Kekkijutsu 'Controle de Sombras' poderia ser uma máscara que permite ao usuário se misturar com as sombras. Seja criativo.
 `;
@@ -444,21 +455,21 @@ Crie um item que combine essas influências de forma criativa. Por exemplo, um a
         case 'Arma':
              prompt = `Gere uma Arma para um RPG no estilo Demon Slayer.
 A arma deve ser criada com base nos seguintes filtros:
-- **Raridade**: ${filters.rarity}
-- **Era/Estilo**: ${filters.era}
-- **Cor do Metal (Lâmina Nichirin)**: ${filters.weaponMetalColor}
+- **Raridade**: ${getFilterInstruction(filters.rarity, 'uma raridade adequada')}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
+- **Cor do Metal (Lâmina Nichirin)**: ${getFilterInstruction(filters.weaponMetalColor, 'uma cor de metal significativa')}
 
-Descreva a aparência da arma, especialmente a cor da lâmina, e crie efeitos mecânicos e ganchos narrativos que correspondam à sua raridade e estilo. Se a cor for 'Aleatória', escolha uma que combine com a arma.
+Descreva a aparência da arma, especialmente a cor da lâmina, e crie efeitos mecânicos e ganchos narrativos que correspondam à sua raridade e estilo. Se a cor for aleatória, escolha uma que combine com a arma.
 `;
             break;
             
         case 'Local/Cenário':
             prompt = `Gere um Local/Cenário para um RPG no estilo Demon Slayer.
 O local deve ser criado com base nos seguintes filtros:
-- **Era/Estilo**: ${filters.era}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Tom**: ${filters.locationTone}
-- **País/Cultura de Inspiração**: ${filters.locationCountry}
-- **Tipo de Terreno**: ${filters.locationTerrain}
+- **País/Cultura de Inspiração**: ${getFilterInstruction(filters.locationCountry, 'um país ou cultura interessante')}
+- **Tipo de Terreno**: ${getFilterInstruction(filters.locationTerrain, 'um tipo de terreno adequado')}
 
 Crie um local vívido e atmosférico. Descreva sua aparência, clima, bioma e ganchos narrativos. O tom, a cultura e o terreno devem influenciar fortemente a descrição e os perigos do local. Preencha os campos 'pais', 'terreno' e 'tom_local' no JSON de acordo.
 `;
@@ -469,9 +480,9 @@ Crie um local vívido e atmosférico. Descreva sua aparência, clima, bioma e ga
 A resposta DEVE ser um objeto JSON, seguindo estritamente o schema fornecido.
 
 **Filtros para inspirar o cenário:**
-- **Era/Estilo**: ${filters.era}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Tom**: ${filters.wbTone}
-- **País/Cultura de Inspiração**: ${filters.wbCountry}
+- **País/Cultura de Inspiração**: ${getFilterInstruction(filters.wbCountry, 'um país ou cultura interessante')}
 - **Escala da Ameaça**: ${filters.wbScale}
 
 Concentre-se em entregar ideias práticas e inspiradoras, com os seguintes elementos obrigatórios, todos influenciados pelos filtros acima:
@@ -494,12 +505,12 @@ A resposta DEVE ser um objeto JSON, seguindo estritamente o schema fornecido.
 
 **Contexto para a Criação (Filtros):**
 A técnica deve ser adequada para um caçador com o seguinte perfil:
-- **Respiração Base para Derivação**: ${filters.baseBreathingStyle}
-- **Era/Estilo**: ${filters.era}
-- **Arma Preferida**: ${filters.breathingFormWeapon}
+- **Respiração Base para Derivação**: ${getFilterInstruction(filters.baseBreathingStyle, 'uma respiração base adequada')}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
+- **Arma Preferida**: ${getFilterInstruction(filters.breathingFormWeapon, 'uma arma adequada')}
 - **Tom**: ${filters.breathingFormTone}
-- **Origem do Caçador**: ${filters.breathingFormOrigin}
-- **Arquétipo do Caçador**: ${filters.breathingFormArchetype}
+- **Origem do Caçador**: ${getFilterInstruction(filters.breathingFormOrigin, 'uma origem de caçador adequada')}
+- **Arquétipo do Caçador**: ${getFilterInstruction(filters.breathingFormArchetype, 'um arquétipo de caçador adequado')}
 
 **Regras de Geração Obrigatórias:**
 1.  **Derivação e Consistência**: A nova forma DEVE derivar da Respiração Base e ser tematicamente consistente com o perfil do caçador descrito acima.
@@ -514,10 +525,10 @@ Por favor, gere a nova Forma de Respiração Derivada no formato JSON solicitado
         case 'Kekkijutsu':
             prompt = `Gere um Kekkijutsu (Arte Demoníaca de Sangue) para um RPG no estilo Demon Slayer. A raridade deve ser adequada à complexidade da arte, não é um filtro.
 O Kekkijutsu deve ser tematicamente inspirado pelos seguintes filtros:
-- **Era/Estilo**: ${filters.era}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Inspiração (Kekkijutsu Existente)**: ${filters.kekkijutsuInspiration}
 - **Inspiração (Respiração de Caçador)**: ${filters.kekkijutsuInspirationBreathing}
-- **Inspiração (Arma)**: ${filters.kekkijutsuWeapon}
+- **Inspiração (Arma)**: ${getFilterInstruction(filters.kekkijutsuWeapon, 'uma arma como inspiração, ou nenhuma')}
 
 Crie uma arte demoníaca que seja uma manifestação sombria e distorcida das inspirações. Por exemplo, um Kekkijutsu inspirado na 'Respiração da Água' pode ser a capacidade de criar lâminas de sangue pressurizado. Um Kekkijutsu inspirado em 'Machado' pode ser a habilidade de cristalizar o sangue em armas pesadas. Seja criativo e detalhado. Use o schema base, focando em 'descricao', 'efeitos_secundarios', e 'ganchos_narrativos'.
 `;
@@ -528,11 +539,11 @@ Crie uma arte demoníaca que seja uma manifestação sombria e distorcida das in
 O inimigo deve ser uma ameaça única e inspiradora, com sua dificuldade e complexidade baseadas no Nível de Poder solicitado.
 
 **Filtros:**
-- **Nível de Poder**: ${filters.oniPowerLevel}
-- **Arma**: ${filters.oniWeapon}
+- **Nível de Poder**: ${getFilterInstruction(filters.oniPowerLevel, 'um nível de poder criativo e adequado')}
+- **Arma**: ${getFilterInstruction(filters.oniWeapon, 'uma arma adequada ou garras/punhos')}
 - **Inspiração (Respiração)**: ${filters.oniInspirationBreathing}
 - **Inspiração (Kekkijutsu)**: ${filters.oniInspirationKekkijutsu}
-- **Era/Estilo**: ${filters.era}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 
 **Diretrizes de Nível de Poder:**
 - **Minion**: Simples, fraco, geralmente em grupos. Kekkijutsu 'Nenhum' ou muito básico. Raridade 'Comum', Nível 1-3.
@@ -548,11 +559,11 @@ Incorpore as inspirações de forma criativa no design, comportamento e Kekkijut
         case 'NPC':
             prompt = `Gere um NPC completo e memorável para um RPG no estilo Demon Slayer.
 O NPC deve ser criado com base nos seguintes filtros:
-- **Era/Estilo**: ${filters.era}
-- **Origem**: ${filters.origem}
+- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
+- **Origem**: ${getFilterInstruction(filters.origem, 'uma origem criativa e adequada')}
 - **Tom do NPC**: ${filters.missionTone}
-- **Profissão**: ${filters.profession}
-- **Relação com PJs**: ${filters.relation_with_pcs}
+- **Profissão**: ${getFilterInstruction(filters.profession, 'uma profissão adequada')}
+- **Relação com PJs**: ${getFilterInstruction(filters.relation_with_pcs, 'uma relação inicial interessante')}
 - **Nível de Detalhe**: ${filters.level_detail}
 
 A 'descricao_curta' deve ser a aparência física, e a 'descricao' deve ser a história de fundo e personalidade, ambas influenciadas fortemente pela sua Origem.
@@ -567,6 +578,9 @@ A 'descricao_curta' deve ser a aparência física, e a 'descricao' deve ser a hi
              if(filters.targets) prompt += `- Alvo: ${filters.targets}\n`;
              if(filters.moodModifiers) prompt += `- Modificadores de Ambiente: ${filters.moodModifiers}\n`;
             break;
+        
+        default: // 'Arma' and 'Aleatória' fall here
+            prompt += `Filtros:\n- Categoria: ${getFilterInstruction(filters.category, 'uma categoria de item interessante')}\n- Raridade: ${getFilterInstruction(filters.rarity, 'uma raridade adequada')}\n- Era: ${getFilterInstruction(filters.era, 'uma era adequada')}\n`;
     }
     
     if (promptModifier) {

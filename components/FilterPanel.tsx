@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
-import { SparklesIcon } from './icons/SparklesIcon';
 import { Slider } from './ui/Slider';
+import { RefreshIcon } from './icons/RefreshIcon';
 import type { FilterState, Tone } from '../types';
 import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES, RELATIONS, DETAIL_LEVELS, ORIGINS, ONI_POWER_LEVELS, PERSONALITIES, METAL_COLORS, COUNTRIES, TERRAINS } from '../constants';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
@@ -17,9 +16,10 @@ interface FilterPanelProps {
   onFiltersChange: (filters: FilterState) => void;
   onGenerate: (count: number) => void;
   isLoading: boolean;
+  onResetFilters: () => void;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onGenerate, isLoading }) => {
+export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onGenerate, isLoading, onResetFilters }) => {
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     onFiltersChange({ ...filters, [key]: value });
   };
@@ -45,7 +45,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   
   React.useEffect(() => {
     if (!professionOptions.includes(filters.profession)) {
-        handleFilterChange('profession', 'Aleatória');
+        handleFilterChange('profession', '');
     }
   }, [professionOptions, filters.profession]);
 
@@ -55,6 +55,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         return (
           <>
             <Select label="Arma Principal" value={filters.hunterWeapon} onChange={(e) => handleFilterChange('hunterWeapon', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
+              <option value="Aleatório">Aleatório</option>
               {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
             </Select>
             <SearchableMultiSelect
@@ -69,13 +71,16 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                 placeholder="Selecione estilos..."
             />
             <Select label="Origem" value={filters.origem} onChange={(e) => handleFilterChange('origem', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
             <Select label="Arquétipo (Classe)" value={filters.hunterArchetype} onChange={(e) => handleFilterChange('hunterArchetype', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               <option value="Aleatório">Aleatório</option>
               {hunterArchetypeOptions.map(arch => <option key={arch} value={arch}>{arch}</option>)}
             </Select>
             <Select label="Personalidade" value={filters.hunterPersonality} onChange={(e) => handleFilterChange('hunterPersonality', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
             </Select>
              <Select label="Tom do Personagem" value={filters.hunterTone} onChange={(e) => handleFilterChange('hunterTone', e.target.value as Tone)}>
@@ -87,6 +92,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         return (
           <>
             <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
             </Select>
             <Select label="Inspiração (Respiração)" value={filters.accessoryInspirationBreathing} onChange={(e) => handleFilterChange('accessoryInspirationBreathing', e.target.value)}>
@@ -102,6 +108,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
               {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
             </Select>
             <Select label="Inspiração (Origem)" value={filters.accessoryOriginInspiration} onChange={(e) => handleFilterChange('accessoryOriginInspiration', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
           </>
@@ -110,9 +117,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         return (
           <>
             <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
             </Select>
              <Select label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={(e) => handleFilterChange('weaponMetalColor', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {METAL_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
           </>
@@ -124,9 +133,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
               {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
             </Select>
             <Select label="País/Cultura" value={filters.locationCountry} onChange={(e) => handleFilterChange('locationCountry', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
             <Select label="Tipo de Terreno" value={filters.locationTerrain} onChange={(e) => handleFilterChange('locationTerrain', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {TERRAINS.map(t => <option key={t} value={t}>{t}</option>)}
             </Select>
           </>
@@ -138,6 +149,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
               {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
             </Select>
             <Select label="País/Cultura" value={filters.wbCountry} onChange={(e) => handleFilterChange('wbCountry', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
             <Select label="Escala da Ameaça" value={filters.wbScale} onChange={(e) => handleFilterChange('wbScale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}>
@@ -151,21 +163,26 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       case 'Forma de Respiração':
         return (
           <>
-            {/* FIX: Replaced SearchableMultiSelect with Select to match FilterState type for 'baseBreathingStyle'. */}
             <Select label="Respiração Base (Derivação)" value={filters.baseBreathingStyle} onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               <option value="Aleatória">Aleatória</option>
               {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
             </Select>
             <Select label="Arma" value={filters.breathingFormWeapon} onChange={(e) => handleFilterChange('breathingFormWeapon', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
+              <option value="Aleatório">Aleatório</option>
               {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
             </Select>
             <Select label="Tom" value={filters.breathingFormTone} onChange={(e) => handleFilterChange('breathingFormTone', e.target.value as Tone)}>
               {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
             </Select>
             <Select label="Origem" value={filters.breathingFormOrigin} onChange={(e) => handleFilterChange('breathingFormOrigin', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
+              <option value="Aleatório">Aleatório</option>
               {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
             <Select label="Arquétipo (Classe)" value={filters.breathingFormArchetype} onChange={(e) => handleFilterChange('breathingFormArchetype', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               <option value="Aleatório">Aleatório</option>
               {hunterArchetypeOptions.map(arch => <option key={arch} value={arch}>{arch}</option>)}
             </Select>
@@ -174,7 +191,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
        case 'Kekkijutsu':
         return (
           <>
-            {/* FIX: Replaced SearchableMultiSelect with Select for 'kekkijutsuInspiration' to match the FilterState type. */}
             <Select label="Inspiração (Kekkijutsu)" value={filters.kekkijutsuInspiration} onChange={(e) => handleFilterChange('kekkijutsuInspiration', e.target.value)}>
               <option value="Nenhuma">Nenhuma</option>
               {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}
@@ -184,6 +200,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
               {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
             </Select>
             <Select label="Inspiração (Arma)" value={filters.kekkijutsuWeapon} onChange={(e) => handleFilterChange('kekkijutsuWeapon', e.target.value)}>
+              <option value="" disabled>Selecione...</option>
               <option value="Nenhuma">Nenhuma</option>
               {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
             </Select>
@@ -193,9 +210,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
          return (
             <>
                  <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={(e) => handleFilterChange('oniPowerLevel', e.target.value)}>
+                  <option value="" disabled>Selecione...</option>
                   {ONI_POWER_LEVELS.map(p => <option key={p} value={p}>{p}</option>)}
                 </Select>
                 <Select label="Arma do Oni" value={filters.oniWeapon} onChange={(e) => handleFilterChange('oniWeapon', e.target.value)}>
+                  <option value="" disabled>Selecione...</option>
+                  <option value="Aleatório">Aleatório</option>
                   {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
                 </Select>
                  <Select label="Inspiração (Respiração)" value={filters.oniInspirationBreathing} onChange={(e) => handleFilterChange('oniInspirationBreathing', e.target.value)}>
@@ -212,15 +232,18 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         return (
             <>
                 <Select label="Origem" value={filters.origem} onChange={(e) => handleFilterChange('origem', e.target.value)}>
+                    <option value="" disabled>Selecione...</option>
                     {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
                 </Select>
                 <Select label="Tom do NPC" value={filters.missionTone} onChange={(e) => handleFilterChange('missionTone', e.target.value as Tone)}>
                   {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                 </Select>
                  <Select label="Profissão" value={filters.profession} onChange={(e) => handleFilterChange('profession', e.target.value)}>
+                  <option value="" disabled>Selecione...</option>
                   {professionOptions.map(p => <option key={p} value={p}>{p}</option>)}
                 </Select>
                 <Select label="Relação com PJs" value={filters.relation_with_pcs} onChange={(e) => handleFilterChange('relation_with_pcs', e.target.value)}>
+                  <option value="" disabled>Selecione...</option>
                   {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </Select>
                 <Select label="Nível de Detalhe" value={filters.level_detail} onChange={(e) => handleFilterChange('level_detail', e.target.value)}>
@@ -231,12 +254,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       case 'Missão/Cenário':
         return (
             <>
-                {/* FIX: Corrected property 'tone' to 'missionTone' to match FilterState type. */}
                 <Select label="Tom da Missão" value={filters.missionTone} onChange={(e) => handleFilterChange('missionTone', e.target.value as Tone)}>
                   {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                 </Select>
                 <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity || 3} onChange={(e) => handleNumericFilterChange('intensity', e.target.value)} />
-                 {/* FIX: Corrected property 'scale' to 'missionScale' to match FilterState type. */}
                  <Select label="Escala da Ameaça" value={filters.missionScale} onChange={(e) => handleFilterChange('missionScale', e.target.value as 'local' | 'regional' | 'nacional' | 'cósmico')}>
                   <option value="local">Local</option>
                   <option value="regional">Regional</option>
@@ -261,16 +282,21 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         // Default filters for Arma, or Aleatória
         return (
             <Select label="Raridade" value={filters.rarity} onChange={(e) => handleFilterChange('rarity', e.target.value)}>
+                <option value="" disabled>Selecione...</option>
                 {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
             </Select>
         )
     }
   }
 
-
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
-      <h2 className="text-xl font-bold text-white mb-4 font-gangofthree">Forja de Lendas</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-white font-gangofthree">Forja de Lendas</h2>
+        <Button variant="ghost" onClick={onResetFilters} className="!p-2" title="Resetar Filtros">
+          <RefreshIcon className="w-5 h-5" />
+        </Button>
+      </div>
       <div className="space-y-4 flex-grow overflow-y-auto pr-2">
         <Select
           label="Categoria"
@@ -285,6 +311,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           value={filters.era}
           onChange={(e) => handleFilterChange('era', e.target.value)}
         >
+          <option value="" disabled>Selecione...</option>
           {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
         </Select>
 

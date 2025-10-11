@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
 import { Card } from './ui/Card';
@@ -7,6 +5,8 @@ import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
+import { ClipboardIcon } from './icons/ClipboardIcon';
+import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface DetailPanelProps {
   item: GeneratedItem | null;
@@ -445,6 +445,7 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     setEditedItem(item);
@@ -477,6 +478,13 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         onUpdate(editedItem);
         setIsEditing(false);
     }
+  };
+
+  const handleCopy = () => {
+    if (!item) return;
+    navigator.clipboard.writeText(JSON.stringify(item, null, 2));
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
   
   const handleEditChange = (field: keyof GeneratedItem, value: any) => {
@@ -516,9 +524,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                      `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
                  </p>
             </div>
-            <div className="flex gap-2">
-                {canEdit && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)}>{isEditing ? 'Cancelar' : 'Editar'}</Button>}
-                {isEditing && canEdit && <Button onClick={handleSave}>Salvar</Button>}
+            <div className="flex items-center gap-1">
+                 <Button variant="ghost" className="!p-2" onClick={handleCopy} title="Copiar Conteúdo JSON">
+                    {isCopied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                 </Button>
                 <button 
                     onClick={() => onToggleFavorite(item)}
                     className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
@@ -571,6 +580,20 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 </>
             )}
         </div>
+        
+        {/* EDIT BUTTONS REMOVED FOR SIMPLIFICATION FOR NOW */}
+        {/* {canEdit && (
+            <div className="mt-4 pt-4 border-t border-gray-700">
+                {isEditing ? (
+                    <div className="flex gap-2">
+                        <Button onClick={handleSave} className="flex-grow">Salvar</Button>
+                        <Button variant="secondary" onClick={() => setIsEditing(false)}>Cancelar</Button>
+                    </div>
+                ) : (
+                    <Button variant="secondary" onClick={() => setIsEditing(true)} className="w-full">Editar Item</Button>
+                )}
+            </div>
+        )} */}
         
         {!isEditing && canGenerateVariant && (
             <div className="mt-4 pt-4 border-t border-gray-700 flex-shrink-0">
