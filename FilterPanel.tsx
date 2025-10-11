@@ -1,10 +1,12 @@
 
+
 import React from 'react';
 import { Button } from './components/ui/Button';
 import { Select } from './components/ui/Select';
 import { SearchableMultiSelect } from './components/ui/SearchableMultiSelect';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { Slider } from './components/ui/Slider';
+// FIX: Corrected type imports from the now separate types.ts file.
 import type { FilterState, Tone } from './types';
 // FIX: Removed BREATHING_STYLES from constants import as it's not exported there.
 import { CATEGORIES, RARITIES, ERAS, DEMON_BLOOD_ARTS, TONES } from './constants';
@@ -111,7 +113,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         {filters.category === 'Forma de Respiração' && (
           <Select
             label="Respiração Base (Derivação)"
-            value={filters.baseBreathingStyle}
+            value={filters.baseBreathingStyle || 'Aleatória'}
             onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}
           >
             <option value="Aleatória">Aleatória</option>

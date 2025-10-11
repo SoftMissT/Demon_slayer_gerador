@@ -1,4 +1,6 @@
 
+
+// FIX: Corrected type import from the now separate types.ts file.
 import type { Era } from '../types';
 
 export const PROFESSIONS_BY_ERA: Record<string, string[]> = {

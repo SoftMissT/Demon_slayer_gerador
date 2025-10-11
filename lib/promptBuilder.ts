@@ -99,10 +99,8 @@ export const buildImagePrompt = (
       const background = getBackgroundPrompt('Caçador');
       return buildCharacterImagePrompt(nome, descricao_curta, background, 'expressão determinada');
     }
-    case 'Classe/Origem': {
-      const background = getBackgroundPrompt('Classe/Origem');
-      return buildCharacterImagePrompt(`um arquétipo de ${nome}`, descricao_curta, background, 'expressão confiante e enigmática');
-    }
+    // FIX: Removed invalid case 'Classe/Origem' which was causing a type error
+    // because it is not a valid 'Category'.
     case 'Arma': {
       const background = getBackgroundPrompt('Arma');
       return buildItemImagePrompt(nome, descricao_curta, background, 'Arma', era);

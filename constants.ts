@@ -1,5 +1,6 @@
 
 
+// FIX: Corrected type imports from the now separate types.ts file.
 import type { Category, Rarity, Era, Tone } from './types';
 
 export const CATEGORIES: Category[] = [

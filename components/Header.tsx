@@ -1,6 +1,5 @@
 import React from 'react';
 import { AboutTooltip } from './AboutTooltip';
-import { SparklesIcon } from './icons/SparklesIcon';
 
 interface HeaderProps {
   onAboutClick: () => void;
@@ -8,7 +7,7 @@ interface HeaderProps {
   onViewChange: (view: 'forge' | 'prompt') => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick, activeView, onViewChange }) => {
+export const Header = React.forwardRef<HTMLElement, HeaderProps>(({ onAboutClick, activeView, onViewChange }, ref) => {
     
     const getButtonClasses = (view: 'forge' | 'prompt') => {
         const base = "px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200";
@@ -19,10 +18,10 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, activeView, onView
     }
 
   return (
-    <header className="py-4 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 flex justify-between items-center sticky top-0 z-40">
+    <header ref={ref} className="py-4 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 flex justify-between items-center sticky top-0 z-40">
       <div className="flex items-center gap-3">
         <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-10 h-10" />
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700 font-gangofthree tracking-wider">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent font-gangofthree tracking-wider">
           Kimetsu Forge
         </h1>
       </div>
@@ -41,4 +40,6 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, activeView, onView
       </div>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';

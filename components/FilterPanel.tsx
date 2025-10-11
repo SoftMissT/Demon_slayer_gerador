@@ -159,13 +159,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       case 'Forma de Respiração':
         return (
           <>
-            <Select label="Respiração Base (Derivação)" value={filters.baseBreathingStyle} onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}>
-              <option value="" disabled>Selecione uma respiração</option>
-              <option value="Aleatória">Aleatória</option>
-              {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
-            </Select>
+            <SearchableMultiSelect
+                label="Respiração Base (até 2)"
+                options={breathingStyleOptions}
+                selected={filters.baseBreathingStyles}
+                onChange={(selected) => {
+                    if (selected.length <= 2) {
+                        handleFilterChange('baseBreathingStyles', selected);
+                    }
+                }}
+                placeholder="Selecione até 2 estilos"
+            />
             <Select label="Arma" value={filters.breathingFormWeapon} onChange={(e) => handleFilterChange('breathingFormWeapon', e.target.value)}>
               <option value="" disabled>Selecione uma arma</option>
+              <option value="Aleatória">Aleatória</option>
               {weaponOptions.map(w => <option key={w} value={w}>{w}</option>)}
             </Select>
             <Select label="Tom" value={filters.breathingFormTone} onChange={(e) => handleFilterChange('breathingFormTone', e.target.value as Tone)}>
@@ -173,6 +180,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             </Select>
             <Select label="Origem" value={filters.breathingFormOrigin} onChange={(e) => handleFilterChange('breathingFormOrigin', e.target.value)}>
               <option value="" disabled>Selecione uma origem</option>
+              <option value="Aleatória">Aleatória</option>
               {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
             <Select label="Arquétipo (Classe)" value={filters.breathingFormArchetype} onChange={(e) => handleFilterChange('breathingFormArchetype', e.target.value)}>

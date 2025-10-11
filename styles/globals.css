@@ -4,6 +4,11 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Gang+of+Three&display=swap');
 
+:root {
+  --header-height: 81px; /* Fallback height */
+}
+
+
 /* Custom scrollbar for a better dark theme aesthetic */
 html {
     scrollbar-color: #4b5563 #1f2937;
@@ -27,4 +32,35 @@ html {
 
 body {
     @apply bg-gray-900 text-gray-200;
+    overflow: hidden; /* Disable main page scroll */
+}
+
+/* New responsive grid layout */
+.main-grid-container {
+    height: calc(100vh - var(--header-height));
+    display: grid;
+    padding: 1rem;
+    gap: 1rem;
+    grid-template-columns: 1fr; /* Mobile-first: 1 column */
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+    .main-grid-container {
+        padding: 1.5rem;
+        gap: 1.5rem;
+        grid-template-columns: 3fr 5fr;
+    }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+    .main-grid-container {
+        grid-template-columns: 3fr 5fr 4fr;
+    }
+}
+
+.grid-column-wrapper {
+    min-height: 0; /* Prevents grid children from overflowing their container */
+    height: 100%;
 }

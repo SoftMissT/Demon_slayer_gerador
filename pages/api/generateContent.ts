@@ -464,14 +464,22 @@ Descreva a aparência da arma, especialmente a cor da lâmina, e crie efeitos me
             break;
             
         case 'Local/Cenário':
-            prompt = `Gere um Local/Cenário para um RPG no estilo Demon Slayer.
-O local deve ser criado com base nos seguintes filtros:
-- **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
-- **Tom**: ${filters.locationTone}
+            prompt = `Você é um mestre de RPG e escritor criativo, especializado em criar cenários vívidos no universo de Demon Slayer (Kimetsu no Yaiba).
+Sua tarefa é gerar UM Local/Cenário detalhado, seguindo estritamente a estrutura JSON fornecida e os filtros abaixo.
+
+**Filtros Obrigatórios:**
+- **Era/Estilo do Mundo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
+- **Tom e Atmosfera**: ${filters.locationTone}
 - **País/Cultura de Inspiração**: ${getFilterInstruction(filters.locationCountry, 'um país ou cultura interessante')}
 - **Tipo de Terreno**: ${getFilterInstruction(filters.locationTerrain, 'um tipo de terreno adequado')}
 
-Crie um local vívido e atmosférico. Descreva sua aparência, clima, bioma e ganchos narrativos. O tom, a cultura e o terreno devem influenciar fortemente a descrição e os perigos do local. Preencha os campos 'pais', 'terreno' e 'tom_local' no JSON de acordo.
+**Instruções de Geração:**
+1.  **Coerência Temática**: O local gerado DEVE refletir todos os filtros. Por exemplo, um local 'Steampunk' com tom de 'terror' em um 'Pântano Nebuloso' deve ter descrições de máquinas enferrujadas e abandonadas envoltas em névoa, com perigos mecânicos e uma atmosfera opressiva.
+2.  **Descrição Vívida**: Descreva a aparência, o clima, os sons e os cheiros do local.
+3.  **Ganchos Narrativos**: Os ganchos de aventura devem estar diretamente ligados às características do local.
+4.  **Preenchimento do JSON**: Preencha OBRIGATÓRIAMENTE os campos 'pais', 'terreno', e 'tom_local' no JSON com os valores correspondentes aos filtros ou com a escolha feita pela IA caso o filtro seja 'Aleatório'.
+
+Crie um local único e inspirador que seja uma consequência direta da combinação dos filtros fornecidos.
 `;
             break;
 
@@ -505,7 +513,7 @@ A resposta DEVE ser um objeto JSON, seguindo estritamente o schema fornecido.
 
 **Contexto para a Criação (Filtros):**
 A técnica deve ser adequada para um caçador com o seguinte perfil:
-- **Respiração Base para Derivação**: ${getFilterInstruction(filters.baseBreathingStyle, 'uma respiração base adequada')}
+- **Respirações Base para Derivação**: ${filters.baseBreathingStyles.length > 0 ? filters.baseBreathingStyles.join(' e ') : 'uma respiração base adequada'}
 - **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Arma Preferida**: ${getFilterInstruction(filters.breathingFormWeapon, 'uma arma adequada')}
 - **Tom**: ${filters.breathingFormTone}
@@ -513,7 +521,7 @@ A técnica deve ser adequada para um caçador com o seguinte perfil:
 - **Arquétipo do Caçador**: ${getFilterInstruction(filters.breathingFormArchetype, 'um arquétipo de caçador adequado')}
 
 **Regras de Geração Obrigatórias:**
-1.  **Derivação e Consistência**: A nova forma DEVE derivar da Respiração Base e ser tematicamente consistente com o perfil do caçador descrito acima.
+1.  **Derivação e Consistência**: A nova forma DEVE derivar da(s) Respiração(ões) Base. Se duas respirações forem fornecidas, crie uma forma híbrida que combine elementos de ambas de forma criativa. O campo 'base_breathing_id' no JSON deve conter o nome da respiração principal ou uma combinação dos nomes (ex: 'Chamas e Vento'). A técnica deve ser tematicamente consistente com o perfil do caçador descrito acima.
 2.  **Mecânica Detalhada**: O objeto 'mechanics' DEVE seguir o template do schema, com regras claras de ativação, custo, dano, etc.
 3.  **Escala**: O campo 'level_scaling' deve detalhar como os valores mudam com o rank/nível.
 4.  **Variantes**: Gere 3 'micro_variants' e as variantes de balanço (leve, padrão, brutal).

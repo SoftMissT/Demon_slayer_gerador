@@ -1,92 +1,70 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
-import type { PromptGenerationResult, MidjourneyParameters, GptParameters } from '../../types';
+import type { PromptGenerationResult } from '../../types';
 
-const buildMidjourneyParamsString = (params: Partial<Record<keyof MidjourneyParameters, any>>): string => {
+// Helper to format Midjourney params into a string
+const formatMjParams = (params: { [key: string]: any }, negativePrompt?: string): string => {
     let paramString = '';
-    if (!params || Object.keys(params).length === 0) return '';
-
-    // Handle version separately due to --niji flag
+    if (params.aspectRatio) paramString += ` --ar ${params.aspectRatio}`;
+    if (params.chaos) paramString += ` --c ${params.chaos}`;
+    if (params.quality) paramString += ` --q ${params.quality}`;
+    if (params.style) paramString += ` --style ${params.style}`;
+    if (params.stylize) paramString += ` --s ${params.stylize}`;
+    if (params.weird) paramString += ` --w ${params.weird}`;
     if (params.version) {
-        if (params.version === 'Niji 6') {
-            paramString += ' --niji 6';
+        if (params.version.startsWith('Niji')) {
+            paramString += ` --niji ${params.version.split(' ')[1]}`;
         } else {
             paramString += ` --v ${params.version}`;
         }
     }
-    
-    // Handle other parameters
-    for (const key in params) {
-        if (key !== 'version' && params[key as keyof MidjourneyParameters] !== undefined) {
-             const paramKey = {
-                aspectRatio: 'ar',
-                chaos: 'c',
-                quality: 'q',
-                stylize: 's',
-                style: 'style',
-                weird: 'w'
-            }[key];
-            if(paramKey) {
-                paramString += ` --${paramKey} ${params[key as keyof MidjourneyParameters]}`;
-            }
-        }
+    if (negativePrompt) {
+        paramString += ` --no ${negativePrompt}`;
     }
     return paramString.trim();
 };
 
-
-const buildPromptForPrompts = (
-    topic: string,
-    negativePrompt: string,
-    mjParams: Partial<Record<keyof MidjourneyParameters, any>>, // Now receives only active params
-    gptParams: GptParameters
-): string => {
+const buildPromptGenerationPrompt = (topic: string, negativePrompt: string, mjParams: any, gptParams: any): string => {
+    const mjParamsString = formatMjParams(mjParams, negativePrompt);
     
-    const mjParamsString = buildMidjourneyParamsString(mjParams);
+    return `Você é um especialista em engenharia de prompts, criando prompts altamente eficazes para IAs de geração de imagem como Midjourney e DALL-E 3.
+Sua tarefa é gerar dois prompts distintos com base na entrada do usuário: um otimizado para Midjourney e outro para DALL-E 3 (que usa um modelo semelhante ao GPT para interpretação).
 
-    let prompt = `Você é um engenheiro de prompt de IA especialista, mestre em criar prompts para geradores de imagem como Midjourney e DALL-E 3.
-Sua tarefa é criar dois prompts de imagem distintos e otimizados com base na ideia do usuário, **seguindo estritamente as políticas de conteúdo e segurança do Midjourney.**
-A resposta DEVE ser um objeto JSON, seguindo o schema fornecido.
+A entrada do usuário é a seguinte:
+- Tópico Principal / Ideia: ${topic}
+- Prompt Negativo (o que evitar): ${negativePrompt || 'Nenhum'}
+- Parâmetros de Estilo GPT/DALL-E:
+  - Tom/Atmosfera: ${gptParams.tone}
+  - Estilo de Arte: ${gptParams.style}
+  - Composição/Ângulo: ${gptParams.composition}
+- Parâmetros Finais para Midjourney: ${mjParamsString}
 
-**REGRAS CRÍTICAS DE SEGURANÇA PARA MIDJOURNEY:**
-- **NÃO use palavras explícitas** relacionadas a gore, violência gráfica, mutilação, sangue excessivo ou ferimentos detalhados. Em vez disso, use linguagem metafórica e descritiva (ex: "atmosfera sombria", "consequências de uma batalha feroz", "essência carmesim estilizada").
-- **NÃO use termos sexualmente explícitos, pornográficos ou que possam ser interpretados como sexualização.** Mantenha o conteúdo SFW (Safe for Work).
-- **EVITE nomes de figuras políticas ou celebridades** para prevenir a criação de deepfakes.
-- **EVITE citar nomes de artistas diretamente** para respeitar direitos autorais. Em vez disso, descreva o *estilo* do artista (ex: "no estilo de uma pintura expressionista com pinceladas grossas e alto contraste").
-- **SEMPRE priorize a segurança e a conformidade com as regras.** O objetivo é criar arte poderosa sem acionar os filtros de conteúdo.
+**Instruções para Gerar os Prompts:**
 
-**Tópico da Imagem:** "${topic}"
+1.  **Prompt para Midjourney:**
+    - Crie um prompt conciso, focado em palavras-chave.
+    - Combine o tópico principal com palavras-chave estilísticas relevantes derivadas dos parâmetros GPT/DALL-E.
+    - O prompt deve ser uma série de frases descritivas e palavras-chave, separadas por vírgulas.
+    - **IMPORTANTE**: Anexe a string de parâmetros de Midjourney \`${mjParamsString}\` exatamente como fornecida no final do prompt.
 
-**Elementos a Evitar (Prompt Negativo):** "${negativePrompt || 'Nenhum'}"
+2.  **Prompt para GPT/DALL-E:**
+    - Crie um parágrafo detalhado e descritivo.
+    - Use linguagem natural para descrever vividamente a cena, incorporando o tópico principal.
+    - Integre os parâmetros de estilo GPT/DALL-E (Tom, Estilo de Arte, Composição) de forma fluida na descrição.
 
-**1. Crie um Prompt para Midjourney:**
-- Seja conciso e direto. Use palavras-chave e frases curtas separadas por vírgulas.
-- Incorpore os seguintes parâmetros no final do prompt, se eles forem fornecidos: ${mjParamsString || 'Nenhum parâmetro específico fornecido.'}
-- O prompt deve ser em INGLÊS.
-
-**2. Crie um Prompt para DALL-E / GPT:**
-- Seja descritivo e use linguagem natural. Crie uma cena detalhada como se estivesse descrevendo uma fotografia ou pintura.
-- Incorpore os seguintes conceitos:
-    - Tom/Atmosfera: ${gptParams.tone}
-    - Estilo de Arte: ${gptParams.style}
-    - Composição/Ângulo: ${gptParams.composition}
-- O prompt deve ser em INGLÊS.
-
-Analise o tópico, aplique os parâmetros e gere os dois prompts.
-`;
-
-    return prompt;
+A resposta DEVE ser um único objeto JSON com duas chaves: "midjourneyPrompt" e "gptPrompt".`;
 };
 
 const responseSchema = {
     type: Type.OBJECT,
     properties: {
-        midjourneyPrompt: { type: Type.STRING, description: 'O prompt otimizado para Midjourney, em inglês, terminando com os parâmetros corretos, se fornecidos.' },
-        gptPrompt: { type: Type.STRING, description: 'O prompt descritivo e detalhado para DALL-E/GPT, em inglês.' },
+        midjourneyPrompt: { type: Type.STRING },
+        gptPrompt: { type: Type.STRING },
     },
     required: ["midjourneyPrompt", "gptPrompt"]
 };
+
 
 export default async function handler(
     req: NextApiRequest,
@@ -99,36 +77,30 @@ export default async function handler(
     try {
         const { topic, negativePrompt, mjParams, gptParams } = req.body;
 
-        if (!topic || !gptParams) { // mjParams is now optional
-            return res.status(400).json({ message: 'Tópico e parâmetros GPT são obrigatórios.' });
+        if (!topic) {
+            return res.status(400).json({ message: 'O tópico é obrigatório.' });
         }
 
         const aiClient = getAiClient();
-        const prompt = buildPromptForPrompts(topic, negativePrompt, mjParams, gptParams);
-
-        const config: any = {
-            responseMimeType: "application/json",
-            responseSchema: responseSchema,
-        };
+        const prompt = buildPromptGenerationPrompt(topic, negativePrompt, mjParams, gptParams);
 
         const result = await aiClient.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
-            config: config,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema,
+            },
         });
 
-        let jsonText = result.text?.trim();
+        const jsonText = result.text?.trim();
         if (!jsonText) {
-            throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
+            throw new Error("A resposta da IA estava vazia.");
         }
-        
-        const generatedPrompts = JSON.parse(jsonText);
-        
-        const finalResult: PromptGenerationResult = {
-            ...generatedPrompts,
-        };
 
-        res.status(200).json(finalResult);
+        const data = JSON.parse(jsonText);
+        
+        res.status(200).json(data);
 
     } catch (error) {
         console.error("Erro em /api/generatePrompts:", error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from './components/Header';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
@@ -59,7 +59,7 @@ const App: React.FC = () => {
         wbCountry: '',
         wbScale: 'local',
         // Breathing Form Filters
-        baseBreathingStyle: '',
+        baseBreathingStyles: [],
         breathingFormWeapon: '',
         breathingFormTone: 'ação',
         breathingFormOrigin: '',
@@ -79,6 +79,23 @@ const App: React.FC = () => {
 
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const headerRef = useRef<HTMLElement>(null);
+
+    // Dynamically set header height for full-page layout
+    useEffect(() => {
+        const updateHeaderHeight = () => {
+            if (headerRef.current) {
+                const height = headerRef.current.getBoundingClientRect().height;
+                document.documentElement.style.setProperty('--header-height', `${Math.ceil(height)}px`);
+            }
+        };
+
+        window.addEventListener('resize', updateHeaderHeight);
+        updateHeaderHeight(); // Initial call
+
+        return () => window.removeEventListener('resize', updateHeaderHeight);
+    }, []);
+
 
     // Auto-select the newest item
     useEffect(() => {
@@ -149,11 +166,11 @@ const App: React.FC = () => {
     }, []);
     
     const ForgeView = () => (
-        <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 lg:p-6 h-[calc(100vh-81px)]">
-            <div className="lg:col-span-3 h-full">
+        <main className="main-grid-container">
+            <div className="grid-column-wrapper">
                 <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} />
             </div>
-            <div className="lg:col-span-5 h-full">
+            <div className="grid-column-wrapper">
                  <ResultsPanel 
                     items={items} 
                     isLoading={isLoading} 
@@ -165,7 +182,7 @@ const App: React.FC = () => {
                     onClearResults={handleClearResults}
                 />
             </div>
-            <div className="hidden lg:block lg:col-span-4 h-full">
+            <div className="hidden lg:block grid-column-wrapper">
                  <DetailPanel
                     item={selectedItem}
                     onGenerateVariant={handleGenerateVariant}
@@ -178,8 +195,9 @@ const App: React.FC = () => {
     );
 
     return (
-        <div className="bg-gray-900 text-gray-200 min-h-screen flex flex-col font-sans">
+        <div className="bg-gray-900 text-gray-200 h-screen flex flex-col font-sans">
             <Header
+                ref={headerRef}
                 onAboutClick={() => setIsAboutModalOpen(true)}
                 activeView={activeView}
                 onViewChange={setActiveView}
@@ -194,7 +212,7 @@ const App: React.FC = () => {
             {activeView === 'forge' ? (
                 <ForgeView />
             ) : (
-                <main className="flex-grow p-4 lg:p-6">
+                <main className="flex-grow p-4 lg:p-6 overflow-y-auto">
                     <PromptEngineeringPanel />
                 </main>
             )}
