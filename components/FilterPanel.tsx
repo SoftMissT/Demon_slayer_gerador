@@ -109,6 +109,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             </Select>
             <Select label="Inspiração (Origem)" value={filters.accessoryOriginInspiration} onChange={(e) => handleFilterChange('accessoryOriginInspiration', e.target.value)}>
               <option value="" disabled>Selecione...</option>
+              <option value="Aleatória">Aleatória</option>
               {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
           </>
@@ -163,11 +164,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       case 'Forma de Respiração':
         return (
           <>
-            <Select label="Respiração Base (Derivação)" value={filters.baseBreathingStyle} onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}>
-              <option value="" disabled>Selecione...</option>
-              <option value="Aleatória">Aleatória</option>
-              {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
-            </Select>
+             <SearchableMultiSelect
+                label="Respiração Base (Inspiração)"
+                options={breathingStyleOptions}
+                selected={filters.baseBreathingStyles}
+                onChange={(selected) => handleFilterChange('baseBreathingStyles', selected)}
+                placeholder="Selecione inspirações..."
+            />
             <Select label="Arma" value={filters.breathingFormWeapon} onChange={(e) => handleFilterChange('breathingFormWeapon', e.target.value)}>
               <option value="" disabled>Selecione...</option>
               <option value="Aleatório">Aleatório</option>
@@ -176,12 +179,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             <Select label="Tom" value={filters.breathingFormTone} onChange={(e) => handleFilterChange('breathingFormTone', e.target.value as Tone)}>
               {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
             </Select>
-            <Select label="Origem" value={filters.breathingFormOrigin} onChange={(e) => handleFilterChange('breathingFormOrigin', e.target.value)}>
+            <Select label="Origem (Inspiração)" value={filters.breathingFormOrigin} onChange={(e) => handleFilterChange('breathingFormOrigin', e.target.value)}>
               <option value="" disabled>Selecione...</option>
               <option value="Aleatório">Aleatório</option>
               {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
-            <Select label="Arquétipo (Classe)" value={filters.breathingFormArchetype} onChange={(e) => handleFilterChange('breathingFormArchetype', e.target.value)}>
+            <Select label="Arquétipo (Inspiração)" value={filters.breathingFormArchetype} onChange={(e) => handleFilterChange('breathingFormArchetype', e.target.value)}>
               <option value="" disabled>Selecione...</option>
               <option value="Aleatório">Aleatório</option>
               {hunterArchetypeOptions.map(arch => <option key={arch} value={arch}>{arch}</option>)}
@@ -297,7 +300,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           <RefreshIcon className="w-5 h-5" />
         </Button>
       </div>
-      <div className="space-y-4 flex-grow overflow-y-auto pr-2">
+      <div className="space-y-4 flex-grow pr-2">
         <Select
           label="Categoria"
           value={filters.category}

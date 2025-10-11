@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import type { GeneratedItem } from '../types';
 import { Card } from './ui/Card';

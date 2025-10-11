@@ -499,13 +499,16 @@ Mantenha a coerência entre todos os elementos. Os campos 'raridade' e 'nivel_su
             break;
 
         case 'Forma de Respiração':
+            const baseStyle = filters.baseBreathingStyles.length > 0 ? filters.baseBreathingStyles[0] : 'uma respiração base adequada';
+            const inspirationStyles = filters.baseBreathingStyles.slice(1);
+            
             prompt = `Você é um game designer especialista em RPG de mesa, focado em criar mecânicas balanceadas e temáticas para um sistema de jogo no universo de Demon Slayer.
 Sua tarefa é criar UMA NOVA FORMA DERIVADA para uma Respiração existente. NUNCA crie uma nova respiração base.
 A resposta DEVE ser um objeto JSON, seguindo estritamente o schema fornecido.
 
 **Contexto para a Criação (Filtros):**
-A técnica deve ser adequada para um caçador com o seguinte perfil:
-- **Respiração Base para Derivação**: ${getFilterInstruction(filters.baseBreathingStyle, 'uma respiração base adequada')}
+A técnica deve ser uma derivação da **${baseStyle}** e ser adequada para um caçador com o seguinte perfil:
+- **Inspirações Secundárias**: ${inspirationStyles.length > 0 ? inspirationStyles.join(', ') : 'Nenhuma'}
 - **Era/Estilo**: ${getFilterInstruction(filters.era, 'uma era apropriada')}
 - **Arma Preferida**: ${getFilterInstruction(filters.breathingFormWeapon, 'uma arma adequada')}
 - **Tom**: ${filters.breathingFormTone}
@@ -513,12 +516,12 @@ A técnica deve ser adequada para um caçador com o seguinte perfil:
 - **Arquétipo do Caçador**: ${getFilterInstruction(filters.breathingFormArchetype, 'um arquétipo de caçador adequado')}
 
 **Regras de Geração Obrigatórias:**
-1.  **Derivação e Consistência**: A nova forma DEVE derivar da Respiração Base e ser tematicamente consistente com o perfil do caçador descrito acima.
+1.  **Derivação e Consistência**: A nova forma DEVE derivar da Respiração Base (${baseStyle}) e ser tematicamente consistente com o perfil do caçador descrito acima. Se houver inspirações secundárias, incorpore elementos temáticos delas.
 2.  **Mecânica Detalhada**: O objeto 'mechanics' DEVE seguir o template do schema, com regras claras de ativação, custo, dano, etc.
 3.  **Escala**: O campo 'level_scaling' deve detalhar como os valores mudam com o rank/nível.
 4.  **Variantes**: Gere 3 'micro_variants' e as variantes de balanço (leve, padrão, brutal).
 
-Por favor, gere a nova Forma de Respiração Derivada no formato JSON solicitado.
+Por favor, gere a nova Forma de Respiração Derivada no formato JSON solicitado. O campo 'base_breathing_id' deve ser preenchido com '${baseStyle}'.
 `;
             break;
 

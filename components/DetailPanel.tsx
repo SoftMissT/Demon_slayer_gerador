@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
+import type { GeneratedItem, MissionNPC, MissionItem, WBKeyNpc } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
@@ -343,7 +343,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {item.key_npcs_wb && item.key_npcs_wb.length > 0 && (
             <DetailSection title="NPCs Importantes">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {item.key_npcs_wb.map((npc, i) => (
+                    {item.key_npcs_wb.map((npc: WBKeyNpc, i: number) => (
                          <Card key={i} className="!p-3 !bg-gray-800/70">
                             <h5 className="font-bold text-white">{npc.name} <span className="text-xs text-gray-400 font-normal">({npc.role})</span></h5>
                             <p className="text-xs text-gray-400 mt-1">{npc.description}</p>
@@ -441,6 +441,108 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
     </>
 );
 
+const formatItemAsText = (item: GeneratedItem | null): string => {
+    if (!item) return '';
+
+    const builder: string[] = [];
+    const divider = '--------------------';
+
+    const add = (title: string, content: any) => {
+        if (!content || (Array.isArray(content) && content.length === 0)) return;
+        
+        builder.push(`${title.toUpperCase()}:`);
+        
+        if (Array.isArray(content)) {
+            const listItems = content.map(c => {
+                if (typeof c === 'object' && c !== null) {
+                    if (c.name && c.role && c.description) { // WBKeyNpc
+                        return `- ${c.name} (${c.role}): ${c.description}`;
+                    }
+                    return `- ${JSON.stringify(c)}`;
+                }
+                return `- ${c}`;
+            });
+            builder.push(...listItems);
+        } else if (typeof content === 'object') {
+            if (content.nome && content.descricao) { // Acessorio, Kekkijutsu
+                 builder.push(`  ${content.nome}`);
+                 builder.push(`  ${content.descricao}`);
+            } else if (content.arma && content.empunhadura) { // Arsenal
+                 builder.push(`  Arma: ${content.arma}`);
+                 builder.push(`  Estilo: ${content.empunhadura.nome}`);
+                 builder.push(`  ${content.empunhadura.descricao}`);
+            } else if (content.respiracao && content.variacoes_tecnica) { // Habilidades Especiais
+                 builder.push(`  Respiração: ${content.respiracao}`);
+                 if (content.variacoes_tecnica.length > 0) {
+                    builder.push(...content.variacoes_tecnica.map((v: string) => `  - ${v}`));
+                 }
+            }
+        } else {
+            builder.push(String(content));
+        }
+        builder.push(''); // Add a blank line for spacing
+    };
+    
+    // Header
+    builder.push(item.name_pt || item.title || item.nome);
+    builder.push(divider);
+    add('Categoria', item.categoria);
+    if(item.raridade !== 'N/A') add('Raridade', item.raridade);
+    if(item.nivel_sugerido) add('Nível Sugerido', item.nivel_sugerido);
+    
+    // Dynamic top-level fields
+    if(item.power_level) add('Nível de Poder', item.power_level);
+    if(item.origem) add('Origem', item.origem);
+    if(item.classe) add('Arquétipo (Classe)', item.classe);
+    if(item.personalidade) add('Personalidade', item.personalidade);
+    
+    builder.push(divider);
+
+    // Common description fields
+    add('Descrição Curta', item.descricao_curta);
+    add('Descrição', item.descricao);
+    add('Descrição Física', item.descricao_fisica);
+    add('Descrição Física Detalhada', item.descricao_fisica_detalhada);
+    add('Background', item.background);
+    
+    // Complex objects
+    add('Arsenal', item.arsenal);
+    add('Habilidades Especiais', item.habilidades_especiais);
+    add('Acessório Distintivo', item.acessorio);
+    add('Kekkijutsu', item.kekkijutsu);
+
+    // Lists
+    add('Comportamento em Combate', item.comportamento_combate);
+    add('Comportamento Fora de Combate', item.comportamento_fora_combate);
+    add('Fraquezas Únicas', item.fraquezas_unicas);
+    add('Troféus / Loot', item.trofeus_loot);
+    add('Uso em Cena', item.uso_em_cena);
+    add('Ganchos de Aventura', item.adventure_hooks);
+
+    // Ganchos can be string or array
+    if (item.ganchos_narrativos) {
+        add('Ganchos Narrativos', item.ganchos_narrativos);
+    }
+    
+    add('NPCs Importantes', item.key_npcs_wb);
+
+
+    // Mechanics for simple items
+    const mechanics: string[] = [];
+    if (item.dano) mechanics.push(`Dano: ${item.dano}`);
+    if (item.dados) mechanics.push(`Dados: ${item.dados}`);
+    if (item.tipo_de_dano) mechanics.push(`Tipo de Dano: ${item.tipo_de_dano}`);
+    if (item.status_aplicado && item.status_aplicado !== 'Nenhum') mechanics.push(`Status Aplicado: ${item.status_aplicado}`);
+    if (item.efeitos_secundarios && item.efeitos_secundarios !== 'Nenhum') mechanics.push(`Efeitos Secundários: ${item.efeitos_secundarios}`);
+    if(mechanics.length > 0) {
+        builder.push('MECÂNICAS:');
+        builder.push(...mechanics);
+        builder.push('');
+    }
+    
+    return builder.join('\n').replace(/\n\n\n/g, '\n\n');
+};
+
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -482,7 +584,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
 
   const handleCopy = () => {
     if (!item) return;
-    navigator.clipboard.writeText(JSON.stringify(item, null, 2));
+    const textToCopy = formatItemAsText(item);
+    navigator.clipboard.writeText(textToCopy);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -525,7 +628,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                  </p>
             </div>
             <div className="flex items-center gap-1">
-                 <Button variant="ghost" className="!p-2" onClick={handleCopy} title="Copiar Conteúdo JSON">
+                 <Button variant="ghost" className="!p-2" onClick={handleCopy} title="Copiar Conteúdo como Texto">
                     {isCopied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
                  </Button>
                 <button 

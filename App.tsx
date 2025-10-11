@@ -46,7 +46,7 @@ const initialFilterState: FilterState = {
     wbTone: 'aventura',
     wbCountry: '',
     wbScale: 'local',
-    baseBreathingStyle: '',
+    baseBreathingStyles: [],
     breathingFormWeapon: '',
     breathingFormTone: 'ação',
     breathingFormOrigin: '',
@@ -70,6 +70,22 @@ const App: React.FC = () => {
 
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    // Effect to dynamically set the header height for perfect layout calculations
+    useEffect(() => {
+        const updateHeaderHeight = () => {
+            const header = document.querySelector('header');
+            if (header) {
+                const headerHeight = header.getBoundingClientRect().height;
+                document.documentElement.style.setProperty('--header-height', `${Math.ceil(headerHeight)}px`);
+            }
+        };
+        
+        updateHeaderHeight();
+        window.addEventListener('resize', updateHeaderHeight);
+
+        return () => window.removeEventListener('resize', updateHeaderHeight);
+    }, []);
 
     // Auto-select the newest item
     useEffect(() => {
@@ -144,12 +160,11 @@ const App: React.FC = () => {
     }, []);
     
     const ForgeView = () => (
-        <main className="flex-grow flex flex-row overflow-x-auto lg:flex-col lg:overflow-x-visible p-4 lg:p-6 gap-6 h-[calc(100vh-85px)]">
-            {/* The panels will have min-width for mobile's flex-row and will stack in desktop's flex-col */}
-            <div className="lg:w-full min-w-[340px] h-full">
+        <main className="main-content-area">
+            <div className="content-column filter-column-wrapper">
                 <FilterPanel filters={filters} onFiltersChange={setFilters} onGenerate={handleGenerate} isLoading={isLoading} onResetFilters={handleResetFilters} />
             </div>
-            <div className="lg:w-full min-w-[400px] h-full">
+            <div className="content-column">
                  <ResultsPanel 
                     items={items} 
                     isLoading={isLoading} 
@@ -161,7 +176,7 @@ const App: React.FC = () => {
                     onClearResults={handleClearResults}
                 />
             </div>
-            <div className="lg:w-full min-w-[420px] h-full">
+            <div className="content-column">
                  <DetailPanel
                     item={selectedItem}
                     onGenerateVariant={handleGenerateVariant}

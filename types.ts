@@ -1,5 +1,13 @@
-// FIX: Removed the circular import of 'Rarity' from the same file.
-export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
+// FIX: Replaced circular import with the actual type definition for Rarity.
+export type Rarity =
+  | 'Aleatória'
+  | 'Comum'
+  | 'Incomum'
+  | 'Raro'
+  | 'Épico'
+  | 'Lendário'
+  | 'Amaldiçoado'
+  | 'N/A';
 
 export type Category = 
   | 'Aleatória'
@@ -84,7 +92,7 @@ export interface FilterState {
   wbScale: string;
   
   // Breathing Form Filters
-  baseBreathingStyle: string;
+  baseBreathingStyles: string[];
   breathingFormWeapon: string;
   breathingFormTone: Tone;
   breathingFormOrigin: string;
