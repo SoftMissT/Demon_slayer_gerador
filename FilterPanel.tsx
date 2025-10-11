@@ -36,6 +36,88 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   // FIX: Create an array of style names from the imported data object.
   const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => style.nome);
 
+  // FIX: Helper to render rarity select only for applicable categories.
+  const renderRaritySelect = () => {
+    if (filters.category === 'Arma') {
+        return (
+            <Select
+                label="Raridade"
+                value={filters.weaponRarity}
+                onChange={(e) => handleFilterChange('weaponRarity', e.target.value as Rarity)}
+            >
+                {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
+            </Select>
+        );
+    }
+    if (filters.category === 'Acessório') {
+        return (
+            <Select
+                label="Raridade"
+                value={filters.accessoryRarity}
+                onChange={(e) => handleFilterChange('accessoryRarity', e.target.value as Rarity)}
+            >
+                {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
+            </Select>
+        );
+    }
+    return null;
+  }
+
+  // FIX: Helper to render era select only for applicable categories.
+  const renderEraSelect = () => {
+    let era: Era | undefined;
+    let eraKey: keyof FilterState | undefined;
+
+    switch (filters.category) {
+        case 'Caçador':
+            era = filters.hunterEra;
+            eraKey = 'hunterEra';
+            break;
+        case 'Acessório':
+            era = filters.accessoryEra;
+            eraKey = 'accessoryEra';
+            break;
+        case 'Arma':
+            era = filters.weaponEra;
+            eraKey = 'weaponEra';
+            break;
+        case 'Local/Cenário':
+            era = filters.locationEra;
+            eraKey = 'locationEra';
+            break;
+        case 'World Building':
+            era = filters.wbEra;
+            eraKey = 'wbEra';
+            break;
+        case 'Forma de Respiração':
+            era = filters.breathingFormEra;
+            eraKey = 'breathingFormEra';
+            break;
+        case 'Kekkijutsu':
+            era = filters.kekkijutsuEra;
+            eraKey = 'kekkijutsuEra';
+            break;
+        case 'NPC':
+            era = filters.npcEra;
+            eraKey = 'npcEra';
+            break;
+    }
+
+    if (era !== undefined && eraKey) {
+        const key = eraKey; // for closure
+        return (
+            <Select
+                label="Era / Estilo"
+                value={era}
+                onChange={(e) => handleFilterChange(key, e.target.value as Era)}
+            >
+                {ERAS.map(e => <option key={e} value={e}>{e}</option>)}
+            </Select>
+        );
+    }
+    return null;
+}
+
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
       <h2 className="text-xl font-bold text-white mb-4 font-gangofthree">Forja de Lendas</h2>
@@ -49,25 +131,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </Select>
 
-        {filters.category !== 'Missão/Cenário' && (
-           <Select
-            label="Raridade"
-            value={filters.rarity}
-            // FIX: Cast e.target.value to Rarity to match the FilterState type.
-            onChange={(e) => handleFilterChange('rarity', e.target.value as Rarity)}
-          >
-            {RARITIES.map(rar => <option key={rar} value={rar}>{rar}</option>)}
-          </Select>
-        )}
+        {/* FIX: Replaced generic rarity select with a conditional one */}
+        {renderRaritySelect()}
 
-        <Select
-          label="Era / Estilo"
-          value={filters.era}
-          // FIX: Cast e.target.value to Era to match the FilterState type.
-          onChange={(e) => handleFilterChange('era', e.target.value as Era)}
-        >
-          {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
-        </Select>
+        {/* FIX: Replaced generic era select with a conditional one */}
+        {renderEraSelect()}
         
         {/* Mission-specific filters */}
         {filters.category === 'Missão/Cenário' && (
@@ -112,24 +180,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             </div>
         )}
 
-        {/* FIX: Replaced SearchableMultiSelect with Select to match FilterState type for 'baseBreathingStyle'. */}
+        {/* FIX: Used SearchableMultiSelect and corrected property to 'baseBreathingStyles' */}
         {filters.category === 'Forma de Respiração' && (
-          <Select
+          <SearchableMultiSelect
             label="Respiração Base (Derivação)"
-            value={filters.baseBreathingStyle || 'Aleatória'}
-            onChange={(e) => handleFilterChange('baseBreathingStyle', e.target.value)}
-          >
-            <option value="Aleatória">Aleatória</option>
-            {breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}
-          </Select>
+            selected={filters.baseBreathingStyles}
+            onChange={(val) => handleFilterChange('baseBreathingStyles', val)}
+            options={breathingStyleOptions}
+          />
         )}
         
-        {/* FIX: Replaced SearchableMultiSelect with Select for 'kekkijutsuInspiration' to match the FilterState type. */}
+        {/* FIX: Corrected property to 'kekkijutsuKekkijutsuInspiration'. */}
         {filters.category === 'Kekkijutsu' && (
           <Select
             label="Inspiração (Kekkijutsu)"
-            value={filters.kekkijutsuInspiration}
-            onChange={(e) => handleFilterChange('kekkijutsuInspiration', e.target.value)}
+            value={filters.kekkijutsuKekkijutsuInspiration}
+            onChange={(e) => handleFilterChange('kekkijutsuKekkijutsuInspiration', e.target.value)}
           >
             <option value="Nenhuma">Nenhuma</option>
             {DEMON_BLOOD_ARTS.map(b => <option key={b} value={b}>{b}</option>)}

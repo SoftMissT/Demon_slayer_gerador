@@ -1,104 +1,134 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import useLocalStorage from './hooks/useLocalStorage';
+import type { FilterState, GeneratedItem } from './types';
+import { generateContent } from './services/geminiService';
 import { Header } from './components/Header';
 import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { DetailPanel } from './components/DetailPanel';
+import { Footer } from './components/Footer';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
-import { AboutPanel } from './components/AboutPanel';
+import { AboutModal } from './components/AboutModal';
+import { FavoritesModal } from './components/FavoritesModal';
 import { HistoryModal } from './components/HistoryModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
-import { Footer } from './components/Footer';
-import type { FilterState, GeneratedItem } from './types';
-import { generateContent } from './services/geminiService';
-import useLocalStorage from './hooks/useLocalStorage';
+import { DetailModal } from './components/DetailModal';
 
-const INITIAL_FILTERS: FilterState = {
-    category: 'Caçador',
-    // Hunter
-    hunterWeapon: 'Aleatório',
-    hunterBreathingStyles: [],
-    hunterAccessory: 'Aleatório',
-    hunterEra: 'Aleatória',
-    hunterPersonality: 'Aleatório',
-    hunterOrigin: 'Aleatória',
-    hunterArchetype: 'Aleatório',
-    // Accessory
-    accessoryRarity: 'Aleatória',
-    accessoryEra: 'Aleatória',
-    accessoryKekkijutsuInspiration: 'Nenhuma',
-    accessoryBreathingInspiration: 'Nenhuma',
-    accessoryWeaponInspiration: 'Aleatório',
-    accessoryOrigin: 'Aleatória',
-    // Weapon
-    weaponRarity: 'Aleatória',
-    weaponMetalColor: 'Aleatória',
-    weaponEra: 'Aleatória',
-    weaponType: 'Aleatório',
-    // Location
-    locationTone: 'aventura',
-    locationCountry: 'Aleatório',
-    locationEra: 'Aleatória',
-    locationTerrain: 'Aleatório',
-    // World Building
-    wbTone: 'aventura',
-    wbCountry: 'Aleatório',
-    wbEra: 'Aleatória',
-    wbThreatScale: 'Aleatória',
-    wbLocation: 'Aleatório',
-    // Breathing Form
-    breathingFormEra: 'Aleatória',
-    breathingFormWeapon: 'Aleatório',
-    baseBreathingStyles: [],
-    breathingFormTone: 'ação',
-    breathingFormOrigin: 'Aleatória',
-    breathingFormArchetype: 'Aleatório',
-    // Kekkijutsu
-    kekkijutsuEra: 'Aleatória',
-    kekkijutsuKekkijutsuInspiration: 'Nenhuma',
-    kekkijutsuBreathingInspiration: 'Nenhuma',
-    kekkijutsuWeaponInspiration: 'Aleatório',
-    // NPC
-    npcOrigin: 'Aleatória',
-    npcProfession: 'Aleatório',
-    npcEra: 'Aleatória',
-    // Oni
-    oniPowerLevel: 'Aleatório',
-    oniInspirationKekkijutsu: 'Nenhuma',
-    oniInspirationBreathing: 'Nenhuma',
-    oniWeapon: 'Aleatório',
-    // Mission
-    missionTone: 'aventura',
-    intensity: 3,
-    missionScale: 'local',
-    protagonist: '',
-    targets: '',
-    moodModifiers: '',
+const initialFilters: FilterState = {
+  category: 'Caçador',
+  hunterWeapon: 'Aleatória',
+  hunterBreathingStyles: [],
+  hunterAccessory: 'Aleatória',
+  hunterEra: 'Aleatória',
+  hunterPersonality: 'Aleatória',
+  hunterOrigin: 'Aleatória',
+  hunterArchetype: 'Aleatória',
+  accessoryRarity: 'Aleatória',
+  accessoryEra: 'Aleatória',
+  accessoryKekkijutsuInspiration: 'Nenhuma',
+  accessoryBreathingInspiration: 'Nenhuma',
+  accessoryWeaponInspiration: 'Nenhuma',
+  accessoryOrigin: 'Aleatória',
+  weaponRarity: 'Aleatória',
+  weaponMetalColor: 'Aleatória',
+  weaponEra: 'Aleatória',
+  weaponType: 'Aleatória',
+  locationTone: 'aventura',
+  locationCountry: 'Aleatório',
+  locationEra: 'Aleatória',
+  locationTerrain: 'Aleatório',
+  wbTone: 'aventura',
+  wbCountry: 'Aleatório',
+  wbEra: 'Aleatória',
+  wbThreatScale: 'Aleatória',
+  wbLocation: 'Aleatória',
+  breathingFormEra: 'Aleatória',
+  breathingFormWeapon: 'Aleatória',
+  baseBreathingStyles: [],
+  breathingFormTone: 'ação',
+  breathingFormOrigin: 'Aleatória',
+  breathingFormArchetype: 'Aleatória',
+  kekkijutsuEra: 'Aleatória',
+  kekkijutsuKekkijutsuInspiration: 'Nenhuma',
+  kekkijutsuBreathingInspiration: 'Nenhuma',
+  kekkijutsuWeaponInspiration: 'Nenhuma',
+  npcOrigin: 'Aleatória',
+  npcProfession: 'Aleatória',
+  npcEra: 'Aleatória',
+  oniPowerLevel: 'Aleatório',
+  oniInspirationKekkijutsu: 'Nenhuma',
+  oniInspirationBreathing: 'Nenhuma',
+  oniWeapon: 'Aleatória',
+  missionTone: 'mistério',
+  intensity: 3,
+  missionScale: 'local',
+  protagonist: 'Um caçador recém-formado com um passado misterioso.',
+  targets: 'Um oni que se esconde em uma vila isolada.',
+  moodModifiers: 'chuvoso, sombrio, silencioso',
 };
 
+
 const App: React.FC = () => {
-    const [activeView, setActiveView] = useState<'forge' | 'prompt' | 'sobre'>('forge');
-    const [isHistoryModalOpen, setHistoryModalOpen] = useState(false);
-    
-    const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
-    const [items, setItems] = useLocalStorage<GeneratedItem[]>('kf-generated-items', []);
-    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kf-history', []);
-    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kf-favorites', []);
-    
+    const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
+    const [items, setItems] = useLocalStorage<GeneratedItem[]>('generatedItems_v2', []);
+    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('generationHistory_v2', []);
+    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('favoriteItems_v2', []);
+    const [filters, setFilters] = useState<FilterState>(initialFilters);
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const mainContainerRef = useRef<HTMLElement>(null);
-    
-    // Select the first item on initial load if items exist
-    useEffect(() => {
-        if (items.length > 0 && !selectedItem) {
-            setSelectedItem(items[items.length - 1]);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-    const handleUpdateItem = (updatedItem: GeneratedItem) => {
+    // Auto-select first item or last generated item
+    useEffect(() => {
+        if (!selectedItem && items.length > 0) {
+            setSelectedItem(items[items.length - 1]);
+        } else if (selectedItem && !items.find(i => i.id === selectedItem.id)) {
+            // If selected item was deleted, select the last one or null
+            setSelectedItem(items.length > 0 ? items[items.length - 1] : null);
+        }
+    }, [items, selectedItem]);
+    
+    const handleGenerate = useCallback(async (count: number = 1, promptModifier?: string) => {
+        setIsLoading(true);
+        setError(null);
+        if(count > 1) setSelectedItem(null);
+
+        try {
+            const newItems = await generateContent(filters, count, promptModifier);
+            setItems(prev => [...prev, ...newItems]);
+            setHistory(prev => [...prev, ...newItems]);
+            if (newItems.length > 0) {
+                setSelectedItem(newItems[newItems.length - 1]);
+            }
+        } catch (err: any) {
+            setError(err.message || 'Ocorreu um erro desconhecido.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [filters, setItems, setHistory]);
+    
+    const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
+        const promptModifier = `Gere uma variação deste item com uma abordagem mais ${variantType}. Foque em como essa abordagem altera suas habilidades, aparência e lore.\n\nItem Original:\n${JSON.stringify(item, null, 2)}`;
+        await handleGenerate(1, promptModifier);
+    }, [handleGenerate]);
+
+    const handleToggleFavorite = useCallback((item: GeneratedItem) => {
+        setFavorites(prev => {
+            const isFav = prev.some(fav => fav.id === item.id);
+            if (isFav) {
+                return prev.filter(fav => fav.id !== item.id);
+            } else {
+                return [...prev, item];
+            }
+        });
+    }, [setFavorites]);
+
+    const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
         const updateList = (list: GeneratedItem[]) => list.map(item => item.id === updatedItem.id ? updatedItem : item);
         setItems(updateList);
         setHistory(updateList);
@@ -108,168 +138,115 @@ const App: React.FC = () => {
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
-    };
-    
-    const handleGenerate = useCallback(async (count: number = 1, promptModifier?: string, itemToVary?: GeneratedItem) => {
-        setIsLoading(true);
-        setError(null);
-        if (count === 1 && !promptModifier) { // Only clear selection for brand new items
-            setSelectedItem(null);
-        }
+    }, [setItems, setHistory, setFavorites, favorites, selectedItem]);
 
-        try {
-            // FIX: The generated object for currentFilters was not a valid FilterState.
-            // When varying an item, the prompt modifier already contains the full item context.
-            // We only need to reset filters and set the correct category.
-            const currentFilters = itemToVary ? { ...INITIAL_FILTERS, category: itemToVary.categoria } as FilterState : filters;
-            const newItems = await generateContent(currentFilters, count, promptModifier);
-            
-            setItems(prev => [...prev, ...newItems]);
-            setHistory(prev => [...prev, ...newItems]);
-            setSelectedItem(newItems[newItems.length - 1]);
-
-        } catch (err: any) {
-            setError(err.message || 'Ocorreu um erro desconhecido.');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [filters, setItems, setHistory]);
-    
-    const handleGenerateVariant = (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
-        const prompt = `Gere uma variação da seguinte ficha de item, com uma abordagem mais ${variantType}. Mantenha o nome e a essência, mas altere as mecânicas e a descrição para refletir o novo estilo. Item original para variar: ${JSON.stringify(item)}`;
-        handleGenerate(1, prompt, item);
-    };
-    
-    const handleSelectItem = (item: GeneratedItem) => {
+    const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
-        // On mobile/tablet, scroll smoothly to the Detail Panel
-        if (window.innerWidth < 1024 && mainContainerRef.current) {
-            const panelWidth = mainContainerRef.current.offsetWidth;
-            mainContainerRef.current.scrollTo({
-                left: panelWidth * 2, // The 3rd panel
-                behavior: 'smooth',
-            });
-        }
-    };
-    
-    const handleToggleFavorite = (item: GeneratedItem) => {
-        if (favorites.some(fav => fav.id === item.id)) {
-            setFavorites(favorites.filter(fav => fav.id !== item.id));
-        } else {
-            setFavorites([...favorites, item]);
-        }
-    };
-    
-    const isFavorite = useMemo(() => {
-        return selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false;
-    }, [selectedItem, favorites]);
-    
-    const handleClearResults = () => {
+        setIsDetailModalOpen(true); // For mobile view
+    }, []);
+
+    const handleClearResults = useCallback(() => {
         setItems([]);
         setSelectedItem(null);
-    };
+    }, [setItems]);
 
-    const handleResetFilters = () => {
-        setFilters(prev => ({ ...INITIAL_FILTERS, category: prev.category }));
-    };
-
-    const handleHistorySelect = (item: GeneratedItem) => {
-        handleSelectItem(item);
-        setHistoryModalOpen(false);
-    };
+    const handleDeleteFromHistory = useCallback((itemId: string) => {
+        setHistory(prev => prev.filter(item => item.id !== itemId));
+    }, [setHistory]);
     
-    const handleHistoryDelete = (itemId: string) => {
-        setHistory(history.filter(item => item.id !== itemId));
-    };
-
-    const handleHistoryClear = () => {
+    const handleClearHistory = useCallback(() => {
         setHistory([]);
-    };
-    
-    const ForgeView = () => (
-        <main 
-            ref={mainContainerRef}
-            className="
-            flex-grow max-h-[calc(100vh-80px)] 
-            flex overflow-x-auto snap-x snap-mandatory no-scrollbar
-            lg:grid lg:grid-cols-12 lg:gap-4 lg:p-4 lg:overflow-hidden
-        ">
-            {/* Panel 1: Filters */}
-            <div className="flex-shrink-0 w-full snap-center p-2 h-full lg:p-0 lg:col-span-3 lg:w-auto">
-                <div className="h-full overflow-y-auto no-scrollbar">
-                    <FilterPanel 
-                        filters={filters} 
-                        onFiltersChange={setFilters} 
-                        onGenerate={handleGenerate} 
-                        isLoading={isLoading}
-                        onResetFilters={handleResetFilters}
-                    />
-                </div>
-            </div>
-            {/* Panel 2: Results */}
-            <div className="flex-shrink-0 w-full snap-center p-2 h-full lg:p-0 lg:col-span-3 lg:w-auto">
-                <div className="h-full overflow-y-auto no-scrollbar">
-                    <ResultsPanel
-                        items={items}
-                        isLoading={isLoading}
-                        selectedItem={selectedItem}
-                        onSelectItem={handleSelectItem}
-                        favorites={favorites}
-                        onToggleFavorite={handleToggleFavorite}
-                        onGenerateVariant={handleGenerateVariant}
-                        onClearResults={handleClearResults}
-                    />
-                </div>
-            </div>
-            {/* Panel 3: Details */}
-            <div className="flex-shrink-0 w-full snap-center p-2 h-full lg:p-0 lg:col-span-6 lg:w-auto">
-                 <div className="h-full overflow-y-auto no-scrollbar">
-                    <DetailPanel
-                        item={selectedItem}
-                        onGenerateVariant={handleGenerateVariant}
-                        isFavorite={isFavorite}
-                        onToggleFavorite={handleToggleFavorite}
-                        onUpdate={handleUpdateItem}
-                    />
-                </div>
-            </div>
-        </main>
-    );
+    }, [setHistory]);
+
+    const handleSelectFromModal = useCallback((item: GeneratedItem) => {
+        setSelectedItem(item);
+        setIsFavoritesModalOpen(false);
+        setIsHistoryModalOpen(false);
+        setIsDetailModalOpen(true); // For mobile view
+    }, []);
+
+    const isFavorite = selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false;
 
     return (
-        <div className="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200 font-sans">
             <Header
-                onHistoryClick={() => setHistoryModalOpen(true)}
+                onAboutClick={() => setIsAboutModalOpen(true)}
+                onFavoritesClick={() => setIsFavoritesModalOpen(true)}
+                onHistoryClick={() => setIsHistoryModalOpen(true)}
                 activeView={activeView}
                 onViewChange={setActiveView}
             />
             
-            {error && <div className="p-4"><ErrorDisplay message={error} onDismiss={() => setError(null)} /></div>}
-            
-            <div className="flex-grow flex flex-col overflow-hidden">
-                {activeView === 'forge' && <ForgeView />}
-                {activeView === 'prompt' && (
-                    <div className="p-4 flex-grow max-h-[calc(100vh-80px-28px)] overflow-y-auto">
-                        <PromptEngineeringPanel />
+            <main className="flex-grow p-4 md:p-6 lg:p-8">
+                {activeView === 'forge' ? (
+                    <div className="flex flex-col gap-4 md:gap-6 h-full">
+                        {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 h-full flex-grow">
+                            <div className="lg:col-span-3 h-full">
+                                <FilterPanel 
+                                    filters={filters}
+                                    onFiltersChange={setFilters}
+                                    onGenerate={handleGenerate}
+                                    isLoading={isLoading}
+                                />
+                            </div>
+                            <div className="lg:col-span-3 h-full">
+                                 <ResultsPanel
+                                    items={items}
+                                    isLoading={isLoading}
+                                    selectedItem={selectedItem}
+                                    onSelectItem={handleSelectItem}
+                                    favorites={favorites}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    onGenerateVariant={handleGenerateVariant}
+                                    onClearResults={handleClearResults}
+                                />
+                            </div>
+                            <div className="lg:col-span-6 h-full hidden lg:block">
+                                <DetailPanel
+                                    item={selectedItem}
+                                    onGenerateVariant={handleGenerateVariant}
+                                    isFavorite={isFavorite}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    onUpdate={handleUpdateItem}
+                                />
+                            </div>
+                        </div>
                     </div>
+                ) : (
+                    <PromptEngineeringPanel />
                 )}
-                {activeView === 'sobre' && (
-                    <div className="p-4 flex-grow max-h-[calc(100vh-80px-28px)] overflow-y-auto">
-                        <AboutPanel />
-                    </div>
-                )}
-            </div>
+            </main>
             
-            <Footer onViewChange={setActiveView} />
+            <Footer onAboutClick={() => setIsAboutModalOpen(true)} />
 
-            <HistoryModal 
-                isOpen={isHistoryModalOpen} 
-                onClose={() => setHistoryModalOpen(false)}
-                history={history}
-                onSelect={handleHistorySelect}
-                onDelete={handleHistoryDelete}
-                onClear={handleHistoryClear}
+            <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+            <FavoritesModal 
+                isOpen={isFavoritesModalOpen} 
+                onClose={() => setIsFavoritesModalOpen(false)}
+                favorites={favorites}
+                onSelect={handleSelectFromModal}
+                onToggleFavorite={handleToggleFavorite}
             />
+            <HistoryModal 
+                isOpen={isHistoryModalOpen}
+                onClose={() => setIsHistoryModalOpen(false)}
+                history={history}
+                onSelect={handleSelectFromModal}
+                onDelete={handleDeleteFromHistory}
+                onClear={handleClearHistory}
+            />
+            <div className="lg:hidden">
+                <DetailModal
+                    isOpen={isDetailModalOpen}
+                    onClose={() => setIsDetailModalOpen(false)}
+                    item={selectedItem}
+                    onGenerateVariant={handleGenerateVariant}
+                    isFavorite={isFavorite}
+                    onToggleFavorite={handleToggleFavorite}
+                    onUpdate={handleUpdateItem}
+                />
+            </div>
         </div>
     );
 };

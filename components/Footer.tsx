@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { aboutContent } from '../lib/aboutContent';
+import { HeartIcon } from './icons/HeartIcon';
 
+// FIX: Implemented Footer component to resolve placeholder errors.
 interface FooterProps {
-  onViewChange: (view: 'sobre') => void;
+    onAboutClick: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
+export const Footer: React.FC<FooterProps> = ({ onAboutClick }) => {
+
+  useEffect(() => {
+    const openAbout = () => onAboutClick();
+    document.addEventListener('openAboutModal', openAbout);
+    return () => document.removeEventListener('openAboutModal', openAbout);
+  }, [onAboutClick]);
+
   return (
-    <footer className="w-full text-center p-2 bg-gray-900 border-t border-gray-700 text-xs text-gray-500">
-      <span>Forja de Lendas é uma ferramenta não oficial.</span>
-      <button onClick={() => onViewChange('sobre')} className="underline hover:text-white ml-2">
-        Sobre o projeto
-      </button>
+    <footer className="text-xs text-center p-4 text-gray-500 border-t border-gray-800 mt-auto">
+      <div dangerouslySetInnerHTML={{ __html: aboutContent.html_footer_snippet }} />
+      <p className="mt-2">
+        Feito com <HeartIcon className="w-3 h-3 inline-block text-red-500" /> por SoftMissT &amp; Mathzin.
+      </p>
     </footer>
   );
 };

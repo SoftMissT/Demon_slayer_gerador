@@ -423,7 +423,7 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         
         {'level_scaling' in item && item.level_scaling && (
             <DetailSection title="Escala por Nível">
-                {Object.entries(item.level_scaling).map(([rank, scaling]) => (
+                {Object.entries(item.level_scaling).map(([rank, scaling]: [string, any]) => (
                     <div key={rank}>
                         <h5 className="font-semibold text-white text-sm mt-1">{rank}</h5>
                         {Object.entries(scaling).map(([stat, value]) => (
@@ -486,13 +486,15 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     }
   };
   
-  const handleEditChange = (field: keyof GeneratedItem, value: any) => {
+  // FIX: Changed `field` type from `keyof GeneratedItem` to `string` to allow editing of properties not present on all union members.
+  const handleEditChange = (field: string, value: any) => {
     if(editedItem) {
         setEditedItem({...editedItem, [field]: value});
     }
   }
 
-  const renderField = (label: string, field: keyof GeneratedItem, type: 'text' | 'textarea' | 'number' = 'text') => {
+  // FIX: Changed `field` type from `keyof GeneratedItem` to `string` to allow rendering of properties not present on all union members.
+  const renderField = (label: string, field: string, type: 'text' | 'textarea' | 'number' = 'text') => {
     if (!editedItem) return null;
     const value = (editedItem as any)[field] as string | number | undefined || '';
     

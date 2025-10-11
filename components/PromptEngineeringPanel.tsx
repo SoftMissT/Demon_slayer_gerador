@@ -83,7 +83,7 @@ export const PromptEngineeringPanel: React.FC = () => {
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             <Card className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-4 font-gangofthree">Alquimia</h2>
+                <h2 className="text-2xl font-bold text-white mb-4 font-gangofthree">Mago dos prompts</h2>
                 <p className="text-gray-400 mb-4">
                     Descreva sua ideia, ajuste os parâmetros e deixe o Alquimista construir prompts otimizados para Midjourney e DALL-E.
                 </p>
