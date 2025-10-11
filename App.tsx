@@ -129,6 +129,7 @@ const App: React.FC = () => {
                     onSelectItem={handleSelectItem}
                     favorites={favorites}
                     onToggleFavorite={handleToggleFavorite}
+                    onGenerateVariant={handleGenerateVariant}
                 />
             </div>
         </main>

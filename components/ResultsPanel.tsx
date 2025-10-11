@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { GeneratedItem } from '../types';
 import { ResultCard } from './ResultCard';
@@ -11,9 +12,10 @@ interface ResultsPanelProps {
   onSelectItem: (item: GeneratedItem) => void;
   favorites: GeneratedItem[];
   onToggleFavorite: (item: GeneratedItem) => void;
+  onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
 }
 
-export const ResultsPanel: React.FC<ResultsPanelProps> = ({ items, isLoading, selectedItem, onSelectItem, favorites, onToggleFavorite }) => {
+export const ResultsPanel: React.FC<ResultsPanelProps> = ({ items, isLoading, selectedItem, onSelectItem, favorites, onToggleFavorite, onGenerateVariant }) => {
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
       <h2 className="text-xl font-bold text-white mb-4 font-gangofthree">Resultados</h2>
@@ -39,6 +41,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ items, isLoading, se
               isSelected={selectedItem?.id === item.id}
               isFavorite={favorites.some(fav => fav.id === item.id)}
               onToggleFavorite={onToggleFavorite}
+              onGenerateVariant={onGenerateVariant}
             />
           ))}
         </div>

@@ -1,3 +1,4 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -49,7 +50,7 @@ const buildPromptForPrompts = (
     let prompt = `Você é um engenheiro de prompt de IA especialista, mestre em criar prompts para geradores de imagem como Midjourney e DALL-E 3.
 Sua tarefa é criar dois prompts de imagem distintos e otimizados com base na ideia do usuário.
 ${useWebSearch ? 'Use a ferramenta de busca (Google Search) para encontrar referências visuais, artistas, estilos e detalhes relevantes sobre o tópico para enriquecer os prompts.' : 'Use seu conhecimento interno para criar os prompts.'}
-A resposta DEVE ser um objeto JSON, seguindo o schema fornecido.
+A resposta DEVE ser um objeto JSON${useWebSearch ? '.' : ', seguindo o schema fornecido.'}
 
 **Tópico da Imagem:** "${topic}"
 
@@ -70,6 +71,11 @@ A resposta DEVE ser um objeto JSON, seguindo o schema fornecido.
 
 Analise o tópico, aplique os parâmetros e gere os dois prompts.
 `;
+
+    if (useWebSearch) {
+        prompt += `\nLembre-se: sua resposta final DEVE ser apenas o objeto JSON, sem nenhum texto introdutório, explicação ou formatação de markdown.`
+    }
+
     return prompt;
 };
 
@@ -100,13 +106,13 @@ export default async function handler(
         const aiClient = getAiClient();
         const prompt = buildPromptForPrompts(topic, negativePrompt, mjParams, gptParams, useWebSearch);
 
-        const config: any = {
-            responseMimeType: "application/json",
-            responseSchema: responseSchema,
-        };
+        const config: any = {};
 
         if (useWebSearch) {
             config.tools = [{ googleSearch: {} }];
+        } else {
+            config.responseMimeType = "application/json";
+            config.responseSchema = responseSchema;
         }
 
         const result = await aiClient.models.generateContent({
@@ -115,10 +121,26 @@ export default async function handler(
             config: config,
         });
 
-        const jsonText = result.text?.trim();
+        let jsonText = result.text?.trim();
         if (!jsonText) {
             throw new Error("A resposta da IA estava vazia. A geração pode ter sido bloqueada ou o modelo não produziu uma saída válida.");
         }
+
+        if (useWebSearch) {
+            // Extract JSON from markdown code block if present
+            const match = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
+            if (match && match[1]) {
+                jsonText = match[1];
+            } else {
+                // Fallback for plain JSON object
+                const startIndex = jsonText.indexOf('{');
+                const endIndex = jsonText.lastIndexOf('}');
+                if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+                    jsonText = jsonText.substring(startIndex, endIndex + 1);
+                }
+            }
+        }
+        
         const generatedPrompts = JSON.parse(jsonText);
         
         const groundingMetadata = result.candidates?.[0]?.groundingMetadata;

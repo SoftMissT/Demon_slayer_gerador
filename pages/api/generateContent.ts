@@ -31,13 +31,15 @@ const locationSchema = {
     properties: {
         nome: { type: Type.STRING },
         categoria: { type: Type.STRING, description: "Deve ser 'Local/Cenário'" },
+        raridade: { type: Type.STRING, description: "Raridade do local, ex: Comum, Raro, Lendário." },
+        nivel_sugerido: { type: Type.INTEGER, description: "Nível de desafio sugerido para o local." },
         descricao_curta: { type: Type.STRING },
         descricao: { type: Type.STRING },
         clima: { type: Type.STRING },
         bioma: { type: Type.STRING },
         ganchos_narrativos: { type: Type.STRING },
     },
-    required: ["nome", "categoria", "descricao_curta", "descricao", "clima", "bioma", "ganchos_narrativos"]
+    required: ["nome", "categoria", "raridade", "nivel_sugerido", "descricao_curta", "descricao", "clima", "bioma", "ganchos_narrativos"]
 };
 
 const missionNpcSchema = {
@@ -72,6 +74,8 @@ const missionSchema = {
     properties: {
         title: { type: Type.STRING },
         categoria: { type: Type.STRING, description: "Deve ser 'Missão/Cenário'" },
+        raridade: { type: Type.STRING, description: "A 'raridade' ou impacto da missão, ex: Comum, Raro, Épico, Lendário." },
+        nivel_sugerido: { type: Type.INTEGER, description: "Nível de desafio sugerido para a missão." },
         logline: { type: Type.STRING },
         summary: { type: Type.STRING },
         objectives: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -100,7 +104,7 @@ const missionSchema = {
         sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
         micro_variants: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 pequenas variações, como 'O alvo é um traidor' ou 'O NPC chave está mentindo'." },
     },
-    required: ["title", "categoria", "logline", "summary", "objectives", "complications", "failure_states", "rewards", "numberOfSessions", "environment", "key_npcs", "scaling_hooks"]
+    required: ["title", "categoria", "raridade", "nivel_sugerido", "logline", "summary", "objectives", "complications", "failure_states", "rewards", "numberOfSessions", "environment", "key_npcs", "scaling_hooks"]
 }
 
 

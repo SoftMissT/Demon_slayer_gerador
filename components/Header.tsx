@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AboutTooltip } from './AboutTooltip';
 import { SparklesIcon } from './icons/SparklesIcon';
@@ -21,9 +22,9 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, activeView, onView
   return (
     <header className="py-4 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 flex justify-between items-center sticky top-0 z-40">
       <div className="flex items-center gap-3">
-        <SparklesIcon className="w-8 h-8 text-indigo-400" />
-        <h1 className="text-2xl font-bold text-white font-gangofthree tracking-wider">
-          Forja de Lendas
+        <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-10 h-10" />
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700 font-gangofthree tracking-wider">
+          Kimetsu Forge
         </h1>
       </div>
       
