@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
+import { InfoTooltip } from './InfoTooltip';
 
 // FIX: Redefined SelectProps to correctly type this custom component. It now extends
 // button attributes (since it renders a button) and omits conflicting properties
@@ -9,9 +10,10 @@ interface SelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>
   value: string | number | readonly string[] | undefined;
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   children: React.ReactNode;
+  tooltip?: string;
 }
 
-export const Select: React.FC<SelectProps> = ({ label, children, value, onChange, ...props }) => {
+export const Select: React.FC<SelectProps> = ({ label, children, value, onChange, tooltip, ...props }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<'down' | 'up'>('down');
   const ref = useRef<HTMLDivElement>(null);
@@ -71,7 +73,12 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
 
   return (
     <div ref={ref} className="relative">
-      {label && <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>}
+      {label && (
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className="text-sm font-medium text-gray-400">{label}</span>
+          {tooltip && <InfoTooltip text={tooltip} />}
+        </div>
+      )}
       <button
         ref={buttonRef}
         type="button"

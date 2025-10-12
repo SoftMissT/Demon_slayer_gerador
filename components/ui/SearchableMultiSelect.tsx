@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { InfoTooltip } from './InfoTooltip';
 
 interface SearchableMultiSelectProps {
   label: string;
@@ -7,6 +8,7 @@ interface SearchableMultiSelectProps {
   onChange: (selected: string[]) => void;
   placeholder?: string;
   maxSelection?: number;
+  tooltip?: string;
 }
 
 export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
@@ -16,6 +18,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   onChange,
   placeholder = "Selecione...",
   maxSelection,
+  tooltip,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,7 +76,10 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
 
   return (
     <div ref={ref} className="relative">
-      <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
+      <div className="flex items-center gap-1.5 mb-1">
+        <span className="text-sm font-medium text-gray-400">{label}</span>
+        {tooltip && <InfoTooltip text={tooltip} />}
+      </div>
       <button
         ref={buttonRef}
         type="button"

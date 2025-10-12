@@ -124,7 +124,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
     const renderCategorySpecificFilters = () => {
         switch (filters.category) {
             case 'Caçador': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SearchableSelect label="Temática" value={filters.hunterTematica || ''} onChange={e => handleFilterChange('hunterTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Temática" value={filters.hunterTematica || ''} onChange={e => handleFilterChange('hunterTematica', e.target.value as Tematica)} tooltip="Define o universo temático para a criação do Caçador, influenciando sua aparência, background e equipamentos.">{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Rank" value={filters.hunterRank} onChange={e => handleFilterChange('hunterRank', e.target.value)}>{HUNTER_RANKS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País de Origem (Cultural)" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Origem (Background)" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -135,7 +135,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
             </div>);
             case 'Inimigo/Oni': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}>{ONI_POWER_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.oniTematica || ''} onChange={e => handleFilterChange('oniTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Temática" value={filters.oniTematica || ''} onChange={e => handleFilterChange('oniTematica', e.target.value as Tematica)} tooltip="Define o universo temático para a criação do Oni, influenciando sua aparência, poderes e afiliações.">{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País de Origem (Cultural)" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Personalidade Dominante" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Arma" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -204,7 +204,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <div className="md:col-span-2">
-                    <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} />
+                    <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} tooltip="Controla a complexidade e o perigo da missão. Valores mais altos geram missões com mais reviravoltas, inimigos poderosos e consequências impactantes." />
                 </div>
                 <div className="md:col-span-2">
                     <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
@@ -244,7 +244,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 </button>
             </div>
             <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-4">
-                <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
+                <Select 
+                    label="Categoria" 
+                    value={filters.category} 
+                    onChange={handleCategoryChange}
+                    tooltip="Define o tipo principal do item a ser gerado, determinando os filtros específicos disponíveis."
+                >
                     <option value="">Selecione a Categoria</option>
                     {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </Select>
@@ -300,6 +305,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                         placeholder="Ex: Attack on Titan, Studio Ghibli, Yoshitaka Amano"
                         rows={2}
                         disabled={isLoading}
+                        tooltip="Forneça referências visuais (animes, artistas, jogos) para guiar o estilo artístico da descrição e do prompt de imagem. Separe por vírgulas."
                     />
                 </div>
 
@@ -311,6 +317,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                         placeholder="Ex: Crie algo com um toque de terror cósmico."
                         rows={2}
                         disabled={isLoading}
+                        tooltip="Uma instrução direta e de alta prioridade para a IA, útil para testes ou para forçar um elemento específico que não está nos filtros."
                     />
                 </div>
                 <div className="flex items-center justify-between gap-4">

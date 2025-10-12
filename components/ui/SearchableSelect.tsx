@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
+import { InfoTooltip } from './InfoTooltip';
 
 interface SearchableSelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'children'> {
   label: string;
@@ -6,9 +7,10 @@ interface SearchableSelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButt
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   children: React.ReactNode;
   placeholder?: string;
+  tooltip?: string;
 }
 
-export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, children, value, onChange, placeholder = "Selecione...", ...props }) => {
+export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, children, value, onChange, placeholder = "Selecione...", tooltip, ...props }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [position, setPosition] = useState<'down' | 'up'>('down');
@@ -72,7 +74,12 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, child
 
   return (
     <div ref={ref} className="relative">
-      {label && <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>}
+      {label && (
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className="text-sm font-medium text-gray-400">{label}</span>
+          {tooltip && <InfoTooltip text={tooltip} />}
+        </div>
+      )}
       <button
         ref={buttonRef}
         type="button"

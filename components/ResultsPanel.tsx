@@ -136,7 +136,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   const displayedFilters = getActiveFilters(activeFilters);
 
   return (
-    <div className="results-panel forge-panel rounded-lg p-4 flex flex-col">
+    <div className="results-panel forge-panel rounded-lg p-4 flex flex-col flex-grow">
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h2 className="text-xl font-bold text-white font-gangofthree">{title}</h2>
         {items.length > 0 && (
@@ -161,7 +161,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               </div>
           </div>
       )}
-      <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-[200px]">
+      <div className="flex-grow min-h-[200px]">
         {isLoading && items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
             <ForgeLoadingIndicator aiFocus={aiFocus} />
@@ -173,7 +173,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
             <p>Use os filtros para gerar seus itens.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <AnimatePresence>
                 {items.map(item => (
                    <motion.div

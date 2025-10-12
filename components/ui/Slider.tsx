@@ -1,4 +1,5 @@
 import React from 'react';
+import { InfoTooltip } from './InfoTooltip';
 
 interface SliderProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -6,15 +7,19 @@ interface SliderProps extends React.InputHTMLAttributes<HTMLInputElement> {
   min: number;
   max: number;
   step: number;
+  tooltip?: string;
 }
 
-export const Slider: React.FC<SliderProps> = ({ label, value, min, max, step, ...props }) => {
+export const Slider: React.FC<SliderProps> = ({ label, value, min, max, step, tooltip, ...props }) => {
   return (
     <div>
-      <label className="flex justify-between items-center text-sm font-medium text-gray-400 mb-1">
-        <span>{label}</span>
+      <div className="flex justify-between items-center mb-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-medium text-gray-400">{label}</span>
+          {tooltip && <InfoTooltip text={tooltip} />}
+        </div>
         <span className="bg-gray-700 text-gray-200 text-xs font-semibold px-2 py-0.5 rounded">{value}</span>
-      </label>
+      </div>
       <input
         type="range"
         min={min}
