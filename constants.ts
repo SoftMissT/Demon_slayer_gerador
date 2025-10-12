@@ -1,14 +1,14 @@
 // FIX: Populated with full constant definitions to resolve module errors.
-import type { Category, Rarity, Era, Tone, FilterState } from './types';
+import type { Category, Rarity, Tematica, Tone, FilterState } from './types';
 import { ORIGINS_DATA } from './lib/originsData';
 
 export const CATEGORIES: Category[] = [
-    'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missão/Cenário', 'World Building'
+    'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missões', 'World Building'
 ];
 
 export const RARITIES: Rarity[] = ['Aleatória', 'Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'];
 
-export const ERAS: Era[] = [
+export const TEMATICAS: Tematica[] = [
     'Aleatória',
     'Período Edo (Japão Feudal)',
     'Medieval Fantasia',
@@ -17,7 +17,40 @@ export const ERAS: Era[] = [
     'Pós-apocalíptico',
     'Tempos Atuais',
     'Futurista (Sci-Fi)',
-    'Biopunk'
+    'Biopunk',
+    '🧭 JOSEON (Coreia Histórica Expandida)',
+    '🤠 VELHO OESTE SOLAR',
+    'DOS CAÇADORES DE SOMBRAS',
+    '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES',
+    '🕵️‍♂️ DO JAZZ & OCULTISMO',
+    '🧪 DO COLONIALISMO DE ALQUIMIA',
+    '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)',
+    '🤖 DA SINGULARIDADE (PÓS-HUMANA)',
+    '🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)',
+    '🛸 DO CREPÚSCULO CÓSMICO',
+    '💠 DA INFOCRACIA',
+    '🎭 DOS CINCO REINOS (WUXIA/XIANXIA)',
+    '🌃 DO SUBMUNDO NOTURNO',
+    '🧙 DA ALVORADA ANCESTRAL',
+    '🏜️ DO SAARA ETERNO',
+    '🧟 DA QUEDA DOS REINOS',
+    '🚪 DOS PORTAIS ESQUECIDOS',
+    '🪐 DA FRONTEIRA ESTELAR',
+    '🌌 DO ETERNO CREPÚSCULO',
+    '⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA',
+    '🎭 DOS CARNAVAIS SANGUE',
+    '🌃 DO RENASCIMENTO SOMBRIO',
+    '⚔️ DOS DEUSES CAÍDOS',
+    // FIX: Corrected string literal to match the `Tematica` type definition exactly, resolving a type error likely caused by a hidden character.
+    '🛸 DA COLONIZAÇÃO INTERGALÁCTICA',
+    'Neon-Noir Megacidade',
+    'Mythpunk Amazônico',
+    'Shogunato Cibernético',
+    'Coralpunk Oceânico',
+    'Retro-Futuro 1950s',
+    'Ártico Steampunk',
+    'Paisagem dos Sonhos (Surreal)',
+    'Tecno-Xamanismo'
 ];
 
 export const TONES: Tone[] = ['épico', 'sombrio', 'misterioso', 'aventuresco', 'cômico', 'trágico', 'esperançoso'];
@@ -230,7 +263,33 @@ export const COUNTRIES: string[] = [
 ];
 
 export const TERRAINS: string[] = [
-    'Aleatória', 'Floresta Densa', 'Montanhas Rochosas', 'Pântano Nebuloso', 'Cidade Assombrada', 'Templo Antigo', 'Caverna de Cristal', 'Vulcão Ativo', 'Planície Nevada', 'Deserto de Areia Negra'
+    'Aleatória',
+    'Floresta Densa',
+    'Montanhas Rochosas',
+    'Pântano Nebuloso',
+    'Cidade Assombrada',
+    'Templo Antigo',
+    'Caverna de Cristal',
+    'Vulcão Ativo',
+    'Planície Nevada',
+    'Deserto de Areia Negra',
+    'Caverna Abissal',
+    'Cidade Flutuante',
+    'Cemitério de Navios',
+    'Planalto Tempestuoso',
+    'Mercado Clandestino',
+    'Biblioteca Proibida',
+    'Arena de Batalha Subterrânea',
+    'Ruínas Submersas',
+    'Deserto de Gelo',
+    'Floresta Petrificada',
+    'Metrópole em Ruínas',
+    'Santuário na Árvore do Mundo',
+    'Campo de Batalha Celestial',
+    'Vilarejo Amaldiçoado',
+    'Geleira Mecânica',
+    'Pântano de Cogumelos Gigantes',
+    'Distrito Industrial Abandonado'
 ];
 
 export const THREAT_SCALES: string[] = [
@@ -247,7 +306,7 @@ export const ORIGINS: string[] = ['Aleatória', ...ORIGINS_DATA.map(o => o.nome)
 export const INITIAL_FILTERS: FilterState = {
     category: '',
     // Hunter
-    hunterEra: 'Aleatória',
+    hunterTematica: 'Aleatória',
     hunterCountry: 'Aleatório',
     hunterOrigin: 'Aleatória',
     hunterArchetype: 'Aleatória',
@@ -262,9 +321,9 @@ export const INITIAL_FILTERS: FilterState = {
     oniInspirationKekkijutsu: [],
     oniInspirationBreathing: 'Nenhuma',
     oniPersonality: 'Aleatória',
-    oniEra: 'Aleatória',
+    oniTematica: 'Aleatória',
     // NPC
-    npcEra: 'Aleatória',
+    npcTematica: 'Aleatória',
     npcCountry: 'Aleatório',
     npcOrigin: 'Aleatória',
     npcProfession: 'Aleatória',
@@ -273,13 +332,13 @@ export const INITIAL_FILTERS: FilterState = {
     npcAccessory: 'Nenhum',
     // Weapon
     weaponRarity: 'Aleatória',
-    weaponEra: 'Aleatória',
+    weaponTematica: 'Aleatória',
     weaponCountry: 'Aleatório',
     weaponType: 'Aleatório',
     weaponMetalColor: 'Aleatório',
     // Accessory
     accessoryRarity: 'Aleatória',
-    accessoryEra: 'Aleatória',
+    accessoryTematica: 'Aleatória',
     accessoryOrigin: 'Aleatória',
     accessoryCountry: 'Aleatório',
     accessoryBreathingInspiration: 'Nenhuma',
@@ -287,14 +346,14 @@ export const INITIAL_FILTERS: FilterState = {
     accessoryWeaponInspiration: 'Nenhuma',
     // Breathing Form
     baseBreathingStyles: [],
-    breathingFormEra: 'Aleatória',
+    breathingFormTematica: 'Aleatória',
     breathingFormCountry: 'Aleatório',
     breathingFormOrigin: 'Aleatória',
     breathingFormTone: 'épico',
     breathingFormWeapon: 'Aleatório',
     breathingFormArchetype: 'Aleatória',
     // Kekkijutsu
-    kekkijutsuEra: 'Aleatória',
+    kekkijutsuTematica: 'Aleatória',
     kekkijutsuCountry: 'Aleatório',
     kekkijutsuKekkijutsuInspiration: 'Aleatória',
     kekkijutsuBreathingInspiration: 'Nenhuma',
@@ -302,9 +361,10 @@ export const INITIAL_FILTERS: FilterState = {
     kekkijutsuAccessoryInspiration: 'Nenhuma',
     // Location
     locationTone: 'misterioso',
-    locationEra: 'Aleatória',
+    locationTematica: 'Aleatória',
     locationCountry: 'Aleatório',
     locationTerrain: 'Aleatório',
+    locationTerrainCustom: '',
     // Mission
     missionTone: 'sombrio',
     intensity: 3,
@@ -312,9 +372,11 @@ export const INITIAL_FILTERS: FilterState = {
     protagonist: '',
     targets: '',
     moodModifiers: '',
+    missionTematica: 'Aleatória',
+    missionCountry: 'Aleatório',
     // World Building
     wbTone: 'épico',
-    wbEra: 'Aleatória',
+    wbTematica: 'Aleatória',
     wbCountry: 'Aleatório',
     wbThreatScale: 'Aleatória',
     wbLocation: '',

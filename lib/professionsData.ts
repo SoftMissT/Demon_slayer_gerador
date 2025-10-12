@@ -1,7 +1,7 @@
 // FIX: Corrected type import from the now separate types.ts file.
-import type { Era } from '../types';
+import type { Tematica } from '../types';
 
-export const PROFESSIONS_BY_ERA: Record<string, string[]> = {
+export const PROFESSIONS_BY_TEMATICA: Record<string, string[]> = {
     'Aleatória': ['Aleatória'],
     'Período Edo (Japão Feudal)': [
         'Aleatória', 'Samurai', 'Ninja', 'Ferreiro de Nichirin', 'Comerciante', 'Monge', 'Gueixa', 'Ronin', 'Agricultor', 'Artesão', 'Daimyo', 'Médico Herbalista'
@@ -34,7 +34,7 @@ export const PROFESSIONS_BY_ERA: Record<string, string[]> = {
 
 // Populate an 'all' category with unique professions from all eras for the 'Aleatória' era filter
 const allProfessions = new Set<string>(['Aleatória']);
-Object.entries(PROFESSIONS_BY_ERA).forEach(([era, professions]) => {
+Object.entries(PROFESSIONS_BY_TEMATICA).forEach(([era, professions]) => {
     if (era !== 'Aleatória') {
         professions.forEach(prof => {
             if (prof !== 'Aleatória') {
@@ -43,4 +43,4 @@ Object.entries(PROFESSIONS_BY_ERA).forEach(([era, professions]) => {
         });
     }
 });
-PROFESSIONS_BY_ERA.all = Array.from(allProfessions);
+PROFESSIONS_BY_TEMATICA.all = Array.from(allProfessions);

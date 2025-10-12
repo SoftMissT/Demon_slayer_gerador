@@ -5,19 +5,20 @@ import { Button } from './ui/Button';
 import { Spinner } from './ui/Spinner';
 import { AnvilIcon } from './icons/AnvilIcon';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
+import { SearchableSelect } from './ui/SearchableSelect';
 import { Slider } from './ui/Slider';
 import { SaveIcon } from './icons/SaveIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import useLocalStorage from '../hooks/useLocalStorage';
 import {
-    CATEGORIES, RARITIES, ERAS, TONES, DEMON_BLOOD_ARTS, PERSONALITIES,
+    CATEGORIES, RARITIES, TEMATICAS, TONES, DEMON_BLOOD_ARTS, PERSONALITIES,
     METAL_COLORS, COUNTRIES, TERRAINS, THREAT_SCALES, ONI_POWER_LEVELS, ORIGINS, INITIAL_FILTERS
 } from '../constants';
-import type { FilterState, Category, Era, Rarity, Tone, FilterPreset } from '../types';
+import type { FilterState, Category, Tematica, Rarity, Tone, FilterPreset } from '../types';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
 import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 import { WEAPON_TYPES } from '../lib/weaponData';
-import { PROFESSIONS_BY_ERA } from '../lib/professionsData';
+import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
 
 interface FilterPanelProps {
     onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
@@ -95,30 +96,30 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
     };
     
     const professionOptions = useMemo(() => {
-        const eraKey = filters.npcEra;
-        if (PROFESSIONS_BY_ERA[eraKey]) {
-            return PROFESSIONS_BY_ERA[eraKey];
+        const eraKey = filters.npcTematica;
+        if (PROFESSIONS_BY_TEMATICA[eraKey]) {
+            return PROFESSIONS_BY_TEMATICA[eraKey];
         }
-        return PROFESSIONS_BY_ERA.all;
-    }, [filters.npcEra]);
+        return PROFESSIONS_BY_TEMATICA.all;
+    }, [filters.npcTematica]);
 
     const renderCategorySpecificFilters = () => {
         switch (filters.category) {
             case 'Caçador': return (<>
-                <Select label="Era" value={filters.hunterEra} onChange={e => handleFilterChange('hunterEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País de Origem (Cultural)" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Origem (Background)" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>{hunterArchetypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.hunterTematica} onChange={e => handleFilterChange('hunterTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País de Origem (Cultural)" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Origem (Background)" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>{hunterArchetypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Personalidade" value={filters.hunterPersonality} onChange={e => handleFilterChange('hunterPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableMultiSelect label="Inspiração (Respirações)" options={breathingStylesOptions} selected={filters.hunterBreathingStyles} onChange={s => handleFilterChange('hunterBreathingStyles', s)} placeholder="Selecione até 2" maxSelection={2}/>
             </>);
             case 'Inimigo/Oni': return (<>
                 <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}>{ONI_POWER_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Era" value={filters.oniEra} onChange={e => handleFilterChange('oniEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País de Origem (Cultural)" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.oniTematica} onChange={e => handleFilterChange('oniTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País de Origem (Cultural)" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Personalidade Dominante" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Arma" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="Arma" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Inspiração de Respiração" value={filters.oniInspirationBreathing} onChange={e => handleFilterChange('oniInspirationBreathing', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableMultiSelect 
                     label="Inspiração de Kekkijutsu" 
@@ -129,59 +130,62 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 />
             </>);
             case 'NPC': return (<>
-                <Select label="Era" value={filters.npcEra} onChange={e => handleFilterChange('npcEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Origem (Background)" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>{professionOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.npcTematica} onChange={e => handleFilterChange('npcTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Origem (Background)" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>{professionOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Arma" value={filters.npcWeapon} onChange={e => handleFilterChange('npcWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="Arma" value={filters.npcWeapon} onChange={e => handleFilterChange('npcWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Acessório" value={filters.npcAccessory} onChange={e => handleFilterChange('npcAccessory', e.target.value)}>{accessoryInspirationOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Arma': return (<>
                 <Select label="Raridade" value={filters.weaponRarity} onChange={e => handleFilterChange('weaponRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Era" value={filters.weaponEra} onChange={e => handleFilterChange('weaponEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.weaponCountry} onChange={e => handleFilterChange('weaponCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.weaponTematica} onChange={e => handleFilterChange('weaponTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.weaponCountry} onChange={e => handleFilterChange('weaponCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}>{METAL_COLORS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Acessório': return (<>
                  <Select label="Raridade" value={filters.accessoryRarity} onChange={e => handleFilterChange('accessoryRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Era" value={filters.accessoryEra} onChange={e => handleFilterChange('accessoryEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.accessoryCountry} onChange={e => handleFilterChange('accessoryCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.accessoryTematica} onChange={e => handleFilterChange('accessoryTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.accessoryCountry} onChange={e => handleFilterChange('accessoryCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Inspiração (Respiração)" value={filters.accessoryBreathingInspiration} onChange={e => handleFilterChange('accessoryBreathingInspiration', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Inspiração (Kekkijutsu)" value={filters.accessoryKekkijutsuInspiration} onChange={e => handleFilterChange('accessoryKekkijutsuInspiration', e.target.value)}>{['Nenhuma', ...DEMON_BLOOD_ARTS].map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Forma de Respiração': return (<>
                 <SearchableMultiSelect label="Respiração Base" options={breathingStylesOptions} selected={filters.baseBreathingStyles} onChange={s => handleFilterChange('baseBreathingStyles', s)} placeholder="Selecione 1 ou 2" maxSelection={2} />
-                <Select label="Era" value={filters.breathingFormEra} onChange={e => handleFilterChange('breathingFormEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.breathingFormCountry} onChange={e => handleFilterChange('breathingFormCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Arma Principal" value={filters.breathingFormWeapon} onChange={e => handleFilterChange('breathingFormWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.breathingFormTematica} onChange={e => handleFilterChange('breathingFormTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.breathingFormCountry} onChange={e => handleFilterChange('breathingFormCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Arma Principal" value={filters.breathingFormWeapon} onChange={e => handleFilterChange('breathingFormWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Tom" value={filters.breathingFormTone} onChange={e => handleFilterChange('breathingFormTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Kekkijutsu': return (<>
-                <Select label="Era" value={filters.kekkijutsuEra} onChange={e => handleFilterChange('kekkijutsuEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.kekkijutsuCountry} onChange={e => handleFilterChange('kekkijutsuCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.kekkijutsuTematica} onChange={e => handleFilterChange('kekkijutsuTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.kekkijutsuCountry} onChange={e => handleFilterChange('kekkijutsuCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Inspiração (Kekkijutsu)" value={filters.kekkijutsuKekkijutsuInspiration} onChange={e => handleFilterChange('kekkijutsuKekkijutsuInspiration', e.target.value)}>{DEMON_BLOOD_ARTS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Inspiração (Respiração)" value={filters.kekkijutsuBreathingInspiration} onChange={e => handleFilterChange('kekkijutsuBreathingInspiration', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Inspiração (Arma)" value={filters.kekkijutsuWeaponInspiration} onChange={e => handleFilterChange('kekkijutsuWeaponInspiration', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="Inspiração (Arma)" value={filters.kekkijutsuWeaponInspiration} onChange={e => handleFilterChange('kekkijutsuWeaponInspiration', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Inspiração (Acessório)" value={filters.kekkijutsuAccessoryInspiration} onChange={e => handleFilterChange('kekkijutsuAccessoryInspiration', e.target.value)}>{accessoryInspirationOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Local/Cenário': return (<>
                 <Select label="Tom" value={filters.locationTone} onChange={e => handleFilterChange('locationTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Era" value={filters.locationEra} onChange={e => handleFilterChange('locationEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.locationCountry} onChange={e => handleFilterChange('locationCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Terreno Principal" value={filters.locationTerrain} onChange={e => handleFilterChange('locationTerrain', e.target.value)}>{TERRAINS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.locationTematica} onChange={e => handleFilterChange('locationTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.locationCountry} onChange={e => handleFilterChange('locationCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Terreno Principal" value={filters.locationTerrain} onChange={e => handleFilterChange('locationTerrain', e.target.value)}>{TERRAINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <TextInput label="Ou Especifique um Terreno" value={filters.locationTerrainCustom} onChange={e => handleFilterChange('locationTerrainCustom', e.target.value)} placeholder="Ex: Cidade no esqueleto de um Titã"/>
             </>);
-            case 'Missão/Cenário': return (<>
+            case 'Missões': return (<>
                 <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.missionTematica} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} />
                 <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
                 <TextInput label="Alvo Principal" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} placeholder="Ex: um oni que devora memórias, uma seita..."/>
             </>);
             case 'World Building': return (<>
                 <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Era" value={filters.wbEra} onChange={e => handleFilterChange('wbEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="País (Cultural)" value={filters.wbCountry} onChange={e => handleFilterChange('wbCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Temática" value={filters.wbTematica} onChange={e => handleFilterChange('wbTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="País (Cultural)" value={filters.wbCountry} onChange={e => handleFilterChange('wbCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Escala da Ameaça" value={filters.wbThreatScale} onChange={e => handleFilterChange('wbThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <TextInput label="Local Principal" value={filters.wbLocation} onChange={e => handleFilterChange('wbLocation', e.target.value)} placeholder="Ex: uma cidade sob uma cachoeira, uma ilha-prisão..."/>
             </>);

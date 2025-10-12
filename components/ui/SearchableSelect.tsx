@@ -1,0 +1,112 @@
+import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
+
+interface SearchableSelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'children'> {
+  label: string;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  children: React.ReactNode;
+  placeholder?: string;
+}
+
+export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, children, value, onChange, placeholder = "Selecione...", ...props }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [position, setPosition] = useState<'down' | 'up'>('down');
+  const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleToggleOpen = () => {
+    if (!isOpen) {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const dropdownHeight = 250; 
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+          setPosition('up');
+        } else {
+          setPosition('down');
+        }
+      }
+    }
+    setIsOpen(!isOpen);
+    if(isOpen) {
+        setSearchTerm(""); // Reset search on close
+    }
+  };
+
+  const handleOptionClick = (optionValue: string) => {
+    const event = {
+      target: { value: optionValue },
+    } as React.ChangeEvent<HTMLSelectElement>;
+    onChange(event);
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  const options = Children.toArray(children).filter(isValidElement).map(child => ({
+      value: (child.props as any).value as string,
+      label: (child.props as any).children as React.ReactNode,
+  }));
+  
+  const filteredOptions = options.filter(option =>
+    typeof option.label === 'string' && option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedLabel = options.find(opt => opt.value === value)?.label || placeholder;
+  
+  const dropdownClasses = `absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col ${
+    position === 'up' ? 'bottom-full mb-1' : 'mt-1'
+  }`;
+
+  return (
+    <div ref={ref} className="relative">
+      {label && <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>}
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={handleToggleOpen}
+        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        {...props}
+      >
+        <span className="truncate">{selectedLabel}</span>
+        <svg className={`w-4 h-4 ml-2 transform transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+      </button>
+
+      {isOpen && (
+        <div className={dropdownClasses}>
+          <div className="p-2 flex-shrink-0">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              className="w-full bg-gray-900 border border-gray-700 rounded-md py-1 px-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <ul className="overflow-auto flex-grow">
+            {filteredOptions.map(option => (
+              <li
+                key={option.value}
+                onClick={() => handleOptionClick(option.value)}
+                className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-700 ${String(value) === option.value ? 'bg-indigo-600 text-white' : 'text-gray-300'}`}
+              >
+                {option.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};

@@ -1,13 +1,13 @@
 // FIX: Populated with full type definitions to resolve module errors.
-export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missão/Cenário' | 'World Building';
+export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missões' | 'World Building';
 export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
-export type Era = 'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 'Cyberpunk' | 'Pós-apocalíptico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Biopunk';
+export type Tematica = 'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 'Cyberpunk' | 'Pós-apocalíptico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Biopunk' | '🧭 JOSEON (Coreia Histórica Expandida)' | '🤠 VELHO OESTE SOLAR' | 'DOS CAÇADORES DE SOMBRAS' | '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES' | '🕵️‍♂️ DO JAZZ & OCULTISMO' | '🧪 DO COLONIALISMO DE ALQUIMIA' | '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)' | '🤖 DA SINGULARIDADE (PÓS-HUMANA)' | '🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)' | '🛸 DO CREPÚSCULO CÓSMICO' | '💠 DA INFOCRACIA' | '🎭 DOS CINCO REINOS (WUXIA/XIANXIA)' | '🌃 DO SUBMUNDO NOTURNO' | '🧙 DA ALVORADA ANCESTRAL' | '🏜️ DO SAARA ETERNO' | '🧟 DA QUEDA DOS REINOS' | '🚪 DOS PORTAIS ESQUECIDOS' | '🪐 DA FRONTEIRA ESTELAR' | '🌌 DO ETERNO CREPÚSCULO' | '⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA' | '🎭 DOS CARNAVAIS SANGUE' | '🌃 DO RENASCIMENTO SOMBRIO' | '⚔️ DOS DEUSES CAÍDOS' | '🛸 DA COLONIZAÇÃO INTERGALÁCTICA' | 'Neon-Noir Megacidade' | 'Mythpunk Amazônico' | 'Shogunato Cibernético' | 'Coralpunk Oceânico' | 'Retro-Futuro 1950s' | 'Ártico Steampunk' | 'Paisagem dos Sonhos (Surreal)' | 'Tecno-Xamanismo';
 export type Tone = 'épico' | 'sombrio' | 'misterioso' | 'aventuresco' | 'cômico' | 'trágico' | 'esperançoso';
 
 export interface FilterState {
   category: Category | '';
   // Hunter
-  hunterEra: Era;
+  hunterTematica: Tematica;
   hunterCountry: string;
   hunterOrigin: string;
   hunterArchetype: string;
@@ -22,9 +22,9 @@ export interface FilterState {
   oniInspirationKekkijutsu: string[];
   oniInspirationBreathing: string;
   oniPersonality: string;
-  oniEra: Era;
+  oniTematica: Tematica;
   // NPC
-  npcEra: Era;
+  npcTematica: Tematica;
   npcCountry: string;
   npcOrigin: string;
   npcProfession: string;
@@ -33,13 +33,13 @@ export interface FilterState {
   npcAccessory: string;
   // Weapon
   weaponRarity: Rarity;
-  weaponEra: Era;
+  weaponTematica: Tematica;
   weaponCountry: string;
   weaponType: string;
   weaponMetalColor: string;
   // Accessory
   accessoryRarity: Rarity;
-  accessoryEra: Era;
+  accessoryTematica: Tematica;
   accessoryOrigin: string;
   accessoryCountry: string;
   accessoryBreathingInspiration: string;
@@ -47,14 +47,14 @@ export interface FilterState {
   accessoryWeaponInspiration: string;
   // Breathing Form
   baseBreathingStyles: string[];
-  breathingFormEra: Era;
+  breathingFormTematica: Tematica;
   breathingFormCountry: string;
   breathingFormOrigin: string;
   breathingFormTone: Tone;
   breathingFormWeapon: string;
   breathingFormArchetype: string;
   // Kekkijutsu
-  kekkijutsuEra: Era;
+  kekkijutsuTematica: Tematica;
   kekkijutsuCountry: string;
   kekkijutsuKekkijutsuInspiration: string;
   kekkijutsuBreathingInspiration: string;
@@ -62,9 +62,10 @@ export interface FilterState {
   kekkijutsuAccessoryInspiration: string;
   // Location
   locationTone: Tone;
-  locationEra: Era;
+  locationTematica: Tematica;
   locationCountry: string;
   locationTerrain: string;
+  locationTerrainCustom: string;
   // Mission
   missionTone: Tone;
   intensity: number;
@@ -72,9 +73,11 @@ export interface FilterState {
   protagonist: string;
   targets: string;
   moodModifiers: string;
+  missionTematica: Tematica;
+  missionCountry: string;
   // World Building
   wbTone: Tone;
-  wbEra: Era;
+  wbTematica: Tematica;
   wbCountry: string;
   wbThreatScale: string;
   wbLocation: string;
@@ -90,7 +93,7 @@ interface BaseGeneratedItem {
   createdAt: string;
   nome: string;
   categoria: Category;
-  era: string;
+  tematica: string;
   descricao_curta: string;
   descricao: string;
   raridade: Rarity;
@@ -207,7 +210,7 @@ export interface MissionItem {
 }
 
 export interface MissionItemDetails extends BaseGeneratedItem {
-    categoria: 'Missão/Cenário';
+    categoria: 'Missões';
     title: string;
     logline: string;
     summary: string;

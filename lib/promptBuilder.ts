@@ -1,4 +1,3 @@
-
 import { Type } from '@google/genai';
 import type { FilterState, Category } from '../types';
 
@@ -12,7 +11,7 @@ const ganchosNarrativosSchema = {
 const baseItemSchemaProperties = {
     nome: { type: Type.STRING, description: "Nome criativo e único para o item." },
     categoria: { type: Type.STRING, description: "A categoria do item gerado." },
-    era: { type: Type.STRING, description: "A era ou estilo em que o item se encaixa." },
+    tematica: { type: Type.STRING, description: "A temática ou estilo em que o item se encaixa." },
     descricao_curta: { type: Type.STRING, description: "Uma descrição de uma a duas frases que captura a essência do item." },
     descricao: { type: Type.STRING, description: "Uma descrição detalhada (2-3 parágrafos) com lore, aparência e contexto." },
     raridade: { type: Type.STRING, description: "A raridade do item (Ex: Comum, Raro, Lendário).", enum: ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado', 'N/A'] },
@@ -149,7 +148,7 @@ const missionSchema = {
     type: Type.OBJECT,
     properties: {
         ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Missão/Cenário'] },
+        categoria: { type: Type.STRING, enum: ['Missões'] },
         title: { type: Type.STRING },
         logline: { type: Type.STRING },
         summary: { type: Type.STRING },
@@ -206,7 +205,7 @@ const categoryToSchemaMap: Record<Category, any> = {
     'Forma de Respiração': breathingFormSchema,
     'Kekkijutsu': kekkijutsuSchema,
     'Local/Cenário': locationSchema,
-    'Missão/Cenário': missionSchema,
+    'Missões': missionSchema,
     'World Building': worldBuildingSchema,
 };
 
@@ -226,7 +225,14 @@ function cleanFilters(filters: FilterState) {
 export const buildGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
     const activeFilters = cleanFilters(filters);
 
-    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba", adaptando-o para diferentes eras e estilos.
+    // Prioritize custom terrain if provided
+    if (activeFilters.locationTerrainCustom) {
+        activeFilters.locationTerrain = activeFilters.locationTerrainCustom;
+    }
+    delete activeFilters.locationTerrainCustom;
+
+
+    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba", adaptando-o para diferentes temáticas e estilos.
 Sua tarefa é gerar ${count} ${count > 1 ? 'itens únicos' : 'item único'} para a categoria "${filters.category}".
 O resultado DEVE ser um objeto JSON (ou um array de objetos JSON se count > 1) que adere estritamente ao schema fornecido. Não inclua texto, markdown ou explicações fora do JSON.
 

@@ -566,7 +566,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     );
   }
   
-  const canGenerateVariant = item.categoria !== 'Missão/Cenário' && item.categoria !== 'NPC';
+  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC';
   const currentName = ('title' in item && item.title) || item.nome;
 
   return (
@@ -598,7 +598,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                     )}
 
                     <p className="text-xs text-indigo-400 pt-1 capitalize">
-                        {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
+                        {item.categoria === 'Missões' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
                         item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
                         item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
                         item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
@@ -623,7 +623,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
             </div>
         </div>
         <div className="flex-grow overflow-y-auto px-4">
-            {item.categoria === 'Missão/Cenário' ? <MissionDetailView item={item} /> :
+            {item.categoria === 'Missões' ? <MissionDetailView item={item} /> :
              item.categoria === 'NPC' ? <NpcDetailView item={item} /> :
              item.categoria === 'Caçador' ? <HunterDetailView item={item} /> :
              item.categoria === 'Inimigo/Oni' ? <OniDetailView item={item} /> :
