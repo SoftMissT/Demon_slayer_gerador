@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -147,7 +148,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   };
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-[calc(100vh-150px)]">
+    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex flex-col h-full">
       <h2 className="text-xl font-bold text-white mb-4 font-gangofthree flex-shrink-0">Filtros</h2>
       <div className="space-y-4 flex-grow overflow-y-auto pr-2">
         <Select

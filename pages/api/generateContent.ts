@@ -20,6 +20,9 @@ export default async function handler(
     }
 
     const aiClient = getAiClient();
+    if (!aiClient) {
+        return res.status(500).json({ message: 'Erro de configuração do servidor: a API Key do Google Gemini não foi encontrada.' });
+    }
     
     const prompt = buildGenerationPrompt(filters, count, promptModifier);
     const schema = buildResponseSchema(filters, count);

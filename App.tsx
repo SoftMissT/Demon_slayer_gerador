@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import useLocalStorage from './hooks/useLocalStorage';
 import type { FilterState, GeneratedItem } from './types';
@@ -129,12 +130,12 @@ const App: React.FC = () => {
                 onViewChange={setActiveView}
             />
             
-            <main className="flex-grow p-4 md:p-6 lg:p-8">
+            <main className="flex-grow">
                 {activeView === 'forge' ? (
-                    <div className="flex flex-col gap-4 md:gap-6 h-full">
-                        {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 h-full flex-grow">
-                            <div className="lg:col-span-3 h-full">
+                    <>
+                        {error && <div className="p-4"><ErrorDisplay message={error} onDismiss={() => setError(null)} /></div>}
+                        <div className="main-grid-container">
+                            <div className="grid-column-wrapper">
                                 <FilterPanel 
                                     filters={filters}
                                     onFiltersChange={setFilters}
@@ -143,7 +144,7 @@ const App: React.FC = () => {
                                     onResetFilters={handleResetFilters}
                                 />
                             </div>
-                            <div className="lg:col-span-3 h-full">
+                            <div className="grid-column-wrapper">
                                  <ResultsPanel
                                     items={items}
                                     isLoading={isLoading}
@@ -155,7 +156,7 @@ const App: React.FC = () => {
                                     onClearResults={handleClearResults}
                                 />
                             </div>
-                            <div className="lg:col-span-6 h-full hidden lg:block">
+                            <div className="grid-column-wrapper hidden lg:flex">
                                 <DetailPanel
                                     item={selectedItem}
                                     onGenerateVariant={handleGenerateVariant}
@@ -165,9 +166,11 @@ const App: React.FC = () => {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </>
                 ) : (
-                    <PromptEngineeringPanel />
+                    <div className="p-4 md:p-6 lg:p-8">
+                        <PromptEngineeringPanel />
+                    </div>
                 )}
             </main>
             

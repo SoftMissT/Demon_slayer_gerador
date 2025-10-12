@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,7 +7,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
 
 :root {
-  --header-height: 81px; /* Fallback height */
+  --header-height: 81px;
 }
 
 
@@ -33,41 +34,44 @@ html {
 
 body {
     @apply bg-gray-900 text-gray-200;
-    overflow: hidden; /* Disable main page scroll */
 }
 
 /* New responsive grid layout */
 .main-grid-container {
-    height: calc(100vh - var(--header-height));
     display: grid;
-    padding: 1rem;
     gap: 1rem;
-    grid-template-columns: 1fr; /* Mobile-first: 1 column */
+    padding: 1rem;
+    /* Mobile: Single column, natural height */
+    grid-template-columns: minmax(0, 1fr);
 }
 
-/* Tablet: 2 columns */
+/* Tablet & up: App-shell layout */
 @media (min-width: 768px) {
+    body {
+        overflow: hidden;
+    }
     .main-grid-container {
+        height: calc(100vh - var(--header-height));
         padding: 1.5rem;
         gap: 1.5rem;
-        grid-template-columns: 3fr 5fr;
+        /* Tablet: 2 columns (Filters + Results) */
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     }
 }
 
 /* Desktop: 3 columns */
 @media (min-width: 1024px) {
     .main-grid-container {
-        grid-template-columns: 3fr 5fr 4fr;
+        /* 3 columns (Filters, Results, Details) */
+        grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 5fr);
     }
 }
 
 .grid-column-wrapper {
     min-height: 0; /* Prevents grid children from overflowing their container */
     height: 100%;
-}
-
-.scrollable-content {
-    overflow-y: auto;
+    display: flex; /* Allow panel inside to use h-full correctly */
+    flex-direction: column;
 }
 
 @layer utilities {
