@@ -11,22 +11,73 @@ Ela auxilia na geração de armas, inimigos, formas de respiração, NPCs e cen�
 ## 🧠 Como Funciona: A Orquestração de IAs
 O Kimetsu Forge utiliza um fluxo de três etapas para garantir resultados ricos e detalhados:
 
-1.  **DeepSeek (O Conceitualizador):** A primeira IA gera a ideia base, o conceito bruto e fundamental do item, personagem ou técnica solicitada.
-2.  **Google Gemini (O Arquiteto):** Em seguida, o Gemini recebe esse conceito e o enriquece, adicionando lore, estrutura, detalhes mecânicos para RPG e um protótipo de descrição visual.
-3.  **OpenAI GPT-4o (O Artista Final):** Por fim, o modelo da OpenAI realiza o polimento final, aprimorando a narrativa para um tom de roleplay mais forte e refinando a descrição visual para que ela se torne um prompt de imagem pronto para ser usado.
+1.  **DeepSeek (O Conceitualizador):** A primeira IA gera a ideia base, o conceito bruto e fundamental do item, personagem ou técnica solicitada. É a semente da criação.
+2.  **Google Gemini (O Arquiteto):** Em seguida, o Gemini recebe esse conceito e o enriquece, adicionando lore, estrutura, detalhes mecânicos para RPG e um protótipo de descrição visual. Ele constrói o esqueleto e os músculos da ideia.
+3.  **OpenAI GPT-4o (O Artista Final):** Por fim, o modelo da OpenAI realiza o polimento final, aprimorando a narrativa para um tom de roleplay mais forte e refinando a descrição visual para que ela se torne um prompt de imagem pronto para ser usado. Ele dá a alma e a beleza final à criação.
+
+## 🚀 Como Começar (Guia de Instalação)
+
+Siga estes passos para executar o Kimetsu Forge em sua máquina local.
+
+### 1. Pré-requisitos
+- [Node.js](https://nodejs.org/) (versão 18 ou superior)
+- [Git](https://git-scm.com/)
+
+### 2. Clone o Repositório
+Abra seu terminal e execute o seguinte comando:
+```bash
+git clone https://github.com/SoftMissT/Demon_slayer_gerador.git
+cd Demon_slayer_gerador
+```
+
+### 3. Instale as Dependências
+Use o npm para instalar todos os pacotes necessários:
+```bash
+npm install
+```
+
+### 4. Configure as Chaves de API
+Para que a geração de conteúdo funcione, você precisa de chaves de API para os serviços de IA.
+
+1.  Crie um arquivo chamado `.env.local` na raiz do projeto.
+2.  Adicione as seguintes variáveis a este arquivo:
+
+```
+GEMINI_API_KEY="SUA_CHAVE_API_DO_GOOGLE_GEMINI"
+OPENAI_API_KEY="SUA_CHAVE_API_DA_OPENAI"
+DEEPSEEK_API_KEY="SUA_CHAVE_API_DO_DEEPSEEK"
+```
+- **Google Gemini:** Obtenha sua chave no [Google AI Studio](https://aistudio.google.com/app/apikey).
+- **OpenAI (GPT-4o):** Obtenha sua chave na [Plataforma OpenAI](https://platform.openai.com/api-keys).
+- **DeepSeek:** Obtenha sua chave na [Plataforma DeepSeek](https://platform.deepseek.com/api_keys).
+
+### 5. Execute o Servidor de Desenvolvimento
+Com tudo configurado, inicie a aplicação:
+```bash
+npm run dev
+```
+Abra [http://localhost:3000](http://localhost:3000) em seu navegador para ver o resultado.
+
+### 6. Customizando o Gerador
+A maior parte da lógica de geração está centralizada nos seguintes locais:
+- **`/lib/promptBuilder.ts`:** Aqui você pode editar os prompts enviados para a IA e os esquemas de resposta JSON. Modificar este arquivo é a principal forma de alterar a estrutura e o conteúdo do que é gerado.
+- **`/lib/*Data.ts`:** Arquivos como `breathingStylesData.ts` ou `weaponData.ts` contêm as opções que aparecem nos menus de filtro. Adicione ou remova itens aqui para customizar a interface.
+
 
 ## 🧩 Tecnologias
 - **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).
 - **Frontend:** Next.js & React para uma arquitetura moderna e de alta performance.
 - **Estilização:** Tailwind CSS para um design rápido, responsivo e customizável.
 
+## ❤️ Apoie a Obra Original
+Kimetsu Forge é um projeto de fã, feito com carinho para a comunidade. A melhor forma de apoiar é consumindo a obra original de Koyoharu Gotouge.
+- **Leia o Mangá:** [Compre na Panini Comics Brasil](https://panini.com.br/demon-slayer-kimetsu-no-yaiba)
+- **Assista ao Anime:** [Disponível na Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
+
 ## ⚠️ Aviso Legal
-Este é um projeto de fã não oficial, criado apenas para fins educacionais e de entretenimento.
+Este é um projeto de fã não oficial, criado em homenagem à incrível obra de Koyoharu Gotouge, apenas para fins educacionais e de entretenimento.
 Demon Slayer: Kimetsu no Yaiba é uma propriedade de Koyoharu Gotouge, Shueisha e Ufotable.
 Todos os direitos do universo original e dos personagens pertencem aos seus respectivos proprietários.
-
-Assista ao anime legalmente na Crunchyroll:
-👉 [Demon Slayer na Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
 
 ## 👥 Créditos
 - **Criadores:** SoftMisst & Mathzin
@@ -35,6 +86,3 @@ Assista ao anime legalmente na Crunchyroll:
 ## 💬 Sobre Este Projeto
 O Kimetsu Forge foi projetado para auxiliar Mestres de Jogo, acelerando a geração de ideias e a construção de mundos.
 O conteúdo gerado é fictício e deve ser personalizado para se adequar à história ou ao estilo de campanha de cada jogador.
-
-## ❤️ Apoie o Projeto
-Se você gostou desta ferramenta e quer ver mais projetos criativos como este, por favor, apoie os desenvolvedores. Cada gesto ajuda.

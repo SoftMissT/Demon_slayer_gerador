@@ -13,6 +13,7 @@ const App: React.FC = () => {
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [theme, setTheme] = useState('forge-theme');
+    const [favoritesCount, setFavoritesCount] = useState(0);
 
     useEffect(() => {
         // This still applies non-background styles from themes
@@ -35,6 +36,7 @@ const App: React.FC = () => {
                     onAboutClick={() => setIsAboutOpen(true)}
                     onFavoritesClick={() => setIsFavoritesOpen(true)}
                     onHistoryClick={() => setIsHistoryOpen(true)}
+                    favoritesCount={favoritesCount}
                 />
                 <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6">
                     <AnimatePresence mode="wait">
@@ -52,6 +54,7 @@ const App: React.FC = () => {
                                     onFavoritesClose={() => setIsFavoritesOpen(false)}
                                     isHistoryOpen={isHistoryOpen}
                                     onHistoryClose={() => setIsHistoryOpen(false)}
+                                    onFavoritesCountChange={setFavoritesCount}
                                 />
                             ) : (
                                 <PromptEngineeringPanel />

@@ -1,3 +1,4 @@
+
 import { Type } from '@google/genai';
 import type { FilterState, Category } from '../types';
 
@@ -265,7 +266,24 @@ Contexto Geral:
 - Crie lore, descrições vívidas e mecânicas interessantes para o jogo.
 - O campo 'imagePromptDescription' deve ser uma descrição visual concisa, com tags, pronta para ser refinada por outra IA.
 - O campo 'nome' deve ser único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
+`;
+    
+    if (filters.category === 'Caçador' || filters.category === 'Inimigo/Oni' || filters.category === 'NPC') {
+        prompt += `\nInstruções Específicas para Personagem:\n`;
 
+        const country = filters.hunterCountry || filters.oniCountry || filters.npcCountry;
+        if (country && country !== 'Aleatória') {
+            prompt += `- O campo 'nome' DEVE ser um nome próprio culturalmente apropriado para o país de origem: ${country}.\n`;
+        } else {
+            prompt += `- O campo 'nome' DEVE ser um nome próprio criativo e adequado ao universo de Demon Slayer.\n`;
+        }
+        
+        if (filters.category === 'Caçador' && filters.hunterArchetype) {
+            prompt += `- O arquétipo selecionado ('${filters.hunterArchetype}') define a 'classe' do personagem; não deve ser parte do seu nome próprio.\n`;
+        }
+    }
+
+    prompt += `
 Diretriz de Foco: Seu foco principal ao expandir este conceito deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
 `;
 

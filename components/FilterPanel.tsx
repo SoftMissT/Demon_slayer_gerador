@@ -22,6 +22,7 @@ import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 import { WEAPON_TYPES } from '../lib/weaponData';
 import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
 import { RefreshIcon } from './icons/RefreshIcon';
+import { HowItWorksModal } from './HowItWorksModal';
 
 interface FilterPanelProps {
     onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
@@ -45,6 +46,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
     const [promptModifier, setPromptModifier] = useState('');
     const [presets, setPresets] = useLocalStorage<FilterPreset[]>('kimetsu-forge-presets', []);
     const [selectedPreset, setSelectedPreset] = useState<string>('');
+    const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
 
     // FIX: Define options for select inputs based on imported data to resolve reference errors.
     const breathingStylesOptions = useMemo(() => BREATHING_STYLES_DATA.map(bs => bs.nome), []);
@@ -246,12 +248,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
         <Card className="forge-panel flex flex-col h-full p-4">
             <div className="flex justify-between items-center flex-shrink-0 mb-4">
                 <h2 className="text-xl font-bold text-white font-gangofthree">Filtros da Forja</h2>
-                <button className="reset-button-outer" onClick={handleResetFilters}>
-                    <div className="reset-button-flex">
-                        <RefreshIcon className="w-4 h-4" />
-                        <span>Limpar Filtros</span>
-                    </div>
-                </button>
+                <div className="flex items-center gap-4">
+                    <button className="button" style={{width: '150px'}} onClick={() => setIsHowItWorksOpen(true)}>
+                        <span>Passo-a-Passo</span>
+                    </button>
+                    <button className="reset-button-outer" onClick={handleResetFilters}>
+                        <div className="reset-button-flex">
+                            <RefreshIcon className="w-4 h-4" />
+                            <span>Limpar Filtros</span>
+                        </div>
+                    </button>
+                </div>
             </div>
             <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-4">
                 <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
@@ -341,6 +348,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                     </Button>
                 </div>
             </div>
+            <HowItWorksModal isOpen={isHowItWorksOpen} onClose={() => setIsHowItWorksOpen(false)} />
         </Card>
     );
 };

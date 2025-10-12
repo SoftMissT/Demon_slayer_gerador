@@ -19,6 +19,7 @@ interface ForgeInterfaceProps {
     onFavoritesClose: () => void;
     isHistoryOpen: boolean;
     onHistoryClose: () => void;
+    onFavoritesCountChange: (count: number) => void;
 }
 
 const useWindowSize = () => {
@@ -35,7 +36,7 @@ const useWindowSize = () => {
     return size;
 };
 
-export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen, onFavoritesClose, isHistoryOpen, onHistoryClose }) => {
+export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen, onFavoritesClose, isHistoryOpen, onHistoryClose, onFavoritesCountChange }) => {
     const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
     const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
     const { width } = useWindowSize();
@@ -46,13 +47,19 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentAiFocus, setCurrentAiFocus] = useState<Record<string, string> | null>(null);
+    const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
 
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
+    useEffect(() => {
+        onFavoritesCountChange(favorites.length);
+    }, [favorites, onFavoritesCountChange]);
+
     const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
         setIsLoading(true);
         setError(null);
+        setActiveFilters(filters);
         setCurrentAiFocus({
             aiFocusGemini: filters.aiFocusGemini,
             aiFocusGpt: filters.aiFocusGpt,
@@ -149,6 +156,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     const handleClearResults = useCallback(() => {
         setItems([]);
         setSelectedItem(null);
+        setActiveFilters(null);
     }, []);
 
     const isFavorite = useMemo(() => {
@@ -174,6 +182,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
                         onGenerateVariant={handleGenerateVariant}
                         onClearResults={handleClearResults}
                         aiFocus={currentAiFocus}
+                        activeFilters={activeFilters}
                     />
                     <AnimatePresence>
                         {selectedItem && (

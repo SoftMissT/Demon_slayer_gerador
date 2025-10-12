@@ -4,11 +4,13 @@ import { Button } from './ui/Button';
 import { RefreshIcon } from './icons/RefreshIcon';
 import { MidjourneyParameters } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
-import { PromptResultDisplay } from './PromptResultDisplay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import type { MidjourneyParameters as MidjourneyParametersType, GptParameters, PromptGenerationResult } from '../types';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
 import { PotionIcon } from './icons/PotionIcon';
+import { PromptCard } from './PromptCard';
+import { ImageGenerationPanel } from './ImageGenerationPanel';
+
 
 const INITIAL_MJ_PARAMS: MidjourneyParametersType = {
     aspectRatio: { active: false, value: '1:1' },
@@ -170,8 +172,10 @@ export const PromptEngineeringPanel: React.FC = () => {
                 {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
 
                 {result && !isLoading && (
-                    <div className="animate-fade-in-up h-full">
-                        <PromptResultDisplay result={result} />
+                    <div className="animate-fade-in-up h-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <PromptCard model="midjourney" prompt={result.midjourneyPrompt} />
+                        <PromptCard model="gpt" prompt={result.gptPrompt} />
+                        <ImageGenerationPanel initialPrompt={result.gptPrompt} />
                     </div>
                 )}
             </div>

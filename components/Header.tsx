@@ -1,20 +1,19 @@
 import React from 'react';
-import { AboutTooltip } from './AboutTooltip';
 import { StarIcon } from './icons/StarIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
-import { Button } from './ui/Button';
 import { ShareButton } from './ShareButton';
+import { HelpIcon } from './icons/HelpIcon';
 
-// FIX: Implemented Header component to resolve placeholder errors.
 interface HeaderProps {
   onAboutClick: () => void;
   onFavoritesClick: () => void;
   onHistoryClick: () => void;
   activeView: 'forge' | 'prompt';
   onViewChange: (view: 'forge' | 'prompt') => void;
+  favoritesCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, onHistoryClick, activeView, onViewChange }) => {
+export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, onHistoryClick, activeView, onViewChange, favoritesCount }) => {
     
     const getButtonClasses = (view: 'forge' | 'prompt') => {
         const base = "px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200";
@@ -53,13 +52,23 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, 
       <div className="flex-1 flex justify-end">
         <div className="flex items-center gap-2">
           <ShareButton />
-          <Button variant="ghost" onClick={onFavoritesClick} className="!p-2" aria-label="Favoritos">
-              <StarIcon className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" onClick={onHistoryClick} className="!p-2" aria-label="Histórico">
-              <HistoryIcon className="w-6 h-6" />
-          </Button>
-          <AboutTooltip onClick={onAboutClick} />
+          <button className="button relative" onClick={onFavoritesClick}>
+              <StarIcon className="w-5 h-5" />
+              <span>Favoritos</span>
+              {favoritesCount > 0 && (
+                  <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white ring-2 ring-black">
+                      {favoritesCount}
+                  </span>
+              )}
+          </button>
+          <button className="button" onClick={onHistoryClick}>
+              <HistoryIcon className="w-5 h-5" />
+              <span>Histórico</span>
+          </button>
+          <button className="button" onClick={onAboutClick}>
+              <HelpIcon className="w-5 h-5" />
+              <span>Sobre</span>
+          </button>
         </div>
       </div>
       <div className="header-glow"></div>

@@ -1,3 +1,4 @@
+
 // Provides a list of hunter archetypes for creative inspiration within the application.
 
 interface ArchetypeAbility {
@@ -29,7 +30,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
     "progressao_tipica": "dominar uma Respiração Lendária para sua subclasse; forjar/ganhar uma Nichirin de linhagem; executar provas de duelo (Ronin) ou caçadas de Kizuki (Oni Hunter).",
     "subclasses": [
       {
-        "nome": "Kenshi",
+        "nome": "Espadachim",
         "habilidade": {
           "nome": "Sen no Kamae (Postura do Corte)",
           "tipo": "Ativa (stance toggle)",
@@ -39,7 +40,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
         }
       },
       {
-        "nome": "Bujin",
+        "nome": "Lutador Marcial",
         "habilidade": {
           "nome": "Ciclo do Ki (Ki no Meguri)",
           "tipo": "Ativa/Acumulativa",
@@ -49,7 +50,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
         }
       },
       {
-        "nome": "Kyūshi",
+        "nome": "Arqueiro Artífice",
         "habilidade": {
           "nome": "Takumi no Yumi (Arco do Artífice)",
           "tipo": "Ativa técnica (projétil + utilitário)",
@@ -67,7 +68,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
     "progressao_tipica": "forjar uma Nichirin com alma (Kajiya + Kenshi quest); sintetizar veneno de Kizuki; dominar rituais de selo para incursões endgame.",
     "subclasses": [
       {
-        "nome": "Kajiya",
+        "nome": "Ferreiro de Batalha",
         "habilidade": {
           "nome": "Forja de Batalha (Gyakuten no Kaji)",
           "tipo": "Ativa (buff/temporária)",
@@ -87,7 +88,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
         }
       },
       {
-        "nome": "Dokugakusha",
+        "nome": "Toxicologista",
         "habilidade": {
           "nome": "Mistura Letal (Dokuga no Kesshō)",
           "tipo": "Ativa área (DOT / debuff)",
@@ -115,7 +116,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
     "progressao_tipica": "Forjar um escudo Nichirin que absorve energia demoníaca; aprender uma Kata de Guardião lendária; proteger um local sagrado para receber uma bênção de resistência.",
     "subclasses": [
       {
-        "nome": "Tate",
+        "nome": "Protetor",
         "habilidade": {
           "nome": "Vínculo de Proteção (Mamori no Kizuna)",
           "tipo": "Ativa / Link",
@@ -125,7 +126,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
         }
       },
       {
-        "nome": "Ishibumi",
+        "nome": "Baluarte",
         "habilidade": {
           "nome": "Barreira de Pedra (Ishibumi no Kabe)",
           "tipo": "Ativa / CC e defesa de área",
@@ -135,7 +136,7 @@ export const HUNTER_ARCHETYPES_DATA: Archetype[] = [
         }
       },
       {
-        "nome": "Shugo",
+        "nome": "Defensor",
         "habilidade": {
           "nome": "Aura do Guardião (Shugo no Hōyō)",
           "tipo": "Passiva/Toggled (stance)",
