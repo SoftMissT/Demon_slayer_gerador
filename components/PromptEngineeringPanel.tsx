@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -106,12 +105,13 @@ export const PromptEngineeringPanel: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 relative h-full">
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="flex flex-col h-full relative">
+             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 {bubbles}
             </div>
-            <div className="relative z-10">
-                {/* User Inputs & Parameters */}
+            
+            <div className="flex-shrink-0 pr-2 pb-4">
+                 {/* User Inputs & Parameters */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                     {/* Left Column: Topic and Negative Prompt */}
                     <Card className="p-6 parameter-card">
@@ -154,8 +154,7 @@ export const PromptEngineeringPanel: React.FC = () => {
                         </Card>
                     </div>
                 </div>
-
-                {/* Action Buttons */}
+                 {/* Action Buttons */}
                 <div className="flex justify-end gap-4 mt-6">
                     <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
                         <RefreshIcon className="w-5 h-5" /> Resetar
@@ -165,9 +164,11 @@ export const PromptEngineeringPanel: React.FC = () => {
                         {isLoading ? 'Gerando...' : 'Gerar Prompts'}
                     </Button>
                 </div>
+            </div>
 
-                {/* Results Section */}
-                <div className="mt-6">
+            <div className="flex-grow overflow-y-auto pt-2 pr-2 -mr-2">
+                 {/* Results Section */}
+                <div className="mt-2">
                     {isLoading && (
                         <div className="flex justify-center pt-4">
                             <AlchemyLoadingIndicator />

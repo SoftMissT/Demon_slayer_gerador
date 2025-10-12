@@ -61,9 +61,11 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
       label: (child.props as any).children as React.ReactNode,
   }));
 
-  const selectedLabel = options.find(opt => opt.value === value)?.label || 'Selecione...';
+  const selectedOption = options.find(opt => opt.value === value);
+  const selectedLabel = selectedOption?.label || 'Selecione...';
+  const isPlaceholder = !selectedOption || !value;
 
-  const dropdownClasses = `absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto ${
+  const dropdownClasses = `select-menu absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto ${
     position === 'up' ? 'bottom-full mb-1' : 'mt-1'
   }`;
 
@@ -74,10 +76,10 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
         ref={buttonRef}
         type="button"
         onClick={handleToggleOpen}
-        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        className="select-button w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         {...props} // Passa disabled, etc.
       >
-        <span className="truncate">{selectedLabel}</span>
+        <span className={`truncate ${isPlaceholder ? 'text-gray-400' : 'text-white'}`}>{selectedLabel}</span>
         <svg className={`w-4 h-4 ml-2 transform transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </button>
 

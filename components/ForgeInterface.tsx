@@ -111,9 +111,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
         const modifier = `Gere uma variação deste item com um foco mais ${variantType}. Mantenha a essência, mas altere as mecânicas e a descrição para refletir a nova abordagem. Item base: ${item.nome} - ${item.descricao_curta}`;
         
-        // FIX: Object literal may only specify known properties, and 'raridade' does not exist in type 'Partial<FilterState>'.
-        // The filter state was being constructed with an invalid `raridade` property. This has been corrected
-        // to use the appropriate category-specific rarity properties (`weaponRarity` or `accessoryRarity`).
         const filters: Partial<FilterState> = { category: item.categoria };
         if (item.categoria === 'Arma') {
             filters.weaponRarity = item.raridade;
@@ -161,29 +158,29 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
 
     return (
         <div className="forge-interface h-full relative">
-            <div className="grid grid-cols-12 gap-6 h-full">
+            <div className="app-layout h-full">
                 {!isMobile && (
-                    <div className="col-span-12 lg:col-span-4 xl:col-span-3 h-full">
+                    <div className="filters-panel-wrapper">
                         <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
                     </div>
                 )}
 
-                <div className="col-span-12 lg:col-span-8 xl:col-span-9 grid grid-cols-12 gap-6 h-full">
-                    <div className="col-span-12 xl:col-span-7 h-full">
-                        <ResultsPanel
-                            items={items}
-                            isLoading={isLoading && items.length === 0}
-                            selectedItem={selectedItem}
-                            onSelectItem={handleSelectItem}
-                            favorites={favorites}
-                            onToggleFavorite={handleToggleFavorite}
-                            onGenerateVariant={handleGenerateVariant}
-                            onClearResults={handleClearResults}
-                            aiFocus={currentAiFocus}
-                        />
-                    </div>
-                    {!isMobile && (
-                         <div className="hidden xl:block xl:col-span-5 h-full">
+                <div className="results-panel-wrapper">
+                    <div className="grid grid-cols-12 gap-6 h-full">
+                        <div className="col-span-12 xl:col-span-7 h-full">
+                            <ResultsPanel
+                                items={items}
+                                isLoading={isLoading && items.length === 0}
+                                selectedItem={selectedItem}
+                                onSelectItem={handleSelectItem}
+                                favorites={favorites}
+                                onToggleFavorite={handleToggleFavorite}
+                                onGenerateVariant={handleGenerateVariant}
+                                onClearResults={handleClearResults}
+                                aiFocus={currentAiFocus}
+                            />
+                        </div>
+                        <div className="hidden xl:block xl:col-span-5 h-full">
                            <AnimatePresence>
                              {selectedItem && (
                                <motion.div
@@ -204,7 +201,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
                              )}
                            </AnimatePresence>
                          </div>
-                    )}
+                    </div>
                 </div>
             </div>
 

@@ -4,7 +4,6 @@ import { Footer } from './components/Footer';
 import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
-import { MatrixBackground } from './components/MatrixBackground';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -29,7 +28,6 @@ const App: React.FC = () => {
     
     return (
         <>
-            <MatrixBackground />
             <div className={`relative z-10 flex flex-col min-h-screen bg-transparent text-white font-sans kimetsu-forge-app ${theme}`}>
                 <Header
                     activeView={activeView}
@@ -38,7 +36,7 @@ const App: React.FC = () => {
                     onFavoritesClick={() => setIsFavoritesOpen(true)}
                     onHistoryClick={() => setIsHistoryOpen(true)}
                 />
-                <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6 overflow-hidden">
+                <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeView}

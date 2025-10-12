@@ -234,7 +234,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                      <RefreshIcon className="w-4 h-4" /> Limpar Filtros
                 </Button>
             </div>
-            <div className="flex-grow overflow-y-auto pr-2 -mr-2 space-y-4">
+            <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-4">
                 <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
                     <option value="">Selecione a Categoria</option>
                     {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -242,17 +242,19 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 
                 {filters.category && (
                     <div className="space-y-4">
-                        <div className="border-t border-gray-700/50 pt-4 space-y-3">
-                            <h3 className="text-sm font-semibold text-gray-300">Diretrizes da Forja</h3>
-                             <Select label="Gemini (Arquiteto)" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)}>
-                                {AI_FOCUS_GEMINI.map(o => <option key={o} value={o}>{o}</option>)}
-                            </Select>
-                            <Select label="GPT (Escritor)" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)}>
-                                {AI_FOCUS_GPT.map(o => <option key={o} value={o}>{o}</option>)}
-                            </Select>
-                            <Select label="DeepSeek (Game Master)" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)}>
-                                {AI_FOCUS_DEEPSEEK.map(o => <option key={o} value={o}>{o}</option>)}
-                            </Select>
+                        <div className="border-t border-gray-700/50 pt-4">
+                            <h3 className="text-sm font-semibold text-gray-300 mb-3">Diretrizes da Forja</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Select label="Gemini (Arquiteto)" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)}>
+                                    {AI_FOCUS_GEMINI.map(o => <option key={o} value={o}>{o}</option>)}
+                                </Select>
+                                <Select label="GPT (Escritor)" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)}>
+                                    {AI_FOCUS_GPT.map(o => <option key={o} value={o}>{o}</option>)}
+                                </Select>
+                                <Select label="DeepSeek (Game Master)" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)}>
+                                    {AI_FOCUS_DEEPSEEK.map(o => <option key={o} value={o}>{o}</option>)}
+                                </Select>
+                            </div>
                         </div>
                         <div className="border-t border-gray-700/50 pt-4">
                             {renderCategorySpecificFilters()}
