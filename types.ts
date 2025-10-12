@@ -19,9 +19,10 @@ export interface FilterState {
   oniPowerLevel: string;
   oniCountry: string;
   oniWeapon: string;
-  oniInspirationKekkijutsu: string;
+  oniInspirationKekkijutsu: string[];
   oniInspirationBreathing: string;
   oniPersonality: string;
+  oniEra: Era;
   // NPC
   npcEra: Era;
   npcCountry: string;
@@ -29,6 +30,7 @@ export interface FilterState {
   npcProfession: string;
   npcPersonality: string;
   npcWeapon: string;
+  npcAccessory: string;
   // Weapon
   weaponRarity: Rarity;
   weaponEra: Era;
@@ -57,6 +59,7 @@ export interface FilterState {
   kekkijutsuKekkijutsuInspiration: string;
   kekkijutsuBreathingInspiration: string;
   kekkijutsuWeaponInspiration: string;
+  kekkijutsuAccessoryInspiration: string;
   // Location
   locationTone: Tone;
   locationEra: Era;

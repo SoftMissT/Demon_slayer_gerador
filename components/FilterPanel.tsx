@@ -27,6 +27,7 @@ interface FilterPanelProps {
 const breathingStylesOptions = BREATHING_STYLES_DATA.map(style => style.nome);
 const hunterArchetypeOptions = ['Aleatória', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))];
 const weaponTypeOptions = WEAPON_TYPES.map(w => w.name);
+const accessoryInspirationOptions = ['Nenhuma', 'Máscara', 'Brinco', 'Colar', 'Anel', 'Cinto', 'Luva', 'Haori (Kimono)', 'Amuleto'];
 
 const TextInput: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label: string }> = ({ label, ...props }) => (
     <div>
@@ -114,9 +115,18 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
             </>);
             case 'Inimigo/Oni': return (<>
                 <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}>{ONI_POWER_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Era" value={filters.oniEra} onChange={e => handleFilterChange('oniEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="País de Origem (Cultural)" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Personalidade Dominante" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Inspiração de Kekkijutsu" value={filters.oniInspirationKekkijutsu} onChange={e => handleFilterChange('oniInspirationKekkijutsu', e.target.value)}>{DEMON_BLOOD_ARTS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Arma" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Inspiração de Respiração" value={filters.oniInspirationBreathing} onChange={e => handleFilterChange('oniInspirationBreathing', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableMultiSelect 
+                    label="Inspiração de Kekkijutsu" 
+                    options={DEMON_BLOOD_ARTS.filter(o => o !== 'Aleatória')} 
+                    selected={filters.oniInspirationKekkijutsu} 
+                    onChange={s => handleFilterChange('oniInspirationKekkijutsu', s)} 
+                    placeholder="Selecione uma ou mais artes..."
+                />
             </>);
             case 'NPC': return (<>
                 <Select label="Era" value={filters.npcEra} onChange={e => handleFilterChange('npcEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
@@ -124,6 +134,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <Select label="Origem (Background)" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>{professionOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Arma" value={filters.npcWeapon} onChange={e => handleFilterChange('npcWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Acessório" value={filters.npcAccessory} onChange={e => handleFilterChange('npcAccessory', e.target.value)}>{accessoryInspirationOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Arma': return (<>
                 <Select label="Raridade" value={filters.weaponRarity} onChange={e => handleFilterChange('weaponRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
@@ -142,12 +154,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
             case 'Forma de Respiração': return (<>
                 <SearchableMultiSelect label="Respiração Base" options={breathingStylesOptions} selected={filters.baseBreathingStyles} onChange={s => handleFilterChange('baseBreathingStyles', s)} placeholder="Selecione 1 ou 2" maxSelection={2} />
                 <Select label="Era" value={filters.breathingFormEra} onChange={e => handleFilterChange('breathingFormEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="País (Cultural)" value={filters.breathingFormCountry} onChange={e => handleFilterChange('breathingFormCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Arma Principal" value={filters.breathingFormWeapon} onChange={e => handleFilterChange('breathingFormWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Tom" value={filters.breathingFormTone} onChange={e => handleFilterChange('breathingFormTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Kekkijutsu': return (<>
                 <Select label="Era" value={filters.kekkijutsuEra} onChange={e => handleFilterChange('kekkijutsuEra', e.target.value as Era)}>{ERAS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="País (Cultural)" value={filters.kekkijutsuCountry} onChange={e => handleFilterChange('kekkijutsuCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Inspiração (Kekkijutsu)" value={filters.kekkijutsuKekkijutsuInspiration} onChange={e => handleFilterChange('kekkijutsuKekkijutsuInspiration', e.target.value)}>{DEMON_BLOOD_ARTS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Inspiração (Respiração)" value={filters.kekkijutsuBreathingInspiration} onChange={e => handleFilterChange('kekkijutsuBreathingInspiration', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Inspiração (Arma)" value={filters.kekkijutsuWeaponInspiration} onChange={e => handleFilterChange('kekkijutsuWeaponInspiration', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Inspiração (Acessório)" value={filters.kekkijutsuAccessoryInspiration} onChange={e => handleFilterChange('kekkijutsuAccessoryInspiration', e.target.value)}>{accessoryInspirationOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </>);
             case 'Local/Cenário': return (<>
                 <Select label="Tom" value={filters.locationTone} onChange={e => handleFilterChange('locationTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
