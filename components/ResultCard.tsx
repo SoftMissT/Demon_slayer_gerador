@@ -54,7 +54,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     >
         <div>
             <div className="flex justify-between items-start">
-                <div className="flex-grow pr-4">
+                <div className="flex-grow pr-4 min-w-0">
                     <h3 className="font-bold text-white truncate" title={currentName}>{currentName}</h3>
                     <p className="text-xs text-indigo-400 capitalize">{item.categoria}</p>
                 </div>

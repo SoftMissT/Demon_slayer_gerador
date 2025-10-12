@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { GeneratedItem } from '../types';
 import { ResultCardSkeleton } from './ResultCardSkeleton';
@@ -33,7 +34,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   aiFocus,
 }) => {
   return (
-    <div className="results-panel forge-panel rounded-lg p-4 flex flex-col h-full">
+    <div className="results-panel forge-panel rounded-lg p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h2 className="text-xl font-bold text-white font-gangofthree">{title}</h2>
         {items.length > 0 && (

@@ -622,7 +622,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
 
   if (!item) {
     return (
-      <Card className="h-full flex items-center justify-center">
+      <Card className="flex items-center justify-center">
         <div className="text-center text-gray-500">
           <SparklesIcon className="w-12 h-12 mx-auto mb-2" />
           <p>Selecione um item para ver os detalhes</p>
@@ -635,7 +635,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   const currentName = ('title' in item && item.title) || item.nome;
 
   return (
-    <Card className="detail-panel h-full flex flex-col !p-0 overflow-hidden">
+    <Card className="detail-panel flex flex-col !p-0 overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-700 flex-shrink-0">
             <div className="flex justify-between items-start">
                 <div className="flex-grow mr-2 overflow-hidden">

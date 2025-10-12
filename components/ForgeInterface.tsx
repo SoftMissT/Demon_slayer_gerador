@@ -159,11 +159,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     return (
         <div className="forge-interface h-full relative">
             <div className="forge-layout-wrapper">
-                <div className="forge-column">
+                <div className="forge-column-filters">
                     <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
                 </div>
 
-                <div className="forge-column">
+                <div className="forge-column-results">
                     <ResultsPanel
                         items={items}
                         isLoading={isLoading && items.length === 0}
@@ -182,7 +182,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
                                 transition={{ duration: 0.3 }}
-                                className="w-full"
+                                className="w-full flex-shrink-0"
                             >
                                 <DetailPanel
                                     item={selectedItem}

@@ -44,7 +44,7 @@ const App: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
                             transition={{ duration: 0.25, ease: "easeInOut" }}
-                            className="h-full py-6"
+                            className="flex-grow flex flex-col py-6"
                         >
                             {activeView === 'forge' ? (
                                 <ForgeInterface
