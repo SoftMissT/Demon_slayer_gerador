@@ -1,3 +1,4 @@
+
 // FIX: Import `useState` and `useEffect` from React to resolve 'Cannot find name' errors.
 import React, { useState, useEffect } from 'react';
 // FIX: Corrected import paths for types and components.
@@ -513,7 +514,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         <div className="flex justify-between items-start mb-2 flex-shrink-0">
             <div>
                  <h2 className="text-xl font-bold text-white font-gangofthree">
-                    {isEditing && canEdit ? <input value={editedItem?.nome || ''} onChange={e => handleEditChange('nome', e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-1 text-lg" /> : (('name_pt' in item && item.name_pt) || ('title' in item && item.title) || item.nome)}
+                    {isEditing && canEdit ? <input value={editedItem?.nome || ''} onChange={e => handleEditChange('nome', e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-1 text-lg" /> : (('title' in item && item.title) || item.nome)}
                  </h2>
                  <p className="text-sm text-indigo-400 pt-1 capitalize">
                     {isMission ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 

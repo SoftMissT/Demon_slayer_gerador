@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem, WorldBuildingItem, BreathingFormItem, HunterItem, OniItem, NpcItem, MissionItemDetails } from '../types';
 import { Card } from './ui/Card';
@@ -491,7 +492,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         <div className="flex justify-between items-start mb-2 flex-shrink-0">
             <div>
                  <h2 className="text-xl font-bold text-white font-gangofthree">
-                    {('name_pt' in item && item.name_pt) || ('title' in item && item.title) || item.nome}
+                    {('title' in item && item.title) || item.nome}
                  </h2>
                  <p className="text-sm text-indigo-400 pt-1 capitalize">
                     {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
