@@ -103,8 +103,15 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
         const modifier = `Gere uma variação deste item com um foco mais ${variantType}. Mantenha a essência, mas altere as mecânicas e a descrição para refletir a nova abordagem. Item base: ${item.nome} - ${item.descricao_curta}`;
         
-        // Construct a minimal filter state from the original item
-        const filters: Partial<FilterState> = { category: item.categoria, raridade: item.raridade };
+        // FIX: Object literal may only specify known properties, and 'raridade' does not exist in type 'Partial<FilterState>'.
+        // The filter state was being constructed with an invalid `raridade` property. This has been corrected
+        // to use the appropriate category-specific rarity properties (`weaponRarity` or `accessoryRarity`).
+        const filters: Partial<FilterState> = { category: item.categoria };
+        if (item.categoria === 'Arma') {
+            filters.weaponRarity = item.raridade;
+        } else if (item.categoria === 'Acessório') {
+            filters.accessoryRarity = item.raridade;
+        }
         
         setIsLoading(true);
         setError(null);

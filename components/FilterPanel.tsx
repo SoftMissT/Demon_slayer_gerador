@@ -3,14 +3,17 @@ import { Card } from './ui/Card';
 import { Select } from './ui/Select';
 import { Button } from './ui/Button';
 import { Spinner } from './ui/Spinner';
-import { SparklesIcon } from './icons/SparklesIcon';
+import { AnvilIcon } from './icons/AnvilIcon';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { Slider } from './ui/Slider';
+import { SaveIcon } from './icons/SaveIcon';
+import { TrashIcon } from './icons/TrashIcon';
+import useLocalStorage from '../hooks/useLocalStorage';
 import {
     CATEGORIES, RARITIES, ERAS, TONES, DEMON_BLOOD_ARTS, PERSONALITIES,
     METAL_COLORS, COUNTRIES, TERRAINS, THREAT_SCALES, ONI_POWER_LEVELS, ORIGINS, INITIAL_FILTERS
 } from '../constants';
-import type { FilterState, Category, Era, Rarity, Tone } from '../types';
+import type { FilterState, Category, Era, Rarity, Tone, FilterPreset } from '../types';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
 import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 import { WEAPON_TYPES } from '../lib/weaponData';
@@ -40,10 +43,47 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
     const [count, setCount] = useState(1);
     const [promptModifier, setPromptModifier] = useState('');
+    const [presets, setPresets] = useLocalStorage<FilterPreset[]>('kimetsu-forge-presets', []);
+    const [selectedPreset, setSelectedPreset] = useState<string>('');
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(field: K, value: FilterState[K]) => {
         setFilters(prev => ({ ...prev, [field]: value }));
     }, []);
+    
+    const handleSavePreset = useCallback(() => {
+        const name = prompt("Digite um nome para o preset:");
+        if (name && name.trim()) {
+            if (presets.some(p => p.name === name.trim())) {
+                alert('Já existe um preset com este nome.');
+                return;
+            }
+            const newPreset: FilterPreset = { name: name.trim(), filters };
+            setPresets(prev => [...prev, newPreset].sort((a, b) => a.name.localeCompare(b.name)));
+            setSelectedPreset(name.trim());
+        }
+    }, [filters, presets, setPresets]);
+
+    const handlePresetChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const name = e.target.value;
+        setSelectedPreset(name);
+        if (name) {
+            const preset = presets.find(p => p.name === name);
+            if (preset) {
+                setFilters(preset.filters);
+            }
+        } else {
+            setFilters(INITIAL_FILTERS);
+        }
+    }, [presets]);
+
+    const handleDeletePreset = useCallback(() => {
+        if (selectedPreset && window.confirm(`Tem certeza que deseja deletar o preset "${selectedPreset}"?`)) {
+            setPresets(prev => prev.filter(p => p.name !== selectedPreset));
+            setSelectedPreset('');
+            setFilters(INITIAL_FILTERS); 
+        }
+    }, [selectedPreset, setPresets]);
+
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newCategory = e.target.value as Category;
@@ -142,8 +182,28 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 </Select>
                 {filters.category && renderCategorySpecificFilters()}
             </div>
-            <div className="mt-4 border-t border-gray-700 pt-4 flex-shrink-0 space-y-4">
-                <div>
+            <div className="mt-auto pt-4 flex-shrink-0 space-y-4">
+                 <div className="border-t border-gray-700 pt-4 space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-300">Presets de Filtros</h3>
+                    <div className="flex items-center gap-2">
+                        <div className="flex-grow">
+                        <Select label="" value={selectedPreset} onChange={handlePresetChange}>
+                            <option value="">Carregar preset...</option>
+                            {presets.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                        </Select>
+                        </div>
+                        <Button variant="secondary" size="sm" onClick={handleSavePreset} className="!p-2" title="Salvar filtros atuais como um preset">
+                            <SaveIcon className="w-5 h-5" />
+                        </Button>
+                        {selectedPreset && (
+                        <Button variant="danger" size="sm" onClick={handleDeletePreset} className="!p-2" title="Deletar preset selecionado">
+                            <TrashIcon className="w-5 h-5" />
+                        </Button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="border-t border-gray-700 pt-4">
                     <label className="block text-sm font-medium text-gray-400 mb-1">Modificador de Prompt (Opcional)</label>
                     <textarea
                         value={promptModifier}
@@ -164,8 +224,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                             disabled={isLoading}
                         />
                     </div>
-                    <Button onClick={() => onGenerate(filters, count, promptModifier)} disabled={isLoading || !filters.category} className="w-40">
-                        {isLoading ? <Spinner size="sm" /> : <SparklesIcon className="w-5 h-5" />}
+                    <Button onClick={() => onGenerate(filters, count, promptModifier)} disabled={isLoading || !filters.category} className="w-40 forge-anvil-button">
+                        {isLoading ? <Spinner size="sm" /> : <AnvilIcon className="w-5 h-5" />}
                         {isLoading ? 'Forjando...' : `Forjar`}
                     </Button>
                 </div>

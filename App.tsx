@@ -14,12 +14,18 @@ const App: React.FC = () => {
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-    // Add a class to the body when the prompt panel is active for unique styling
+    // Add a class to the body to switch between themes
     useEffect(() => {
+        document.body.classList.remove('forge-theme', 'alchemist-theme');
         if (activeView === 'prompt') {
-            document.body.classList.add('prompt-engineering-active');
+            document.body.classList.add('alchemist-theme');
         } else {
-            document.body.classList.remove('prompt-engineering-active');
+            document.body.classList.add('forge-theme');
+        }
+        
+        // Cleanup on unmount
+        return () => {
+            document.body.classList.remove('forge-theme', 'alchemist-theme');
         }
     }, [activeView]);
     

@@ -77,6 +77,11 @@ export interface FilterState {
   wbLocation: string;
 }
 
+export interface FilterPreset {
+  name: string;
+  filters: FilterState;
+}
+
 interface BaseGeneratedItem {
   id: string;
   createdAt: string;
