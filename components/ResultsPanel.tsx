@@ -32,7 +32,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h2 className="text-xl font-bold text-white font-gangofthree">Resultados da Forja</h2>
         {items.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={onClearResults} className="text-xs">
+            <Button variant="ghost" size="sm" onClick={onClearResults}>
                 Limpar Resultados
             </Button>
         )}
