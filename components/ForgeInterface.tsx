@@ -1,227 +1,204 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FilterPanel } from './FilterPanel';
 import { ResultsPanel } from './ResultsPanel';
-import { DetailPanel } from './DetailPanel';
-import { FavoritesModal } from './FavoritesModal';
-import { HistoryModal } from './HistoryModal';
 import { DetailModal } from './DetailModal';
-import { ErrorDisplay } from './ui/ErrorDisplay';
-import { Button } from './ui/Button';
-import { FilterIcon } from './icons/FilterIcon';
-import { Modal } from './ui/Modal';
-import type { FilterState, GeneratedItem } from '../types';
 import { generateContent } from '../services/geminiService';
-import useLocalStorage from '../hooks/useLocalStorage';
+import type { FilterState, GeneratedItem } from '../types';
 
 interface ForgeInterfaceProps {
-    isFavoritesOpen: boolean;
-    onFavoritesClose: () => void;
-    isHistoryOpen: boolean;
-    onHistoryClose: () => void;
+    favorites: GeneratedItem[];
+    onToggleFavorite: (item: GeneratedItem) => void;
+    onAddToHistory: (items: GeneratedItem[]) => void;
+    onError: (message: string | null) => void;
+    onUpdateItem: (item: GeneratedItem) => void;
 }
 
-const useWindowSize = () => {
-    const [size, setSize] = useState({ width: 0, height: 0 });
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const handleResize = () => {
-            setSize({ width: window.innerWidth, height: window.innerHeight });
-        };
-        window.addEventListener('resize', handleResize);
-        handleResize();
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-    return size;
-};
-
-export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen, onFavoritesClose, isHistoryOpen, onHistoryClose }) => {
-    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
-    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
-    const { width } = useWindowSize();
-    const isMobile = useMemo(() => (width || 0) < 1024, [width]);
-
+export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
+    favorites,
+    onToggleFavorite,
+    onAddToHistory,
+    onError,
+    onUpdateItem,
+}) => {
     const [items, setItems] = useState<GeneratedItem[]>([]);
-    const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [currentAiFocus, setCurrentAiFocus] = useState<Record<string, string> | null>(null);
-
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-
-    const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
-        setIsLoading(true);
-        setError(null);
-        setCurrentAiFocus({
-            aiFocusGemini: filters.aiFocusGemini,
-            aiFocusGpt: filters.aiFocusGpt,
-            aiFocusDeepSeek: filters.aiFocusDeepSeek,
-        });
-
-        if (count === 1) {
-            setItems([]);
+    const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
+    const [isDetailModalOpen, setDetailModalOpen] = useState(false);
+    const [aiFocus, setAiFocus] = useState<Record<string, string> | null>(null);
+    
+    useEffect(() => {
+        if (items.length === 0) {
+            setSelectedItem(null);
         }
-        setSelectedItem(null);
-        if (isMobile) setIsFilterPanelOpen(false);
-
-        try {
-            const newItems = await generateContent(filters, count, promptModifier);
-            setItems(prev => [...newItems, ...prev]);
-            if (newItems.length > 0) {
-                setSelectedItem(newItems[0]);
-                setHistory(prev => [...newItems, ...prev].slice(0, 100));
-            }
-        } catch (err: any) {
-            setError(err.message || 'Ocorreu um erro desconhecido.');
-        } finally {
-            setIsLoading(false);
-            setCurrentAiFocus(null);
-        }
-    }, [isMobile, setHistory]);
-
+    }, [items]);
+    
     const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
-        if (isMobile) {
-            setIsDetailModalOpen(true);
-        }
-    }, [isMobile]);
+        setDetailModalOpen(true);
+    }, []);
 
-    const handleToggleFavorite = useCallback((itemToToggle: GeneratedItem) => {
-        setFavorites(prev => {
-            const isFav = prev.some(item => item.id === itemToToggle.id);
-            if (isFav) {
-                return prev.filter(item => item.id !== itemToToggle.id);
-            } else {
-                return [itemToToggle, ...prev];
-            }
-        });
-    }, [setFavorites]);
+    const handleCloseModal = useCallback(() => {
+        setDetailModalOpen(false);
+        // Deselect item after modal close animation
+        setTimeout(() => {
+            setSelectedItem(null);
+        }, 300);
+    }, []);
     
-    const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
-        const updateList = (list: GeneratedItem[]) => list.map(i => i.id === updatedItem.id ? updatedItem : i);
-        setItems(updateList);
-        setHistory(updateList);
-        setFavorites(updateList);
+    const handleUpdateItem = (updatedItem: GeneratedItem) => {
+        onUpdateItem(updatedItem);
+        setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
-    }, [selectedItem, setFavorites, setHistory]);
+    };
 
-    const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
-        const modifier = `Gere uma variação deste item com um foco mais ${variantType}. Mantenha a essência, mas altere as mecânicas e a descrição para refletir a nova abordagem. Item base: ${item.nome} - ${item.descricao_curta}`;
-        
-        const filters: Partial<FilterState> = { category: item.categoria };
-        if (item.categoria === 'Arma') {
-            filters.weaponRarity = item.raridade;
-        } else if (item.categoria === 'Acessório') {
-            filters.accessoryRarity = item.raridade;
-        }
-        
+    const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
         setIsLoading(true);
-        setError(null);
-        if (isMobile && isDetailModalOpen) setIsDetailModalOpen(false);
-
+        onError(null);
+        setItems([]);
+        setSelectedItem(null);
+        setAiFocus({
+            gemini: filters.aiFocusGemini,
+            gpt: filters.aiFocusGpt,
+            deepseek: filters.aiFocusDeepSeek
+        });
+        
         try {
-            const newItems = await generateContent(filters as FilterState, 1, modifier);
-            if (newItems.length > 0) {
-                const variant = { ...newItems[0], nome: `${item.nome} (Variante ${variantType})`};
-                setItems(prev => [variant, ...prev]);
-                setSelectedItem(variant);
-                setHistory(prev => [variant, ...prev]);
-            }
-        } catch (err: any) {
-            setError(err.message || 'Falha ao gerar variante.');
+            const newItems = await generateContent(filters, count, promptModifier);
+            setItems(newItems);
+            onAddToHistory(newItems);
+        } catch (error: any) {
+            onError(error.message || 'Ocorreu um erro desconhecido.');
+            setItems([]);
         } finally {
             setIsLoading(false);
+            setAiFocus(null);
         }
-    }, [setHistory, isMobile, isDetailModalOpen]);
+    }, [onAddToHistory, onError]);
+    
+    const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
+        // This is a complex feature, for now we will just re-generate with a modifier
+        const filters: FilterState = {
+            category: item.categoria,
+            // We can't know the original filters, so we'll just use the item's properties
+            styleReferences: '',
+            hunterTematica: item.tematica as any,
+            hunterCountry: '',
+            hunterOrigin: '',
+            hunterArchetype: '',
+            hunterPersonality: '',
+            hunterWeapon: '',
+            hunterBreathingStyles: [],
+            hunterAccessory: '',
+            hunterRank: '',
+            oniPowerLevel: '',
+            oniCountry: '',
+            oniWeapon: '',
+            oniInspirationKekkijutsu: [],
+            oniInspirationBreathing: '',
+            oniPersonality: '',
+            oniTematica: item.tematica as any,
+            npcTematica: item.tematica as any,
+            npcCountry: '',
+            npcOrigin: '',
+            npcProfession: '',
+            npcPersonality: '',
+            npcWeapon: '',
+            npcAccessory: '',
+            weaponRarity: item.raridade as any,
+            weaponTematica: item.tematica as any,
+            weaponCountry: '',
+            weaponType: '',
+            weaponMetalColor: '',
+            accessoryRarity: item.raridade as any,
+            accessoryTematica: item.tematica as any,
+            accessoryOrigin: '',
+            accessoryCountry: '',
+            accessoryBreathingInspiration: '',
+            accessoryKekkijutsuInspiration: '',
+            accessoryWeaponInspiration: '',
+            baseBreathingStyles: [],
+            breathingFormTematica: item.tematica as any,
+            breathingFormCountry: '',
+            breathingFormOrigin: '',
+            breathingFormTone: 'épico',
+            breathingFormWeapon: '',
+            breathingFormArchetype: '',
+            kekkijutsuTematica: item.tematica as any,
+            kekkijutsuCountry: '',
+            kekkijutsuKekkijutsuInspiration: '',
+            kekkijutsuBreathingInspiration: '',
+            kekkijutsuWeaponInspiration: '',
+            kekkijutsuAccessoryInspiration: '',
+            locationTone: 'misterioso',
+            locationTematica: item.tematica as any,
+            locationCountry: '',
+            locationTerrain: '',
+            locationTerrainCustom: '',
+            missionTone: 'sombrio',
+            intensity: 3,
+            missionScale: 'local',
+            protagonist: '',
+            targets: '',
+            moodModifiers: '',
+            missionTematica: item.tematica as any,
+            missionCountry: '',
+            wbTone: 'épico',
+            wbTematica: item.tematica as any,
+            wbCountry: '',
+            wbThreatScale: '',
+            wbLocation: '',
+            eventTone: 'misterioso',
+            eventTematica: item.tematica as any,
+            eventCountry: '',
+            eventLevel: '',
+            eventThreatLevel: '',
+            eventType: '',
+            aiFocusGemini: 'Estrutura Base (Padrão)',
+            aiFocusGpt: 'Polimento Narrativo (Padrão)',
+            aiFocusDeepSeek: 'Refinamento de Mecânicas (Padrão)',
+        };
+        const promptModifier = `Crie uma variação do item "${item.nome}" com um foco mais ${variantType}.`;
+        await handleGenerate(filters, 1, promptModifier);
 
-    const handleDeleteFromHistory = useCallback((itemId: string) => {
-        setHistory(prev => prev.filter(item => item.id !== itemId));
-    }, [setHistory]);
-
-    const handleClearHistory = useCallback(() => {
-        setHistory([]);
-        onHistoryClose();
-    }, [setHistory, onHistoryClose]);
+    }, [handleGenerate]);
 
     const handleClearResults = useCallback(() => {
         setItems([]);
         setSelectedItem(null);
     }, []);
 
-    const isFavorite = useMemo(() => {
-        if (!selectedItem) return false;
-        return favorites.some(fav => fav.id === selectedItem.id);
-    }, [selectedItem, favorites]);
+    const isFavorite = selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false;
 
     return (
-        <div className="forge-interface h-full relative">
-            <div className="forge-layout-wrapper">
-                <div className="forge-column-filters">
-                    <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
-                </div>
-
-                <div className="forge-column-results">
-                    <ResultsPanel
-                        items={items}
-                        isLoading={isLoading && items.length === 0}
-                        selectedItem={selectedItem}
-                        onSelectItem={handleSelectItem}
-                        favorites={favorites}
-                        onToggleFavorite={handleToggleFavorite}
-                        onGenerateVariant={handleGenerateVariant}
-                        onClearResults={handleClearResults}
-                        aiFocus={currentAiFocus}
-                    />
-                    <AnimatePresence>
-                        {selectedItem && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full flex-shrink-0"
-                            >
-                                <DetailPanel
-                                    item={selectedItem}
-                                    onGenerateVariant={handleGenerateVariant}
-                                    isFavorite={isFavorite}
-                                    onToggleFavorite={handleToggleFavorite}
-                                    onUpdate={handleUpdateItem}
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+        <div className="forge-layout">
+            <div className="forge-column-filters filters-panel-wrapper">
+                <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
             </div>
-
-            {isMobile && (
-                <>
-                    <Button onClick={() => setIsFilterPanelOpen(true)} className="fixed bottom-4 right-4 z-30 !rounded-full !p-4 shadow-lg" aria-label="Abrir Filtros">
-                        <FilterIcon className="w-6 h-6" />
-                    </Button>
-                    <Modal isOpen={isFilterPanelOpen} onClose={() => setIsFilterPanelOpen(false)} variant="drawer-left" title="Filtros da Forja">
-                       <div className="p-4 h-full"><FilterPanel onGenerate={handleGenerate} isLoading={isLoading} /></div>
-                    </Modal>
-                    {selectedItem && (
-                      <DetailModal
-                          isOpen={isDetailModalOpen}
-                          onClose={() => setIsDetailModalOpen(false)}
-                          item={selectedItem}
-                          onGenerateVariant={handleGenerateVariant}
-                          isFavorite={isFavorite}
-                          onToggleFavorite={handleToggleFavorite}
-                          onUpdate={handleUpdateItem}
-                      />
-                    )}
-                </>
-            )}
-
-            <FavoritesModal isOpen={isFavoritesOpen} onClose={onFavoritesClose} favorites={favorites} onSelect={(item) => { handleSelectItem(item); onFavoritesClose(); }} onToggleFavorite={handleToggleFavorite} />
-            <HistoryModal isOpen={isHistoryOpen} onClose={onHistoryClose} history={history} onSelect={(item) => { handleSelectItem(item); onHistoryClose(); }} onDelete={handleDeleteFromHistory} onClear={handleClearHistory} />
-            <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+            <div className="forge-column-results results-panel-wrapper">
+                <ResultsPanel
+                    items={items}
+                    isLoading={isLoading}
+                    selectedItem={selectedItem}
+                    onSelectItem={handleSelectItem}
+                    favorites={favorites}
+                    onToggleFavorite={onToggleFavorite}
+                    onGenerateVariant={handleGenerateVariant}
+                    onClearResults={handleClearResults}
+                    aiFocus={aiFocus}
+                />
+            </div>
+            
+            <DetailModal
+                isOpen={isDetailModalOpen}
+                onClose={handleCloseModal}
+                item={selectedItem}
+                onGenerateVariant={handleGenerateVariant}
+                isFavorite={isFavorite}
+                onToggleFavorite={selectedItem ? onToggleFavorite : () => {}}
+                onUpdate={handleUpdateItem}
+            />
         </div>
     );
 };
