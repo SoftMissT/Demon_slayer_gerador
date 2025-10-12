@@ -81,7 +81,7 @@ const refineMechanicsWithDeepSeek = async (item: GeneratedItem, focus: string): 
         
         mechanicalKeys.forEach(key => {
             if (key in item) {
-                (mechanicalFields as any)[key] = item[key];
+                (mechanicalFields as any)[key] = (item as any)[key];
             }
         });
 
