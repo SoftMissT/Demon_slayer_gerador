@@ -22,9 +22,9 @@ interface DetailPanelProps {
 }
 
 const DetailSection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-  <div className={`mb-4 ${className}`}>
-    <h4 className="text-sm font-bold text-indigo-400 mb-1 font-gangofthree tracking-wide">{title}</h4>
-    <div className="text-gray-300 text-sm prose prose-sm prose-invert max-w-none">{children}</div>
+  <div className={`py-4 border-b border-gray-700/50 last:border-b-0 ${className}`}>
+    <h4 className="text-xs font-bold text-indigo-400 mb-2 font-gangofthree tracking-widest uppercase">{title}</h4>
+    <div className="text-gray-300 text-sm prose max-w-none leading-relaxed">{children}</div>
   </div>
 );
 
@@ -569,57 +569,59 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   const currentName = ('title' in item && item.title) || item.nome;
 
   return (
-    <Card className="h-full flex flex-col">
-        <div className="flex justify-between items-start mb-2 flex-shrink-0">
-            <div className="flex-grow mr-2">
-                 {isEditingName ? (
-                     <input
-                        ref={nameInputRef}
-                        type="text"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        onBlur={handleNameSave}
-                        onKeyDown={handleNameKeyDown}
-                        className="text-xl font-bold text-white font-gangofthree bg-gray-700 border border-indigo-500 rounded-md px-2 py-1 -ml-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                 ) : (
-                    <div 
-                        className="flex items-center gap-2 cursor-pointer group -ml-2 p-1 rounded-md hover:bg-gray-700/50"
-                        onClick={() => setIsEditingName(true)}
-                        title="Clique para editar o nome"
-                    >
-                        <h2 className="text-xl font-bold text-white font-gangofthree">
-                            {currentName}
-                        </h2>
-                        <PencilIcon className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                    </div>
-                 )}
+    <Card className="h-full flex flex-col !p-0 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-700 flex-shrink-0">
+            <div className="flex justify-between items-start">
+                <div className="flex-grow mr-2">
+                    {isEditingName ? (
+                        <input
+                            ref={nameInputRef}
+                            type="text"
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            onBlur={handleNameSave}
+                            onKeyDown={handleNameKeyDown}
+                            className="text-xl font-bold text-white font-gangofthree bg-gray-700 border border-indigo-500 rounded-md px-2 py-1 -ml-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                    ) : (
+                        <div 
+                            className="flex items-center gap-2 cursor-pointer group -ml-2 p-1 rounded-md"
+                            onClick={() => setIsEditingName(true)}
+                            title="Clique para editar o nome"
+                        >
+                            <h2 className="text-xl font-bold text-white font-gangofthree">
+                                {currentName}
+                            </h2>
+                            <PencilIcon className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                        </div>
+                    )}
 
-                 <p className="text-sm text-indigo-400 pt-1 capitalize">
-                    {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
-                     item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
-                     item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
-                     item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
-                     item.categoria === 'World Building' ? `${item.categoria}` :
-                     item.categoria === 'Forma de Respiração' ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
-                     item.categoria === 'Kekkijutsu' ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
-                     `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
-                 </p>
-            </div>
-            <div className="flex gap-1 items-center flex-shrink-0">
-                <Button variant="ghost" onClick={handleCopy} className="!p-2">
-                    {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
-                </Button>
-                <button 
-                    onClick={() => onToggleFavorite(item)}
-                    className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
-                    title={isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
-                >
-                    <StarIcon className="w-6 h-6" filled={isFavorite} />
-                </button>
+                    <p className="text-xs text-indigo-400 pt-1 capitalize">
+                        {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
+                        item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
+                        item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
+                        item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
+                        item.categoria === 'World Building' ? `${item.categoria}` :
+                        item.categoria === 'Forma de Respiração' ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
+                        item.categoria === 'Kekkijutsu' ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
+                        `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
+                    </p>
+                </div>
+                <div className="flex gap-1 items-center flex-shrink-0">
+                    <Button variant="ghost" onClick={handleCopy} className="!p-2">
+                        {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                    </Button>
+                    <button 
+                        onClick={() => onToggleFavorite(item)}
+                        className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
+                        title={isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
+                    >
+                        <StarIcon className="w-6 h-6" filled={isFavorite} />
+                    </button>
+                </div>
             </div>
         </div>
-        <div className="flex-grow overflow-y-auto pr-2">
+        <div className="flex-grow overflow-y-auto px-4">
             {item.categoria === 'Missão/Cenário' ? <MissionDetailView item={item} /> :
              item.categoria === 'NPC' ? <NpcDetailView item={item} /> :
              item.categoria === 'Caçador' ? <HunterDetailView item={item} /> :
@@ -639,8 +641,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         </div>
         
         {canGenerateVariant && (
-            <div className="mt-4 pt-4 border-t border-gray-700 flex-shrink-0">
-                <h4 className="text-sm font-bold text-indigo-400 mb-2 font-gangofthree">Gerar Variação</h4>
+            <div className="mt-auto p-4 border-t border-gray-700 flex-shrink-0">
+                <h4 className="text-xs font-bold text-indigo-400 mb-2 font-gangofthree tracking-widest uppercase">Gerar Variação</h4>
                 <div className="grid grid-cols-3 gap-2">
                     <Button variant="secondary" onClick={() => onGenerateVariant(item, 'agressiva')}>Agressiva</Button>
                     <Button variant="secondary" onClick={() => onGenerateVariant(item, 'técnica')}>Técnica</Button>

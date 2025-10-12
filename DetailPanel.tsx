@@ -1,6 +1,8 @@
 
 
-import React, { useState, useEffect } from 'react';
+
+// FIX: Imported 'useRef' from React to resolve reference error.
+import React, { useState, useEffect, useRef } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem, WorldBuildingItem, BreathingFormItem, HunterItem, OniItem, NpcItem, MissionItemDetails } from './types';
 import { Card } from './components/ui/Card';
 import { Button } from './components/ui/Button';
@@ -10,6 +12,8 @@ import { AlertTriangleIcon } from './components/icons/AlertTriangleIcon';
 import { buildPlainTextForItem } from './lib/textFormatters';
 import { ClipboardIcon } from './components/icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './components/icons/ClipboardCheckIcon';
+// FIX: Imported the 'PencilIcon' component to resolve reference error.
+import { PencilIcon } from './components/icons/PencilIcon';
 
 
 interface DetailPanelProps {
@@ -21,9 +25,9 @@ interface DetailPanelProps {
 }
 
 const DetailSection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-  <div className={`mb-4 ${className}`}>
-    <h4 className="text-sm font-bold text-indigo-400 mb-1 font-gangofthree tracking-wide">{title}</h4>
-    <div className="text-gray-300 text-sm prose prose-sm prose-invert max-w-none">{children}</div>
+  <div className={`py-4 border-b border-gray-700/50 last:border-b-0 ${className}`}>
+    <h4 className="text-xs font-bold text-indigo-400 mb-2 font-gangofthree tracking-widest uppercase">{title}</h4>
+    <div className="text-gray-300 text-sm prose max-w-none leading-relaxed">{children}</div>
   </div>
 );
 
@@ -474,6 +478,7 @@ const BreathingFormDetailView: React.FC<{ item: BreathingFormItem }> = ({ item }
         
         {item.mechanics?.damage_formula_rank && (
             <DetailSection title="Dano por Rank">
+                 {/* FIX: Corrected map parameter type from `[string, any]` to `[string, string]` to match `damage_formula_rank` type and ensure type safety. */}
                  {Object.entries(item.mechanics.damage_formula_rank).map(([rank, formula]: [string, string]) => (
                     <p key={rank}><strong>{rank}:</strong> {formula}</p>
                  ))}
@@ -509,15 +514,39 @@ const BreathingFormDetailView: React.FC<{ item: BreathingFormItem }> = ({ item }
 
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(item?.nome || '');
   const [copied, setCopied] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setEditedItem(item);
-    setIsEditing(false); // Always reset editing state when item changes
+    setEditedName(item?.nome || '');
+    setIsEditingName(false);
   }, [item]);
   
+  useEffect(() => {
+    if (isEditingName) {
+        nameInputRef.current?.focus();
+        nameInputRef.current?.select();
+    }
+  }, [isEditingName]);
+
+  const handleNameSave = () => {
+    if (item && editedName.trim() && editedName.trim() !== item.nome) {
+        onUpdate({ ...item, nome: editedName.trim() });
+    }
+    setIsEditingName(false);
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+        handleNameSave();
+    } else if (e.key === 'Escape' && item) {
+        setEditedName(item.nome);
+        setIsEditingName(false);
+    }
+  };
+
   const handleCopy = () => {
     if (item) {
         const textToCopy = buildPlainTextForItem(item);
@@ -540,39 +569,62 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   }
   
   const canGenerateVariant = item.categoria !== 'Missão/Cenário' && item.categoria !== 'NPC';
+  const currentName = ('title' in item && item.title) || item.nome;
 
   return (
-    <Card className="h-full flex flex-col">
-        <div className="flex justify-between items-start mb-2 flex-shrink-0">
-            <div>
-                 <h2 className="text-xl font-bold text-white font-gangofthree">
-                    {('title' in item && item.title) || item.nome}
-                 </h2>
-                 <p className="text-sm text-indigo-400 pt-1 capitalize">
-                    {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
-                     item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
-                     item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
-                     item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
-                     item.categoria === 'World Building' ? `${item.categoria}` :
-                     item.categoria === 'Forma de Respiração' ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
-                     item.categoria === 'Kekkijutsu' ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
-                     `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
-                 </p>
-            </div>
-            <div className="flex gap-1 items-center">
-                <Button variant="ghost" onClick={handleCopy} className="!p-2">
-                    {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
-                </Button>
-                <button 
-                    onClick={() => onToggleFavorite(item)}
-                    className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
-                    title={isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
-                >
-                    <StarIcon className="w-6 h-6" filled={isFavorite} />
-                </button>
+    <Card className="h-full flex flex-col !p-0 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-700 flex-shrink-0">
+            <div className="flex justify-between items-start">
+                <div className="flex-grow mr-2">
+                    {isEditingName ? (
+                        <input
+                            ref={nameInputRef}
+                            type="text"
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            onBlur={handleNameSave}
+                            onKeyDown={handleNameKeyDown}
+                            className="text-xl font-bold text-white font-gangofthree bg-gray-700 border border-indigo-500 rounded-md px-2 py-1 -ml-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                    ) : (
+                        <div 
+                            className="flex items-center gap-2 cursor-pointer group -ml-2 p-1 rounded-md"
+                            onClick={() => setIsEditingName(true)}
+                            title="Clique para editar o nome"
+                        >
+                            <h2 className="text-xl font-bold text-white font-gangofthree">
+                                {currentName}
+                            </h2>
+                            <PencilIcon className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                        </div>
+                    )}
+
+                    <p className="text-xs text-indigo-400 pt-1 capitalize">
+                        {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
+                        item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
+                        item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
+                        item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
+                        item.categoria === 'World Building' ? `${item.categoria}` :
+                        item.categoria === 'Forma de Respiração' ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
+                        item.categoria === 'Kekkijutsu' ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
+                        `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
+                    </p>
+                </div>
+                <div className="flex gap-1 items-center flex-shrink-0">
+                    <Button variant="ghost" onClick={handleCopy} className="!p-2">
+                        {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
+                    </Button>
+                    <button 
+                        onClick={() => onToggleFavorite(item)}
+                        className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
+                        title={isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
+                    >
+                        <StarIcon className="w-6 h-6" filled={isFavorite} />
+                    </button>
+                </div>
             </div>
         </div>
-        <div className="flex-grow overflow-y-auto pr-2">
+        <div className="flex-grow overflow-y-auto px-4">
             {item.categoria === 'Missão/Cenário' ? <MissionDetailView item={item} /> :
              item.categoria === 'NPC' ? <NpcDetailView item={item} /> :
              item.categoria === 'Caçador' ? <HunterDetailView item={item} /> :
@@ -592,8 +644,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         </div>
         
         {canGenerateVariant && (
-            <div className="mt-4 pt-4 border-t border-gray-700 flex-shrink-0">
-                <h4 className="text-sm font-bold text-indigo-400 mb-2 font-gangofthree">Gerar Variação</h4>
+            <div className="mt-auto p-4 border-t border-gray-700 flex-shrink-0">
+                <h4 className="text-xs font-bold text-indigo-400 mb-2 font-gangofthree tracking-widest uppercase">Gerar Variação</h4>
                 <div className="grid grid-cols-3 gap-2">
                     <Button variant="secondary" onClick={() => onGenerateVariant(item, 'agressiva')}>Agressiva</Button>
                     <Button variant="secondary" onClick={() => onGenerateVariant(item, 'técnica')}>Técnica</Button>

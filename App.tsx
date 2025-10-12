@@ -125,7 +125,7 @@ const App: React.FC = () => {
     const isFavorite = selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false;
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200 font-gangofthree">
+        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200">
             <Header
                 onAboutClick={() => setIsAboutModalOpen(true)}
                 onFavoritesClick={() => setIsFavoritesModalOpen(true)}

@@ -82,59 +82,55 @@ export const PromptEngineeringPanel: React.FC = () => {
         <>
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
                 {/* --- Coluna 1: Entradas --- */}
-                <div className="md:sticky md:top-28">
-                    <Card className="!p-0 overflow-hidden">
-                        <div className="p-6 bg-gray-900/40">
-                             <h2 className="text-2xl font-bold text-white mb-2 font-gangofthree">Mago dos prompts</h2>
-                            <p className="text-sm text-gray-400">
-                                Descreva sua ideia, ajuste os parâmetros e deixe o Alquimista construir prompts otimizados para Midjourney e DALL-E.
-                            </p>
-                        </div>
-                        
-                        <div className="p-6 space-y-6">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-1">Tópico / Ideia Principal</label>
-                                    <textarea
-                                        value={topic}
-                                        onChange={(e) => setTopic(e.target.value)}
-                                        placeholder="Ex: Um caçador de demônios ciborgue em uma Tóquio chuvosa de neon, segurando uma katana de energia..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-2 focus:ring-indigo-500"
-                                        rows={3}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (o que evitar)</label>
-                                    <input
-                                        type="text"
-                                        value={negativePrompt}
-                                        onChange={(e) => setNegativePrompt(e.target.value)}
-                                        placeholder="Ex: texto, marca d'água, baixa resolução, feio"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-2 focus:ring-indigo-500"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="border-t border-gray-700 pt-6">
-                                <MidjourneyParameters 
-                                    params={mjParams} 
-                                    onParamsChange={setMjParams} 
-                                    enabled={mjParamsEnabled}
-                                    onEnabledChange={setMjParamsEnabled}
+                <div className="md:sticky md:top-28 space-y-6">
+                    <Card>
+                        <h2 className="text-2xl font-bold text-white mb-2 font-gangofthree">Mago dos prompts</h2>
+                        <p className="text-sm text-gray-400 mb-4">
+                            Descreva sua ideia, ajuste os parâmetros e deixe o Alquimista construir prompts otimizados para Midjourney e DALL-E.
+                        </p>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Tópico / Ideia Principal</label>
+                                <textarea
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                    placeholder="Ex: Um caçador de demônios ciborgue em uma Tóquio chuvosa de neon, segurando uma katana de energia..."
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-2 focus:ring-indigo-500"
+                                    rows={3}
                                 />
                             </div>
-                            <div className="border-t border-gray-700 pt-6">
-                                <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
-                            </div>
-
-                            <div className="border-t border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-end gap-4">
-                                <Button onClick={handleGenerate} disabled={isLoading} className="w-full sm:w-auto">
-                                    <SparklesIcon className="w-5 h-5" />
-                                    {isLoading ? 'Gerando...' : 'Gerar Prompts'}
-                                </Button>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (o que evitar)</label>
+                                <input
+                                    type="text"
+                                    value={negativePrompt}
+                                    onChange={(e) => setNegativePrompt(e.target.value)}
+                                    placeholder="Ex: texto, marca d'água, baixa resolução, feio"
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-2 focus:ring-indigo-500"
+                                />
                             </div>
                         </div>
                     </Card>
+
+                    <Card>
+                        <MidjourneyParameters 
+                            params={mjParams} 
+                            onParamsChange={setMjParams} 
+                            enabled={mjParamsEnabled}
+                            onEnabledChange={setMjParamsEnabled}
+                        />
+                    </Card>
+
+                    <Card>
+                        <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
+                    </Card>
+                    
+                    <div className="flex justify-end">
+                        <Button onClick={handleGenerate} disabled={isLoading} className="w-full sm:w-auto">
+                            <SparklesIcon className="w-5 h-5" />
+                            {isLoading ? 'Gerando...' : 'Gerar Prompts'}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* --- Coluna 2: Saídas --- */}

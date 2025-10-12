@@ -38,11 +38,9 @@ const PromptCard: React.FC<{ title: string; prompt: string }> = ({ title, prompt
 
 export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ result }) => {
   return (
-    <div className="mt-8 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PromptCard title="Prompt para Midjourney" prompt={result.midjourneyPrompt} />
-            <PromptCard title="Prompt para DALL-E / GPT" prompt={result.gptPrompt} />
-        </div>
+    <div className="space-y-6">
+        <PromptCard title="Prompt para Midjourney" prompt={result.midjourneyPrompt} />
+        <PromptCard title="Prompt para DALL-E / GPT" prompt={result.gptPrompt} />
     </div>
   );
 };
