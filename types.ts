@@ -1,7 +1,7 @@
 import type { StringifyOptions } from "crypto";
 
 export type Category =
-  | 'Aleatória'
+  | ''
   | 'Arma'
   | 'Acessório'
   | 'Caçador'
@@ -33,7 +33,32 @@ export type Era =
   | 'Moderno'
   | 'Tempos Atuais'
   | 'Futurista (Sci-Fi)'
-  | 'Biopunk';
+  | 'Biopunk'
+  | 'Velho Oeste'
+  | 'Era Joseon'
+  | 'ERA DOS CINCO REINOS'
+  | 'ERA DA INFOCRACIA'
+  | 'ERA DO CREPÚSCULO CÓSMICO'
+  | 'ERA DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)'
+  | 'ERA DA SINGULARIDADE (PÓS-HUMANA)'
+  | 'ERA DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)'
+  | 'ERA DO COLONIALISMO DE ALQUIMIA'
+  | 'ERA DO JAZZ & OCULTISMO'
+  | 'ERA DOS CAÇADORES DE SOMBRAS'
+  | 'VELHO OESTE SOLAR'
+  | 'ERA DO SUBMUNDO NOTURNO'
+  | 'ERA DA ALVORADA ANCESTRAL'
+  | 'ERA DO SAARA ETERNO'
+  | 'ERA DA QUEDA DOS REINOS'
+  | 'ERA DOS PORTAIS ESQUECIDOS'
+  | 'ERA DA FRONTEIRA ESTELAR'
+  | 'ERA DO ETERNO CREPÚSCULO'
+  | 'ERA DA REVOLUÇÃO INDUSTRIAL OCULTA'
+  | 'ERA DOS CARNAVAIS SANGUE'
+  | 'ERA DO RENASCIMENTO SOMBRIO'
+  | 'ERA DOS DEUSES CAÍDOS'
+  | 'ERA DA COLONIZAÇÃO INTERGALÁCTICA';
+
 
 export type Tone =
   | 'investigação'
@@ -55,6 +80,7 @@ export interface FilterState {
   hunterPersonality: string;
   hunterOrigin: string;
   hunterArchetype: string;
+  hunterCountry: string;
 
   // Accessory Filters
   accessoryRarity: Rarity;
@@ -69,6 +95,7 @@ export interface FilterState {
   weaponMetalColor: string;
   weaponEra: Era;
   weaponType: string;
+  weaponCountry: string;
 
   // Location Filters
   locationTone: Tone;
@@ -90,23 +117,30 @@ export interface FilterState {
   breathingFormTone: Tone;
   breathingFormOrigin: string;
   breathingFormArchetype: string;
+  breathingFormCountry: string;
 
   // Kekkijutsu Filters
   kekkijutsuEra: Era;
   kekkijutsuKekkijutsuInspiration: string;
   kekkijutsuBreathingInspiration: string;
   kekkijutsuWeaponInspiration: string;
+  kekkijutsuCountry: string;
   
   // NPC filters
   npcOrigin: string;
   npcProfession: string;
   npcEra: Era;
+  npcPersonality: string;
+  npcWeapon: string;
+  npcCountry: string;
   
   // Oni Filters
   oniPowerLevel: string;
   oniInspirationKekkijutsu: string;
   oniInspirationBreathing: string;
   oniWeapon: string;
+  oniCountry: string;
+  oniPersonality: string;
 
   // Mission Filters
   missionTone: Tone;
@@ -159,7 +193,7 @@ export interface BaseGeneratedItem {
   id: string;
   createdAt: string;
   nome: string;
-  categoria: Category;
+  categoria: Category | 'Aleatória';
   raridade: Rarity;
   // FIX: Added era to base item type.
   era: Era;

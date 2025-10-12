@@ -10,7 +10,7 @@ interface AboutModalProps {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Sobre a Forja de Lendas">
+    <Modal isOpen={isOpen} onClose={onClose} title="Sobre o Kimetsu Forge">
         <div className="max-h-[70vh] overflow-y-auto pr-4">
              <AboutPanel />
         </div>

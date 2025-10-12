@@ -13,59 +13,7 @@ import { FavoritesModal } from './components/FavoritesModal';
 import { HistoryModal } from './components/HistoryModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { DetailModal } from './components/DetailModal';
-
-const initialFilters: FilterState = {
-  category: 'Caçador',
-  hunterWeapon: 'Aleatória',
-  hunterBreathingStyles: [],
-  hunterAccessory: 'Aleatória',
-  hunterEra: 'Aleatória',
-  hunterPersonality: 'Aleatória',
-  hunterOrigin: 'Aleatória',
-  hunterArchetype: 'Aleatória',
-  accessoryRarity: 'Aleatória',
-  accessoryEra: 'Aleatória',
-  accessoryKekkijutsuInspiration: 'Nenhuma',
-  accessoryBreathingInspiration: 'Nenhuma',
-  accessoryWeaponInspiration: 'Nenhuma',
-  accessoryOrigin: 'Aleatória',
-  weaponRarity: 'Aleatória',
-  weaponMetalColor: 'Aleatória',
-  weaponEra: 'Aleatória',
-  weaponType: 'Aleatória',
-  locationTone: 'aventura',
-  locationCountry: 'Aleatório',
-  locationEra: 'Aleatória',
-  locationTerrain: 'Aleatório',
-  wbTone: 'aventura',
-  wbCountry: 'Aleatório',
-  wbEra: 'Aleatória',
-  wbThreatScale: 'Aleatória',
-  wbLocation: 'Aleatória',
-  breathingFormEra: 'Aleatória',
-  breathingFormWeapon: 'Aleatória',
-  baseBreathingStyles: [],
-  breathingFormTone: 'ação',
-  breathingFormOrigin: 'Aleatória',
-  breathingFormArchetype: 'Aleatória',
-  kekkijutsuEra: 'Aleatória',
-  kekkijutsuKekkijutsuInspiration: 'Nenhuma',
-  kekkijutsuBreathingInspiration: 'Nenhuma',
-  kekkijutsuWeaponInspiration: 'Nenhuma',
-  npcOrigin: 'Aleatória',
-  npcProfession: 'Aleatória',
-  npcEra: 'Aleatória',
-  oniPowerLevel: 'Aleatório',
-  oniInspirationKekkijutsu: 'Nenhuma',
-  oniInspirationBreathing: 'Nenhuma',
-  oniWeapon: 'Aleatória',
-  missionTone: 'mistério',
-  intensity: 3,
-  missionScale: 'local',
-  protagonist: 'Um caçador recém-formado com um passado misterioso.',
-  targets: 'Um oni que se esconde em uma vila isolada.',
-  moodModifiers: 'chuvoso, sombrio, silencioso',
-};
+import { INITIAL_FILTERS } from './constants';
 
 
 const App: React.FC = () => {
@@ -73,7 +21,7 @@ const App: React.FC = () => {
     const [items, setItems] = useLocalStorage<GeneratedItem[]>('generatedItems_v2', []);
     const [history, setHistory] = useLocalStorage<GeneratedItem[]>('generationHistory_v2', []);
     const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('favoriteItems_v2', []);
-    const [filters, setFilters] = useState<FilterState>(initialFilters);
+    const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -164,6 +112,10 @@ const App: React.FC = () => {
         setIsHistoryModalOpen(false);
         setIsDetailModalOpen(true); // For mobile view
     }, []);
+    
+    const handleResetFilters = useCallback(() => {
+        setFilters(INITIAL_FILTERS);
+    }, []);
 
     const isFavorite = selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false;
 
@@ -188,6 +140,7 @@ const App: React.FC = () => {
                                     onFiltersChange={setFilters}
                                     onGenerate={handleGenerate}
                                     isLoading={isLoading}
+                                    onResetFilters={handleResetFilters}
                                 />
                             </div>
                             <div className="lg:col-span-3 h-full">

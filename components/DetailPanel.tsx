@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
 import { Card } from './ui/Card';
@@ -56,7 +57,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Ganchos e Objetivos">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.objectives?.map((obj: string, i: number) => <li key={i}>{obj}</li>)}
+                    {item.objectives?.map((obj: any, i: number) => <li key={i}>{obj}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -65,7 +66,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Complicações Possíveis">
                  <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.complications?.map((comp: string, i: number) => <li key={i}>{comp}</li>)}
+                    {item.complications?.map((comp: any, i: number) => <li key={i}>{comp}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -74,7 +75,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Condições de Falha">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.failure_states.map((state: string, i: number) => <li key={i}>{state}</li>)}
+                    {item.failure_states.map((state: any, i: number) => <li key={i}>{state}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -83,7 +84,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Recompensas">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.rewards.map((reward: string, i: number) => <li key={i}>{reward}</li>)}
+                    {item.rewards.map((reward: any, i: number) => <li key={i}>{reward}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -157,7 +158,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
                     <AlertTriangleIcon className="w-6 h-6 flex-shrink-0 text-yellow-400" />
                     <ul className="list-disc pl-4">
                         {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                        {item.sensitive_flags.map((flag: string, i: number) => <li key={i}>{flag}</li>)}
+                        {item.sensitive_flags.map((flag: any, i: number) => <li key={i}>{flag}</li>)}
                     </ul>
                 </div>
             </DetailSection>
@@ -168,7 +169,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
                 <p className="italic text-gray-400">"{item.diff.summary}"</p>
                 <ul className="list-disc pl-5 space-y-1 mt-2 text-xs">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.diff.changes?.map((change: string, i: number) => <li key={i}>{change}</li>)}
+                    {item.diff.changes?.map((change: any, i: number) => <li key={i}>{change}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -192,8 +193,8 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
 const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     <>
         {'origem' in item && item.origem && <DetailSection title="Origem">{item.origem}</DetailSection>}
-        <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>
-        <DetailSection title="História e Aparência Completa">{item.descricao || 'N/A'}</DetailSection>
+        <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>}
+        <DetailSection title="História e Aparência Completa">{item.descricao || 'N/A'}</DetailSection>}
         {'voice_and_mannerisms' in item && <DetailSection title="Voz e Maneirismos">{item.voice_and_mannerisms || 'N/A'}</DetailSection>}
         {'inventory_focal' in item && <DetailSection title="Item Focal / Propriedade">{item.inventory_focal || 'N/A'}</DetailSection>}
         {'motivation' in item && <DetailSection title="Motivação">{item.motivation || 'N/A'}</DetailSection>}
@@ -202,7 +203,7 @@ const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos de Aventura">
                 <ul className="list-disc pl-5 space-y-1">
-                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
+                    {item.ganchos_narrativos.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -211,7 +212,7 @@ const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Exemplos de Diálogo">
                 <ul className="pl-5 space-y-2 italic text-indigo-200">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.dialogue_lines?.map((line: string, i: number) => <li key={i}>"{line}"</li>)}
+                    {item.dialogue_lines?.map((line: any, i: number) => <li key={i}>"{line}"</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -241,7 +242,7 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
                         <h5 className="text-sm font-semibold text-gray-200 mt-2 mb-1">Técnicas Notáveis:</h5>
                         <ul className="list-disc pl-5 space-y-1">
                             {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                            {item.habilidades_especiais.variacoes_tecnica.map((tech: string, i: number) => <li key={i}>{tech}</li>)}
+                            {item.habilidades_especiais.variacoes_tecnica.map((tech: any, i: number) => <li key={i}>{tech}</li>)}
                         </ul>
                     </>
                 )}
@@ -258,7 +259,7 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos Narrativos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
+                    {item.ganchos_narrativos.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -267,7 +268,7 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Uso em Cena">
                  <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.uso_em_cena.map((uso: string, i: number) => <li key={i}>{uso}</li>)}
+                    {item.uso_em_cena.map((uso: any, i: number) => <li key={i}>{uso}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -294,7 +295,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Comportamento em Combate">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.comportamento_combate.map((behavior: string, i: number) => <li key={i}>{behavior}</li>)}
+                    {item.comportamento_combate.map((behavior: any, i: number) => <li key={i}>{behavior}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -303,7 +304,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Comportamento Fora de Combate">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.comportamento_fora_combate.map((behavior: string, i: number) => <li key={i}>{behavior}</li>)}
+                    {item.comportamento_fora_combate.map((behavior: any, i: number) => <li key={i}>{behavior}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -312,7 +313,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Fraquezas Únicas">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.fraquezas_unicas.map((weakness: string, i: number) => <li key={i}>{weakness}</li>)}
+                    {item.fraquezas_unicas.map((weakness: any, i: number) => <li key={i}>{weakness}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -321,7 +322,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             <DetailSection title="Troféus / Loot">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.trofeus_loot.map((loot: string, i: number) => <li key={i}>{loot}</li>)}
+                    {item.trofeus_loot.map((loot: any, i: number) => <li key={i}>{loot}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -329,7 +330,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos Narrativos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
+                    {item.ganchos_narrativos.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -338,7 +339,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
 
 const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     <>
-        <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>
+        <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>}
 
         {'plot_threads' in item && item.plot_threads && item.plot_threads.length > 0 && (
             <DetailSection title="Tramas Principais">
@@ -357,7 +358,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             <DetailSection title="Ganchos de Aventura">
                 <ul className="list-disc pl-5 space-y-1">
                     {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.adventure_hooks.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
+                    {item.adventure_hooks.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}

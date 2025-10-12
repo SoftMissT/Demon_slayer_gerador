@@ -13,7 +13,7 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
     const activeFilters: Record<string, any> = {};
 
     const addFilter = (key: string, value: any) => {
-        if (value && value !== 'Aleatória' && value !== 'Nenhuma' && (!Array.isArray(value) || value.length > 0)) {
+        if (value && value !== 'Aleatória' && value !== 'Nenhuma' && value !== '' && (!Array.isArray(value) || value.length > 0)) {
             activeFilters[key] = Array.isArray(value) ? value.join(', ') : value;
         }
     };
@@ -23,13 +23,14 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
     switch (filters.category) {
         case 'Caçador':
             categorySpecificInstructions = 'Gere um Caçador de Demônios completo. A raridade deve ser inferida com base na combinação de origem, classe e habilidades, não um filtro direto. Inclua um acessório distintivo.';
+            addFilter('Era/Estilo', filters.hunterEra);
+            addFilter('País/Cultura', filters.hunterCountry);
+            addFilter('Origem', filters.hunterOrigin);
+            addFilter('Classe (Arquétipo)', filters.hunterArchetype);
+            addFilter('Personalidade', filters.hunterPersonality);
             addFilter('Arma', filters.hunterWeapon);
             addFilter('Respirações', filters.hunterBreathingStyles);
             addFilter('Acessório', filters.hunterAccessory);
-            addFilter('Era/Estilo', filters.hunterEra);
-            addFilter('Personalidade', filters.hunterPersonality);
-            addFilter('Origem', filters.hunterOrigin);
-            addFilter('Classe (Arquétipo)', filters.hunterArchetype);
             break;
         case 'Acessório':
             categorySpecificInstructions = 'Gere um acessório mágico ou amaldiçoado. Descreva sua aparência, poderes e lore.';
@@ -44,6 +45,7 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
             categorySpecificInstructions = 'Gere uma arma única. Se for uma arma Nichirin, descreva a cor da lâmina e o que ela representa.';
             addFilter('Tipo de Arma', filters.weaponType);
             addFilter('Raridade', filters.weaponRarity);
+            addFilter('País/Cultura', filters.weaponCountry);
             addFilter('Cor do Metal', filters.weaponMetalColor);
             addFilter('Era/Estilo', filters.weaponEra);
             break;
@@ -68,12 +70,14 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
             addFilter('Arma Associada', filters.breathingFormWeapon);
             addFilter('Era/Estilo', filters.breathingFormEra);
             addFilter('Tom', filters.breathingFormTone);
-            addFilter('Origem Cultural', filters.breathingFormOrigin);
+            addFilter('Origem do Usuário', filters.breathingFormOrigin);
+            addFilter('País/Cultura', filters.breathingFormCountry);
             addFilter('Arquétipo de Usuário', filters.breathingFormArchetype);
             break;
         case 'Kekkijutsu':
             categorySpecificInstructions = 'Gere uma Arte Demoníaca de Sangue (Kekkijutsu). A raridade não é aplicável; o poder deve ser o foco. Descreva suas técnicas e manifestações de forma criativa.';
             addFilter('Era/Estilo', filters.kekkijutsuEra);
+            addFilter('País/Cultura', filters.kekkijutsuCountry);
             addFilter('Inspiração (Outro Kekkijutsu)', filters.kekkijutsuKekkijutsuInspiration);
             addFilter('Inspiração (Respiração)', filters.kekkijutsuBreathingInspiration);
             addFilter('Inspiração (Arma)', filters.kekkijutsuWeaponInspiration);
@@ -81,15 +85,20 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
         case 'Inimigo/Oni':
             categorySpecificInstructions = 'Gere um Oni. O nível de poder deve ditar sua complexidade, habilidades e ameaça.';
             addFilter('Nível de Poder', filters.oniPowerLevel);
+            addFilter('País/Cultura', filters.oniCountry);
+            addFilter('Personalidade', filters.oniPersonality);
             addFilter('Inspiração (Kekkijutsu)', filters.oniInspirationKekkijutsu);
             addFilter('Inspiração (Respiração)', filters.oniInspirationBreathing);
             addFilter('Arma', filters.oniWeapon);
             break;
         case 'NPC':
-             categorySpecificInstructions = 'Gere um NPC (Personagem Não-Jogador). Detalhe sua aparência, personalidade, motivações e segredos.';
-             addFilter('Origem', filters.npcOrigin);
+             categorySpecificInstructions = 'Gere um NPC (Personagem Não-Jogador). Detalhe sua aparência, personalidade, motivações e segredos. Se uma arma for especificada, integre-a de forma que faça sentido com a profissão do NPC.';
              addFilter('Era', filters.npcEra);
+             addFilter('País/Cultura', filters.npcCountry);
+             addFilter('Origem', filters.npcOrigin);
              addFilter('Profissão', filters.npcProfession);
+             addFilter('Personalidade', filters.npcPersonality);
+             addFilter('Arma', filters.npcWeapon);
              break;
         default:
             addFilter('Categoria', filters.category);
