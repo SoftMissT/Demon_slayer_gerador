@@ -3,37 +3,48 @@ import { StarIcon } from './icons/StarIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
 import { ShareButton } from './ShareButton';
 import { HelpIcon } from './icons/HelpIcon';
+import { InfoIcon } from './icons/InfoIcon';
+import { motion } from 'framer-motion';
 
 interface HeaderProps {
   onAboutClick: () => void;
   onFavoritesClick: () => void;
   onHistoryClick: () => void;
+  onHowItWorksClick: () => void;
   activeView: 'forge' | 'prompt';
   onViewChange: (view: 'forge' | 'prompt') => void;
   favoritesCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, onHistoryClick, activeView, onViewChange, favoritesCount }) => {
-    
-    const getButtonClasses = (view: 'forge' | 'prompt') => {
-        const base = "px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200";
-        if (activeView === view) {
-            return `${base} header-button-active`; // Use a generic class for theme-based styling
-        }
-        return `${base} bg-gray-700 text-gray-300 hover:bg-gray-600`;
-    }
+const TABS = [
+    { id: 'forge', label: 'Forja' },
+    { id: 'prompt', label: 'Alquimia' },
+];
 
+export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, onHistoryClick, onHowItWorksClick, activeView, onViewChange, favoritesCount }) => {
+    
   return (
-    <header className="main-header py-8 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm flex items-center sticky top-0 z-40">
+    <header className="main-header py-4 px-6 md:px-8 flex items-center sticky top-0 z-40">
       {/* Left section for alignment */}
       <div className="flex-1 flex justify-start">
-        <nav className="hidden md:flex items-center gap-2 p-1 bg-gray-800 rounded-lg flex-shrink-0">
-          <button onClick={() => onViewChange('forge')} className={getButtonClasses('forge')}>
-              Forja
-          </button>
-          <button onClick={() => onViewChange('prompt')} className={getButtonClasses('prompt')}>
-              Alquimia
-          </button>
+        <nav className="hidden md:flex items-center tab-switcher flex-shrink-0">
+          {TABS.map(tab => (
+            <button 
+                key={tab.id} 
+                onClick={() => onViewChange(tab.id as 'forge' | 'prompt')} 
+                className={`tab-switcher-button ${activeView === tab.id ? 'active' : ''}`}
+            >
+              {activeView === tab.id && (
+                <motion.div
+                    layoutId="active-pill"
+                    className="active-indicator"
+                    style={{ borderRadius: 6 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
+            </button>
+          ))}
         </nav>
       </div>
       
@@ -52,6 +63,10 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, 
       <div className="flex-1 flex justify-end">
         <div className="flex items-center gap-2">
           <ShareButton />
+          <button className="button" onClick={onHowItWorksClick}>
+              <InfoIcon className="w-5 h-5" />
+              <span>Passo-a-Passo</span>
+          </button>
           <button className="button relative" onClick={onFavoritesClick}>
               <StarIcon className="w-5 h-5" />
               <span>Favoritos</span>

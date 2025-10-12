@@ -29,52 +29,7 @@ body {
   @apply text-white antialiased;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-        circle farthest-side at 0% 50%,
-        #282828 23.5%,
-        rgba(255, 170, 0, 0) 0
-      )
-      21px 30px,
-    radial-gradient(
-        circle farthest-side at 0% 50%,
-        #2c3539 24%,
-        rgba(240, 166, 17, 0) 0
-      )
-      19px 30px,
-    linear-gradient(
-        #282828 14%,
-        rgba(240, 166, 17, 0) 0,
-        rgba(240, 166, 17, 0) 85%,
-        #282828 0
-      )
-      0 0,
-    linear-gradient(
-        150deg,
-        #282828 24%,
-        #2c3539 0,
-        #2c3539 26%,
-        rgba(240, 166, 17, 0) 0,
-        rgba(240, 166, 17, 0) 74%,
-        #2c3539 0,
-        #2c3539 76%,
-        #282828 0
-      )
-      0 0,
-    linear-gradient(
-        30deg,
-        #282828 24%,
-        #2c3539 0,
-        #2c3539 26%,
-        rgba(240, 166, 17, 0) 0,
-        rgba(240, 166, 17, 0) 74%,
-        #2c3539 0,
-        #2c3539 76%,
-        #282828 0
-      )
-      0 0,
-    linear-gradient(90deg, #2c3539 2%, #282828 0, #282828 98%, #2c3539 0%) 0 0
-      #282828;
-  background-size: 40px 60px;
+  background-color: #121212;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -154,6 +109,52 @@ body {
     --forge-text-primary: #F5F5F5;
     --forge-border: #444;
     --forge-panel-bg: rgba(26, 26, 26, 0.7);
+    background: radial-gradient(
+        circle farthest-side at 0% 50%,
+        #282828 23.5%,
+        rgba(255, 170, 0, 0) 0
+      )
+      21px 30px,
+    radial-gradient(
+        circle farthest-side at 0% 50%,
+        #2c3539 24%,
+        rgba(240, 166, 17, 0) 0
+      )
+      19px 30px,
+    linear-gradient(
+        #282828 14%,
+        rgba(240, 166, 17, 0) 0,
+        rgba(240, 166, 17, 0) 85%,
+        #282828 0
+      )
+      0 0,
+    linear-gradient(
+        150deg,
+        #282828 24%,
+        #2c3539 0,
+        #2c3539 26%,
+        rgba(240, 166, 17, 0) 0,
+        rgba(240, 166, 17, 0) 74%,
+        #2c3539 0,
+        #2c3539 76%,
+        #282828 0
+      )
+      0 0,
+    linear-gradient(
+        30deg,
+        #282828 24%,
+        #2c3539 0,
+        #2c3539 26%,
+        rgba(240, 166, 17, 0) 0,
+        rgba(240, 166, 17, 0) 74%,
+        #2c3539 0,
+        #2c3539 76%,
+        #282828 0
+      )
+      0 0,
+    linear-gradient(90deg, #2c3539 2%, #282828 0, #282828 98%, #2c3539 0%) 0 0
+      #282828;
+  background-size: 40px 60px;
 }
 
 @keyframes glow-pulse {
@@ -163,20 +164,23 @@ body {
 
 /* Thematic Header */
 .forge-theme .main-header {
-    background: linear-gradient(135deg, rgba(42, 12, 12, 0.8) 0%, rgba(26, 26, 26, 0.8) 50%, rgba(12, 12, 42, 0.8) 100%);
-    border-bottom: 3px solid var(--forge-highlight-orange);
+    background: 
+        linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 0.9)),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    border-bottom: 2px solid var(--forge-highlight-orange);
     position: relative;
     overflow: hidden;
 }
 
 .forge-theme .header-glow {
     position: absolute;
-    bottom: 0;
+    bottom: -2px;
     left: 0;
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, var(--forge-highlight-orange), var(--forge-highlight-gold), var(--forge-highlight-orange));
     animation: glow-pulse 2s infinite;
+    z-index: 1;
 }
 
 .forge-theme .header-logo-title h1 {
@@ -296,19 +300,20 @@ body {
     box-shadow: 0 0 30px var(--forge-highlight-gold), 0 0 50px var(--forge-highlight-orange), inset 0 0 15px var(--forge-highlight-gold) !important;
 }
 
-.forge-theme .header-button-active {
-    background-color: var(--forge-highlight-orange) !important;
-    color: var(--forge-bg) !important;
-    font-weight: bold;
-    box-shadow: 0 0 10px var(--forge-highlight-orange);
-}
-
 
 /* --- ALCHEMIST THEME --- */
+@keyframes potion-background {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 .alchemist-theme {
     position: relative;
     overflow: hidden;
     color: #E6E6FA; /* Lavanda suave */
+    background: linear-gradient(135deg, var(--deep-purple), var(--void-black), var(--dark-blue));
+    background-size: 400% 400%;
+    animation: potion-background 20s ease infinite;
 }
 
 /* Animated Bubbles Background */
@@ -316,14 +321,6 @@ body {
   0% { transform: translateY(100%) scale(0.5); opacity: 0; }
   50% { opacity: 0.8; }
   100% { transform: translateY(-100%) scale(1); opacity: 0; }
-}
-.alchemist-theme .bubble {
-  position: absolute;
-  bottom: -50px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--magic-pink), transparent 60%);
-  animation: rise 15s infinite ease-in;
-  filter: drop-shadow(0 0 5px var(--magic-pink));
 }
 
 /* Header with Magic Flow */
@@ -333,21 +330,22 @@ body {
   100% { background-position: 0% 50%; }
 }
 .alchemist-theme .main-header {
-    background: linear-gradient(135deg, rgba(45, 27, 105, 0.8) 0%, rgba(10, 10, 20, 0.8) 50%, rgba(26, 31, 44, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(45, 27, 105, 0.8) 0%, rgba(10, 10, 20, 0.9) 50%, rgba(26, 31, 44, 0.8) 100%);
     box-shadow: 0 4px 30px -5px rgba(138, 43, 226, 0.6);
     border-bottom: 2px solid transparent;
     position: relative;
 }
-.alchemist-theme .main-header::after {
+.alchemist-theme .header-glow {
     content: '';
     position: absolute;
     bottom: -2px;
     left: 0;
     width: 100%;
-    height: 2px;
+    height: 3px;
     background: linear-gradient(90deg, var(--potion-purple), var(--crystal-blue), var(--elixir-green), var(--alchemy-gold), var(--potion-purple));
     background-size: 200% 100%;
     animation: magic-flow 8s linear infinite;
+    z-index: 1;
 }
 
 .alchemist-theme .header-logo-title h1 {
@@ -436,10 +434,29 @@ body {
     animation: float 4s ease-in-out infinite;
 }
 
-/* Active Header Button */
-.alchemist-theme .header-button-active {
-    background: var(--potion-purple) !important;
-    color: white !important;
+
+/* --- TAB SWITCHER --- */
+.tab-switcher {
+    @apply relative flex items-center gap-2 p-1 bg-gray-800/80 rounded-lg;
+}
+.tab-switcher-button {
+    @apply relative z-10 px-4 py-1.5 rounded-md font-semibold text-sm transition-colors duration-300;
+}
+.tab-switcher-button:not(.active) {
+    @apply text-gray-300 hover:text-white;
+}
+.tab-switcher-button.active {
+    @apply text-white;
+}
+.active-indicator {
+    @apply absolute inset-0 rounded-md z-0;
+}
+.forge-theme .active-indicator {
+    background-color: var(--forge-highlight-orange);
+    box-shadow: 0 0 10px var(--forge-highlight-orange);
+}
+.alchemist-theme .active-indicator {
+    background: var(--potion-purple);
     box-shadow: 0 0 10px var(--potion-purple);
 }
 
@@ -533,64 +550,65 @@ body {
     }
 }
 
-/* --- Custom Reset Button --- */
-.reset-button-flex {
+/* --- Special Reset Button --- */
+/* From Uiverse.io by gharsh11032000, adapted for Kimetsu Forge */ 
+.special-reset-button {
+  position: relative;
+  width: auto;
+  height: 40px;
+  background-color: #000;
   display: flex;
   align-items: center;
-  gap: 5px;
-}
-
-.reset-button-outer {
-  padding: 8px 16px;
+  color: white;
+  flex-direction: row;
+  justify-content: center;
   border: none;
-  font-size: 0.875rem;
+  padding: 0 16px;
+  gap: 8px;
+  border-radius: 8px;
   cursor: pointer;
-  position: relative;
-  background: linear-gradient(90deg, #5bfcc4, #f593e4, #71a4f0);
-  border-radius: 12px;
-  color: #fff;
-  transition: all 0.3s ease;
-  box-shadow:
-    inset 0px 0px 5px #ffffffa9,
-    inset 0px 25px 20px #000,
-    0px 3px 8px #000000cc;
-  text-shadow: 1px 1px 1px #000;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
-.reset-button-outer::before {
-  content: "";
+.special-reset-button::before {
+  content: '';
   position: absolute;
   inset: 0;
+  left: -4px;
+  top: -1px;
   margin: auto;
-  border-radius: 12px;
-  filter: blur(0);
+  width: calc(100% + 8px);
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100% );
+  z-index: -10;
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.special-reset-button::after {
+  content: "";
   z-index: -1;
-  box-shadow: none;
-  background: conic-gradient(
-    #00000000 80deg,
-    #40baf7,
-    #f34ad7,
-    #5bfcc4,
-    #00000000 280deg
-  );
-  transition: all 0.3s ease;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100% );
+  transform: translate3d(0, 0, 0) scale(0.95);
+  filter: blur(20px);
 }
 
-.reset-button-outer:hover::before {
-  filter: blur(15px);
+.special-reset-button:hover::after {
+  filter: blur(30px);
 }
 
-.reset-button-outer:active::before {
-  filter: blur(5px);
-  transform: translateY(1px);
+.special-reset-button:hover::before {
+  transform: rotate(-180deg);
 }
 
-.reset-button-outer:active {
-  box-shadow:
-    inset 0px 0px 5px #ffffffa9,
-    inset 0px 25px 20px #000;
-  margin-top: 2px;
+.special-reset-button:active::before {
+  scale: 0.7;
 }
+
 
 /* --- SHARE BUTTON --- */
 .button-content {
@@ -747,4 +765,54 @@ body {
 
 .button:active::before {
   scale: 0.7;
+}
+
+/* --- Custom UI Switch --- */
+/* From Uiverse.io by gharsh11032000, adapted for Kimetsu Forge */ 
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 3.5em;
+  height: 2em;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #374151; /* gray-700 */
+  border: 2px solid #4B5563; /* gray-600 */
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.4em;
+  width: 1.4em;
+  left: 0.2em;
+  bottom: 0.2em;
+  background-color: white;
+  border-radius: inherit;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.switch input:checked + .slider {
+  background-color: #4f46e5; /* indigo-600 */
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.7); /* indigo-500 glow */
+  border: 2px solid #6366f1; /* indigo-500 */
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.5em);
 }

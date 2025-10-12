@@ -107,63 +107,65 @@ export const PromptEngineeringPanel: React.FC = () => {
     };
 
     return (
-        <div className="alquimia-layout-wrapper relative">
+        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
              <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 {bubbles}
             </div>
             
-            {/* Top Configuration Grid */}
-            <div className="alquimia-top-grid">
-                <Card className="p-6 parameter-card prompt-editor-block">
-                    <div className="space-y-4 h-full flex flex-col">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
-                            <textarea
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                                placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white resize-none flex-grow"
-                            />
+            {/* Left Column: Controls & Prompt Results */}
+            <div className="flex flex-col gap-4">
+                {/* Configuration Grid */}
+                <div className="alquimia-top-grid">
+                    <Card className="p-6 parameter-card prompt-editor-block">
+                        <h3 className="text-lg font-bold text-white font-gangofthree mb-3">Caldeirão</h3>
+                        <div className="space-y-4 h-full flex flex-col">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
+                                <textarea
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                    placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white resize-none flex-grow"
+                                />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
+                                <input
+                                    type="text"
+                                    value={negativePrompt}
+                                    onChange={(e) => setNegativePrompt(e.target.value)}
+                                    placeholder="Ex: texto, blur, baixa qualidade, cartoon"
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+                                />
+                            </div>
                         </div>
-                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
-                            <input
-                                type="text"
-                                value={negativePrompt}
-                                onChange={(e) => setNegativePrompt(e.target.value)}
-                                placeholder="Ex: texto, blur, baixa qualidade, cartoon"
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
-                            />
-                        </div>
-                    </div>
-                </Card>
-                <Card className="p-6 parameter-card">
-                    <MidjourneyParameters 
-                        params={mjParams} 
-                        onParamsChange={setMjParams} 
-                        enabled={mjParamsEnabled}
-                        onEnabledChange={setMjParamsEnabled}
-                    />
-                </Card>
-                <Card className="p-6 parameter-card">
-                    <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
-                </Card>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4 flex-shrink-0">
-                <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
-                    <RefreshIcon className="w-5 h-5" /> Resetar
-                </Button>
-                <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()} className="alchemist-button">
-                    <PotionIcon className="w-5 h-5" />
-                    {isLoading ? 'Gerando...' : 'Gerar Prompts'}
-                </Button>
-            </div>
+                    </Card>
+                    <Card className="p-6 parameter-card">
+                        <MidjourneyParameters 
+                            params={mjParams} 
+                            onParamsChange={setMjParams} 
+                            enabled={mjParamsEnabled}
+                            onEnabledChange={setMjParamsEnabled}
+                        />
+                    </Card>
+                    <Card className="p-6 parameter-card">
+                        <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
+                    </Card>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-4 flex-shrink-0">
+                    <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
+                        <RefreshIcon className="w-5 h-5" /> Resetar
+                    </Button>
+                    <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()} className="alchemist-button">
+                        <PotionIcon className="w-5 h-5" />
+                        {isLoading ? 'Gerando...' : 'Gerar Prompts'}
+                    </Button>
+                </div>
 
-            {/* Results Section */}
-            <div className="flex-grow min-h-0">
-                {isLoading && (
+                {/* Prompt Results */}
+                {isLoading && !result && (
                     <div className="flex justify-center items-center h-full">
                         <AlchemyLoadingIndicator />
                     </div>
@@ -171,13 +173,21 @@ export const PromptEngineeringPanel: React.FC = () => {
                 
                 {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
 
-                {result && !isLoading && (
-                    <div className="animate-fade-in-up h-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {result && (
+                    <div className="animate-fade-in-up space-y-4">
                         <PromptCard model="midjourney" prompt={result.midjourneyPrompt} />
                         <PromptCard model="gpt" prompt={result.gptPrompt} />
-                        <ImageGenerationPanel initialPrompt={result.gptPrompt} />
                     </div>
                 )}
+            </div>
+
+            {/* Right Column: Image Generation */}
+            <div className="h-full">
+                <ImageGenerationPanel 
+                    initialPrompt={result?.gptPrompt || ''} 
+                    mjParams={mjParams} 
+                    gptParams={gptParams} 
+                />
             </div>
         </div>
     );

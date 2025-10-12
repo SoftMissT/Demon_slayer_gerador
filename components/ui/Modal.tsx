@@ -6,9 +6,10 @@ interface ModalProps {
   title?: string;
   children: React.ReactNode;
   variant?: 'center' | 'drawer-left';
+  panelClassName?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, variant = 'center' }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, variant = 'center', panelClassName = '' }) => {
   const [isRendered, setIsRendered] = useState(isOpen);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         className={`${containerClasses}`}
       >
         <div 
-            className={`${panelBaseClasses} ${panelVariantClasses[variant]}`}
+            className={`${panelBaseClasses} ${panelVariantClasses[variant]} ${panelClassName}`}
             onClick={(e) => e.stopPropagation()}
         >
             {title && (

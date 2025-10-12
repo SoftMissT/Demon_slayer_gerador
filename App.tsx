@@ -5,10 +5,12 @@ import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import { HowItWorksModal } from './components/HowItWorksModal';
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
     const [isAboutOpen, setIsAboutOpen] = useState(false);
+    const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
     
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -16,15 +18,10 @@ const App: React.FC = () => {
     const [favoritesCount, setFavoritesCount] = useState(0);
 
     useEffect(() => {
-        // This still applies non-background styles from themes
         document.body.classList.remove('forge-theme', 'alchemist-theme');
         const newTheme = activeView === 'prompt' ? 'alchemist-theme' : 'forge-theme';
         document.body.classList.add(newTheme);
         setTheme(newTheme);
-        
-        return () => {
-            document.body.classList.remove('forge-theme', 'alchemist-theme');
-        }
     }, [activeView]);
     
     return (
@@ -36,16 +33,17 @@ const App: React.FC = () => {
                     onAboutClick={() => setIsAboutOpen(true)}
                     onFavoritesClick={() => setIsFavoritesOpen(true)}
                     onHistoryClick={() => setIsHistoryOpen(true)}
+                    onHowItWorksClick={() => setIsHowItWorksOpen(true)}
                     favoritesCount={favoritesCount}
                 />
-                <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6">
+                <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6 overflow-hidden">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeView}
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -15 }}
-                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
                             className="flex-grow flex flex-col py-6"
                         >
                             {activeView === 'forge' ? (
@@ -64,6 +62,7 @@ const App: React.FC = () => {
                 </main>
                 <Footer onAboutClick={() => setIsAboutOpen(true)} />
                 <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+                <HowItWorksModal isOpen={isHowItWorksOpen} onClose={() => setIsHowItWorksOpen(false)} />
             </div>
         </>
     );

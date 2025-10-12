@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { PromptGenerationResult } from '../types';
 import { PromptCard } from './PromptCard';

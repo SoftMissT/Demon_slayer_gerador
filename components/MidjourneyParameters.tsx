@@ -5,6 +5,7 @@ import { Select } from './ui/Select';
 import { Slider } from './ui/Slider';
 import { Checkbox } from './ui/Checkbox';
 import { Button } from './ui/Button';
+import { Switch } from './ui/Switch';
 
 interface MidjourneyParametersProps {
     params: MidjourneyParametersType;
@@ -54,11 +55,14 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                  <h3 className="text-lg font-bold text-white font-gangofthree">Parâmetros Midjourney</h3>
-                 <Checkbox 
-                    label="Ativar"
-                    checked={enabled}
-                    onChange={(e) => onEnabledChange(e.target.checked)}
-                 />
+                 <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-300">Ativar</span>
+                    <Switch
+                        checked={enabled}
+                        onChange={(e) => onEnabledChange(e.target.checked)}
+                        aria-label="Ativar parâmetros do Midjourney"
+                    />
+                </div>
             </div>
              <p className="text-sm text-gray-400">
                 Ajuste os parâmetros para controlar o resultado no Midjourney.

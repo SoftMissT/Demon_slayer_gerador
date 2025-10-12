@@ -15,20 +15,25 @@ interface FavoritesModalProps {
 
 const FavoritesModalComponent: React.FC<FavoritesModalProps> = ({ isOpen, onClose, favorites, onSelect, onToggleFavorite }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Itens Favoritos">
-      <div className="max-h-[70vh] overflow-y-auto p-4 -m-6">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title="ITENS FAVORITOS"
+      panelClassName="forge-panel !p-0"
+    >
+      <div className="max-h-[70vh] overflow-y-auto p-6">
         {favorites.length === 0 ? (
           <p className="text-gray-500 text-center py-8">Você ainda não favoritou nenhum item.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[...favorites].reverse().map(item => (
-              <div key={item.id} className="bg-gray-700 p-3 rounded-lg flex items-center justify-between gap-4 transition-colors hover:bg-gray-600">
+              <div key={item.id} className="bg-gray-900/50 p-3 rounded-lg flex items-center justify-between gap-4 transition-all duration-200 hover:bg-gray-800/70 border border-gray-700 hover:border-indigo-500 hover:scale-105">
                 <div className="flex-grow overflow-hidden">
                   <p className="font-bold truncate text-white">{('title' in item && item.title) || item.nome}</p>
                   <p className="text-sm text-indigo-400">{item.categoria}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button variant="secondary" onClick={() => onSelect(item)}>Ver</Button>
+                  <Button variant="secondary" size="sm" onClick={() => onSelect(item)}>Ver</Button>
                   <button 
                     onClick={() => onToggleFavorite(item)} 
                     className="p-2 text-yellow-400 hover:text-yellow-500 transition-colors"

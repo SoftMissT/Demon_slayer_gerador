@@ -7,16 +7,21 @@ import { PotionIcon } from './icons/PotionIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { Tooltip } from './ui/Tooltip';
+import type { MidjourneyParameters, GptParameters } from '../types';
+import { ImagePreviewModal } from './ImagePreviewModal';
 
 interface ImageGenerationPanelProps {
     initialPrompt: string;
+    mjParams: MidjourneyParameters;
+    gptParams: GptParameters;
 }
 
-export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({ initialPrompt }) => {
+export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({ initialPrompt, mjParams, gptParams }) => {
     const [prompt, setPrompt] = useState(initialPrompt);
     const [imageData, setImageData] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     useEffect(() => {
         setPrompt(initialPrompt);
@@ -30,7 +35,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({ init
             const response = await fetch('/api/generateImage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ prompt, mjParams, gptParams }),
             });
 
             if (!response.ok) {
@@ -48,9 +53,10 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({ init
     };
 
     return (
+        <>
         <Card className="prompt-card flex flex-col !p-4 h-full">
             <div className="flex justify-between items-center mb-3">
-                <h3 className="text-lg font-bold text-white font-gangofthree">Gerador de Imagem</h3>
+                <h3 className="text-lg font-bold text-white font-gangofthree">Gerador de Imagem (Gemini)</h3>
             </div>
             
             <div className="flex-grow flex flex-col justify-between space-y-4">
@@ -62,13 +68,15 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({ init
                             <img 
                                 src={`data:image/jpeg;base64,${imageData}`} 
                                 alt="Imagem gerada pela IA" 
-                                className="object-contain w-full h-full"
+                                className="object-contain w-full h-full cursor-pointer"
+                                onClick={() => setIsPreviewOpen(true)}
                             />
                             <Tooltip text="Baixar Imagem">
                                 <a 
                                     href={`data:image/jpeg;base64,${imageData}`} 
                                     download={`kimetsu-forge-${Date.now()}.jpg`}
                                     className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     <DownloadIcon className="w-5 h-5" />
                                 </a>
@@ -103,5 +111,11 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({ init
             
              {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
         </Card>
+        <ImagePreviewModal 
+            isOpen={isPreviewOpen} 
+            onClose={() => setIsPreviewOpen(false)} 
+            imageData={imageData}
+        />
+        </>
     );
 };
