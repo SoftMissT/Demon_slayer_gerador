@@ -1,103 +1,68 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
-import { FavoritesModal } from './components/FavoritesModal';
-import { HistoryModal } from './components/HistoryModal';
-import { ErrorDisplay } from './components/ui/ErrorDisplay';
-import { MatrixBackground } from './components/MatrixBackground';
-import useLocalStorage from './hooks/useLocalStorage';
-import type { GeneratedItem } from './types';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
-    const [isAboutModalOpen, setAboutModalOpen] = useState(false);
-    const [isFavoritesModalOpen, setFavoritesModalOpen] = useState(false);
-    const [isHistoryModalOpen, setHistoryModalOpen] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
-    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
-
-    const handleError = useCallback((message: string | null) => {
-        setError(message);
-        if (message) {
-            setTimeout(() => setError(null), 8000);
-        }
-    }, []);
-
-    const handleToggleFavorite = useCallback((item: GeneratedItem) => {
-        setFavorites(prev =>
-            prev.some(fav => fav.id === item.id)
-                ? prev.filter(fav => fav.id !== item.id)
-                : [...prev, item]
-        );
-    }, [setFavorites]);
+    const [isAboutOpen, setIsAboutOpen] = useState(false);
     
-    const handleAddToHistory = useCallback((newItems: GeneratedItem[]) => {
-        setHistory(prev => [...newItems, ...prev]);
-    }, [setHistory]);
+    const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [theme, setTheme] = useState('forge-theme');
 
-    const handleDeleteFromHistory = useCallback((itemId: string) => {
-        setHistory(prev => prev.filter(item => item.id !== itemId));
-    }, [setHistory]);
-
-    const handleClearHistory = useCallback(() => {
-        if (window.confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
-            setHistory([]);
+    useEffect(() => {
+        // This still applies non-background styles from themes
+        document.body.classList.remove('forge-theme', 'alchemist-theme');
+        const newTheme = activeView === 'prompt' ? 'alchemist-theme' : 'forge-theme';
+        document.body.classList.add(newTheme);
+        setTheme(newTheme);
+        
+        return () => {
+            document.body.classList.remove('forge-theme', 'alchemist-theme');
         }
-    }, [setHistory]);
-
-    const updateItemInStorages = (updatedItem: GeneratedItem) => {
-        setFavorites(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
-        setHistory(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
-    };
-
+    }, [activeView]);
+    
     return (
-        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100 font-sans">
-            <MatrixBackground />
-            <Header
-                onAboutClick={() => setAboutModalOpen(true)}
-                onFavoritesClick={() => setFavoritesModalOpen(true)}
-                onHistoryClick={() => setHistoryModalOpen(true)}
-                activeView={activeView}
-                onViewChange={setActiveView}
-            />
-            <main className="flex-grow container mx-auto px-4 md:px-6 py-8">
-                {activeView === 'forge' ? (
-                    <ForgeInterface
-                        favorites={favorites}
-                        onToggleFavorite={handleToggleFavorite}
-                        onAddToHistory={handleAddToHistory}
-                        onError={handleError}
-                        onUpdateItem={updateItemInStorages}
-                    />
-                ) : (
-                    <PromptEngineeringPanel onError={handleError} />
-                )}
-            </main>
-            <Footer onAboutClick={() => setAboutModalOpen(true)} />
-
-            <AboutModal isOpen={isAboutModalOpen} onClose={() => setAboutModalOpen(false)} />
-            <FavoritesModal
-                isOpen={isFavoritesModalOpen}
-                onClose={() => setFavoritesModalOpen(false)}
-                favorites={favorites}
-                onSelect={(item) => { /* This is handled inside ForgeInterface which controls the selected item state */ }}
-                onToggleFavorite={handleToggleFavorite}
-            />
-            <HistoryModal
-                isOpen={isHistoryModalOpen}
-                onClose={() => setHistoryModalOpen(false)}
-                history={history}
-                onSelect={(item) => { /* This is handled inside ForgeInterface which controls the selected item state */ }}
-                onDelete={handleDeleteFromHistory}
-                onClear={handleClearHistory}
-            />
-            <ErrorDisplay message={error} onDismiss={() => setError(null)} />
-        </div>
+        <>
+            <div className={`relative z-10 flex flex-col min-h-screen bg-transparent text-white font-sans kimetsu-forge-app ${theme}`}>
+                <Header
+                    activeView={activeView}
+                    onViewChange={setActiveView}
+                    onAboutClick={() => setIsAboutOpen(true)}
+                    onFavoritesClick={() => setIsFavoritesOpen(true)}
+                    onHistoryClick={() => setIsHistoryOpen(true)}
+                />
+                <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeView}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="flex-grow flex flex-col py-6"
+                        >
+                            {activeView === 'forge' ? (
+                                <ForgeInterface
+                                    isFavoritesOpen={isFavoritesOpen}
+                                    onFavoritesClose={() => setIsFavoritesOpen(false)}
+                                    isHistoryOpen={isHistoryOpen}
+                                    onHistoryClose={() => setIsHistoryOpen(false)}
+                                />
+                            ) : (
+                                <PromptEngineeringPanel />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
+                </main>
+                <Footer onAboutClick={() => setIsAboutOpen(true)} />
+                <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+            </div>
+        </>
     );
 };
 
