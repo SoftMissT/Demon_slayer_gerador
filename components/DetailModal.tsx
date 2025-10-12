@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Modal } from './ui/Modal';
 // FIX: Corrected import path for DetailPanel component.
@@ -16,7 +15,7 @@ interface DetailModalProps {
   onUpdate: (item: GeneratedItem) => void;
 }
 
-export const DetailModal: React.FC<DetailModalProps> = ({
+const DetailModalComponent: React.FC<DetailModalProps> = ({
   isOpen,
   onClose,
   item,
@@ -32,3 +31,5 @@ export const DetailModal: React.FC<DetailModalProps> = ({
     </Modal>
   );
 };
+
+export const DetailModal = React.memo(DetailModalComponent);

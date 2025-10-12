@@ -76,7 +76,7 @@ const HistoryItem: React.FC<{
 };
 
 
-export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, history, onSelect, onDelete, onClear }) => {
+const HistoryModalComponent: React.FC<HistoryModalProps> = ({ isOpen, onClose, history, onSelect, onDelete, onClear }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Histórico de Gerações">
         <div className="flex justify-between items-center mb-4">
@@ -102,3 +102,5 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
     </Modal>
   );
 };
+
+export const HistoryModal = React.memo(HistoryModalComponent);

@@ -6,9 +6,9 @@ import { RefreshIcon } from './icons/RefreshIcon';
 import { MidjourneyParameters } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
 import { PromptResultDisplay } from './PromptResultDisplay';
-import { LoadingIndicator } from './LoadingIndicator';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import type { MidjourneyParameters as MidjourneyParametersType, GptParameters, PromptGenerationResult } from '../types';
+import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
 
 const INITIAL_MJ_PARAMS: MidjourneyParametersType = {
     aspectRatio: { active: false, value: '1:1' },
@@ -90,66 +90,71 @@ export const PromptEngineeringPanel: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="p-6 lg:col-span-2">
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
-                            <textarea
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                                placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white h-24"
-                            />
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {/* Coluna de Entradas Principais e Ações */}
+                <div className="flex flex-col gap-6">
+                    <Card className="p-6">
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
+                                <textarea
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                    placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white h-48 resize-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
+                                <input
+                                    type="text"
+                                    value={negativePrompt}
+                                    onChange={(e) => setNegativePrompt(e.target.value)}
+                                    placeholder="Ex: texto, blur, baixa qualidade, cartoon"
+                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
-                            <input
-                                type="text"
-                                value={negativePrompt}
-                                onChange={(e) => setNegativePrompt(e.target.value)}
-                                placeholder="Ex: texto, blur, baixa qualidade, cartoon"
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
-                            />
-                        </div>
+                    </Card>
+                    <div className="flex justify-end gap-4">
+                        <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
+                            <RefreshIcon className="w-5 h-5" /> Resetar
+                        </Button>
+                        <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()}>
+                            <SparklesIcon className="w-5 h-5" />
+                            {isLoading ? 'Gerando...' : 'Gerar Prompts'}
+                        </Button>
                     </div>
-                </Card>
+                </div>
                 
-                <Card className="p-6">
-                    <MidjourneyParameters 
-                        params={mjParams} 
-                        onParamsChange={setMjParams} 
-                        enabled={mjParamsEnabled}
-                        onEnabledChange={setMjParamsEnabled}
-                    />
-                </Card>
-                
-                <Card className="p-6">
-                    <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
-                </Card>
-            </div>
-
-            <div className="flex justify-end gap-4">
-                <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
-                    <RefreshIcon className="w-5 h-5" /> Resetar
-                </Button>
-                <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()}>
-                    <SparklesIcon className="w-5 h-5" />
-                    {isLoading ? 'Gerando...' : 'Gerar Prompts'}
-                </Button>
+                {/* Coluna de Parâmetros */}
+                <div className="space-y-6">
+                    <Card className="p-6">
+                        <MidjourneyParameters 
+                            params={mjParams} 
+                            onParamsChange={setMjParams} 
+                            enabled={mjParamsEnabled}
+                            onEnabledChange={setMjParamsEnabled}
+                        />
+                    </Card>
+                    
+                    <Card className="p-6">
+                        <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
+                    </Card>
+                </div>
             </div>
 
             {isLoading && (
-                 <div className="flex justify-center mt-8">
-                    <LoadingIndicator text="Engenharia de Prompt em andamento..." />
+                 <div className="flex justify-center pt-8">
+                    <AlchemyLoadingIndicator />
                 </div>
             )}
             
             {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
 
             {result && !isLoading && (
-                 <div className="animate-fade-in-up mt-8">
+                 <div className="animate-fade-in-up mt-2">
                     <PromptResultDisplay result={result} />
                 </div>
             )}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
-import { FilterPanel } from './components/FilterPanel';
 import { ResultsPanel } from './components/ResultsPanel';
 import { Footer } from './components/Footer';
 import { AboutModal } from './components/AboutModal';
@@ -13,6 +12,7 @@ import type { GeneratedItem, FilterState } from './types';
 import { generateContent } from './services/geminiService';
 import useLocalStorage from './hooks/useLocalStorage';
 import { INITIAL_FILTERS } from './constants';
+import { ForgeInterface } from './components/ForgeInterface';
 
 const App: React.FC = () => {
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
@@ -50,7 +50,9 @@ const App: React.FC = () => {
 
             if (newItems.length > 0) {
                 setSelectedItem(newItems[0]);
-                setDetailModalOpen(true);
+                if (window.innerWidth < 1024) { // On smaller screens, open modal for better view
+                    setDetailModalOpen(true);
+                }
             }
         } catch (err: any) {
             setError(err.message || 'An unknown error occurred.');
@@ -60,61 +62,74 @@ const App: React.FC = () => {
     }, [filters, selectedItem, setHistory]);
 
 
-    const handleGenerateVariant = (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
+    const handleGenerateVariant = useCallback((item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
         const promptModifier = `Gere uma variação deste item com uma abordagem mais ${variantType}. Mantenha o conceito central, mas altere detalhes, habilidades ou a lore para refletir a nova abordagem.\n\nItem Original:\n${JSON.stringify(item)}`;
         setSelectedItem(item);
         handleGenerateContent(1, promptModifier);
-    };
+    }, [handleGenerateContent]);
 
 
-    const handleToggleFavorite = (item: GeneratedItem) => {
+    const handleToggleFavorite = useCallback((item: GeneratedItem) => {
         setFavorites(prev => 
             prev.some(fav => fav.id === item.id)
             ? prev.filter(fav => fav.id !== item.id)
             : [item, ...prev]
         );
-    };
+    }, [setFavorites]);
 
-    const updateItemInState = (updater: React.Dispatch<React.SetStateAction<GeneratedItem[]>>, updatedItem: GeneratedItem) => {
-        updater(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
-    };
 
-    const handleUpdateItem = (updatedItem: GeneratedItem) => {
-        updateItemInState(setGeneratedItems, updatedItem);
-        updateItemInState(setFavorites, updatedItem);
-        updateItemInState(setHistory, updatedItem);
+    const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
+        const updateList = (prev: GeneratedItem[]) => prev.map(i => i.id === updatedItem.id ? updatedItem : i);
+        setGeneratedItems(updateList);
+        setFavorites(updateList);
+        setHistory(updateList);
+
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
-    };
+    }, [selectedItem, setGeneratedItems, setFavorites, setHistory, setSelectedItem]);
 
-    const handleSelectItem = (item: GeneratedItem) => {
+    const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
-        setDetailModalOpen(true);
-    };
+        if (window.innerWidth < 1024) { // On smaller screens, open modal for better view
+            setDetailModalOpen(true);
+        }
+    }, [setSelectedItem, setDetailModalOpen]);
 
-    const handleHistorySelect = (item: GeneratedItem) => {
+    const handleHistorySelect = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
         setHistoryModalOpen(false);
         setFavoritesModalOpen(false);
         setActiveView('forge');
         setDetailModalOpen(true);
-    };
+    }, [setSelectedItem, setHistoryModalOpen, setFavoritesModalOpen, setActiveView, setDetailModalOpen]);
     
-    const handleDeleteFromHistory = (itemId: string) => {
+    const handleDeleteFromHistory = useCallback((itemId: string) => {
         setHistory(prev => prev.filter(item => item.id !== itemId));
-    };
+    }, [setHistory]);
     
-    const handleClearHistory = () => {
+    const handleClearHistory = useCallback(() => {
         if(window.confirm("Tem certeza que deseja apagar todo o histórico? Esta ação não pode ser desfeita.")) {
             setHistory([]);
         }
-    };
+    }, [setHistory]);
     
-    const handleClearResults = () => {
+    const handleClearResults = useCallback(() => {
         setGeneratedItems([]);
         setSelectedItem(null);
-    };
+    }, [setGeneratedItems, setSelectedItem]);
+
+    const onAboutClose = useCallback(() => setAboutModalOpen(false), []);
+    const onFavoritesClose = useCallback(() => setFavoritesModalOpen(false), []);
+    const onHistoryClose = useCallback(() => setHistoryModalOpen(false), []);
+    const onDetailClose = useCallback(() => {
+        setDetailModalOpen(false);
+        // On larger screens, closing the modal doesn't deselect the item
+        if (window.innerWidth < 1024) {
+            setSelectedItem(null);
+        }
+    }, []);
+    const onErrorDismiss = useCallback(() => setError(null), []);
 
     return (
         <div className="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
@@ -126,33 +141,24 @@ const App: React.FC = () => {
                 onViewChange={setActiveView}
             />
 
-            <main className="flex-grow p-4 md:p-6 lg:p-8 grid gap-4 md:gap-6 lg:gap-8 grid-cols-12 h-[calc(100vh-100px)]">
+            <main className="flex-grow flex flex-col">
                 {activeView === 'forge' ? (
-                    <>
-                        <div className="col-span-12 lg:col-span-4 h-full min-h-0">
-                            <FilterPanel 
-                                filters={filters}
-                                onFiltersChange={setFilters}
-                                onGenerate={(count) => handleGenerateContent(count)}
-                                isLoading={isLoading}
-                                onResetFilters={() => setFilters(INITIAL_FILTERS)}
-                            />
-                        </div>
-                        <div className="col-span-12 lg:col-span-8 h-full min-h-0">
-                            <ResultsPanel 
-                                items={generatedItems}
-                                isLoading={isLoading}
-                                selectedItem={selectedItem}
-                                onSelectItem={handleSelectItem}
-                                favorites={favorites}
-                                onToggleFavorite={handleToggleFavorite}
-                                onGenerateVariant={handleGenerateVariant}
-                                onClearResults={handleClearResults}
-                            />
-                        </div>
-                    </>
+                   <ForgeInterface
+                        filters={filters}
+                        onFiltersChange={setFilters}
+                        onGenerate={(count) => handleGenerateContent(count)}
+                        isLoading={isLoading}
+                        items={generatedItems}
+                        selectedItem={selectedItem}
+                        onSelectItem={handleSelectItem}
+                        favorites={favorites}
+                        onToggleFavorite={handleToggleFavorite}
+                        onGenerateVariant={handleGenerateVariant}
+                        onUpdate={handleUpdateItem}
+                        onClearResults={handleClearResults}
+                    />
                 ) : (
-                    <div className="col-span-12 h-full overflow-y-auto">
+                    <div className="w-full h-full overflow-y-auto p-4 md:p-6 lg:p-8">
                         <PromptEngineeringPanel />
                     </div>
                 )}
@@ -160,19 +166,19 @@ const App: React.FC = () => {
             
             <Footer onAboutClick={() => setAboutModalOpen(true)} />
 
-            <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+            <ErrorDisplay message={error} onDismiss={onErrorDismiss} />
 
-            <AboutModal isOpen={isAboutModalOpen} onClose={() => setAboutModalOpen(false)} />
+            <AboutModal isOpen={isAboutModalOpen} onClose={onAboutClose} />
             <FavoritesModal 
                 isOpen={isFavoritesModalOpen}
-                onClose={() => setFavoritesModalOpen(false)}
+                onClose={onFavoritesClose}
                 favorites={favorites}
                 onSelect={handleHistorySelect}
                 onToggleFavorite={handleToggleFavorite}
             />
             <HistoryModal
                 isOpen={isHistoryModalOpen}
-                onClose={() => setHistoryModalOpen(false)}
+                onClose={onHistoryClose}
                 history={history}
                 onSelect={handleHistorySelect}
                 onDelete={handleDeleteFromHistory}
@@ -180,7 +186,7 @@ const App: React.FC = () => {
             />
             <DetailModal
                 isOpen={isDetailModalOpen}
-                onClose={() => setDetailModalOpen(false)}
+                onClose={onDetailClose}
                 item={selectedItem}
                 onGenerateVariant={handleGenerateVariant}
                 isFavorite={selectedItem ? favorites.some(f => f.id === selectedItem.id) : false}

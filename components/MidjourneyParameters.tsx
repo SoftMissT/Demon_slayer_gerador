@@ -55,17 +55,17 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
             <div className="flex justify-between items-center">
                  <h3 className="text-lg font-bold text-white font-gangofthree">Parâmetros Midjourney</h3>
                  <Checkbox 
-                    label="Ativar Parâmetros Midjourney"
+                    label="Ativar"
                     checked={enabled}
                     onChange={(e) => onEnabledChange(e.target.checked)}
                  />
             </div>
              <p className="text-sm text-gray-400">
-                Ative e ajuste os parâmetros para controlar o resultado no Midjourney. Parâmetros desativados serão ignorados.
+                Ajuste os parâmetros para controlar o resultado no Midjourney.
             </p>
             
             <div className={`transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <ParamRow label="Aspect Ratio" param={params.aspectRatio} onToggle={(active) => handleParamChange('aspectRatio', { active })} enabled={enabled}>
                          <Select
                             label="Aspect Ratio (--ar)"
@@ -107,8 +107,6 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
                             <option value="original">Original</option>
                         </Select>
                     </ParamRow>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                     <ParamRow label="Chaos" param={params.chaos} onToggle={(active) => handleParamChange('chaos', { active })} enabled={enabled}>
                         <Slider
                             label="Chaos (--c)"
@@ -146,8 +144,8 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
                         />
                     </ParamRow>
                 </div>
-                <div className="mt-4">
-                    <Button variant="secondary" onClick={handleReset} disabled={!enabled}>Resetar Parâmetros</Button>
+                <div className="mt-6">
+                    <Button variant="secondary" size="sm" onClick={handleReset} disabled={!enabled}>Resetar Parâmetros</Button>
                 </div>
             </div>
         </div>

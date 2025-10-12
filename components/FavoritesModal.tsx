@@ -13,7 +13,7 @@ interface FavoritesModalProps {
   onToggleFavorite: (item: GeneratedItem) => void;
 }
 
-export const FavoritesModal: React.FC<FavoritesModalProps> = ({ isOpen, onClose, favorites, onSelect, onToggleFavorite }) => {
+const FavoritesModalComponent: React.FC<FavoritesModalProps> = ({ isOpen, onClose, favorites, onSelect, onToggleFavorite }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Itens Favoritos">
       <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
@@ -43,3 +43,5 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({ isOpen, onClose,
     </Modal>
   );
 };
+
+export const FavoritesModal = React.memo(FavoritesModalComponent);
