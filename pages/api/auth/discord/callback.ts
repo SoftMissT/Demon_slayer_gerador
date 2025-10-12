@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { exchangeCodeForToken, getUserProfile, constructAvatarUrl } from '../../../../lib/discord';
 import { isUserWhitelisted } from '../../../../lib/googleSheets';
-import type { User } from '../../../../App';
+import type { User } from '../../../../types';
 
 interface ApiResponse {
     message?: string;

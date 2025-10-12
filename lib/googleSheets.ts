@@ -15,6 +15,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 async function getWhitelistedIds(): Promise<Set<string>> {
     const now = Date.now();
     if (whitelistedIds && (now - lastFetchTime < CACHE_DURATION)) {
+        console.log('Whitelist successfully served from cache.');
         return whitelistedIds;
     }
 
@@ -57,14 +58,39 @@ async function getWhitelistedIds(): Promise<Set<string>> {
         
         whitelistedIds = newIdSet;
         lastFetchTime = Date.now();
-        console.log(`Whitelist successfully refreshed. Found ${whitelistedIds.size} authorized IDs.`);
+        
+        if (whitelistedIds.size > 0) {
+            console.log(`Whitelist successfully refreshed. Found ${whitelistedIds.size} authorized IDs.`);
+        } else {
+            console.log('Whitelist successfully refreshed. 0 IDs found (the sheet might be empty).');
+        }
+
         return whitelistedIds;
 
     } catch (error: any) {
-        console.error('Failed to fetch whitelist from Google Sheets:', error);
-        // Re-throw a more user-friendly error to be caught by the API route.
-        // This helps distinguish between a config error and a user not being on the list.
-        throw new Error('Falha ao buscar a lista de autorização. Verifique se as variáveis de ambiente do Google Sheets estão corretas e se a planilha foi compartilhada com o email da conta de serviço.');
+        // Log the original, detailed error for server-side debugging.
+        console.error('Original Google Sheets API Error:', error.code, error.message);
+        
+        let detailedErrorMessage = 'Falha ao buscar a lista de autorização.';
+
+        // Google API errors often have a `code` property and a message.
+        if (error.message) {
+            const msg = error.message.toLowerCase();
+            if (error.code === 403 || msg.includes('permission denied')) {
+                detailedErrorMessage = 'Erro de Permissão (403): A planilha não foi compartilhada com o e-mail da conta de serviço (`GOOGLE_SERVICE_ACCOUNT_EMAIL`) com, no mínimo, permissão de "Leitor".';
+            } else if (error.code === 404 || msg.includes('requested entity was not found')) {
+                detailedErrorMessage = 'Planilha não encontrada (404): Verifique se o `GOOGLE_SHEET_ID` está correto e se o nome da aba da planilha é exatamente "discord_id".';
+            } else if (msg.includes('private key') || msg.includes('invalid_grant')) {
+                detailedErrorMessage = 'Erro de Autenticação: A `GOOGLE_PRIVATE_KEY` ou o `GOOGLE_SERVICE_ACCOUNT_EMAIL` parecem estar incorretos. Copie-os novamente do seu arquivo JSON, garantindo que a chave privada esteja completa.';
+            } else if (msg.includes('api has not been used') || msg.includes('enable the api')) {
+                 detailedErrorMessage = 'API não ativada: A API do Google Sheets precisa ser ativada no seu projeto do Google Cloud. Acesse o console do Google Cloud, encontre o projeto correto e ative a "Google Sheets API".';
+            } else {
+                // Include the original error for more context if it's not one of the common ones.
+                detailedErrorMessage = `Erro inesperado na API do Google. Verifique os logs do servidor. Mensagem: ${msg}`;
+            }
+        }
+
+        throw new Error(detailedErrorMessage);
     }
 }
 

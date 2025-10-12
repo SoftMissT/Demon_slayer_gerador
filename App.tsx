@@ -8,12 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { Spinner } from './components/ui/Spinner';
-
-export interface User {
-    id: string;
-    username: string;
-    avatar: string;
-}
+import type { User } from './types';
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');

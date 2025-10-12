@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { User } from '../App';
+import type { User } from '../types';
 import { DiscordLoginButton } from './DiscordLoginButton';
 
 interface HeaderProps {

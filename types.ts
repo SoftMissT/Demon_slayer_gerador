@@ -1,5 +1,12 @@
 // FIX: Populated types.ts with comprehensive type definitions to resolve module and type errors across the application.
 
+// For App/Header/Authentication
+export interface User {
+    id: string;
+    username: string;
+    avatar: string;
+}
+
 // From constants.ts
 export type Category = 
     'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 
