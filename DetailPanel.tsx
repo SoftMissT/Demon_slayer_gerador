@@ -1,7 +1,7 @@
-// FIX: Import `useState` from React to resolve 'Cannot find name' errors.
+// FIX: Import `useState` and `useEffect` from React to resolve 'Cannot find name' errors.
 import React, { useState, useEffect } from 'react';
 // FIX: Corrected import paths for types and components.
-import type { GeneratedItem, MissionNPC, MissionItem } from './types';
+import type { GeneratedItem, MissionNPC, MissionItem, MissionItemDetails, NpcItem, HunterItem, OniItem, WorldBuildingItem, BreathingFormItem } from './types';
 import { Card } from './components/ui/Card';
 import { Button } from './components/ui/Button';
 import { StarIcon } from './components/icons/StarIcon';
@@ -45,7 +45,7 @@ const ItemCard: React.FC<{ item: MissionItem }> = ({ item }) => (
 );
 
 
-const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const MissionDetailView: React.FC<{ item: MissionItemDetails }> = ({ item }) => (
     <>
         {'logline' in item && <DetailSection title="Sinopse">{item.logline || 'N/A'}</DetailSection>}
         {'summary' in item && <DetailSection title="Resumo da Missão">{item.summary || 'N/A'}</DetailSection>}
@@ -182,7 +182,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     </>
 );
 
-const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const NpcDetailView: React.FC<{ item: NpcItem }> = ({ item }) => (
     <>
         {'origem' in item && item.origem && <DetailSection title="Origem">{item.origem}</DetailSection>}
         <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>
@@ -210,7 +210,7 @@ const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     </>
 );
 
-const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const HunterDetailView: React.FC<{ item: HunterItem }> = ({ item }) => (
     <>
         {'classe' in item && <DetailSection title="Arquétipo (Classe)">{item.classe || 'N/A'}</DetailSection>}
         {'personalidade' in item && <DetailSection title="Personalidade">{item.personalidade || 'N/A'}</DetailSection>}
@@ -264,7 +264,7 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     </>
 );
 
-const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const OniDetailView: React.FC<{ item: OniItem }> = ({ item }) => (
     <>
         {'power_level' in item && item.power_level && <DetailSection title="Nível de Poder">{item.power_level}</DetailSection>}
         {'descricao_fisica_detalhada' in item && <DetailSection title="Descrição Física Detalhada">{item.descricao_fisica_detalhada || item.descricao_curta || 'N/A'}</DetailSection>}
@@ -322,7 +322,7 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     </>
 );
 
-const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const WorldBuildingDetailView: React.FC<{ item: WorldBuildingItem }> = ({ item }) => (
     <>
         <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>
 
@@ -389,7 +389,7 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
     </>
 );
 
-const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const BreathingFormDetailView: React.FC<{ item: BreathingFormItem }> = ({ item }) => (
     <>
         {'base_breathing_id' in item && <DetailSection title="Derivação">{`${'derivation_type' in item ? item.derivation_type : ''} da ${item.base_breathing_id}`}</DetailSection>}
         {'name_native' in item && item.name_native && <p className="text-xs text-gray-400 italic mb-2">{item.name_native}</p>}
@@ -416,7 +416,7 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         {'mechanics' in item && item.mechanics?.damage_formula_rank && (
             <DetailSection title="Dano por Rank">
                  {Object.entries(item.mechanics.damage_formula_rank).map(([rank, formula]) => (
-                    <p key={rank}><strong>{rank}:</strong> {formula as string}</p>
+                    <p key={rank}><strong>{rank}:</strong> {formula}</p>
                  ))}
             </DetailSection>
         )}

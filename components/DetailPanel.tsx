@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import type { GeneratedItem, MissionNPC, MissionItem } from '../types';
+import type { GeneratedItem, MissionNPC, MissionItem, WorldBuildingItem, BreathingFormItem, HunterItem, OniItem, NpcItem, MissionItemDetails } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
@@ -48,56 +47,52 @@ const ItemCard: React.FC<{ item: MissionItem }> = ({ item }) => (
 );
 
 
-const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const MissionDetailView: React.FC<{ item: MissionItemDetails }> = ({ item }) => (
     <>
-        {'logline' in item && <DetailSection title="Sinopse">{item.logline || 'N/A'}</DetailSection>}
-        {'summary' in item && <DetailSection title="Resumo da Missão">{item.summary || 'N/A'}</DetailSection>}
+        <DetailSection title="Sinopse">{item.logline || 'N/A'}</DetailSection>
+        <DetailSection title="Resumo da Missão">{item.summary || 'N/A'}</DetailSection>
 
-        {'objectives' in item && item.objectives && item.objectives.length > 0 && (
+        {item.objectives && item.objectives.length > 0 && (
             <DetailSection title="Ganchos e Objetivos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.objectives?.map((obj: any, i: number) => <li key={i}>{obj}</li>)}
+                    {item.objectives.map((obj: string, i: number) => <li key={i}>{obj}</li>)}
                 </ul>
             </DetailSection>
         )}
         
-        {'complications' in item && item.complications && item.complications.length > 0 && (
+        {item.complications && item.complications.length > 0 && (
             <DetailSection title="Complicações Possíveis">
                  <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.complications?.map((comp: any, i: number) => <li key={i}>{comp}</li>)}
+                    {item.complications.map((comp: string, i: number) => <li key={i}>{comp}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'failure_states' in item && item.failure_states && item.failure_states.length > 0 && (
+        {item.failure_states && item.failure_states.length > 0 && (
             <DetailSection title="Condições de Falha">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.failure_states.map((state: any, i: number) => <li key={i}>{state}</li>)}
+                    {item.failure_states.map((state: string, i: number) => <li key={i}>{state}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'rewards' in item && item.rewards && item.rewards.length > 0 && (
+        {item.rewards && item.rewards.length > 0 && (
             <DetailSection title="Recompensas">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.rewards.map((reward: any, i: number) => <li key={i}>{reward}</li>)}
+                    {item.rewards.map((reward: string, i: number) => <li key={i}>{reward}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'numberOfSessions' in item && item.numberOfSessions && item.numberOfSessions > 0 && (
+        {item.numberOfSessions > 0 && (
             <DetailSection title="Duração Estimada">
                 <p>{item.numberOfSessions} {item.numberOfSessions > 1 ? 'sessões' : 'sessão'}</p>
             </DetailSection>
         )}
 
-        {'environment' in item && <DetailSection title="Ambiente (Visão, Som, Cheiro)">{item.environment || 'N/A'}</DetailSection>}
+        {item.environment && <DetailSection title="Ambiente (Visão, Som, Cheiro)">{item.environment}</DetailSection>}
         
-        {'protagonist_desc' in item && item.protagonist_desc && (
+        {item.protagonist_desc && (
             <DetailSection title="Descrição do Protagonista">
                 <p>{item.protagonist_desc.silhouette}</p>
                 <p>{item.protagonist_desc.face}</p>
@@ -107,7 +102,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
-        {'oni_desc' in item && item.oni_desc && (
+        {item.oni_desc && (
             <DetailSection title="Descrição do Oni">
                 <p>{item.oni_desc.scale}</p>
                 <p>{item.oni_desc.skin}</p>
@@ -118,13 +113,13 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
-        {'demonBloodArtType' in item && item.demonBloodArtType && (
+        {item.demonBloodArtType && (
             <DetailSection title="Kekkijutsu do Vilão">
                 <p>{item.demonBloodArtType}</p>
             </DetailSection>
         )}
 
-        {'key_npcs' in item && item.key_npcs && item.key_npcs.length > 0 && (
+        {item.key_npcs && item.key_npcs.length > 0 && (
             <DetailSection title="NPCs Relevantes">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {item.key_npcs.map((npc: MissionNPC) => <NpcCard key={npc.id} npc={npc} />)}
@@ -132,7 +127,7 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
-        {'relevant_items' in item && item.relevant_items && item.relevant_items.length > 0 && (
+        {item.relevant_items && item.relevant_items.length > 0 && (
              <DetailSection title="Itens Relevantes">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {item.relevant_items.map((missionItem: MissionItem, i: number) => <ItemCard key={i} item={missionItem} />)}
@@ -140,9 +135,9 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
-         {'scaling_hooks' in item && <DetailSection title="Ganchos Secundários e Escalada">{item.scaling_hooks || 'N/A'}</DetailSection>}
+         {item.scaling_hooks && <DetailSection title="Ganchos Secundários e Escalada">{item.scaling_hooks}</DetailSection>}
 
-        {'tone_variations' in item && item.tone_variations && typeof item.tone_variations === 'object' && Object.keys(item.tone_variations).length > 0 && (
+        {item.tone_variations && typeof item.tone_variations === 'object' && Object.keys(item.tone_variations).length > 0 && (
             <DetailSection title="Variações de Tom">
                 <div className="space-y-1 text-xs">
                     {Object.entries(item.tone_variations).map(([key, value]) => (
@@ -152,32 +147,30 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
 
-        {'sensitive_flags' in item && item.sensitive_flags && item.sensitive_flags.length > 0 && (
+        {item.sensitive_flags && item.sensitive_flags.length > 0 && (
             <DetailSection title="Alertas de Conteúdo Sensível">
                  <div className="bg-yellow-900/30 border border-yellow-700 text-yellow-200 p-3 rounded-lg flex gap-3 text-sm">
                     <AlertTriangleIcon className="w-6 h-6 flex-shrink-0 text-yellow-400" />
                     <ul className="list-disc pl-4">
-                        {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                        {item.sensitive_flags.map((flag: any, i: number) => <li key={i}>{flag}</li>)}
+                        {item.sensitive_flags.map((flag: string, i: number) => <li key={i}>{flag}</li>)}
                     </ul>
                 </div>
             </DetailSection>
         )}
         
-        {'diff' in item && item.diff && (
+        {item.diff && (
             <DetailSection title="Notas de Design (Diff)">
                 <p className="italic text-gray-400">"{item.diff.summary}"</p>
                 <ul className="list-disc pl-5 space-y-1 mt-2 text-xs">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.diff.changes?.map((change: any, i: number) => <li key={i}>{change}</li>)}
+                    {item.diff.changes?.map((change: string, i: number) => <li key={i}>{change}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'micro_variants' in item && item.micro_variants && item.micro_variants.length > 0 && (
+        {item.micro_variants && item.micro_variants.length > 0 && (
             <DetailSection title="Micro-Variantes">
                 <ul className="list-disc pl-5 space-y-1 text-xs">
-                    {item.micro_variants.map((variant: any, i: number) => (
+                    {item.micro_variants.map((variant: string | Record<string, unknown>, i: number) => (
                         <li key={i}>
                             {typeof variant === 'string'
                                 ? variant
@@ -190,43 +183,42 @@ const MissionDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
     </>
 );
 
-const NpcDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const NpcDetailView: React.FC<{ item: NpcItem }> = ({ item }) => (
     <>
-        {'origem' in item && item.origem && <DetailSection title="Origem">{item.origem}</DetailSection>}
+        {item.origem && <DetailSection title="Origem">{item.origem}</DetailSection>}
         <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>}
         <DetailSection title="História e Aparência Completa">{item.descricao || 'N/A'}</DetailSection>}
-        {'voice_and_mannerisms' in item && <DetailSection title="Voz e Maneirismos">{item.voice_and_mannerisms || 'N/A'}</DetailSection>}
-        {'inventory_focal' in item && <DetailSection title="Item Focal / Propriedade">{item.inventory_focal || 'N/A'}</DetailSection>}
-        {'motivation' in item && <DetailSection title="Motivação">{item.motivation || 'N/A'}</DetailSection>}
-        {'secret' in item && <DetailSection title="Segredo">{item.secret || 'N/A'}</DetailSection>}
+        {item.voice_and_mannerisms && <DetailSection title="Voz e Maneirismos">{item.voice_and_mannerisms}</DetailSection>}
+        {item.inventory_focal && <DetailSection title="Item Focal / Propriedade">{item.inventory_focal}</DetailSection>}
+        {item.motivation && <DetailSection title="Motivação">{item.motivation}</DetailSection>}
+        {item.secret && <DetailSection title="Segredo">{item.secret}</DetailSection>}
 
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos de Aventura">
                 <ul className="list-disc pl-5 space-y-1">
-                    {item.ganchos_narrativos.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
+                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'dialogue_lines' in item && item.dialogue_lines && item.dialogue_lines.length > 0 && (
+        {item.dialogue_lines && item.dialogue_lines.length > 0 && (
             <DetailSection title="Exemplos de Diálogo">
                 <ul className="pl-5 space-y-2 italic text-indigo-200">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.dialogue_lines?.map((line: any, i: number) => <li key={i}>"{line}"</li>)}
+                    {item.dialogue_lines.map((line: string, i: number) => <li key={i}>"{line}"</li>)}
                 </ul>
             </DetailSection>
         )}
     </>
 );
 
-const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const HunterDetailView: React.FC<{ item: HunterItem }> = ({ item }) => (
     <>
-        {'classe' in item && <DetailSection title="Arquétipo (Classe)">{item.classe || 'N/A'}</DetailSection>}
-        {'personalidade' in item && <DetailSection title="Personalidade">{item.personalidade || 'N/A'}</DetailSection>}
-        {'descricao_fisica' in item && <DetailSection title="Descrição Física">{item.descricao_fisica || 'N/A'}</DetailSection>}
-        {'background' in item && <DetailSection title="Background">{item.background || 'N/A'}</DetailSection>}
+        {item.classe && <DetailSection title="Arquétipo (Classe)">{item.classe}</DetailSection>}
+        {item.personalidade && <DetailSection title="Personalidade">{item.personalidade}</DetailSection>}
+        {item.descricao_fisica && <DetailSection title="Descrição Física">{item.descricao_fisica}</DetailSection>}
+        {item.background && <DetailSection title="Background">{item.background}</DetailSection>}
         
-        {'arsenal' in item && item.arsenal && (
+        {item.arsenal && (
             <DetailSection title="Arsenal">
                 <p><strong>Arma:</strong> {item.arsenal.arma}</p>
                 <p><strong>Estilo de Combate:</strong> {item.arsenal.empunhadura.nome}</p>
@@ -234,22 +226,21 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
-        {'habilidades_especiais' in item && item.habilidades_especiais && (
+        {item.habilidades_especiais && (
             <DetailSection title="Habilidades Especiais">
                 <p><strong>Respiração:</strong> {item.habilidades_especiais.respiracao}</p>
                 {item.habilidades_especiais.variacoes_tecnica && item.habilidades_especiais.variacoes_tecnica.length > 0 && (
                     <>
                         <h5 className="text-sm font-semibold text-gray-200 mt-2 mb-1">Técnicas Notáveis:</h5>
                         <ul className="list-disc pl-5 space-y-1">
-                            {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                            {item.habilidades_especiais.variacoes_tecnica.map((tech: any, i: number) => <li key={i}>{tech}</li>)}
+                            {item.habilidades_especiais.variacoes_tecnica.map((tech: string, i: number) => <li key={i}>{tech}</li>)}
                         </ul>
                     </>
                 )}
             </DetailSection>
         )}
 
-        {'acessorio' in item && item.acessorio && (
+        {item.acessorio && (
             <DetailSection title="Acessório Distintivo">
                 <h5 className="font-semibold text-white">{item.acessorio.nome}</h5>
                 <p>{item.acessorio.descricao}</p>
@@ -259,28 +250,27 @@ const HunterDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos Narrativos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {item.ganchos_narrativos.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
+                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'uso_em_cena' in item && item.uso_em_cena && item.uso_em_cena.length > 0 && (
+        {item.uso_em_cena && item.uso_em_cena.length > 0 && (
             <DetailSection title="Uso em Cena">
                  <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.uso_em_cena.map((uso: any, i: number) => <li key={i}>{uso}</li>)}
+                    {item.uso_em_cena.map((uso: string, i: number) => <li key={i}>{uso}</li>)}
                 </ul>
             </DetailSection>
         )}
     </>
 );
 
-const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const OniDetailView: React.FC<{ item: OniItem }> = ({ item }) => (
     <>
-        {'power_level' in item && item.power_level && <DetailSection title="Nível de Poder">{item.power_level}</DetailSection>}
-        {'descricao_fisica_detalhada' in item && <DetailSection title="Descrição Física Detalhada">{item.descricao_fisica_detalhada || item.descricao_curta || 'N/A'}</DetailSection>}
+        {item.power_level && <DetailSection title="Nível de Poder">{item.power_level}</DetailSection>}
+        {item.descricao_fisica_detalhada && <DetailSection title="Descrição Física Detalhada">{item.descricao_fisica_detalhada || item.descricao_curta || 'N/A'}</DetailSection>}
         
-        {'kekkijutsu' in item && item.kekkijutsu && item.kekkijutsu.nome && item.kekkijutsu.nome.toLowerCase() !== 'nenhum' ? (
+        {item.kekkijutsu && item.kekkijutsu.nome && item.kekkijutsu.nome.toLowerCase() !== 'nenhum' ? (
             <DetailSection title="Kekkijutsu (Arte Demoníaca de Sangue)">
                 <h5 className="font-semibold text-white">{item.kekkijutsu.nome}</h5>
                 <p>{item.kekkijutsu.descricao}</p>
@@ -291,38 +281,34 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
             </DetailSection>
         )}
         
-        {'comportamento_combate' in item && item.comportamento_combate && item.comportamento_combate.length > 0 && (
+        {item.comportamento_combate && item.comportamento_combate.length > 0 && (
             <DetailSection title="Comportamento em Combate">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.comportamento_combate.map((behavior: any, i: number) => <li key={i}>{behavior}</li>)}
+                    {item.comportamento_combate.map((behavior: string, i: number) => <li key={i}>{behavior}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'comportamento_fora_combate' in item && item.comportamento_fora_combate && item.comportamento_fora_combate.length > 0 && (
+        {item.comportamento_fora_combate && item.comportamento_fora_combate.length > 0 && (
             <DetailSection title="Comportamento Fora de Combate">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.comportamento_fora_combate.map((behavior: any, i: number) => <li key={i}>{behavior}</li>)}
+                    {item.comportamento_fora_combate.map((behavior: string, i: number) => <li key={i}>{behavior}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'fraquezas_unicas' in item && item.fraquezas_unicas && item.fraquezas_unicas.length > 0 && (
+        {item.fraquezas_unicas && item.fraquezas_unicas.length > 0 && (
             <DetailSection title="Fraquezas Únicas">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.fraquezas_unicas.map((weakness: any, i: number) => <li key={i}>{weakness}</li>)}
+                    {item.fraquezas_unicas.map((weakness: string, i: number) => <li key={i}>{weakness}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'trofeus_loot' in item && item.trofeus_loot && item.trofeus_loot.length > 0 && (
+        {item.trofeus_loot && item.trofeus_loot.length > 0 && (
             <DetailSection title="Troféus / Loot">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.trofeus_loot.map((loot: any, i: number) => <li key={i}>{loot}</li>)}
+                    {item.trofeus_loot.map((loot: string, i: number) => <li key={i}>{loot}</li>)}
                 </ul>
             </DetailSection>
         )}
@@ -330,21 +316,22 @@ const OniDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
         {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
             <DetailSection title="Ganchos Narrativos">
                 <ul className="list-disc pl-5 space-y-1">
-                    {item.ganchos_narrativos.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
+                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
     </>
 );
 
-const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+const WorldBuildingDetailView: React.FC<{ item: WorldBuildingItem }> = ({ item }) => {
+    return (
     <>
-        <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>}
+        <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>
 
-        {'plot_threads' in item && item.plot_threads && item.plot_threads.length > 0 && (
+        {item.plot_threads && item.plot_threads.length > 0 && (
             <DetailSection title="Tramas Principais">
                 <div className="space-y-3">
-                    {item.plot_threads.map((plot: any, i: number) => (
+                    {item.plot_threads.map((plot, i: number) => (
                         <div key={i} className="p-2 bg-gray-900/50 rounded-md border-l-2 border-indigo-500">
                             <h5 className="font-semibold text-white">{plot.title}</h5>
                             <p className="text-xs text-gray-400">{plot.description}</p>
@@ -354,19 +341,18 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             </DetailSection>
         )}
 
-        {'adventure_hooks' in item && item.adventure_hooks && item.adventure_hooks.length > 0 && (
+        {item.adventure_hooks && item.adventure_hooks.length > 0 && (
             <DetailSection title="Ganchos de Aventura">
                 <ul className="list-disc pl-5 space-y-1">
-                    {/* FIX: Add explicit type to mapped parameter to avoid implicit any. */}
-                    {item.adventure_hooks.map((hook: any, i: number) => <li key={i}>{hook}</li>)}
+                    {item.adventure_hooks.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
                 </ul>
             </DetailSection>
         )}
 
-        {'key_npcs_wb' in item && item.key_npcs_wb && item.key_npcs_wb.length > 0 && (
+        {item.key_npcs_wb && item.key_npcs_wb.length > 0 && (
             <DetailSection title="NPCs Importantes">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {item.key_npcs_wb.map((npc: any, i: number) => (
+                    {item.key_npcs_wb.map((npc, i: number) => (
                          <Card key={i} className="!p-3 !bg-gray-800/70">
                             <h5 className="font-bold text-white">{npc.name} <span className="text-xs text-gray-400 font-normal">({npc.role})</span></h5>
                             <p className="text-xs text-gray-400 mt-1">{npc.description}</p>
@@ -376,10 +362,10 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             </DetailSection>
         )}
 
-        {'points_of_interest' in item && item.points_of_interest && item.points_of_interest.length > 0 && (
+        {item.points_of_interest && item.points_of_interest.length > 0 && (
             <DetailSection title="Locais de Interesse">
                 <div className="space-y-3">
-                    {item.points_of_interest.map((poi: any, i: number) => (
+                    {item.points_of_interest.map((poi, i: number) => (
                         <div key={i} className="p-2 bg-gray-900/50 rounded-md">
                             <h5 className="font-semibold text-white">{poi.name} <span className="text-xs text-gray-400 font-normal">({poi.type})</span></h5>
                             <p className="text-xs text-gray-400">{poi.description}</p>
@@ -389,10 +375,10 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             </DetailSection>
         )}
 
-        {'mini_missions' in item && item.mini_missions && item.mini_missions.length > 0 && (
+        {item.mini_missions && item.mini_missions.length > 0 && (
             <DetailSection title="Mini-Missões">
                 <div className="space-y-3">
-                    {item.mini_missions.map((mission: any, i: number) => (
+                    {item.mini_missions.map((mission, i: number) => (
                          <div key={i} className="p-2 bg-gray-900/50 rounded-md">
                             <h5 className="font-semibold text-white">{mission.title}</h5>
                             <p className="text-xs text-gray-400"><strong>Objetivo:</strong> {mission.objective}</p>
@@ -404,14 +390,14 @@ const WorldBuildingDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
         )}
     </>
 );
-
-const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) => (
+}
+const BreathingFormDetailView: React.FC<{ item: BreathingFormItem }> = ({ item }) => (
     <>
-        {'base_breathing_id' in item && <DetailSection title="Derivação">{`${'derivation_type' in item ? item.derivation_type : ''} da ${item.base_breathing_id}`}</DetailSection>}
-        {'name_native' in item && item.name_native && <p className="text-xs text-gray-400 italic mb-2">{item.name_native}</p>}
-        {'description_flavor' in item && <DetailSection title="Descrição (Flavor)">{item.description_flavor || 'N/A'}</DetailSection>}
+        {item.base_breathing_id && <DetailSection title="Derivação">{`${item.derivation_type ? item.derivation_type : ''} da ${item.base_breathing_id}`}</DetailSection>}
+        {item.name_native && <p className="text-xs text-gray-400 italic mb-2">{item.name_native}</p>}
+        {item.description_flavor && <DetailSection title="Descrição (Flavor)">{item.description_flavor}</DetailSection>}
 
-        {'requirements' in item && item.requirements && (
+        {item.requirements && (
             <DetailSection title="Requisitos e Custos">
                 <p><strong>Rank Mínimo:</strong> {item.requirements.min_rank}</p>
                 <p><strong>Custo de Exaustão:</strong> {item.requirements.exhaustion_cost}</p>
@@ -419,7 +405,7 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             </DetailSection>
         )}
 
-        {'mechanics' in item && item.mechanics && (
+        {item.mechanics && (
             <DetailSection title="Mecânicas">
                 <p><strong>Ativação:</strong> {item.mechanics.activation}</p>
                 <p><strong>Alvo:</strong> {item.mechanics.target}</p>
@@ -429,15 +415,16 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             </DetailSection>
         )}
         
-        {'mechanics' in item && item.mechanics?.damage_formula_rank && (
+        {item.mechanics?.damage_formula_rank && (
             <DetailSection title="Dano por Rank">
-                 {Object.entries(item.mechanics.damage_formula_rank).map(([rank, formula]) => (
-                    <p key={rank}><strong>{rank}:</strong> {formula as string}</p>
+                 {/* FIX: Corrected map parameter type from `[string, any]` to `[string, string]` to match `damage_formula_rank` type and ensure type safety. */}
+                 {Object.entries(item.mechanics.damage_formula_rank).map(([rank, formula]: [string, string]) => (
+                    <p key={rank}><strong>{rank}:</strong> {formula}</p>
                  ))}
             </DetailSection>
         )}
         
-        {'level_scaling' in item && item.level_scaling && (
+        {item.level_scaling && (
             <DetailSection title="Escala por Nível">
                 {Object.entries(item.level_scaling).map(([rank, scaling]: [string, any]) => (
                     <div key={rank}>
@@ -450,10 +437,10 @@ const BreathingFormDetailView: React.FC<{ item: GeneratedItem }> = ({ item }) =>
             </DetailSection>
         )}
 
-        {'micro_variants' in item && item.micro_variants && item.micro_variants.length > 0 && (
+        {item.micro_variants && item.micro_variants.length > 0 && (
             <DetailSection title="Micro-Variantes">
                 <ul className="list-disc pl-5 space-y-2 text-xs">
-                     {item.micro_variants.map((variant: any, i: number) => (
+                     {item.micro_variants.map((variant: string | Record<string, unknown>, i: number) => (
                         <li key={i}>
                             {typeof variant === 'string' ? variant : Object.entries(variant).map(([key, value]) => `${key}: ${String(value)}`).join(', ')}
                         </li>
@@ -478,6 +465,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   const handleCopy = () => {
     if (item) {
         const textToCopy = buildPlainTextForItem(item);
+        // FIX: Confirmed that `textToCopy` (a string) is passed directly to `writeText`, not called as a function, to prevent "not callable" errors.
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -496,59 +484,23 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     );
   }
   
-  const isMission = item.categoria === 'Missão/Cenário';
-  const isNpc = item.categoria === 'NPC';
-  const isHunter = item.categoria === 'Caçador';
-  const isOni = item.categoria === 'Inimigo/Oni';
-  const isWorldBuilding = item.categoria === 'World Building';
-  const isBreathingForm = item.categoria === 'Forma de Respiração';
-  const isKekkijutsu = item.categoria === 'Kekkijutsu';
-  
-  const canEdit = !isMission && !isNpc && !isHunter && !isOni && !isWorldBuilding && !isBreathingForm && !isKekkijutsu;
-  const canGenerateVariant = canEdit;
-
-  const handleSave = () => {
-    if (editedItem) {
-        onUpdate(editedItem);
-        setIsEditing(false);
-    }
-  };
-  
-  const handleEditChange = (field: string, value: any) => {
-    if(editedItem) {
-        setEditedItem({...editedItem, [field]: value});
-    }
-  }
-
-  const renderField = (label: string, field: string, type: 'text' | 'textarea' | 'number' = 'text') => {
-    if (!editedItem) return null;
-    const value = (editedItem as any)[field] as string | number | undefined || '';
-    
-    if (isEditing) {
-        if (type === 'textarea') {
-             return <textarea value={value} onChange={e => handleEditChange(field, e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-2 text-sm" rows={4} />;
-        }
-        return <input type={type} value={value} onChange={e => handleEditChange(field, type === 'number' ? parseInt(e.target.value) || 0 : e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-2 text-sm" />;
-    }
-    return <p className="whitespace-pre-wrap">{String(value) || 'N/A'}</p>;
-  }
-
+  const canGenerateVariant = item.categoria !== 'Missão/Cenário' && item.categoria !== 'NPC';
 
   return (
     <Card className="h-full flex flex-col">
         <div className="flex justify-between items-start mb-2 flex-shrink-0">
             <div>
                  <h2 className="text-xl font-bold text-white font-gangofthree">
-                    {isEditing && canEdit ? <input value={editedItem?.nome || ''} onChange={e => handleEditChange('nome', e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded-md p-1 text-lg" /> : (('name_pt' in item && item.name_pt) || ('title' in item && item.title) || item.nome)}
+                    {('name_pt' in item && item.name_pt) || ('title' in item && item.title) || item.nome}
                  </h2>
                  <p className="text-sm text-indigo-400 pt-1 capitalize">
-                    {isMission ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
-                     isNpc ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${('origem' in item && item.origem) || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
-                     isHunter ? `${item.categoria} • ${'origem' in item && item.origem || 'N/A'} • ${'classe' in item && item.classe || 'N/A'}` :
-                     isOni ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
-                     isWorldBuilding ? `${item.categoria}` :
-                     isBreathingForm ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
-                     isKekkijutsu ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
+                    {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
+                     item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
+                     item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
+                     item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
+                     item.categoria === 'World Building' ? `${item.categoria}` :
+                     item.categoria === 'Forma de Respiração' ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
+                     item.categoria === 'Kekkijutsu' ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
                      `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
                  </p>
             </div>
@@ -556,8 +508,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 <Button variant="ghost" onClick={handleCopy} className="!p-2">
                     {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
                 </Button>
-                {canEdit && <Button variant="secondary" onClick={() => setIsEditing(!isEditing)} className="text-xs !py-1 !px-2">{isEditing ? 'Cancelar' : 'Editar'}</Button>}
-                {isEditing && canEdit && <Button onClick={handleSave} className="text-xs !py-1 !px-2">Salvar</Button>}
                 <button 
                     onClick={() => onToggleFavorite(item)}
                     className="p-2 text-gray-400 hover:text-yellow-400 rounded-full hover:bg-gray-700 transition-colors"
@@ -568,66 +518,25 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
             </div>
         </div>
         <div className="flex-grow overflow-y-auto pr-2">
-            {isMission ? <MissionDetailView item={item} /> :
-             isNpc ? <NpcDetailView item={item} /> :
-             isHunter ? <HunterDetailView item={item} /> :
-             isOni ? <OniDetailView item={item} /> :
-             isWorldBuilding ? <WorldBuildingDetailView item={item} /> :
-             isBreathingForm ? <BreathingFormDetailView item={item} /> :
-             isKekkijutsu ? (
+            {item.categoria === 'Missão/Cenário' ? <MissionDetailView item={item} /> :
+             item.categoria === 'NPC' ? <NpcDetailView item={item} /> :
+             item.categoria === 'Caçador' ? <HunterDetailView item={item} /> :
+             item.categoria === 'Inimigo/Oni' ? <OniDetailView item={item} /> :
+             item.categoria === 'World Building' ? <WorldBuildingDetailView item={item} /> :
+             item.categoria === 'Forma de Respiração' ? <BreathingFormDetailView item={item} /> :
+             (
                 <>
-                    <DetailSection title="Descrição Curta">
-                        {renderField('Descrição Curta', 'descricao_curta', 'textarea')}
-                    </DetailSection>
-
-                    <DetailSection title="Descrição Longa">
-                      {renderField('Descrição Longa', 'descricao', 'textarea')}
-                    </DetailSection>
+                    <DetailSection title="Descrição Curta">{item.descricao_curta}</DetailSection>
+                    <DetailSection title="Descrição Longa">{item.descricao}</DetailSection>
 
                     {(typeof item.ganchos_narrativos === 'string' && item.ganchos_narrativos && item.ganchos_narrativos !== "N/A") && 
-                        <DetailSection title="Ganchos Narrativos">
-                            {renderField('Ganchos Narrativos', 'ganchos_narrativos', 'textarea')}
-                        </DetailSection>
+                        <DetailSection title="Ganchos Narrativos">{item.ganchos_narrativos}</DetailSection>
                     }
                 </>
-             ) :
-            (
-                <>
-                    <DetailSection title="Descrição Curta">
-                        {renderField('Descrição Curta', 'descricao_curta', 'textarea')}
-                    </DetailSection>
-
-                    <DetailSection title="Descrição Longa">
-                      {renderField('Descrição Longa', 'descricao', 'textarea')}
-                    </DetailSection>
-
-                    {(typeof item.ganchos_narrativos === 'string' && item.ganchos_narrativos && item.ganchos_narrativos !== "N/A") && 
-                        <DetailSection title="Ganchos Narrativos">
-                            {renderField('Ganchos Narrativos', 'ganchos_narrativos', 'textarea')}
-                        </DetailSection>
-                    }
-
-                    <DetailSection title="Mecânicas de Combate">
-                        <div className="space-y-2">
-                            <p><strong>Dano:</strong> {isEditing ? renderField('Dano', 'dano') : (('dano' in item && item.dano) || 'N/A')}</p>
-                            <p><strong>Dados:</strong> {isEditing ? renderField('Dados', 'dados') : (('dados' in item && item.dados) || 'N/A')}</p>
-                            <p><strong>Tipo de Dano:</strong> {isEditing ? renderField('Tipo de Dano', 'tipo_de_dano') : (('tipo_de_dano' in item && item.tipo_de_dano) || 'N/A')}</p>
-                        </div>
-                    </DetailSection>
-                    
-                    {'status_aplicado' in item && ('efeitos_secundarios' in item) && ((item.status_aplicado && item.status_aplicado !== "Nenhum") || (item.efeitos_secundarios && item.efeitos_secundarios !== "Nenhum")) && (
-                       <DetailSection title="Efeitos Adicionais">
-                            <div className="space-y-2">
-                                {item.status_aplicado && item.status_aplicado !== "Nenhum" && <p><strong>Status Aplicado:</strong> {isEditing ? renderField('Status Aplicado', 'status_aplicado') : item.status_aplicado}</p>}
-                                {item.efeitos_secundarios && item.efeitos_secundarios !== "Nenhum" && <p><strong>Efeitos Secundários:</strong> {isEditing ? renderField('Efeitos Secundários', 'efeitos_secundarios') : item.efeitos_secundarios}</p>}
-                            </div>
-                       </DetailSection>
-                    )}
-                </>
-            )}
+             )}
         </div>
         
-        {!isEditing && canGenerateVariant && (
+        {canGenerateVariant && (
             <div className="mt-4 pt-4 border-t border-gray-700 flex-shrink-0">
                 <h4 className="text-sm font-bold text-indigo-400 mb-2 font-gangofthree">Gerar Variação</h4>
                 <div className="grid grid-cols-3 gap-2">

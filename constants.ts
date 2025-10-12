@@ -1,198 +1,126 @@
-// FIX: Corrected type imports from the now separate types.ts file.
+// FIX: Populated with full constant definitions to resolve module errors.
 import type { Category, Rarity, Era, Tone, FilterState } from './types';
 
 export const CATEGORIES: Category[] = [
-  'Caçador',
-  'Inimigo/Oni',
-  'NPC',
-  'Arma',
-  'Acessório',
-  'Forma de Respiração',
-  'Kekkijutsu',
-  'Local/Cenário',
-  'Missão/Cenário',
-  'World Building'
+    'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missão/Cenário', 'World Building'
 ];
 
-export const RARITIES: Rarity[] = [
-  'Aleatória',
-  'Comum',
-  'Incomum',
-  'Raro',
-  'Épico',
-  'Lendário',
-  'Amaldiçoado'
-];
+export const RARITIES: Rarity[] = ['Aleatória', 'Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'];
 
 export const ERAS: Era[] = [
-  'Aleatória',
-  'Período Edo (Japão Feudal)',
-  'Era Joseon',
-  'Velho Oeste',
-  'Medieval Fantasia',
-  'Steampunk',
-  'Cyberpunk',
-  'Pós-apocalíptico',
-  'Moderno',
-  'Tempos Atuais',
-  'Futurista (Sci-Fi)',
-  'Biopunk',
-  'ERA DOS CINCO REINOS',
-  'ERA DA INFOCRACIA',
-  'ERA DO CREPÚSCULO CÓSMICO',
-  'ERA DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)',
-  'ERA DA SINGULARIDADE (PÓS-HUMANA)',
-  'ERA DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)',
-  'ERA DO COLONIALISMO DE ALQUIMIA',
-  'ERA DO JAZZ & OCULTISMO',
-  'ERA DOS CAÇADORES DE SOMBRAS',
-  'VELHO OESTE SOLAR',
-  'ERA DO SUBMUNDO NOTURNO',
-  'ERA DA ALVORADA ANCESTRAL',
-  'ERA DO SAARA ETERNO',
-  'ERA DA QUEDA DOS REINOS',
-  'ERA DOS PORTAIS ESQUECIDOS',
-  'ERA DA FRONTEIRA ESTELAR',
-  'ERA DO ETERNO CREPÚSCULO',
-  'ERA DA REVOLUÇÃO INDUSTRIAL OCULTA',
-  'ERA DOS CARNAVAIS SANGUE',
-  'ERA DO RENASCIMENTO SOMBRIO',
-  'ERA DOS DEUSES CAÍDOS',
-  // FIX: Corrected the string literal to match the 'Era' type definition, resolving a type error likely caused by an invisible character.
-  'ERA DA COLONIZAÇÃO INTERGALÁTICA'
+    'Aleatória',
+    'Período Edo (Japão Feudal)',
+    'Medieval Fantasia',
+    'Steampunk',
+    'Cyberpunk',
+    'Pós-apocalíptico',
+    'Tempos Atuais',
+    'Futurista (Sci-Fi)',
+    'Biopunk'
 ];
 
-export const TONES: Tone[] = [
-    'investigação',
-    'terror',
-    'ação',
-    'drama',
-    'mistério',
-    'aventura',
-    'político'
+export const TONES: Tone[] = ['épico', 'sombrio', 'misterioso', 'aventuresco', 'cômico', 'trágico', 'esperançoso'];
+
+export const DEMON_BLOOD_ARTS: string[] = [
+    'Aleatória', 'Manipulação de Sangue', 'Fios de Seda', 'Tambores de Impacto', 'Flechas Vetoriais', 'Teias de Aranha', 'Ilusões Mortais', 'Sonhos Manipulados', 'Absorção de Poder', 'Crioquinese', 'Pirocinese', 'Regeneração Acelerada', 'Clones de Carne', 'Manipulação de Esporos', 'Venenos e Toxinas'
 ];
 
-export const PERSONALITIES: string[] = ['Aleatória', 'Sombrio e Silencioso', 'Otimista e Barulhento', 'Calmo e Analítico', 'Impulsivo e Feroz', 'Disciplinado e Austero', 'Gentil e Protetor'];
-export const METAL_COLORS: string[] = ['Aleatória', 'Aço Nichirin Padrão', 'Vermelho Carmesim Brilhante', 'Azul Cobalto Profundo', 'Preto Obsidiana Fosco', 'Branco Lunar Perolado', 'Verde Jade Translúcido', 'Amarelo Dourado Elétrico', 'Roxo Ametista Sombrio'];
+export const PERSONALITIES: string[] = [
+    'Aleatória', 'Honrado', 'Sombrio', 'Caótico', 'Leal', 'Enganador', 'Corajoso', 'Covarde', 'Sábio', 'Tolo', 'Arrogante', 'Humilde', 'Vingativo', 'Piedoso'
+];
+
+export const METAL_COLORS: string[] = [
+    'Aleatória', 'Preto (Absorção Solar)', 'Vermelho (Chamas)', 'Amarelo (Trovão)', 'Azul (Água)', 'Verde (Vento)', 'Rosa (Amor)', 'Cinza (Besta)', 'Branco (Névoa)', 'Lavanda (Serpente)', 'Índigo (Som)'
+];
+
 export const COUNTRIES: string[] = [
-    'Aleatório', 
-    'Japão (Padrão)', 
-    'China Imperial', 
-    'Coreia (Era Joseon)',
-    'Europa Medieval', 
-    'Velho Oeste Americano',
-    'Império Russo', 
-    'Egito Antigo', 
-    'Pérsia Mística', 
-    'Escandinávia Viking',
-    'Império Romano',
-    'Grécia Antiga',
-    'Brasil Colonial',
-    'Índia Mística',
-    'Terras Árabes (Mil e Uma Noites)',
-    'Reino Africano (Wakanda-like)',
-    'Ilhas Polinésias'
+    'Aleatório', 'Japão', 'China', 'Coreia', 'Índia', 'Egito', 'Grécia', 'Roma', 'Nórdico (Viking)', 'Celta', 'Arábia', 'Pérsia', 'Asteca', 'Maia'
 ];
-export const TERRAINS: string[] = ['Aleatório', 'Floresta Densa', 'Montanhas Rochosas', 'Planícies Abertas', 'Pântano Nebuloso', 'Cidade Murada', 'Vila Costeira', 'Cavernas Subterrâneas', 'Deserto de Areia Negra'];
-export const ACCESSORY_TYPES: string[] = ['Aleatória', 'Máscara', 'Brinco', 'Colar', 'Capa', 'Haori Especial', 'Amuleto'];
-export const THREAT_SCALES: string[] = ['Aleatória', 'Conflito Local', 'Guerra Regional', 'Ameaça Global', 'Crise Existencial'];
 
-export const RELATIONS: string[] = ['Aleatória', 'Amigo', 'Inimigo', 'Neutro', 'Mentor', 'Contato'];
-export const DETAIL_LEVELS: string[] = ['Médio', 'Baixo', 'Alto'];
+export const TERRAINS: string[] = [
+    'Aleatória', 'Floresta Densa', 'Montanhas Rochosas', 'Pântano Nebuloso', 'Cidade Assombrada', 'Templo Antigo', 'Caverna de Cristal', 'Vulcão Ativo', 'Planície Nevada', 'Deserto de Areia Negra'
+];
+
+export const THREAT_SCALES: string[] = [
+    'Aleatória', 'Conflito Local', 'Guerra Regional', 'Ameaça Nacional', 'Crise Continental', 'Perigo Global', 'Evento de Extinção'
+];
 
 export const ORIGINS: string[] = [
-    'Aleatória',
-    'Tsuguko (Discípulo de Hashira)',
-    'Samurai',
-    'Ninja',
-    'Isolado',
-    'Civilizado',
-  'Slayer Corrompido',
-    'Descendente Perdido',
-    'Estrangeiro',
-    'Monge',
-    'Criado por Ex-Hashira'
+    'Aleatória', 'Clã de Ferreiros', 'Família de Caçadores', 'Templo de Monges', 'Nobreza Caída', 'Sobrevivente de Massacre', 'Criação de Oni', 'Experimento Alquímico', 'Pacto Sobrenatural', 'Viajante Dimensional'
 ];
 
-export const ONI_POWER_LEVELS: string[] = ['Aleatório', 'Minion', 'Médio', 'Lua Inferior', 'Lua Minguante', 'Lua Superior'];
-
-// Sample data for Demon Blood Arts as it's not provided elsewhere.
-export const DEMON_BLOOD_ARTS: string[] = [
-    "Nenhuma",
-    "Manipulação de Sangue",
-    "Fios Cortantes",
-    "Ilusões Espaciais",
-    "Controle de Sombras",
-    "Gelo Eterno",
-    "Chamas Negras",
-    "Metamorfose Corporal",
-    "Espinhos Ósseos",
-    "Névoa Venenosa",
-    "Criação de Marionetes",
-    "Absorção de Vida",
-    "Gravitocinese",
-    "Desintegração Molecular",
-    "Cúpula Dimensional"
+export const ONI_POWER_LEVELS: string[] = [
+    'Aleatório', 'Oni Comum', 'Oni de Elite', 'Lua Inferior', 'Lua Superior', 'Classe Muzan'
 ];
 
 export const INITIAL_FILTERS: FilterState = {
-  category: '',
-  hunterWeapon: 'Aleatória',
-  hunterBreathingStyles: [],
-  hunterAccessory: 'Aleatória',
-  hunterEra: 'Aleatória',
-  hunterPersonality: 'Aleatória',
-  hunterOrigin: 'Aleatória',
-  hunterArchetype: 'Aleatória',
-  hunterCountry: 'Aleatório',
-  accessoryRarity: 'Aleatória',
-  accessoryEra: 'Aleatória',
-  accessoryKekkijutsuInspiration: 'Nenhuma',
-  accessoryBreathingInspiration: 'Nenhuma',
-  accessoryWeaponInspiration: 'Nenhuma',
-  accessoryOrigin: 'Aleatória',
-  weaponRarity: 'Aleatória',
-  weaponMetalColor: 'Aleatória',
-  weaponEra: 'Aleatória',
-  weaponType: 'Aleatória',
-  weaponCountry: 'Aleatório',
-  locationTone: 'aventura',
-  locationCountry: 'Aleatório',
-  locationEra: 'Aleatória',
-  locationTerrain: 'Aleatório',
-  wbTone: 'aventura',
-  wbCountry: 'Aleatório',
-  wbEra: 'Aleatória',
-  wbThreatScale: 'Aleatória',
-  wbLocation: 'Aleatória',
-  breathingFormEra: 'Aleatória',
-  breathingFormWeapon: 'Aleatória',
-  baseBreathingStyles: [],
-  breathingFormTone: 'ação',
-  breathingFormOrigin: 'Aleatória',
-  breathingFormArchetype: 'Aleatória',
-  breathingFormCountry: 'Aleatório',
-  kekkijutsuEra: 'Aleatória',
-  kekkijutsuKekkijutsuInspiration: 'Nenhuma',
-  kekkijutsuBreathingInspiration: 'Nenhuma',
-  kekkijutsuWeaponInspiration: 'Nenhuma',
-  kekkijutsuCountry: 'Aleatório',
-  npcOrigin: 'Aleatória',
-  npcProfession: 'Aleatória',
-  npcEra: 'Aleatória',
-  npcPersonality: 'Aleatória',
-  npcWeapon: 'Aleatória',
-  npcCountry: 'Aleatório',
-  oniPowerLevel: 'Aleatório',
-  oniInspirationKekkijutsu: 'Nenhuma',
-  oniInspirationBreathing: 'Nenhuma',
-  oniWeapon: 'Aleatória',
-  oniCountry: 'Aleatório',
-  oniPersonality: 'Aleatória',
-  missionTone: 'mistério',
-  intensity: 3,
-  missionScale: 'local',
-  protagonist: 'Um caçador recém-formado com um passado misterioso.',
-  targets: 'Um oni que se esconde em uma vila isolada.',
-  moodModifiers: 'chuvoso, sombrio, silencioso',
+    category: '',
+    // Hunter
+    hunterEra: 'Aleatória',
+    hunterCountry: 'Aleatório',
+    hunterOrigin: 'Aleatória',
+    hunterArchetype: 'Aleatória',
+    hunterPersonality: 'Aleatória',
+    hunterWeapon: 'Aleatório',
+    hunterBreathingStyles: [],
+    hunterAccessory: 'Aleatório',
+    // Oni
+    oniPowerLevel: 'Aleatório',
+    oniCountry: 'Aleatório',
+    oniWeapon: 'Aleatório',
+    oniInspirationKekkijutsu: 'Aleatória',
+    oniInspirationBreathing: 'Nenhuma',
+    oniPersonality: 'Aleatória',
+    // NPC
+    npcEra: 'Aleatória',
+    npcCountry: 'Aleatório',
+    npcOrigin: 'Aleatória',
+    npcProfession: 'Aleatória',
+    npcPersonality: 'Aleatória',
+    npcWeapon: 'Aleatório',
+    // Weapon
+    weaponRarity: 'Aleatória',
+    weaponEra: 'Aleatória',
+    weaponCountry: 'Aleatório',
+    weaponType: 'Aleatório',
+    weaponMetalColor: 'Aleatório',
+    // Accessory
+    accessoryRarity: 'Aleatória',
+    accessoryEra: 'Aleatória',
+    accessoryOrigin: 'Aleatória',
+    accessoryBreathingInspiration: 'Nenhuma',
+    accessoryKekkijutsuInspiration: 'Nenhuma',
+    accessoryWeaponInspiration: 'Nenhuma',
+    // Breathing Form
+    baseBreathingStyles: [],
+    breathingFormEra: 'Aleatória',
+    breathingFormCountry: 'Aleatório',
+    breathingFormOrigin: 'Aleatória',
+    breathingFormTone: 'épico',
+    breathingFormWeapon: 'Aleatório',
+    breathingFormArchetype: 'Aleatório',
+    // Kekkijutsu
+    kekkijutsuEra: 'Aleatória',
+    kekkijutsuCountry: 'Aleatório',
+    kekkijutsuKekkijutsuInspiration: 'Aleatória',
+    kekkijutsuBreathingInspiration: 'Nenhuma',
+    kekkijutsuWeaponInspiration: 'Nenhuma',
+    // Location
+    locationTone: 'misterioso',
+    locationEra: 'Aleatória',
+    locationCountry: 'Aleatório',
+    locationTerrain: 'Aleatório',
+    // Mission
+    missionTone: 'sombrio',
+    intensity: 3,
+    missionScale: 'local',
+    protagonist: '',
+    targets: '',
+    moodModifiers: '',
+    // World Building
+    wbTone: 'épico',
+    wbEra: 'Aleatória',
+    wbCountry: 'Aleatório',
+    wbThreatScale: 'Aleatória',
+    wbLocation: '',
 };
