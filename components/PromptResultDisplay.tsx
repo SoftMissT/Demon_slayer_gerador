@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -30,8 +28,8 @@ const PromptCard: React.FC<PromptCardProps> = ({ title, prompt, className, icon 
     };
     
     return (
-        <Card className={`prompt-card flex flex-col ${className} !p-4`}>
-            <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+        <Card className={`prompt-card flex flex-col ${className} !p-4 h-full`}>
+            <div className="flex justify-between items-center mb-3 flex-wrap gap-2 flex-shrink-0">
                 <div className="flex items-center gap-3">
                     {icon}
                     <h3 className="text-lg font-bold text-white font-gangofthree">{title}</h3>
@@ -43,7 +41,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ title, prompt, className, icon 
                     </Button>
                 </div>
             </div>
-            <div className="bg-gray-900/50 p-4 rounded-md text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto flex-grow font-mono">
+            <div className="bg-gray-900/50 p-4 rounded-md text-sm text-gray-300 whitespace-pre-wrap overflow-auto flex-grow font-mono">
                 <code>{prompt}</code>
             </div>
         </Card>
@@ -52,7 +50,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ title, prompt, className, icon 
 
 export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ result }) => {
   return (
-    <div className="space-y-6">
+    <div className="results-row h-full">
         <PromptCard 
             title="Prompt para Midjourney" 
             prompt={result.midjourneyPrompt} 

@@ -105,84 +105,75 @@ export const PromptEngineeringPanel: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full relative">
+        <div className="alquimia-layout-wrapper relative">
              <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 {bubbles}
             </div>
             
-            <div className="flex-shrink-0 pr-2 pb-4">
-                 {/* User Inputs & Parameters */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                    {/* Left Column: Topic and Negative Prompt */}
-                    <Card className="p-6 parameter-card">
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
-                                <textarea
-                                    value={topic}
-                                    onChange={(e) => setTopic(e.target.value)}
-                                    placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
-                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white h-48 resize-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
-                                <input
-                                    type="text"
-                                    value={negativePrompt}
-                                    onChange={(e) => setNegativePrompt(e.target.value)}
-                                    placeholder="Ex: texto, blur, baixa qualidade, cartoon"
-                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
-                                />
-                            </div>
-                        </div>
-                    </Card>
-                    
-                    {/* Right Column: AI Parameters */}
-                    <div className="space-y-6">
-                        <Card className="p-6 parameter-card">
-                            <MidjourneyParameters 
-                                params={mjParams} 
-                                onParamsChange={setMjParams} 
-                                enabled={mjParamsEnabled}
-                                onEnabledChange={setMjParamsEnabled}
+            {/* Top Configuration Grid */}
+            <div className="alquimia-top-grid">
+                <Card className="p-6 parameter-card prompt-editor-block">
+                    <div className="space-y-4 h-full flex flex-col">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
+                            <textarea
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
+                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white resize-none flex-grow"
                             />
-                        </Card>
-                        
-                        <Card className="p-6 parameter-card">
-                            <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
-                        </Card>
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
+                            <input
+                                type="text"
+                                value={negativePrompt}
+                                onChange={(e) => setNegativePrompt(e.target.value)}
+                                placeholder="Ex: texto, blur, baixa qualidade, cartoon"
+                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+                            />
+                        </div>
                     </div>
-                </div>
-                 {/* Action Buttons */}
-                <div className="flex justify-end gap-4 mt-6">
-                    <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
-                        <RefreshIcon className="w-5 h-5" /> Resetar
-                    </Button>
-                    <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()} className="alchemist-button">
-                        <PotionIcon className="w-5 h-5" />
-                        {isLoading ? 'Gerando...' : 'Gerar Prompts'}
-                    </Button>
-                </div>
+                </Card>
+                <Card className="p-6 parameter-card">
+                    <MidjourneyParameters 
+                        params={mjParams} 
+                        onParamsChange={setMjParams} 
+                        enabled={mjParamsEnabled}
+                        onEnabledChange={setMjParamsEnabled}
+                    />
+                </Card>
+                <Card className="p-6 parameter-card">
+                    <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
+                </Card>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 flex-shrink-0">
+                <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
+                    <RefreshIcon className="w-5 h-5" /> Resetar
+                </Button>
+                <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()} className="alchemist-button">
+                    <PotionIcon className="w-5 h-5" />
+                    {isLoading ? 'Gerando...' : 'Gerar Prompts'}
+                </Button>
             </div>
 
-            <div className="flex-grow overflow-y-auto pt-2 pr-2 -mr-2">
-                 {/* Results Section */}
-                <div className="mt-2">
-                    {isLoading && (
-                        <div className="flex justify-center pt-4">
-                            <AlchemyLoadingIndicator />
-                        </div>
-                    )}
-                    
-                    {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
+            {/* Results Section */}
+            <div className="flex-grow min-h-0">
+                {isLoading && (
+                    <div className="flex justify-center items-center h-full">
+                        <AlchemyLoadingIndicator />
+                    </div>
+                )}
+                
+                {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
 
-                    {result && !isLoading && (
-                        <div className="animate-fade-in-up">
-                            <PromptResultDisplay result={result} />
-                        </div>
-                    )}
-                </div>
+                {result && !isLoading && (
+                    <div className="animate-fade-in-up h-full">
+                        <PromptResultDisplay result={result} />
+                    </div>
+                )}
             </div>
         </div>
     );

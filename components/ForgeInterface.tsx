@@ -158,50 +158,42 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
 
     return (
         <div className="forge-interface h-full relative">
-            <div className="app-layout h-full">
-                {!isMobile && (
-                    <div className="filters-panel-wrapper">
-                        <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
-                    </div>
-                )}
+            <div className="forge-layout-wrapper">
+                <div className="forge-column">
+                    <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
+                </div>
 
-                <div className="results-panel-wrapper">
-                    <div className="grid grid-cols-12 gap-6 h-full">
-                        <div className="col-span-12 xl:col-span-7 h-full">
-                            <ResultsPanel
-                                items={items}
-                                isLoading={isLoading && items.length === 0}
-                                selectedItem={selectedItem}
-                                onSelectItem={handleSelectItem}
-                                favorites={favorites}
-                                onToggleFavorite={handleToggleFavorite}
-                                onGenerateVariant={handleGenerateVariant}
-                                onClearResults={handleClearResults}
-                                aiFocus={currentAiFocus}
-                            />
-                        </div>
-                        <div className="hidden xl:block xl:col-span-5 h-full">
-                           <AnimatePresence>
-                             {selectedItem && (
-                               <motion.div
-                                 initial={{ opacity: 0, y: 20 }}
-                                 animate={{ opacity: 1, y: 0 }}
-                                 exit={{ opacity: 0, y: -20 }}
-                                 transition={{ duration: 0.3 }}
-                                 className="h-full"
-                               >
-                                 <DetailPanel
-                                   item={selectedItem}
-                                   onGenerateVariant={handleGenerateVariant}
-                                   isFavorite={isFavorite}
-                                   onToggleFavorite={handleToggleFavorite}
-                                   onUpdate={handleUpdateItem}
-                                 />
-                               </motion.div>
-                             )}
-                           </AnimatePresence>
-                         </div>
-                    </div>
+                <div className="forge-column">
+                    <ResultsPanel
+                        items={items}
+                        isLoading={isLoading && items.length === 0}
+                        selectedItem={selectedItem}
+                        onSelectItem={handleSelectItem}
+                        favorites={favorites}
+                        onToggleFavorite={handleToggleFavorite}
+                        onGenerateVariant={handleGenerateVariant}
+                        onClearResults={handleClearResults}
+                        aiFocus={currentAiFocus}
+                    />
+                    <AnimatePresence>
+                        {selectedItem && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="w-full"
+                            >
+                                <DetailPanel
+                                    item={selectedItem}
+                                    onGenerateVariant={handleGenerateVariant}
+                                    isFavorite={isFavorite}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    onUpdate={handleUpdateItem}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
