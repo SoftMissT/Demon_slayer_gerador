@@ -5,7 +5,8 @@ import { getAiClient } from '../../lib/gemini';
 import { getOpenAiClient } from '../../lib/openai';
 import { callDeepSeekAPI } from '../../lib/deepseek';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
-import type { FilterState, GeneratedItem, Category } from '../../types';
+import type { FilterState, GeneratedItem, Category, ApiKeys } from '../../types';
+import { logGenerationToSheet } from '../../lib/googleSheets';
 
 // Helper to safely parse JSON from AI responses
 const safeJsonParse = (jsonString: string | null | undefined): any | null => {
@@ -30,7 +31,7 @@ export default async function handler(
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    const { filters, promptModifier } = req.body as { filters: FilterState, promptModifier?: string };
+    const { filters, promptModifier, apiKeys } = req.body as { filters: FilterState, promptModifier?: string, apiKeys?: ApiKeys };
     
     if (!filters || !filters.category) {
         return res.status(400).json({ message: 'A categoria é obrigatória nos filtros.' });
@@ -46,7 +47,7 @@ export default async function handler(
             baseConcept = await callDeepSeekAPI([
                 { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
                 { role: 'user', content: prompt }
-            ]);
+            ], apiKeys?.deepseek);
             allProvenance.push({ step: '1/3 - Base Concept', model: 'DeepSeek', status: 'success' });
         } catch (error: any) {
             console.error("Error in Step 1 (DeepSeek):", error);
@@ -55,7 +56,7 @@ export default async function handler(
         }
 
         // Step 2: Gemini for enrichment
-        const geminiClient = getAiClient();
+        const geminiClient = getAiClient(apiKeys?.gemini);
         if (!geminiClient) {
             return res.status(500).json({ message: 'Cliente Gemini não inicializado. Verifique a chave de API.' });
         }
@@ -80,7 +81,7 @@ export default async function handler(
         // Step 3: OpenAI for final polish
         let finalItem = enrichedItem;
         try {
-            const openAiClient = getOpenAiClient();
+            const openAiClient = getOpenAiClient(apiKeys?.openai);
             if (openAiClient) {
                 const itemForPolish = {
                     nome: ('title' in finalItem && finalItem.title) || finalItem.nome,
@@ -125,6 +126,10 @@ export default async function handler(
             id: `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
             createdAt: new Date().toISOString(),
         };
+
+        // Non-blocking call to log the result to the sheet.
+        // Errors are handled inside the function itself.
+        logGenerationToSheet(result);
 
         res.status(200).json(result);
 

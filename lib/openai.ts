@@ -1,23 +1,19 @@
 
 import OpenAI from 'openai';
 
-let aiClient: OpenAI | null = null;
-
 /**
- * Initializes and returns a singleton instance of the OpenAI client.
- * Returns null and logs an error if the API key is not found.
+ * Initializes and returns an instance of the OpenAI client.
+ * Uses an override API key if provided, otherwise falls back to the environment variable.
+ * Returns null and logs an error if no API key is found.
+ * @param apiKeyOverride - An optional API key to use instead of the one from environment variables.
  */
-export const getOpenAiClient = (): OpenAI | null => {
-    const apiKey = process.env.OPENAI_API_KEY;
+export const getOpenAiClient = (apiKeyOverride?: string): OpenAI | null => {
+    const apiKey = apiKeyOverride || process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-        console.error("A variável de ambiente OPENAI_API_KEY não está definida.");
+        console.warn("Nenhuma chave de API da OpenAI foi encontrada (nem do usuário, nem do ambiente). A etapa de polimento será ignorada.");
         return null;
     }
 
-    if (!aiClient) {
-        aiClient = new OpenAI({ apiKey });
-    }
-
-    return aiClient;
+    return new OpenAI({ apiKey });
 };

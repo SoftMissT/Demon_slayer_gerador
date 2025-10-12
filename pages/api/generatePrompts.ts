@@ -1,6 +1,7 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
-import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult } from '../../types';
+import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys } from '../../types';
 
 interface GeneratePromptsRequest {
     basePrompt: string;
@@ -10,6 +11,7 @@ interface GeneratePromptsRequest {
     generateMidjourney: boolean;
     generateGpt: boolean;
     generateGemini: boolean;
+    apiKeys?: ApiKeys;
 }
 
 const buildMidjourneyPrompt = (base: string, params?: MidjourneyParameters): string => {
@@ -40,14 +42,14 @@ export default async function handler(
     }
 
     try {
-        const geminiClient = getAiClient();
+        const request = req.body as GeneratePromptsRequest;
+        const { basePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini, apiKeys } = request;
+
+        const geminiClient = getAiClient(apiKeys?.gemini);
         if (!geminiClient) {
             return res.status(500).json({ message: 'Cliente Gemini não inicializado. Verifique a chave de API.' });
         }
         
-        const request = req.body as GeneratePromptsRequest;
-        const { basePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini } = request;
-
         const requestedPrompts: string[] = [];
         if (generateMidjourney) requestedPrompts.push('"midjourneyPrompt"');
         if (generateGpt) requestedPrompts.push('"gptPrompt"');

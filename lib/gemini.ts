@@ -1,23 +1,19 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-let aiClient: GoogleGenAI | null = null;
-
 /**
- * Initializes and returns a singleton instance of the GoogleGenAI client.
- * Returns null and logs an error if the API key is not found.
+ * Initializes and returns an instance of the GoogleGenAI client.
+ * Uses an override API key if provided, otherwise falls back to the environment variable.
+ * Returns null and logs an error if no API key is found.
+ * @param apiKeyOverride - An optional API key to use instead of the one from environment variables.
  */
-export const getAiClient = (): GoogleGenAI | null => {
-    const apiKey = process.env.API_KEY;
+export const getAiClient = (apiKeyOverride?: string): GoogleGenAI | null => {
+    const apiKey = apiKeyOverride || process.env.API_KEY;
 
     if (!apiKey) {
-        console.error("A variável de ambiente API_KEY não está definida.");
+        console.error("Nenhuma chave de API do Gemini foi encontrada (nem do usuário, nem do ambiente).");
         return null;
     }
 
-    if (!aiClient) {
-        aiClient = new GoogleGenAI({ apiKey });
-    }
-
-    return aiClient;
+    return new GoogleGenAI({ apiKey });
 };

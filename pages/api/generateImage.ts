@@ -1,7 +1,8 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Modality } from '@google/genai';
-import type { GptParameters, MidjourneyParameters } from '../../types';
+import type { GptParameters, MidjourneyParameters, ApiKeys } from '../../types';
 
 interface ImageResponse {
     base64Image?: string;
@@ -41,12 +42,12 @@ export default async function handler(
     }
     
     try {
-        const { prompt, mjParams, gptParams } = req.body;
+        const { prompt, mjParams, gptParams, apiKeys } = req.body as { prompt: string, mjParams?: MidjourneyParameters, gptParams?: GptParameters, apiKeys?: ApiKeys };
         if (!prompt || typeof prompt !== 'string') {
             return res.status(400).json({ message: 'O prompt é obrigatório e deve ser uma string.' });
         }
 
-        const aiClient = getAiClient();
+        const aiClient = getAiClient(apiKeys?.gemini);
         if (!aiClient) {
             return res.status(500).json({ message: 'A chave da API do Gemini não está configurada no servidor.' });
         }

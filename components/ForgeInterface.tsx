@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FilterPanel } from './FilterPanel';
@@ -10,7 +11,7 @@ import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
-import type { FilterState, GeneratedItem } from '../types';
+import type { FilterState, GeneratedItem, ApiKeys } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { DiscordIcon } from './icons/DiscordIcon';
@@ -23,6 +24,7 @@ interface ForgeInterfaceProps {
     onFavoritesCountChange: (count: number) => void;
     isAuthenticated: boolean;
     onLoginClick: () => void;
+    apiKeys: ApiKeys;
 }
 
 const useWindowSize = () => {
@@ -55,7 +57,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     isFavoritesOpen, onFavoritesClose, 
     isHistoryOpen, onHistoryClose, 
     onFavoritesCountChange, 
-    isAuthenticated, onLoginClick
+    isAuthenticated, onLoginClick,
+    apiKeys,
 }) => {
     const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
     const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
@@ -99,7 +102,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
 
         try {
             const promises = Array.from({ length: count }).map(() => 
-                orchestrateGeneration(filters, promptModifier)
+                orchestrateGeneration(filters, promptModifier, apiKeys)
             );
             const newItems = await Promise.all(promises);
             
@@ -114,7 +117,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             setIsLoading(false);
             setCurrentAiFocus(null);
         }
-    }, [isMobile, setHistory, isAuthenticated, onLoginClick]);
+    }, [isMobile, setHistory, isAuthenticated, onLoginClick, apiKeys]);
 
     const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
@@ -164,7 +167,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (isMobile && isDetailModalOpen) setIsDetailModalOpen(false);
 
         try {
-            const variant = await orchestrateGeneration(filters as FilterState, modifier);
+            const variant = await orchestrateGeneration(filters as FilterState, modifier, apiKeys);
             variant.nome = `${item.nome} (Variante ${variantType})`;
             
             setItems(prev => [variant, ...prev]);
@@ -176,7 +179,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         } finally {
             setIsLoading(false);
         }
-    }, [setHistory, isMobile, isDetailModalOpen, isAuthenticated, onLoginClick]);
+    }, [setHistory, isMobile, isDetailModalOpen, isAuthenticated, onLoginClick, apiKeys]);
 
     const handleDeleteFromHistory = useCallback((itemId: string) => {
         setHistory(prev => prev.filter(item => item.id !== itemId));

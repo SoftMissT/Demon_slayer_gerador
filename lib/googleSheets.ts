@@ -1,11 +1,38 @@
 import { google } from 'googleapis';
 import { JWT } from 'google-auth-library';
+import type { GeneratedItem } from '../types';
 
 // In-memory cache for the whitelist
 let whitelistedIds: Set<string> | null = null;
 let lastFetchTime: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 const TARGET_SHEET_NAME = 'discord_id';
+
+// Shared JWT client to avoid re-creating it on every call
+let jwtClient: JWT | null = null;
+
+function getJwtClient(): JWT {
+    if (jwtClient) {
+        return jwtClient;
+    }
+    
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+    if (!serviceAccountEmail || !privateKey) {
+        throw new Error('As credenciais da conta de serviço do Google (EMAIL, PRIVATE_KEY) não estão configuradas corretamente nas variáveis de ambiente.');
+    }
+
+    // Use a single client with read/write permissions for both functions
+    jwtClient = new JWT({
+        email: serviceAccountEmail,
+        key: privateKey,
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    
+    return jwtClient;
+}
+
 
 /**
  * Fetches the list of whitelisted Discord IDs from a specified Google Sheet.
@@ -20,21 +47,14 @@ async function getWhitelistedIds(): Promise<Set<string>> {
         return whitelistedIds;
     }
 
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
     const sheetId = process.env.GOOGLE_SHEET_ID;
 
-    if (!serviceAccountEmail || !privateKey || !sheetId) {
-        throw new Error('As credenciais da API do Google Sheets não estão configuradas corretamente nas variáveis de ambiente do projeto.');
+    if (!sheetId) {
+        throw new Error('A variável de ambiente GOOGLE_SHEET_ID não está definida.');
     }
 
     try {
-        const auth = new JWT({
-            email: serviceAccountEmail,
-            key: privateKey,
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-        });
-
+        const auth = getJwtClient();
         const sheets = google.sheets({ version: 'v4', auth });
         
         // Step 1: Verify spreadsheet existence and tab name for better error reporting.
@@ -121,4 +141,61 @@ export async function isUserWhitelisted(userId: string): Promise<boolean> {
     }
     const ids = await getWhitelistedIds();
     return ids.has(userId);
+}
+
+/**
+ * Appends a new row to the generation log sheet with details of the generated item.
+ * This is a fire-and-forget function; it logs errors but does not throw them,
+ * ensuring that logging failures do not interrupt the main generation flow.
+ * @param {GeneratedItem} item - The item that was generated.
+ */
+export async function logGenerationToSheet(item: GeneratedItem): Promise<void> {
+    const sheetId = process.env.GOOGLE_SHEET_ID;
+    const logSheetName = process.env.GOOGLE_SHEET_LOG_NAME;
+
+    if (!sheetId) {
+        console.error('GOOGLE_SHEET_ID is not set. Skipping sheet logging.');
+        return;
+    }
+
+    if (!logSheetName) {
+        console.warn('GOOGLE_SHEET_LOG_NAME is not set. Skipping sheet logging.');
+        return;
+    }
+
+    try {
+        const auth = getJwtClient();
+        const sheets = google.sheets({ version: 'v4', auth });
+        
+        const timestamp = item.createdAt || new Date().toISOString();
+        const name = ('title' in item && item.title) || item.nome;
+        
+        const rowData = [
+            timestamp,
+            item.id,
+            item.categoria,
+            name,
+            item.descricao_curta,
+            item.imagePromptDescription || '',
+            JSON.stringify(item),
+        ];
+
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: `${logSheetName}!A:G`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                values: [rowData],
+            },
+        });
+        
+        console.log(`Successfully logged generation ID ${item.id} to Google Sheet.`);
+    } catch (error: any) {
+        // The service account might have read-only permissions. Provide a helpful error.
+        let errorMessage = error.message;
+        if (error.code === 403 || error.message?.toLowerCase().includes('permission denied')) {
+            errorMessage = 'Permission Denied (403). A conta de serviço precisa de permissão de "Editor" na planilha para registrar os logs.';
+        }
+        console.error('Failed to log generation to Google Sheet:', errorMessage);
+    }
 }

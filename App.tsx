@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -8,12 +9,15 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { Spinner } from './components/ui/Spinner';
-import type { User } from './types';
+import type { User, ApiKeys } from './types';
+import useLocalStorage from './hooks/useLocalStorage';
+import { ApiKeysModal } from './components/ApiKeysModal';
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
     const [isAboutOpen, setIsAboutOpen] = useState(false);
     const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
+    const [isApiKeysModalOpen, setIsApiKeysModalOpen] = useState(false);
     
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -23,6 +27,9 @@ const App: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const [authError, setAuthError] = useState<string | null>(null);
     const [isAuthenticating, setIsAuthenticating] = useState(true);
+    
+    const [apiKeys] = useLocalStorage<ApiKeys>('kimetsu-forge-api-keys', { gemini: '', openai: '', deepseek: '' });
+
 
     // Handles both localStorage session check and Discord OAuth callback on initial load
     useEffect(() => {
@@ -123,6 +130,7 @@ const App: React.FC = () => {
                     onFavoritesClick={() => setIsFavoritesOpen(true)}
                     onHistoryClick={() => setIsHistoryOpen(true)}
                     onHowItWorksClick={() => setIsHowItWorksOpen(true)}
+                    onApiKeysClick={() => setIsApiKeysModalOpen(true)}
                     user={user}
                     onLoginClick={handleLogin}
                     onLogoutClick={handleLogout}
@@ -147,11 +155,13 @@ const App: React.FC = () => {
                                     onFavoritesCountChange={setFavoritesCount}
                                     isAuthenticated={!!user}
                                     onLoginClick={handleLogin}
+                                    apiKeys={apiKeys}
                                 />
                             ) : (
                                 <PromptEngineeringPanel 
                                     isAuthenticated={!!user}
                                     onLoginClick={handleLogin}
+                                    apiKeys={apiKeys}
                                 />
                             )}
                         </motion.div>
@@ -160,6 +170,7 @@ const App: React.FC = () => {
                 <Footer onAboutClick={() => setIsAboutOpen(true)} />
                 <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
                 <HowItWorksModal isOpen={isHowItWorksOpen} onClose={() => setIsHowItWorksOpen(false)} />
+                <ApiKeysModal isOpen={isApiKeysModalOpen} onClose={() => setIsApiKeysModalOpen(false)} />
                 <ErrorDisplay message={authError} onDismiss={() => setAuthError(null)} />
             </div>
         </>
