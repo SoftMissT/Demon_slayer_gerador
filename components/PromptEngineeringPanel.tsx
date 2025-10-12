@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -14,7 +15,6 @@ import { SaveIcon } from './icons/SaveIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { Select } from './ui/Select';
 import { RefreshIcon } from './icons/RefreshIcon';
-import { TypingLoader } from './TypingLoader';
 
 const INITIAL_MJ_PARAMS: MidjourneyParams = {
     aspectRatio: { value: '1:1', active: false },
