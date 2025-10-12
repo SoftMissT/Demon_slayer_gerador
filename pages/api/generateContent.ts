@@ -91,7 +91,7 @@ const step2_refineWithGemini = async (baseConcept: any, filters: FilterState, pr
 };
 
 // Step 3: Finalize and polish with OpenAI
-const step3_finalizeWithOpenAI = async (item: GeneratedItem): Promise<{ finalItem: GeneratedItem, provenance: Provenance }> => {
+const step3_finalizeWithOpenAI = async (item: GeneratedItem, filters: FilterState): Promise<{ finalItem: GeneratedItem, provenance: Provenance }> => {
     const provenance: Provenance = { step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped' };
     const openAiClient = getOpenAiClient();
     if (!openAiClient) {
@@ -99,28 +99,47 @@ const step3_finalizeWithOpenAI = async (item: GeneratedItem): Promise<{ finalIte
     }
     
     try {
-        const polishableFields = {
+        const itemForPolish = {
             nome: ('title' in item && item.title) || item.nome,
-            descricao_curta: item.descricao_curta,
+            categoria: item.categoria,
             descricao: item.descricao,
             ganchos_narrativos: item.ganchos_narrativos,
+            imagePromptProto: item.imagePromptDescription, // Gemini creates this now
         };
 
-        const prompt = `Você é um mestre de RPG e escritor criativo. Sua tarefa é fazer o polimento final no item a seguir, que já foi estruturado por outras IAs. Melhore a narrativa, a clareza e o impacto, tornando as descrições mais vívidas e os ganchos narrativos mais intrigantes. Retorne um objeto JSON APENAS com as chaves que você aprimorou: "nome", "descricao_curta", "descricao", "ganchos_narrativos".\n\nItem para polir:\n${JSON.stringify(polishableFields)}`;
+        const prompt = `Você é um mestre de narrativa e um especialista em prompts visuais. Sua tarefa é fazer o polimento final no item a seguir.
+        1.  **gameText**: Reescreva a 'descricao' e os 'ganchos_narrativos' para ter um tom de roleplay mais forte. Descreva posições, sons, sensações e a sequência de golpes para técnicas.
+        2.  **imagePromptDescription**: Refine o 'imagePromptProto' em um prompt final e conciso para um gerador de imagens. Incorpore as seguintes referências de estilo: "${filters.styleReferences || 'nenhum'}". O resultado deve ser uma frase curta com tags (ex: "close-up, dramatic lighting, anime style, cinematic, --ar 3:4").
+
+        Retorne um objeto JSON com duas chaves: "gameText" (a descrição de RPG aprimorada) e "imagePromptDescription" (o prompt de imagem final).
+
+        Item para polir:
+        ${JSON.stringify(itemForPolish)}`;
 
         const response = await openAiClient.chat.completions.create({
             model: 'gpt-4o',
             response_format: { type: "json_object" },
             messages: [
-                { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
+                { role: 'system', content: 'You are a helpful assistant designed to output valid JSON with the keys "gameText" and "imagePromptDescription".' },
                 { role: 'user', content: prompt }
             ]
         });
 
         const polishedData = safeJsonParse(response.choices[0].message.content);
-        if (polishedData) {
+        if (polishedData && polishedData.gameText && polishedData.imagePromptDescription) {
             provenance.status = 'success';
-            return { finalItem: { ...item, ...polishedData }, provenance };
+            // Merge the polished text back into the item
+            const finalItem = { 
+                ...item, 
+                descricao: polishedData.gameText, // 'descricao' is our gameText
+                imagePromptDescription: polishedData.imagePromptDescription,
+            };
+            // Ensure narrative hooks are preserved if not part of the polish
+            if (!polishedData.gameText.includes("Ganchos")) {
+                 finalItem.descricao += `\n\n**Ganchos Narrativos:**\n${Array.isArray(item.ganchos_narrativos) ? item.ganchos_narrativos.map(h => `- ${h}`).join('\n') : item.ganchos_narrativos || ''}`;
+            }
+
+            return { finalItem, provenance };
         }
         return { finalItem: item, provenance };
     } catch (error) {
@@ -163,7 +182,7 @@ export default async function handler(
         }
 
         // Step 3: OpenAI
-        const { finalItem, provenance: p3 } = await step3_finalizeWithOpenAI(enrichedItem);
+        const { finalItem, provenance: p3 } = await step3_finalizeWithOpenAI(enrichedItem, filters);
         allProvenance.push(p3);
         
         return { ...finalItem, provenance: allProvenance };

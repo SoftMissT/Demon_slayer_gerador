@@ -28,11 +28,6 @@ interface FilterPanelProps {
     isLoading: boolean;
 }
 
-const breathingStylesOptions = BREATHING_STYLES_DATA.map(style => style.nome);
-const hunterArchetypeOptions = ['Aleatória', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))];
-const weaponTypeOptions = WEAPON_TYPES.map(w => w.name);
-const accessoryInspirationOptions = ['Nenhuma', 'Máscara', 'Brinco', 'Colar', 'Anel', 'Cinto', 'Luva', 'Haori (Kimono)', 'Amuleto'];
-
 const TextInput: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label: string }> = ({ label, ...props }) => (
     <div>
         <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
@@ -50,6 +45,27 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
     const [promptModifier, setPromptModifier] = useState('');
     const [presets, setPresets] = useLocalStorage<FilterPreset[]>('kimetsu-forge-presets', []);
     const [selectedPreset, setSelectedPreset] = useState<string>('');
+
+    // FIX: Define options for select inputs based on imported data to resolve reference errors.
+    const breathingStylesOptions = useMemo(() => BREATHING_STYLES_DATA.map(bs => bs.nome), []);
+    const hunterArchetypeOptions = useMemo(() => ['Aleatório', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))], []);
+    const weaponTypeOptions = useMemo(() => WEAPON_TYPES.map(w => w.name), []);
+    const accessoryInspirationOptions = useMemo(() => [
+        'Nenhum',
+        'Nenhuma',
+        'Aleatório',
+        'Haori (casaco)',
+        'Máscara Kitsune/Oni',
+        'Brincos Hanafuda',
+        'Amuleto de Proteção (Omamori)',
+        'Guarda-mão de Espada (Tsuba)',
+        'Sinos Suzu',
+        'Lanterna de Papel',
+        'Leque de Guerra (Tessen)',
+        'Jóia com Glicínia',
+        'Cachimbo Kiseru',
+        'Pergaminho com Selos',
+    ], []);
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(field: K, value: FilterState[K]) => {
         setFilters(prev => ({ ...prev, [field]: value }));
@@ -230,9 +246,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
         <Card className="forge-panel flex flex-col h-full p-4">
             <div className="flex justify-between items-center flex-shrink-0 mb-4">
                 <h2 className="text-xl font-bold text-white font-gangofthree">Filtros da Forja</h2>
-                <Button variant="ghost" size="sm" onClick={handleResetFilters}>
-                     <RefreshIcon className="w-4 h-4" /> Limpar Filtros
-                </Button>
+                <button className="reset-button-outer" onClick={handleResetFilters}>
+                    <div className="reset-button-flex">
+                        <RefreshIcon className="w-4 h-4" />
+                        <span>Limpar Filtros</span>
+                    </div>
+                </button>
             </div>
             <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-4">
                 <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
@@ -281,6 +300,18 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                         </Button>
                         )}
                     </div>
+                </div>
+
+                <div className="border-t border-gray-700 pt-4">
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Referências de Estilo (Opcional)</label>
+                    <textarea
+                        value={filters.styleReferences}
+                        onChange={(e) => handleFilterChange('styleReferences', e.target.value)}
+                        placeholder="Ex: Attack on Titan, Studio Ghibli, Yoshitaka Amano"
+                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm resize-none"
+                        rows={2}
+                        disabled={isLoading}
+                    />
                 </div>
 
                 <div className="border-t border-gray-700 pt-4">

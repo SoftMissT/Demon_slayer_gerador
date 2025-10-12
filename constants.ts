@@ -69,7 +69,7 @@ export const METAL_COLORS: string[] = [
 ];
 
 export const COUNTRIES: string[] = [
-    'Aleatório',
+    'Aleatória',
     'Afeganistão',
     'África do Sul',
     'Albânia',
@@ -318,6 +318,7 @@ export const ORIGINS: string[] = ['Aleatória', ...ORIGINS_DATA.map(o => o.nome)
 
 export const INITIAL_FILTERS: FilterState = {
     category: '',
+    styleReferences: '',
     // Hunter
     hunterTematica: '',
     hunterCountry: '',

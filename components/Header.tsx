@@ -3,6 +3,7 @@ import { AboutTooltip } from './AboutTooltip';
 import { StarIcon } from './icons/StarIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
 import { Button } from './ui/Button';
+import { ShareButton } from './ShareButton';
 
 // FIX: Implemented Header component to resolve placeholder errors.
 interface HeaderProps {
@@ -39,14 +40,17 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, 
       </div>
       
       {/* Center section */}
-      <nav className="hidden md:flex items-center gap-2 p-1 bg-gray-800 rounded-lg flex-shrink-0">
-        <button onClick={() => onViewChange('forge')} className={getButtonClasses('forge')}>
-            Forja
-        </button>
-        <button onClick={() => onViewChange('prompt')} className={getButtonClasses('prompt')}>
-            Alquimia
-        </button>
-      </nav>
+      <div className="hidden md:flex items-center gap-4">
+        <nav className="flex items-center gap-2 p-1 bg-gray-800 rounded-lg flex-shrink-0">
+          <button onClick={() => onViewChange('forge')} className={getButtonClasses('forge')}>
+              Forja
+          </button>
+          <button onClick={() => onViewChange('prompt')} className={getButtonClasses('prompt')}>
+              Alquimia
+          </button>
+        </nav>
+        <ShareButton />
+      </div>
 
       {/* Right section for alignment */}
       <div className="flex-1 flex justify-end">

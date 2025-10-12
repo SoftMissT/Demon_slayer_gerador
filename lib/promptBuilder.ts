@@ -14,6 +14,7 @@ const baseItemSchemaProperties = {
     tematica: { type: Type.STRING, description: "A temática ou estilo em que o item se encaixa." },
     descricao_curta: { type: Type.STRING, description: "Uma descrição de uma a duas frases que captura a essência do item." },
     descricao: { type: Type.STRING, description: "Uma descrição detalhada (2-3 parágrafos) com lore, aparência e contexto." },
+    imagePromptDescription: { type: Type.STRING, description: "Um protótipo de prompt para um gerador de imagem, focado em descrever a aparência visual do item com tags (ex: 'close-up, dramatic lighting, anime style')." },
     raridade: { type: Type.STRING, description: "A raridade do item (Ex: Comum, Raro, Lendário).", enum: ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado', 'N/A'] },
     nivel_sugerido: { type: Type.NUMBER, description: "Nível de poder ou desafio sugerido para o item (1 a 20)." },
 };
@@ -257,10 +258,12 @@ export const buildGenerationPrompt = (filters: FilterState, count: number, promp
 
     let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba".
 Sua tarefa é enriquecer um conceito base, transformando-o em um item completo e detalhado para a categoria "${filters.category}".
+Você também deve criar um protótipo de prompt de imagem para este item.
 O resultado DEVE ser um objeto JSON que adere estritamente ao schema fornecido.
 
 Contexto Geral:
-- Crie lore, descrições vívidas e mecânicas interessantes.
+- Crie lore, descrições vívidas e mecânicas interessantes para o jogo.
+- O campo 'imagePromptDescription' deve ser uma descrição visual concisa, com tags, pronta para ser refinada por outra IA.
 - O campo 'nome' deve ser único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
 
 Diretriz de Foco: Seu foco principal ao expandir este conceito deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
@@ -276,9 +279,12 @@ Diretriz de Foco: Seu foco principal ao expandir este conceito deve ser em "${fi
 
     prompt += 'Filtros a serem aplicados (combine-os com o conceito base):\n';
     prompt += `- Categoria Principal: ${filters.category}\n`;
+    if (filters.styleReferences) {
+        prompt += `- Referências de Estilo Visual: ${filters.styleReferences}\n`;
+    }
 
     for (const [key, value] of Object.entries(activeFilters)) {
-        if (key !== 'category' && !key.startsWith('aiFocus')) {
+        if (key !== 'category' && !key.startsWith('aiFocus') && key !== 'styleReferences') {
             const formattedValue = Array.isArray(value) ? value.join(', ') : value;
             prompt += `- ${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${formattedValue}\n`;
         }

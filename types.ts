@@ -1,3 +1,5 @@
+
+// FIX: Removed self-referential import of 'Category' to resolve name conflict.
 // FIX: Populated with full type definitions to resolve module errors.
 export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missões' | 'World Building' | 'Evento';
 export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
@@ -6,6 +8,7 @@ export type Tone = 'épico' | 'sombrio' | 'misterioso' | 'aventuresco' | 'cômic
 
 export interface FilterState {
   category: Category | '';
+  styleReferences: string; // For image prompt generation
   // Hunter
   hunterTematica: Tematica | '';
   hunterCountry: string;
@@ -108,7 +111,8 @@ export interface BaseGeneratedItem {
   categoria: Category;
   tematica: string;
   descricao_curta: string;
-  descricao: string;
+  descricao: string; // This will serve as the 'gameText'
+  imagePromptDescription?: string; // For image generation AIs
   raridade: Rarity;
   nivel_sugerido: number;
   ganchos_narrativos?: string | string[];

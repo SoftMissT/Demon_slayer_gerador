@@ -551,6 +551,30 @@ const EventDetailView: React.FC<{ item: EventItem }> = ({ item }) => (
     </>
 );
 
+const ImagePromptSection: React.FC<{ prompt: string }> = ({ prompt }) => {
+    const [copied, setCopied] = useState(false);
+    const handleCopy = () => {
+        navigator.clipboard.writeText(prompt);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <div className="py-4">
+            <div className="flex justify-between items-center mb-2">
+                <h4 className="text-xs font-bold text-indigo-400 font-gangofthree tracking-widest uppercase">Prompt de Imagem</h4>
+                <Button variant="ghost" size="sm" onClick={handleCopy}>
+                    {copied ? <ClipboardCheckIcon className="w-4 h-4 text-green-400" /> : <ClipboardIcon className="w-4 h-4" />}
+                    {copied ? 'Copiado!' : 'Copiar'}
+                </Button>
+            </div>
+            <div className="bg-gray-900/50 p-3 rounded-md text-sm text-gray-300 whitespace-pre-wrap font-mono">
+                <code>{prompt}</code>
+            </div>
+        </div>
+    );
+};
+
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -682,6 +706,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                     }
                 </>
              )}
+             
+             {item.imagePromptDescription && <ImagePromptSection prompt={item.imagePromptDescription} />}
         </div>
         
         {canGenerateVariant && (
