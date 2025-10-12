@@ -23,5 +23,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.d.ts", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "vite.config.ts", "index.tsx", "App.tsx", "types/vite.d.ts"]
+  "exclude": ["node_modules"]
 }
