@@ -71,7 +71,7 @@ A maior parte da lógica de geração está centralizada nos seguintes locais:
 
 ## ❤️ Apoie a Obra Original
 Kimetsu Forge é um projeto de fã, feito com carinho para a comunidade. A melhor forma de apoiar é consumindo a obra original de Koyoharu Gotouge.
-- **Leia o Mangá:** [Compre na Panini Comics Brasil](https://panini.com.br/demon-slayer-kimetsu-no-yaiba)
+- **Leia o Mangá:** [Compre na Panini Comics Brasil](https://panini.com.br/catalogsearch/result/index/referer/aHR0cHM6Ly9wYW5pbmkuY29tLmJyL2NhdGFsb2dzZWFyY2gvcmVzdWx0Lz9xPURlbW9uK1NsYXllcg~~/?collection=DEMON+SLAYER+-+KIMETSU+NO+YAIBA&q=Demon+Slayer)
 - **Assista ao Anime:** [Disponível na Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
 
 ## ⚠️ Aviso Legal

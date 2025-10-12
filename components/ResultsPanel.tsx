@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { GeneratedItem, FilterState } from '../types';
 import { ResultCardSkeleton } from './ResultCardSkeleton';
@@ -129,7 +130,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   onToggleFavorite,
   onGenerateVariant,
   onClearResults,
-  title = "Resultados da Forja",
+  title = "VITRINE DE EXPOSIÇÃO",
   aiFocus,
   activeFilters,
 }) => {

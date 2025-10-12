@@ -350,6 +350,11 @@ export interface MidjourneyParameters {
     chaos: MidjourneyParameter<number>;
     quality: MidjourneyParameter<number>;
     weird: MidjourneyParameter<number>;
+    artStyle: MidjourneyParameter<string>;
+    lighting: MidjourneyParameter<string>;
+    colorPalette: MidjourneyParameter<string>;
+    composition: MidjourneyParameter<string>;
+    detailLevel: MidjourneyParameter<string>;
 }
 
 export interface GptParameters {

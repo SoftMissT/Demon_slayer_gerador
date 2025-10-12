@@ -43,52 +43,15 @@ body {
 
 /* --- THEMES --- */
 .forge-theme {
-    background: radial-gradient(
-        circle farthest-side at 0% 50%,
-        #282828 23.5%,
-        rgba(255, 170, 0, 0) 0
-      )
-      21px 30px,
-    radial-gradient(
-        circle farthest-side at 0% 50%,
-        #a1000e 24%,
-        rgba(240, 166, 17, 0) 0
-      )
-      19px 30px,
-    linear-gradient(
-        #282828 14%,
-        rgba(240, 166, 17, 0) 0,
-        rgba(240, 166, 17, 0) 85%,
-        #282828 0
-      )
-      0 0,
-    linear-gradient(
-        150deg,
-        #282828 24%,
-        #a1000e 0,
-        #a1000e 26%,
-        rgba(240, 166, 17, 0) 0,
-        rgba(240, 166, 17, 0) 74%,
-        #a1000e 0,
-        #a1000e 76%,
-        #282828 0
-      )
-      0 0,
-    linear-gradient(
-        30deg,
-        #282828 24%,
-        #a1000e 0,
-        #a1000e 26%,
-        rgba(240, 166, 17, 0) 0,
-        rgba(240, 166, 17, 0) 74%,
-        #a1000e 0,
-        #a1000e 76%,
-        #282828 0
-      )
-      0 0,
-    linear-gradient(90deg, #a1000e 2%, #282828 0, #282828 98%, #a1000e 0%) 0 0
-      #282828;
-  background-size: 40px 60px;
+    --s: 100px; /* size */
+    --c: rgba(161, 0, 14, 0.25); /* #a1000e color with alpha */
+    --_g: #0000 8.5%,var(--c) 0 11.5%,#0000 0 38.5%,var(--c) 0 41.5%,#0000 0;
+    background:
+      linear-gradient(150deg,var(--_g)),
+      linear-gradient(30deg, var(--_g)),
+      linear-gradient(90deg, #0000 32.5%,var(--c) 0 37.5%,#0000 0 62.5%,var(--c) 0 67.5%,#0000 0);
+    background-size: calc(var(--s)*0.866) var(--s);
+    background-color: #1a1e2d;
 }
 
 
@@ -100,23 +63,19 @@ body {
 
 /* --- HEADER STYLES --- */
 .main-header {
-    border-bottom: 1px solid transparent;
+    background-color: #111014;
+    border-bottom: 1px solid #2a2a2e;
     transition: background-color 0.5s ease, border-color 0.5s ease;
     position: relative;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
 
-.forge-theme .main-header {
-    background-color: rgba(17, 24, 39, 0.7); /* --forge-panel-bg com mais opacidade */
-    border-color: #374151; /* --forge-border */
-    background-image: url('https://www.transparenttextures.com/patterns/dark-metal.png');
-}
-
+.forge-theme .main-header,
 .alchemist-theme .main-header {
-    background-color: rgba(13, 14, 24, 0.7); /* --void-black com opacidade */
-    border-color: var(--potion-purple);
-    background-image: url('https://www.transparenttextures.com/patterns/subtle-prism.png');
+    background-color: #111014;
+    border-color: #2a2a2e;
+    background-image: none;
 }
 
 .header-logo-title {
@@ -126,10 +85,23 @@ body {
 .header-logo-title h1 {
     font-size: 1.75rem;
     line-height: 1;
-    background: -webkit-linear-gradient(#eee, #b3b3b3);
+}
+
+.kimetsu-title-forge {
+    background: linear-gradient(to right, #fde047, #ef4444); /* yellow-300 to red-500 */
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+.kimetsu-title-alchemy {
+    background: linear-gradient(to right, #4ade80, #a855f7, #ffffff); /* green-400, purple-500, white */
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
 .header-logo-title .subtitle {
     font-size: 0.7rem;
     color: #9ca3af;
@@ -137,66 +109,34 @@ body {
     margin-top: 2px;
 }
 
-.header-glow {
-    position: absolute;
-    bottom: -1px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 2px;
-    opacity: 0.7;
-    z-index: -1;
-    transition: background 0.5s ease;
-}
-.forge-theme .header-glow {
-    background: radial-gradient(ellipse at center, rgba(255, 165, 0, 0.6) 0%, transparent 70%);
-    animation: forge-pulse 4s infinite alternate;
-}
-.alchemist-theme .header-glow {
-    background: radial-gradient(ellipse at center, var(--magic-pink) 0%, transparent 70%);
-     animation: alchemy-pulse 5s infinite alternate;
-}
-@keyframes forge-pulse {
-    from { opacity: 0.5; width: 50%; }
-    to { opacity: 0.8; width: 65%; }
-}
-@keyframes alchemy-pulse {
-    from { opacity: 0.6; filter: hue-rotate(0deg) brightness(1); }
-    to { opacity: 0.9; filter: hue-rotate(45deg) brightness(1.2); }
-}
-
 /* --- TAB SWITCHER --- */
 .tab-switcher {
     position: relative;
     display: flex;
     padding: 4px;
-    background-color: rgba(0,0,0,0.25);
+    background-color: #1a1a1a;
     border-radius: 8px;
+    border: 1px solid #2a2a2e;
 }
 .tab-switcher-button {
     position: relative;
-    padding: 8px 16px;
+    padding: 6px 20px;
     border: none;
     background-color: transparent;
     color: #a0aec0;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, background-color 0.3s ease;
     border-radius: 6px;
+    z-index: 10;
 }
 .tab-switcher-button:hover {
     color: white;
 }
 .tab-switcher-button.active {
+    background-color: #363636;
     color: white;
-}
-.active-indicator {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    z-index: 0;
 }
 
 
@@ -253,7 +193,7 @@ body {
     }
     
     .forge-column-filters {
-        width: clamp(380px, 30%, 480px);
+        width: clamp(400px, 35%, 520px);
         flex-shrink: 0;
         height: calc(100vh - 120px); /* Adjust based on header/footer height */
     }
@@ -336,8 +276,8 @@ body {
 /* From Uiverse.io by gharsh11032000 */ 
 .button {
   position: relative;
-  width: 120px;
-  height: 40px;
+  width: 100px;
+  height: 48px;
   background-color: #000;
   display: flex;
   align-items: center;
@@ -345,21 +285,25 @@ body {
   flex-direction: column;
   justify-content: center;
   border: none;
-  padding: 12px;
-  gap: 12px;
+  padding: 8px;
+  gap: 0;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .button::before {
   content: '';
   position: absolute;
   inset: 0;
-  left: -4px;
-  top: -1px;
+  left: -2px;
+  top: -2px;
   margin: auto;
-  width: 128px;
-  height: 48px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
   border-radius: 10px;
   background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100% );
   z-index: -10;
@@ -495,46 +439,21 @@ body {
 }
 
 /* Share Button */
-.button-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: #2c3e50;
-  padding: 10px 20px;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  overflow: hidden;
-  color: white;
-  border: 1px solid #34495e;
+.button-share-pill {
+    background-color: #2c3e50;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 9999px;
+    border: 1px solid #34495e;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.button-share-pill:hover {
+    background-color: #34495e;
 }
 
-.button-content:hover {
-  background-color: #34495e;
-}
-
-.button-content .text {
-  transition: transform 0.3s ease;
-}
-
-.button-content .share-icon {
-  position: absolute;
-  right: 20px;
-  opacity: 0;
-  transform: translateX(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.button-content:hover .text {
-  transform: translateX(-15px);
-}
-
-.button-content:hover .share-icon {
-  opacity: 1;
-  transform: translateX(0);
-}
 
 /* JP Matrix Background */
 .jp-matrix {
@@ -723,4 +642,62 @@ body {
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
+}
+
+/* Alchemy Clear Button */
+.alchemy-clear-button {
+  position: relative;
+  width: auto;
+  height: 40px;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  color: white;
+  flex-direction: row;
+  justify-content: center;
+  border: none;
+  padding: 0 16px;
+  gap: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.alchemy-clear-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  left: -4px;
+  top: -4px;
+  margin: auto;
+  width: calc(100% + 8px);
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100% );
+  z-index: -10;
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.alchemy-clear-button::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100% );
+  transform: translate3d(0, 0, 0) scale(0.95);
+  filter: blur(20px);
+}
+
+.alchemy-clear-button:hover::after {
+  filter: blur(30px);
+}
+
+.alchemy-clear-button:hover::before {
+  transform: rotate(-180deg);
+}
+
+.alchemy-clear-button:active::before {
+  scale: 0.7;
 }

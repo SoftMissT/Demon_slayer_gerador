@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
@@ -237,7 +238,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
     return (
         <Card className="forge-panel flex flex-col h-full p-4">
             <div className="flex justify-between items-center flex-shrink-0 mb-4">
-                <h2 className="text-xl font-bold text-white font-gangofthree">Bigorna</h2>
+                <h2 className="text-xl font-bold text-white font-gangofthree">BIGORNA</h2>
                 <button className="special-reset-button" onClick={handleResetFilters} title="Limpar todos os filtros e seleções">
                     <RefreshIcon className="w-4 h-4" />
                     <span>Limpar Filtros</span>

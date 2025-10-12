@@ -22,9 +22,15 @@ const buildMidjourneyPrompt = (base: string, params?: MidjourneyParameters): str
     if (!params) return base;
     let prompt = base;
     const activeParams = Object.entries(params).filter(([, p]) => p.active);
-    if (activeParams.length > 0) {
+    
+    // Filter out descriptive params, they are handled by Gemini now
+    const technicalParams = activeParams.filter(([key]) => ![
+        'artStyle', 'lighting', 'colorPalette', 'composition', 'detailLevel'
+    ].includes(key));
+        
+    if (technicalParams.length > 0) {
         prompt += ' ';
-        activeParams.forEach(([key, param]) => {
+        technicalParams.forEach(([key, param]) => {
             const paramKey = key === 'aspectRatio' ? 'ar' : key === 'version' ? 'v' : key === 'style' ? 'style' : key === 'stylize' ? 's' : key === 'chaos' ? 'c' : key === 'quality' ? 'q' : 'w';
             if (paramKey === 'v' && param.value.toString().startsWith('Niji')) {
                  prompt += `--niji ${param.value.toString().split(' ')[1]} `;
@@ -70,7 +76,25 @@ export default async function handler(
         let userPrompt = `**Prompt Base do Usuário:**\n"${basePrompt}"\n\n`;
         
         if (generateMidjourney) {
-            systemPrompt += `Para "midjourneyPrompt":\n- Crie um prompt conciso e visual em INGLÊS. Use palavras-chave e frases curtas separadas por vírgulas.\n- Incorpore elementos de estilo como "cinematic lighting", "ultra detailed", "8k", "photorealistic".\n- Foque em descrever a composição, iluminação e a atmosfera visual.\n\n`;
+            systemPrompt += `Para "midjourneyPrompt":\n- Crie um prompt conciso e visual em INGLÊS. Use palavras-chave e frases curtas separadas por vírgulas.\n- Incorpore elementos de estilo como "cinematic lighting", "ultra detailed", "8k", "photorealistic".\n- Foque em descrever a composição, iluminação e a atmosfera visual, usando os parâmetros descritivos fornecidos.\n\n`;
+            
+            if (mjParams) {
+                const descriptiveParams = [
+                    { label: 'Estilo de Arte', param: mjParams.artStyle },
+                    { label: 'Iluminação', param: mjParams.lighting },
+                    { label: 'Paleta de Cores', param: mjParams.colorPalette },
+                    { label: 'Composição', param: mjParams.composition },
+                    { label: 'Nível de Detalhe', param: mjParams.detailLevel },
+                ].filter(({ param }) => param?.active);
+
+                if (descriptiveParams.length > 0) {
+                    userPrompt += `**Parâmetros Descritivos (para Midjourney):**\n`;
+                    descriptiveParams.forEach(({ label, param }) => {
+                        if(param) userPrompt += `- ${label}: ${param.value}\n`;
+                    });
+                    userPrompt += '\n';
+                }
+            }
         }
         if (generateGpt) {
             systemPrompt += `Para "gptPrompt":\n- Crie um prompt narrativo e descritivo em INGLÊS com 2-3 frases detalhadas para DALL-E 3.\n- Descreva a cena como se estivesse escrevendo uma história, incluindo o humor, o estilo artístico e a composição, usando os parâmetros estruturados fornecidos.\n\n`;

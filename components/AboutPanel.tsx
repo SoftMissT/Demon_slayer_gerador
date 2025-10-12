@@ -31,7 +31,7 @@ export const AboutPanel: React.FC = () => {
         supportTitle: "🎬 Apoie a Obra Original",
         supportText: "A melhor maneira de mostrar seu apoio é consumindo o conteúdo oficial:",
         crunchyrollLink: "https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba",
-        paniniLink: "https://panini.com.br/demon-slayer-kimetsu-no-yaiba",
+        paniniLink: "https://panini.com.br/catalogsearch/result/index/referer/aHR0cHM6Ly9wYW5pbmkuY29tLmJyL2NhdGFsb2dzZWFyY2gvcmVzdWx0Lz9xPURlbW9uK1NsYXllcg~~/?collection=DEMON+SLAYER+-+KIMETSU+NO+YAIBA&q=Demon+Slayer",
         creditsTitle: "👥 Créditos",
         creators: "Criadores: SoftMisst & Mathzin",
         collaborators: "Colaboradores: ZeratulBr, Cardhial, VK, Dan, Akira",

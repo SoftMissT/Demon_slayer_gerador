@@ -26,9 +26,9 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
     ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Passo-a-Passo da Forja">
+    <Modal isOpen={isOpen} onClose={onClose} title="PASSO-A-PASSO DA FORJA">
       <div className="p-6">
-        <p className="text-gray-400 mb-6">
+        <p className="text-gray-300 mb-6">
             O Kimetsu Forge utiliza uma orquestração de três modelos de Inteligência Artificial para transformar seus filtros em um conteúdo rico e detalhado. Veja como funciona:
         </p>
         <div className="space-y-4">
