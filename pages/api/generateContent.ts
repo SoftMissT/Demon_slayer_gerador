@@ -1,123 +1,136 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient as getGeminiClient } from '../../lib/gemini';
 import { getOpenAiClient } from '../../lib/openai';
-import { getOpenRouterClient } from '../../lib/openrouter';
 import { callDeepSeekAPI } from '../../lib/deepseek';
 import type { FilterState, GeneratedItem } from '../../types';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
+import { Type } from '@google/genai';
 
-// Helper function to safely parse JSON from AI responses
-const safeJsonParse = (jsonString: string | null | undefined) => {
+// Helper to safely parse JSON from AI responses, handling markdown code blocks
+const safeJsonParse = (jsonString: string | null | undefined): any | null => {
     if (!jsonString) return null;
     try {
-        // Find JSON within markdown code blocks if they exist
         const match = jsonString.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
         if (match && (match[1] || match[2])) {
             return JSON.parse(match[1] || match[2]);
         }
-        return JSON.parse(jsonString); // Fallback for raw JSON
+        return JSON.parse(jsonString);
     } catch (error) {
         console.error("JSON parsing failed for string:", jsonString);
         return null;
     }
 };
 
-// Step 2: Polish narrative with GPT or OpenRouter
-const polishNarrativeWithGPT = async (item: GeneratedItem, focus: string): Promise<GeneratedItem> => {
-    const narrativeClient = getOpenRouterClient() || getOpenAiClient();
-    
-    if (!narrativeClient) {
-        console.warn("No narrative client (OpenAI or OpenRouter) is available, skipping narrative polish.");
-        return item;
+type Provenance = { step: string; model: string; status: 'success' | 'skipped' | 'failed' };
+
+// #region Orchestration Steps
+
+// Step 1: Generate a base concept with DeepSeek
+const step1_generateBaseWithDeepSeek = async (filters: FilterState, promptModifier?: string): Promise<{ baseConcept: any, provenance: Provenance }> => {
+    const provenance: Provenance = { step: '1/3 - Base Concept', model: 'DeepSeek', status: 'skipped' };
+    if (!process.env.DEEPSEEK_API_KEY) {
+        console.warn("DeepSeek API key not found, skipping base concept generation.");
+        return { baseConcept: {}, provenance };
     }
 
-    const isUsingOpenRouter = !!getOpenRouterClient();
-    // The user mentioned "GPT 5". We will use a powerful model available on OpenRouter, like 'openai/gpt-4o'.
-    // If falling back to OpenAI, use 'gpt-4o-mini'.
-    const model = isUsingOpenRouter ? 'openai/gpt-4o' : 'gpt-4o-mini';
+    try {
+        const prompt = `Você é uma IA de brainstorming para RPG. Sua tarefa é gerar uma ideia conceitual bruta para um item da categoria "${filters.category}" no universo de Demon Slayer. Forneça apenas os conceitos-chave em um objeto JSON com as chaves: "nome", "descricao_curta", "tematica", e "raridade". ${promptModifier ? `Instrução adicional: ${promptModifier}`: ''}`;
+
+        const baseConcept = await callDeepSeekAPI([
+            { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
+            { role: 'user', content: prompt }
+        ]);
+
+        if (baseConcept && typeof baseConcept === 'object') {
+            provenance.status = 'success';
+            return { baseConcept, provenance };
+        }
+        throw new Error("Resposta inválida do DeepSeek.");
+    } catch (error) {
+        console.error("Error in Step 1 (DeepSeek):", error);
+        provenance.status = 'failed';
+        return { baseConcept: {}, provenance }; // Return empty object on failure to allow pipeline to continue
+    }
+};
+
+
+// Step 2: Enrich and structure the concept with Gemini
+const step2_refineWithGemini = async (baseConcept: any, filters: FilterState, promptModifier?: string): Promise<{ enrichedItem: GeneratedItem | null, provenance: Provenance }> => {
+    const provenance: Provenance = { step: '2/3 - Enrichment', model: 'Gemini', status: 'skipped' };
+    const geminiClient = getGeminiClient();
+    if (!geminiClient) {
+        provenance.status = 'failed';
+        return { enrichedItem: null, provenance };
+    }
 
     try {
-        const narrativeFields = {
+        const prompt = buildGenerationPrompt(filters, 1, promptModifier, baseConcept);
+        const schema = buildResponseSchema(filters, 1);
+        
+        const geminiResult = await geminiClient.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: schema,
+                temperature: 0.85,
+            },
+        });
+
+        const enrichedItem = safeJsonParse(geminiResult.text);
+        if (enrichedItem) {
+            provenance.status = 'success';
+            return { enrichedItem, provenance };
+        }
+        throw new Error("Resposta inválida do Gemini.");
+    } catch (error) {
+        console.error("Error in Step 2 (Gemini):", error);
+        provenance.status = 'failed';
+        return { enrichedItem: null, provenance };
+    }
+};
+
+// Step 3: Finalize and polish with OpenAI
+const step3_finalizeWithOpenAI = async (item: GeneratedItem): Promise<{ finalItem: GeneratedItem, provenance: Provenance }> => {
+    const provenance: Provenance = { step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped' };
+    const openAiClient = getOpenAiClient();
+    if (!openAiClient) {
+        return { finalItem: item, provenance };
+    }
+    
+    try {
+        const polishableFields = {
             nome: ('title' in item && item.title) || item.nome,
             descricao_curta: item.descricao_curta,
             descricao: item.descricao,
             ganchos_narrativos: item.ganchos_narrativos,
         };
 
-        const gptPrompt = `Você é um escritor criativo e autor de módulos de RPG, especializado no universo de Demon Slayer. Sua tarefa é aprimorar o conteúdo a seguir com um foco especial em "${focus}". Reescreva as descrições e os ganchos narrativos para serem mais evocativos, detalhados e envolventes, mantendo os conceitos originais. Retorne um objeto JSON com quatro chaves: "nome", "descricao_curta", "descricao", "ganchos_narrativos". Responda apenas com o objeto JSON.\n\nConteúdo para aprimorar:\n${JSON.stringify(narrativeFields)}`;
-        
-        const gptResponse = await narrativeClient.chat.completions.create({
-            model: model,
+        const prompt = `Você é um mestre de RPG e escritor criativo. Sua tarefa é fazer o polimento final no item a seguir, que já foi estruturado por outras IAs. Melhore a narrativa, a clareza e o impacto, tornando as descrições mais vívidas e os ganchos narrativos mais intrigantes. Retorne um objeto JSON APENAS com as chaves que você aprimorou: "nome", "descricao_curta", "descricao", "ganchos_narrativos".\n\nItem para polir:\n${JSON.stringify(polishableFields)}`;
+
+        const response = await openAiClient.chat.completions.create({
+            model: 'gpt-4o',
             response_format: { type: "json_object" },
             messages: [
                 { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
-                { role: 'user', content: gptPrompt }
+                { role: 'user', content: prompt }
             ]
         });
 
-        const polishedNarrative = safeJsonParse(gptResponse.choices[0].message.content);
-
-        if (polishedNarrative) {
-            return {
-                ...item,
-                nome: polishedNarrative.nome || item.nome,
-                descricao_curta: polishedNarrative.descricao_curta || item.descricao_curta,
-                descricao: polishedNarrative.descricao || item.descricao,
-                ganchos_narrativos: polishedNarrative.ganchos_narrativos || item.ganchos_narrativos,
-            };
+        const polishedData = safeJsonParse(response.choices[0].message.content);
+        if (polishedData) {
+            provenance.status = 'success';
+            return { finalItem: { ...item, ...polishedData }, provenance };
         }
+        return { finalItem: item, provenance };
     } catch (error) {
-        console.error(`Error polishing narrative with ${isUsingOpenRouter ? 'OpenRouter' : 'GPT'}:`, error);
+        console.error("Error in Step 3 (OpenAI):", error);
+        provenance.status = 'failed';
+        return { finalItem: item, provenance };
     }
-    return item; // Return original item on failure
 };
 
-
-// Step 3: Refine mechanics with DeepSeek
-const refineMechanicsWithDeepSeek = async (item: GeneratedItem, focus: string): Promise<GeneratedItem> => {
-    if (!process.env.DEEPSEEK_API_KEY) {
-        console.warn("DeepSeek API key not found, skipping mechanics refinement.");
-        return item;
-    }
-
-    try {
-        const mechanicalFields: Partial<GeneratedItem> = {};
-        // FIX: Changed type from `(keyof GeneratedItem)[]` to `(keyof any)[]` to resolve type errors.
-        // `keyof GeneratedItem` resolves to the intersection of keys across all union members, which
-        // is too restrictive and does not include specific mechanical fields.
-        const mechanicalKeys: (keyof any)[] = ['dano', 'dados', 'tipo_de_dano', 'status_aplicado', 'efeitos_secundarios', 'kekkijutsu', 'habilidades_especiais', 'arsenal', 'requirements', 'mechanics', 'level_scaling', 'fraquezas_unicas', 'trofeus_loot'];
-        
-        mechanicalKeys.forEach(key => {
-            if (key in item) {
-                (mechanicalFields as any)[key] = (item as any)[key];
-            }
-        });
-
-        if (Object.keys(mechanicalFields).length === 0) {
-            return item; // No mechanical fields to refine for this item type
-        }
-
-        const deepSeekPrompt = `Você é um game designer especialista em balanceamento de TTRPGs. Seus parceiros de IA, Gemini e GPT, criaram um item com uma narrativa já polida. Sua tarefa é refinar APENAS os campos de mecânica de jogo para torná-los mais interessantes, balanceados e criativos, com um foco especial em "${focus}". Não altere a narrativa. Retorne APENAS um objeto JSON contendo os campos de mecânica de jogo que você refinou.
-
-Mecânicas para refinar:
-${JSON.stringify(mechanicalFields, null, 2)}
-
-Analise e melhore os valores, e então retorne apenas o JSON com os campos atualizados.`;
-
-        const refinedMechanics = await callDeepSeekAPI([
-            { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
-            { role: 'user', content: deepSeekPrompt }
-        ]);
-
-        if (refinedMechanics) {
-            return { ...item, ...refinedMechanics };
-        }
-    } catch (error) {
-        console.error("Error refining mechanics with DeepSeek:", error);
-    }
-    return item; // Return GPT-polished item if DeepSeek refinement fails
-};
-
+// #endregion
 
 export default async function handler(
   req: NextApiRequest,
@@ -134,45 +147,31 @@ export default async function handler(
       return res.status(400).json({ message: 'Filtros inválidos ou categoria ausente.' });
     }
 
-    // Step 1: Generate base structure with Gemini
-    const geminiClient = getGeminiClient();
-    if (!geminiClient) {
-        return res.status(500).json({ message: 'Erro de configuração do servidor: a API Key do Google Gemini não foi encontrada.' });
-    }
-    
-    const prompt = buildGenerationPrompt(filters, count, promptModifier);
-    const schema = buildResponseSchema(filters, count);
-    
-    const geminiResult = await geminiClient.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: schema,
-            temperature: 0.85,
-        },
+    const generationPromises = Array.from({ length: count }).map(async () => {
+        const allProvenance: Provenance[] = [];
+
+        // Step 1: DeepSeek
+        const { baseConcept, provenance: p1 } = await step1_generateBaseWithDeepSeek(filters, promptModifier);
+        allProvenance.push(p1);
+
+        // Step 2: Gemini
+        const { enrichedItem, provenance: p2 } = await step2_refineWithGemini(baseConcept, filters, promptModifier);
+        allProvenance.push(p2);
+        
+        if (!enrichedItem) {
+            throw new Error("Falha na etapa crítica de enriquecimento com Gemini. Não é possível continuar.");
+        }
+
+        // Step 3: OpenAI
+        const { finalItem, provenance: p3 } = await step3_finalizeWithOpenAI(enrichedItem);
+        allProvenance.push(p3);
+        
+        return { ...finalItem, provenance: allProvenance };
     });
 
-    const geminiData = safeJsonParse(geminiResult.text);
-    if (!geminiData) {
-      throw new Error("A resposta da IA (Gemini) estava vazia ou em formato inválido.");
-    }
+    const results = await Promise.all(generationPromises);
 
-    let items: GeneratedItem[] = count > 1 ? geminiData.items : [geminiData]; 
-    if (!Array.isArray(items)) {
-        throw new Error("A resposta da IA (Gemini) não continha um array de um array de itens válido.");
-    }
-    
-    // Step 2 & 3: Polish and refine each item in sequence
-    const enhancedItems = await Promise.all(
-        items.map(async (item) => {
-            const narrativelyPolishedItem = await polishNarrativeWithGPT(item, filters.aiFocusGpt);
-            const mechanicallyRefinedItem = await refineMechanicsWithDeepSeek(narrativelyPolishedItem, filters.aiFocusDeepSeek);
-            return mechanicallyRefinedItem;
-        })
-    );
-
-    const processedItems = enhancedItems.map((item: any) => ({
+    const processedItems = results.map((item: any) => ({
         ...item,
         id: `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         createdAt: new Date().toISOString(),

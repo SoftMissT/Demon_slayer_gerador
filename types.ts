@@ -1,7 +1,7 @@
 // FIX: Populated with full type definitions to resolve module errors.
 export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missões' | 'World Building' | 'Evento';
 export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
-export type Tematica = 'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 'Cyberpunk' | 'Pós-apocalíptico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Biopunk' | '🧭 JOSEON (Coreia Histórica Expandida)' | '🤠 VELHO OESTE SOLAR' | 'DOS CAÇADORES DE SOMBRAS' | '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES' | '🕵️‍♂️ DO JAZZ & OCULTISMO' | '🧪 DO COLONIALISMO DE ALQUIMIA' | '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)' | '🤖 DA SINGULARIDADE (PÓS-HUMANA)' | '🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)' | '🛸 DO CREPÚSCULO CÓSMICO' | '💠 DA INFOCRACIA' | '🎭 DOS CINCO REINOS (WUXIA/XIANXIA)' | '🌃 DO SUBMUNDO NOTURNO' | '🧙 DA ALVORADA ANCESTRAL' | '🏜️ DO SAARA ETERNO' | '🧟 DA QUEDA DOS REINOS' | '🚪 DOS PORTAIS ESQUECIDOS' | '🪐 DA FRONTEIRA ESTELAR' | '🌌 DO ETERNO CREPÚSCULO' | '⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA' | '🎭 DOS CARNAVAIS SANGUE' | '🌃 DO RENASCIMENTO SOMBRIO' | '⚔️ DOS DEUSES CAÍDOS' | '🛸 DA COLONIZAÇÃO INTERGALÁCTICA' | 'Neon-Noir Megacidade' | 'Mythpunk Amazônico' | 'Shogunato Cibernético' | 'Coralpunk Oceânico' | 'Retro-Futuro 1950s' | 'Ártico Steampunk' | 'Paisagem dos Sonhos (Surreal)' | 'Tecno-Xamanismo';
+export type Tematica = 'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 'Cyberpunk' | 'Pós-apocalípico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Biopunk' | '🧭 JOSEON (Coreia Histórica Expandida)' | '🤠 VELHO OESTE SOLAR' | 'DOS CAÇADORES DE SOMBRAS' | '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES' | '🕵️‍♂️ DO JAZZ & OCULTISMO' | '🧪 DO COLONIALISMO DE ALQUIMIA' | '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)' | '🤖 DA SINGULARIDADE (PÓS-HUMANA)' | '🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)' | '🛸 DO CREPÚSCULO CÓSMICO' | '💠 DA INFOCRACIA' | '🎭 DOS CINCO REINOS (WUXIA/XIANXIA)' | '🌃 DO SUBMUNDO NOTURNO' | '🧙 DA ALVORADA ANCESTRAL' | '🏜️ DO SAARA ETERNO' | '🧟 DA QUEDA DOS REINOS' | '🚪 DOS PORTAIS ESQUECIDOS' | '🪐 DA FRONTEIRA ESTELAR' | '🌌 DO ETERNO CREPÚSCULO' | '⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA' | '🎭 DOS CARNAVAIS SANGUE' | '🌃 DO RENASCIMENTO SOMBRIO' | '⚔️ DOS DEUSES CAÍDOS' | '🛸 DA COLONIZAÇÃO INTERGALÁTICA' | 'Neon-Noir Megacidade' | 'Mythpunk Amazônico' | 'Shogunato Cibernético' | 'Coralpunk Oceânico' | 'Retro-Futuro 1950s' | 'Ártico Steampunk' | 'Paisagem dos Sonhos (Surreal)' | 'Tecno-Xamanismo';
 export type Tone = 'épico' | 'sombrio' | 'misterioso' | 'aventuresco' | 'cômico' | 'trágico' | 'esperançoso';
 
 export interface FilterState {
@@ -100,7 +100,8 @@ export interface FilterPreset {
   filters: FilterState;
 }
 
-interface BaseGeneratedItem {
+// FIX: Exported BaseGeneratedItem to make it accessible to other modules, resolving potential build errors.
+export interface BaseGeneratedItem {
   id: string;
   createdAt: string;
   nome: string;
@@ -111,6 +112,7 @@ interface BaseGeneratedItem {
   raridade: Rarity;
   nivel_sugerido: number;
   ganchos_narrativos?: string | string[];
+  provenance?: { step: string; model: string; status: 'success' | 'skipped' | 'failed' }[];
 }
 
 export interface WeaponItem extends BaseGeneratedItem {

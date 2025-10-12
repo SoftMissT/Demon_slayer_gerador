@@ -14,7 +14,8 @@ export const TEMATICAS: Tematica[] = [
     'Medieval Fantasia',
     'Steampunk',
     'Cyberpunk',
-    'Pós-apocalíptico',
+    // FIX: Corrected a typo in 'Pós-apocalíptico' to match the 'Tematica' type.
+    'Pós-apocalípico',
     'Tempos Atuais',
     'Futurista (Sci-Fi)',
     'Biopunk',
@@ -42,7 +43,7 @@ export const TEMATICAS: Tematica[] = [
     '🌃 DO RENASCIMENTO SOMBRIO',
     '⚔️ DOS DEUSES CAÍDOS',
     // FIX: Corrected string literal to match the `Tematica` type definition exactly, resolving a type error likely caused by a hidden character.
-    '🛸 DA COLONIZAÇÃO INTERGALÁCTICA',
+    '🛸 DA COLONIZAÇÃO INTERGALÁTICA',
     'Neon-Noir Megacidade',
     'Mythpunk Amazônico',
     'Shogunato Cibernético',

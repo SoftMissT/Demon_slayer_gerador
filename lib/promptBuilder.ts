@@ -247,34 +247,34 @@ function cleanFilters(filters: FilterState) {
     return cleaned;
 }
 
-export const buildGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string): string => {
+export const buildGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string, baseConcept?: any): string => {
     const activeFilters = cleanFilters(filters);
 
-    // Prioritize custom terrain if provided
     if (activeFilters.locationTerrainCustom) {
         activeFilters.locationTerrain = activeFilters.locationTerrainCustom;
     }
     delete activeFilters.locationTerrainCustom;
 
-
-    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba", adaptando-o para diferentes temáticas e estilos.
-Sua tarefa é gerar ${count} ${count > 1 ? 'itens únicos' : 'item único'} para a categoria "${filters.category}".
-O resultado DEVE ser um objeto JSON (ou um array de objetos JSON se count > 1) que adere estritamente ao schema fornecido. Não inclua texto, markdown ou explicações fora do JSON.
+    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba".
+Sua tarefa é enriquecer um conceito base, transformando-o em um item completo e detalhado para a categoria "${filters.category}".
+O resultado DEVE ser um objeto JSON que adere estritamente ao schema fornecido.
 
 Contexto Geral:
-- Tema: Demon Slayer (Caçadores de Onis, Respirações, Kekkijutsu).
-- Estilo: Uma fusão criativa e detalhada do tema com os filtros especificados. Crie lore, descrições vívidas e mecânicas interessantes.
-- O campo 'nome' deve ser sempre único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
+- Crie lore, descrições vívidas e mecânicas interessantes.
+- O campo 'nome' deve ser único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
 
-Diretriz para Gemini (Arquiteto): Seu foco principal na criação da estrutura deste item deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
-
+Diretriz de Foco: Seu foco principal ao expandir este conceito deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
 `;
 
-    if (promptModifier) {
-        prompt += `INSTRUÇÃO ESPECIAL (prioridade máxima):\n${promptModifier}\n\n`;
+    if (baseConcept && Object.keys(baseConcept).length > 0) {
+        prompt += `\nCONCEITO BASE PARA EXPANDIR (fornecido por outra IA):\n${JSON.stringify(baseConcept)}\n`;
     }
 
-    prompt += 'Filtros a serem aplicados:\n';
+    if (promptModifier) {
+        prompt += `\nINSTRUÇÃO ESPECIAL (prioridade máxima):\n${promptModifier}\n\n`;
+    }
+
+    prompt += 'Filtros a serem aplicados (combine-os com o conceito base):\n';
     prompt += `- Categoria Principal: ${filters.category}\n`;
 
     for (const [key, value] of Object.entries(activeFilters)) {
@@ -284,11 +284,7 @@ Diretriz para Gemini (Arquiteto): Seu foco principal na criação da estrutura d
         }
     }
     
-    if (Object.keys(activeFilters).length <= 4) { // Increased to account for aiFocus filters
-        prompt += '- Nenhum filtro específico aplicado. Use sua criatividade para gerar um item exemplar da categoria.\n';
-    }
-
-    prompt += "\nLembre-se: a saída deve ser APENAS o JSON. Sem comentários, sem explicações, apenas o JSON puro e válido. Seja extremamente criativo e detalhado nas descrições, garantindo que o lore e a aparência sejam memoráveis e únicos."
+    prompt += "\nLembre-se: a saída deve ser APENAS o JSON. Sem comentários, sem explicações, apenas o JSON puro e válido. Seja extremamente criativo e detalhado nas descrições."
 
     return prompt;
 };

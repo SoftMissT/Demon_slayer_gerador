@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 const DEFAULT_STEPS = [
-    'Etapa 1/3: Forjando a base com Google Gemini...',
-    'Etapa 2/3: Polindo a narrativa com GPT...',
-    'Etapa 3/3: Refinando mecânicas com DeepSeek...',
+    'Etapa 1/3: Criando conceito com DeepSeek...',
+    'Etapa 2/3: Enriquecendo a estrutura com Gemini...',
+    'Etapa 3/3: Realizando o polimento final com OpenAI...',
     'Finalizando a forja...',
 ];
 
@@ -22,10 +22,12 @@ export const ForgeLoadingIndicator: React.FC<ForgeLoadingIndicatorProps> = ({ ai
             return match ? match[1] : focus;
         };
 
+        // Note: The AI focus labels in the UI might not perfectly match the new pipeline roles.
+        // We'll use more generic but accurate descriptions here.
         return [
-            `Etapa 1/3: Forjando com Gemini (Foco: ${formatFocus(aiFocus.aiFocusGemini)})`,
-            `Etapa 2/3: Polindo com GPT (Foco: ${formatFocus(aiFocus.aiFocusGpt)})`,
-            `Etapa 3/3: Refinando com DeepSeek (Foco: ${formatFocus(aiFocus.aiFocusDeepSeek)})`,
+            `Etapa 1/3: Buscando conceito base com DeepSeek...`,
+            `Etapa 2/3: Estruturando e enriquecendo com Gemini...`,
+            `Etapa 3/3: Realizando o polimento final com OpenAI...`,
             'Finalizando a forja...',
         ];
     }, [aiFocus]);
