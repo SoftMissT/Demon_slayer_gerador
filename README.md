@@ -46,7 +46,7 @@ npm run dev
 ```
 Abra [http://localhost:3000](http://localhost:3000) em seu navegador para ver o resultado.
 
-### 5. Configure suas Chaves de API
+### 5. Configure suas Chaves de API (Usuário Padrão)
 Ao abrir a aplicação, clique no botão **"Chaves de API"** no cabeçalho. Você precisará obter e inserir suas chaves para os seguintes serviços:
 - **Google Gemini:** Obtenha sua chave no [Google AI Studio](https://aistudio.google.com/app/apikey).
 - **OpenAI (GPT-4o):** Obtenha sua chave na [Plataforma OpenAI](https://platform.openai.com/api-keys).
@@ -54,24 +54,22 @@ Ao abrir a aplicação, clique no botão **"Chaves de API"** no cabeçalho. Voc�
 
 As chaves são salvas no `localStorage` do seu navegador e são necessárias para que a geração de conteúdo funcione.
 
-### ⚡ Modo de Desenvolvedor (Opcional)
-Para agilizar os testes, você pode configurar um bypass para a inserção de chaves com um sistema de "dois fatores" local.
+### ⚡ Modo de Desenvolvedor (Apenas para Desenvolvimento Local)
+Para agilizar os testes na sua máquina local, você pode configurar um bypass para a inserção de chaves.
 
-1.  Crie um arquivo `.env.local` na raiz do projeto.
-2.  Adicione suas chaves de API e uma frase secreta pessoal com os seguintes nomes de variáveis:
+1.  Na raiz do projeto, crie um arquivo chamado `.env.local`.
+2.  Adicione suas chaves de API pessoais a este arquivo. O Next.js exige que as variáveis comecem com `NEXT_PUBLIC_` para serem acessíveis no navegador durante o desenvolvimento.
 
     ```
-    # Chaves de API para carregamento automático
+    # Chaves de API para carregamento automático em ambiente de desenvolvimento local
     NEXT_PUBLIC_DEV_GEMINI_KEY=sua_chave_gemini
     NEXT_PUBLIC_DEV_OPENAI_KEY=sua_chave_openai
     NEXT_PUBLIC_DEV_DEEPSEEK_KEY=sua_chave_deepseek
-
-    # Senha para o segundo fator de autenticação local
-    NEXT_PUBLIC_DEV_SECRET_PHRASE=sua_frase_super_secreta_aqui
     ```
 
-3.  Na aplicação, abra o modal "Chaves de API" e digite `forge_master_key` no chat.
-4.  O sistema pedirá a "frase secreta". Digite a frase que você definiu em `NEXT_PUBLIC_DEV_SECRET_PHRASE`. Isso carregará automaticamente as chaves do seu ambiente, permitindo o uso imediato.
+3.  Agora, ao executar `npm run dev`, a aplicação irá carregar essas chaves automaticamente, e você não precisará inseri-las no modal.
+
+**IMPORTANTE:** Este modo **só funciona localmente**. Por segurança, ele é desativado na versão de produção. **NÃO adicione estas variáveis de ambiente às configurações do seu projeto na Vercel.**
 
 ## 🧩 Tecnologias
 - **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).

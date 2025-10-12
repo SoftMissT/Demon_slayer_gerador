@@ -38,6 +38,22 @@ const App: React.FC = () => {
     // Effect for initial validation on load
     useEffect(() => {
         const validateKeysOnLoad = async () => {
+            // Developer mode: Auto-load keys only in local development environment
+            if (process.env.NODE_ENV === 'development') {
+                const devKeys: ApiKeys = {
+                    gemini: process.env.NEXT_PUBLIC_DEV_GEMINI_KEY || '',
+                    openai: process.env.NEXT_PUBLIC_DEV_OPENAI_KEY || '',
+                    deepseek: process.env.NEXT_PUBLIC_DEV_DEEPSEEK_KEY || '',
+                };
+                if (devKeys.gemini && devKeys.openai && devKeys.deepseek) {
+                    console.log("DEV MODE: Loading API keys from .env.local");
+                    setApiKeys(devKeys);
+                    setAreApiKeysValidated(true); // Trusting dev keys for local simplicity
+                    return; // Skip normal validation
+                }
+            }
+
+            // Normal user flow: validate keys from local storage
             const areKeysPresent = apiKeys.gemini && apiKeys.openai && apiKeys.deepseek;
             if (areKeysPresent) {
                 const result = await validateAllApiKeys(apiKeys);
@@ -58,7 +74,8 @@ const App: React.FC = () => {
         };
 
         validateKeysOnLoad();
-    }, [apiKeys.gemini, apiKeys.openai, apiKeys.deepseek]); // Reruns if keys change from other tabs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Run only once on mount to avoid re-triggering dev mode check
 
     useEffect(() => {
         document.body.classList.remove('forge-theme', 'alchemist-theme');
