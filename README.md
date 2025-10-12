@@ -1,34 +1,40 @@
-# 🛠️ Kimetsu Forge (Forge of Legends)
+# 🛠️ Kimetsu Forge (Forja de Lendas)
 
-Kimetsu Forge is a fan-made creative tool for tabletop RPG masters and players, inspired by the dark and thrilling world of Demon Slayer (Kimetsu no Yaiba).  
-It helps generate weapons, enemies, breathing forms, NPCs, and entire scenarios using generative AI.
+Kimetsu Forge é uma ferramenta criativa feita de fã para fã, voltada para mestres e jogadores de RPG de mesa, com inspiração no universo sombrio e emocionante de Demon Slayer (Kimetsu no Yaiba).
+Ela auxilia na geração de armas, inimigos, formas de respiração, NPCs e cenários inteiros usando uma orquestração de IAs generativas.
 
-## 🧩 Technologies
-- Google Gemini API – Core text generation engine.  
-- GPT API Integration – Provides extended narrative and creative support.  
-- Next.js & React – Modern, high-performance frontend architecture.  
-- Tailwind CSS – Fast, responsive, and customizable design.
+## ✨ Features
+- Geração de elementos de RPG como armas, demônios, técnicas de respiração e ganchos de história.
+- Criação de descrições detalhadas e prontas para uso em prompts de imagem, otimizadas para plataformas como Midjourney e DALL·E.
+- Aceleração do processo de criação de histórias com conteúdo gerado por uma colaboração de IAs.
 
-## ⚙️ What You Can Do
-- Generate RPG elements like weapons, demons, breathing techniques, and story hooks.  
-- Create detailed image prompts optimized for platforms like Midjourney and DALL·E.  
-- Speed up your storytelling process with AI-assisted content generation.
+## 🧠 Como Funciona: A Orquestração de IAs
+O Kimetsu Forge utiliza um fluxo de três etapas para garantir resultados ricos e detalhados:
 
-## ⚠️ Legal Notice
-This is an unofficial fan project created for educational and entertainment purposes only.  
-Demon Slayer: Kimetsu no Yaiba is a property of Koyoharu Gotouge, Shueisha, and Ufotable.  
-All rights to the original universe and characters belong to their respective owners.
+1.  **DeepSeek (O Conceitualizador):** A primeira IA gera a ideia base, o conceito bruto e fundamental do item, personagem ou técnica solicitada.
+2.  **Google Gemini (O Arquiteto):** Em seguida, o Gemini recebe esse conceito e o enriquece, adicionando lore, estrutura, detalhes mecânicos para RPG e um protótipo de descrição visual.
+3.  **OpenAI GPT-4o (O Artista Final):** Por fim, o modelo da OpenAI realiza o polimento final, aprimorando a narrativa para um tom de roleplay mais forte e refinando a descrição visual para que ela se torne um prompt de imagem pronto para ser usado.
 
-Watch the anime legally on Crunchyroll:  
-👉 [Demon Slayer on Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
+## 🧩 Tecnologias
+- **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).
+- **Frontend:** Next.js & React para uma arquitetura moderna e de alta performance.
+- **Estilização:** Tailwind CSS para um design rápido, responsivo e customizável.
 
-## 👥 Credits
-Created by: SoftMisst & Mathzin  
-Collaborators: ZeratulBr, Cardhial, VK, Dan, Akira
+## ⚠️ Aviso Legal
+Este é um projeto de fã não oficial, criado apenas para fins educacionais e de entretenimento.
+Demon Slayer: Kimetsu no Yaiba é uma propriedade de Koyoharu Gotouge, Shueisha e Ufotable.
+Todos os direitos do universo original e dos personagens pertencem aos seus respectivos proprietários.
 
-## 💬 About This Project
-Kimetsu Forge is designed to assist Game Masters by accelerating idea generation and worldbuilding.  
-The generated content is fictional and should be customized to fit each player’s story or campaign style.
+Assista ao anime legalmente na Crunchyroll:
+👉 [Demon Slayer na Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
 
-## ❤️ Support the Project
-If you enjoy this tool and want to see more creative projects like it, please support the developer. Every gesture helps.
+## 👥 Créditos
+- **Criadores:** SoftMisst & Mathzin
+- **Colaboradores:** ZeratulBr, Cardhial, VK, Dan, Akira
+
+## 💬 Sobre Este Projeto
+O Kimetsu Forge foi projetado para auxiliar Mestres de Jogo, acelerando a geração de ideias e a construção de mundos.
+O conteúdo gerado é fictício e deve ser personalizado para se adequar à história ou ao estilo de campanha de cada jogador.
+
+## ❤️ Apoie o Projeto
+Se você gostou desta ferramenta e quer ver mais projetos criativos como este, por favor, apoie os desenvolvedores. Cada gesto ajuda.

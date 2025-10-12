@@ -9,7 +9,7 @@ module.exports = {
       fontFamily: {
         sans: ['Arial', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
         gangofthree: ['"Gang of Three"', 'cursive'],
-        kimetsu: ['"Cinzel Decorative"', 'serif'],
+        kimetsu: ['"Yuji Syuku"', 'serif'],
       },
     },
   },

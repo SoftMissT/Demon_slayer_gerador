@@ -1,5 +1,5 @@
 /* existing styles */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Gang+of+Three&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Gang+of+Three&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -586,13 +586,6 @@ body {
 }
 
 /* --- SHARE BUTTON --- */
-.tooltip-container {
-  position: relative;
-  display: inline-block;
-  font-family: "Arial", sans-serif;
-  overflow: visible;
-}
-
 .button-content {
   display: flex;
   align-items: center;
@@ -687,88 +680,3 @@ body {
 .button-content:hover .share-icon {
   transform: rotate(180deg) scale(1.1);
 }
-
-.tooltip-content {
-  position: absolute;
-  bottom: calc(100% + 15px);
-  left: 50%;
-  transform: translateX(-50%) scale(0.8);
-  background: rgba(30, 30, 30, 0.9);
-  color: white;
-  border-radius: 15px;
-  padding: 18px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-    transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-    visibility 0.5s ease;
-  z-index: 100;
-  pointer-events: none;
-  backdrop-filter: blur(10px);
-}
-
-.tooltip-container:hover .tooltip-content {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) scale(1);
-  pointer-events: auto;
-}
-
-.tooltip-content::before {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 10px 10px 0 10px;
-  border-style: solid;
-  border-color: rgba(30, 30, 30, 0.9) transparent transparent transparent;
-  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.1));
-}
-
-.social-icons {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.social-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #2a2a2a;
-  transition:
-    transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-    background 0.3s ease,
-    box-shadow 0.4s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.social-icon svg {
-  width: 20px;
-  height: 20px;
-  fill: #e0e0e0;
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  z-index: 1;
-}
-
-.social-icon:hover {
-  transform: translateY(-5px) scale(1.1);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-}
-
-.social-icon:hover svg {
-  transform: scale(1.2);
-  fill: white;
-}
-
-.social-icon.twitter:hover { background: linear-gradient(135deg, #1da1f2, #1a91da); }
-.social-icon.facebook:hover { background: linear-gradient(135deg, #1877f2, #165ed0); }
-.social-icon.linkedin:hover { background: linear-gradient(135deg, #0077b5, #005e94); }
