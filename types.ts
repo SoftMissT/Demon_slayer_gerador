@@ -140,12 +140,19 @@ interface BaseItem {
 }
 
 export interface WeaponItem extends BaseItem {
-    categoria: 'Arma' | 'Acessório';
+    categoria: 'Arma';
     dano: string;
     dados: string;
     tipo_de_dano: string;
     status_aplicado: string;
     efeitos_secundarios: string;
+}
+
+export interface AccessoryItem extends BaseItem {
+    categoria: 'Acessório';
+    efeitos_passivos: string;
+    efeitos_ativos: string;
+    condicao_ativacao: string;
 }
 
 export interface KekkijutsuItem extends BaseItem {
@@ -325,6 +332,7 @@ export type GeneratedItem =
 // This allows TypeScript to correctly narrow types based on the 'categoria' property,
 // resolving type errors in the DetailPanel component.
     | WeaponItem
+    | AccessoryItem
     | KekkijutsuItem
     | HunterItem
     | OniItem

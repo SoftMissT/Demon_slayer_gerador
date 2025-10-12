@@ -171,12 +171,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <Select label="Raridade" value={filters.accessoryRarity || ''} onChange={e => handleFilterChange('accessoryRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.accessoryTematica || ''} onChange={e => handleFilterChange('accessoryTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.accessoryCountry} onChange={e => handleFilterChange('accessoryCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <SearchableSelect label="Origem (Background)" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Respiração)" value={filters.accessoryBreathingInspiration} onChange={e => handleFilterChange('accessoryBreathingInspiration', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Kekkijutsu)" value={filters.accessoryKekkijutsuInspiration} onChange={e => handleFilterChange('accessoryKekkijutsuInspiration', e.target.value)}>{['Nenhuma', ...DEMON_BLOOD_ARTS].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <div className="md:col-span-2">
-                    <SearchableSelect label="Inspiração (Arma)" value={filters.accessoryWeaponInspiration} onChange={e => handleFilterChange('accessoryWeaponInspiration', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                </div>
+                <SearchableSelect label="Origem (Background)" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
             case 'Forma de Respiração': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
