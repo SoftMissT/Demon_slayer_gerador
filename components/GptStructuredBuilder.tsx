@@ -31,7 +31,7 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
             <p className="text-sm text-gray-400">
                 Estes parâmetros ajudam a IA a construir um prompt mais rico e detalhado para modelos como DALL-E 3, que respondem bem a descrições em linguagem natural.
             </p>
-             <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+             <div className={`grid grid-cols-1 xl:grid-cols-3 gap-4 transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
                  <Select
                     label="Tom / Atmosfera"
                     value={params.tone}

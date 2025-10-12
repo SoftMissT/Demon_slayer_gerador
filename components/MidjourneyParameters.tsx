@@ -85,7 +85,7 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
             <div className={`transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
                  <div className="border-b border-gray-700/50 pb-4 mb-4">
                     <h4 className="text-sm font-semibold text-gray-300 mb-3">Parâmetros Descritivos</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-4">
                         <ParameterControl label="Estilo de Arte" paramKey="artStyle" {...{ params, onParamsChange, enabled }}>
                             <Select label="" value={params.artStyle.value} onChange={(e) => onParamsChange({ ...params, artStyle: { ...params.artStyle, value: e.target.value }})}>
                                 <option value="anime_manga">Anime/Mangá</option>
@@ -129,7 +129,7 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
                                 <option value="dynamic_angle">Ângulo Dinâmico</option>
                             </Select>
                         </ParameterControl>
-                         <div className="md:col-span-2">
+                         <div className="xl:col-span-2">
                              <ParameterControl label="Nível de Detalhe" paramKey="detailLevel" {...{ params, onParamsChange, enabled }}>
                                 <Select label="" value={params.detailLevel.value} onChange={(e) => onParamsChange({ ...params, detailLevel: { ...params.detailLevel, value: e.target.value }})}>
                                     <option value="detalhado">Detalhado</option>
@@ -144,7 +144,7 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
 
                 <div>
                     <h4 className="text-sm font-semibold text-gray-300 mb-3">Parâmetros Técnicos</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-4">
                         <ParameterControl label="Aspect Ratio (--ar)" paramKey="aspectRatio" {...{ params, onParamsChange, enabled }}>
                             <Select
                                 label=""

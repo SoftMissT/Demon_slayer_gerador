@@ -184,9 +184,9 @@ export const PromptEngineeringPanel: React.FC = () => {
         <div className="alchemy-interface h-full flex flex-col gap-6">
             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-grow min-h-0">
                 {/* Left Column */}
-                <div className="flex flex-col gap-0 min-h-0">
+                <div className="flex flex-col gap-0 min-h-0 lg:col-span-3">
                     <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
                         <Card className="flex-grow flex flex-col p-4 md:p-6">
                             <div className="flex justify-between items-center mb-4">
@@ -220,7 +220,7 @@ export const PromptEngineeringPanel: React.FC = () => {
                 </div>
 
                 {/* Right Column */}
-                <div className="flex flex-col gap-6 min-h-0">
+                <div className="flex flex-col gap-6 min-h-0 lg:col-span-2">
                     <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
                         <Card className="p-4 md:p-6"><MidjourneyParameters params={mjParams} onParamsChange={setMjParams} enabled={isMjEnabled} onEnabledChange={setIsMjEnabled} /></Card>
                         

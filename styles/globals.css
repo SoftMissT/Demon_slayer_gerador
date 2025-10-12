@@ -193,7 +193,7 @@ body {
     }
     
     .forge-column-filters {
-        width: clamp(400px, 35%, 520px);
+        width: clamp(420px, 30vw, 580px);
         flex-shrink: 0;
         height: calc(100vh - 120px); /* Adjust based on header/footer height */
     }

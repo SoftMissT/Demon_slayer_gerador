@@ -1,4 +1,3 @@
-
 import { Type } from '@google/genai';
 import type { FilterState, Category } from '../types';
 
@@ -24,7 +23,7 @@ const weaponSchema = {
     type: Type.OBJECT,
     properties: {
         ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, description: "A categoria do item.", enum: ['Arma', 'Acessório'] },
+        categoria: { type: Type.STRING, description: "A categoria do item.", enum: ['Arma'] },
         dano: { type: Type.STRING, description: "Fórmula de dano para sistemas de RPG (ex: '2d6', '1d10+FOR')." },
         dados: { type: Type.STRING, description: "Detalhes sobre os dados de dano." },
         tipo_de_dano: { type: Type.STRING, description: "Tipo de dano (ex: Cortante, Perfurante, Fogo, Gelo)." },
@@ -33,6 +32,19 @@ const weaponSchema = {
         ganchos_narrativos: ganchosNarrativosSchema,
     }
 };
+
+const accessorySchema = {
+    type: Type.OBJECT,
+    properties: {
+        ...baseItemSchemaProperties,
+        categoria: { type: Type.STRING, description: "A categoria do item.", enum: ['Acessório'] },
+        efeitos_passivos: { type: Type.STRING, description: "Habilidade passiva ou bônus contínuo que o acessório concede." },
+        efeitos_ativos: { type: Type.STRING, description: "Habilidade ativa que pode ser usada pelo portador do acessório (se houver, senão 'Nenhum')." },
+        condicao_ativacao: { type: Type.STRING, description: "Condição ou custo para ativar o efeito do acessório (se houver, senão 'Nenhuma')." },
+        ganchos_narrativos: ganchosNarrativosSchema,
+    }
+};
+
 
 const kekkijutsuSchema = {
     type: Type.OBJECT,
@@ -227,7 +239,7 @@ const categoryToSchemaMap: Record<Category, any> = {
     'Inimigo/Oni': oniSchema,
     'NPC': npcSchema,
     'Arma': weaponSchema,
-    'Acessório': weaponSchema,
+    'Acessório': accessorySchema,
     'Forma de Respiração': breathingFormSchema,
     'Kekkijutsu': kekkijutsuSchema,
     'Local/Cenário': locationSchema,

@@ -2,9 +2,13 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient as getGeminiClient } from '../../lib/gemini';
 import { getOpenAiClient } from '../../lib/openai';
 import { callDeepSeekAPI } from '../../lib/deepseek';
-import type { FilterState, GeneratedItem } from '../../types';
+// FIX: Import the 'Category' type to resolve a type error.
+import type { FilterState, GeneratedItem, Category } from '../../types';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
 import { Type } from '@google/genai';
+import * as ALL_CONSTANTS from '../../constants';
+import { BREATHING_STYLES_DATA } from '../../lib/breathingStylesData';
+import { WEAPON_TYPES } from '../../lib/weaponData';
 
 // Helper to safely parse JSON from AI responses, handling markdown code blocks
 const safeJsonParse = (jsonString: string | null | undefined): any | null => {
@@ -20,6 +24,54 @@ const safeJsonParse = (jsonString: string | null | undefined): any | null => {
         return null;
     }
 };
+
+const pickRandom = (arr: readonly any[], exclude: any[] = ['Aleatória', 'Aleatório', 'Nenhuma', 'N/A']) => {
+    const options = arr.filter(o => !exclude.includes(o));
+    if (options.length === 0) return arr[0] || ''; // Fallback to the first item if all are excluded
+    return options[Math.floor(Math.random() * options.length)];
+};
+
+const breathingStylesOptions = BREATHING_STYLES_DATA.map(bs => bs.nome);
+const weaponTypeOptions = WEAPON_TYPES.map(w => w.name);
+
+const RANDOM_MAP: { [key: string]: readonly any[] } = {
+    Rarity: ALL_CONSTANTS.RARITIES,
+    Tematica: ALL_CONSTANTS.TEMATICAS,
+    Country: ALL_CONSTANTS.COUNTRIES,
+    Origin: ALL_CONSTANTS.ORIGINS,
+    Personality: ALL_CONSTANTS.PERSONALITIES,
+    Weapon: weaponTypeOptions,
+    Breathing: breathingStylesOptions,
+    Kekkijutsu: ALL_CONSTANTS.DEMON_BLOOD_ARTS,
+    Rank: ALL_CONSTANTS.HUNTER_RANKS,
+    PowerLevel: ALL_CONSTANTS.ONI_POWER_LEVELS,
+    MetalColor: ALL_CONSTANTS.METAL_COLORS,
+    Tone: ALL_CONSTANTS.TONES,
+    Terrain: ALL_CONSTANTS.TERRAINS,
+    Scale: ALL_CONSTANTS.THREAT_SCALES,
+    Level: ALL_CONSTANTS.EVENT_LEVELS,
+    ThreatLevel: ALL_CONSTANTS.EVENT_THREAT_LEVELS,
+    Type: ALL_CONSTANTS.EVENT_TYPES,
+};
+
+const resolveRandomFilters = (filters: FilterState): FilterState => {
+    const resolved = { ...filters };
+
+    for (const key in resolved) {
+        const filterKey = key as keyof FilterState;
+        const value = resolved[filterKey];
+
+        if (value === 'Aleatória' || value === 'Aleatório') {
+            // Find the right array from RANDOM_MAP based on key naming convention
+            const mapKey = Object.keys(RANDOM_MAP).find(k => filterKey.toLowerCase().includes(k.toLowerCase()));
+            if (mapKey) {
+                (resolved as any)[filterKey] = pickRandom(RANDOM_MAP[mapKey]);
+            }
+        }
+    }
+    return resolved;
+};
+
 
 type Provenance = { step: string; model: string; status: 'success' | 'skipped' | 'failed' };
 
@@ -165,16 +217,18 @@ export default async function handler(
     if (!filters || !filters.category) {
       return res.status(400).json({ message: 'Filtros inválidos ou categoria ausente.' });
     }
+    
+    const resolvedFilters = resolveRandomFilters(filters);
 
     const generationPromises = Array.from({ length: count }).map(async () => {
         const allProvenance: Provenance[] = [];
 
         // Step 1: DeepSeek
-        const { baseConcept, provenance: p1 } = await step1_generateBaseWithDeepSeek(filters, promptModifier);
+        const { baseConcept, provenance: p1 } = await step1_generateBaseWithDeepSeek(resolvedFilters, promptModifier);
         allProvenance.push(p1);
 
         // Step 2: Gemini
-        const { enrichedItem, provenance: p2 } = await step2_refineWithGemini(baseConcept, filters, promptModifier);
+        const { enrichedItem, provenance: p2 } = await step2_refineWithGemini(baseConcept, resolvedFilters, promptModifier);
         allProvenance.push(p2);
         
         if (!enrichedItem) {
@@ -182,9 +236,14 @@ export default async function handler(
         }
 
         // Step 3: OpenAI
-        const { finalItem, provenance: p3 } = await step3_finalizeWithOpenAI(enrichedItem, filters);
+        const { finalItem, provenance: p3 } = await step3_finalizeWithOpenAI(enrichedItem, resolvedFilters);
         allProvenance.push(p3);
         
+        // Ensure the final item has the correct category from the resolved filters
+        if (!finalItem.categoria) {
+            finalItem.categoria = resolvedFilters.category as Category;
+        }
+
         return { ...finalItem, provenance: allProvenance };
     });
 

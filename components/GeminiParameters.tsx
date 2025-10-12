@@ -31,7 +31,7 @@ export const GeminiParameters: React.FC<GeminiParametersProps> = ({ params, onPa
             <p className="text-sm text-gray-400">
                 Diretrizes para criar um prompt narrativo e visual para o Gemini (Nano Banana).
             </p>
-            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className={`grid grid-cols-1 xl:grid-cols-2 gap-4 transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
                  <Select
                     label="Estilo de Arte"
                     value={params.artStyle}
