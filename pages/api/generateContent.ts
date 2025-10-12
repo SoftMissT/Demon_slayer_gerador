@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient as getGeminiClient } from '../../lib/gemini';
 import { getOpenAiClient } from '../../lib/openai';
+import { getOpenRouterClient } from '../../lib/openrouter';
 import { callDeepSeekAPI } from '../../lib/deepseek';
 import type { FilterState, GeneratedItem } from '../../types';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
@@ -21,13 +22,19 @@ const safeJsonParse = (jsonString: string | null | undefined) => {
     }
 };
 
-// Step 2: Polish narrative with GPT
+// Step 2: Polish narrative with GPT or OpenRouter
 const polishNarrativeWithGPT = async (item: GeneratedItem, focus: string): Promise<GeneratedItem> => {
-    const openAiClient = getOpenAiClient();
-    if (!openAiClient) {
-        console.warn("OpenAI client not available, skipping narrative polish.");
+    const narrativeClient = getOpenRouterClient() || getOpenAiClient();
+    
+    if (!narrativeClient) {
+        console.warn("No narrative client (OpenAI or OpenRouter) is available, skipping narrative polish.");
         return item;
     }
+
+    const isUsingOpenRouter = !!getOpenRouterClient();
+    // The user mentioned "GPT 5". We will use a powerful model available on OpenRouter, like 'openai/gpt-4o'.
+    // If falling back to OpenAI, use 'gpt-4o-mini'.
+    const model = isUsingOpenRouter ? 'openai/gpt-4o' : 'gpt-4o-mini';
 
     try {
         const narrativeFields = {
@@ -39,8 +46,8 @@ const polishNarrativeWithGPT = async (item: GeneratedItem, focus: string): Promi
 
         const gptPrompt = `Você é um escritor criativo e autor de módulos de RPG, especializado no universo de Demon Slayer. Sua tarefa é aprimorar o conteúdo a seguir com um foco especial em "${focus}". Reescreva as descrições e os ganchos narrativos para serem mais evocativos, detalhados e envolventes, mantendo os conceitos originais. Retorne um objeto JSON com quatro chaves: "nome", "descricao_curta", "descricao", "ganchos_narrativos". Responda apenas com o objeto JSON.\n\nConteúdo para aprimorar:\n${JSON.stringify(narrativeFields)}`;
         
-        const gptResponse = await openAiClient.chat.completions.create({
-            model: 'gpt-4o-mini',
+        const gptResponse = await narrativeClient.chat.completions.create({
+            model: model,
             response_format: { type: "json_object" },
             messages: [
                 { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
@@ -60,10 +67,11 @@ const polishNarrativeWithGPT = async (item: GeneratedItem, focus: string): Promi
             };
         }
     } catch (error) {
-        console.error("Error polishing narrative with GPT:", error);
+        console.error(`Error polishing narrative with ${isUsingOpenRouter ? 'OpenRouter' : 'GPT'}:`, error);
     }
     return item; // Return original item on failure
 };
+
 
 // Step 3: Refine mechanics with DeepSeek
 const refineMechanicsWithDeepSeek = async (item: GeneratedItem, focus: string): Promise<GeneratedItem> => {
