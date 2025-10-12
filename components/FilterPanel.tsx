@@ -24,6 +24,7 @@ import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
 import { RefreshIcon } from './icons/RefreshIcon';
 import { HowItWorksModal } from './HowItWorksModal';
 import { TextInput } from './ui/TextInput';
+import { TextArea } from './ui/TextArea';
 
 interface FilterPanelProps {
     onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
@@ -122,7 +123,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
 
     const renderCategorySpecificFilters = () => {
         switch (filters.category) {
-            case 'Caçador': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Caçador': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SearchableSelect label="Temática" value={filters.hunterTematica || ''} onChange={e => handleFilterChange('hunterTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Rank" value={filters.hunterRank} onChange={e => handleFilterChange('hunterRank', e.target.value)}>{HUNTER_RANKS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País de Origem (Cultural)" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -132,14 +133,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <SearchableSelect label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableMultiSelect label="Inspiração (Respirações)" options={breathingStylesOptions} selected={filters.hunterBreathingStyles} onChange={s => handleFilterChange('hunterBreathingStyles', s)} placeholder="Selecione até 2" maxSelection={2}/>
             </div>);
-            case 'Inimigo/Oni': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Inimigo/Oni': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}>{ONI_POWER_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.oniTematica || ''} onChange={e => handleFilterChange('oniTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País de Origem (Cultural)" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Personalidade Dominante" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Arma" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração de Respiração" value={filters.oniInspirationBreathing} onChange={e => handleFilterChange('oniInspirationBreathing', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     <SearchableMultiSelect 
                         label="Inspiração de Kekkijutsu" 
                         options={DEMON_BLOOD_ARTS.filter(o => o !== 'Aleatória')} 
@@ -149,7 +150,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                     />
                 </div>
             </div>);
-            case 'NPC': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'NPC': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SearchableSelect label="Temática" value={filters.npcTematica || ''} onChange={e => handleFilterChange('npcTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Origem (Background)" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -158,22 +159,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <SearchableSelect label="Arma" value={filters.npcWeapon} onChange={e => handleFilterChange('npcWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Acessório" value={filters.npcAccessory} onChange={e => handleFilterChange('npcAccessory', e.target.value)}>{accessoryInspirationOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
-            case 'Arma': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Arma': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Raridade" value={filters.weaponRarity || ''} onChange={e => handleFilterChange('weaponRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.weaponTematica || ''} onChange={e => handleFilterChange('weaponTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.weaponCountry} onChange={e => handleFilterChange('weaponCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}>{METAL_COLORS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
-            case 'Acessório': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Acessório': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <Select label="Raridade" value={filters.accessoryRarity || ''} onChange={e => handleFilterChange('accessoryRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.accessoryTematica || ''} onChange={e => handleFilterChange('accessoryTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.accessoryCountry} onChange={e => handleFilterChange('accessoryCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Respiração)" value={filters.accessoryBreathingInspiration} onChange={e => handleFilterChange('accessoryBreathingInspiration', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Kekkijutsu)" value={filters.accessoryKekkijutsuInspiration} onChange={e => handleFilterChange('accessoryKekkijutsuInspiration', e.target.value)}>{['Nenhuma', ...DEMON_BLOOD_ARTS].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
-            case 'Forma de Respiração': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="lg:col-span-2">
+            case 'Forma de Respiração': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
                     <SearchableMultiSelect label="Respiração Base" options={breathingStylesOptions} selected={filters.baseBreathingStyles} onChange={s => handleFilterChange('baseBreathingStyles', s)} placeholder="Selecione 1 ou 2" maxSelection={2} />
                 </div>
                 <SearchableSelect label="Temática" value={filters.breathingFormTematica || ''} onChange={e => handleFilterChange('breathingFormTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -181,7 +182,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <SearchableSelect label="Arma Principal" value={filters.breathingFormWeapon} onChange={e => handleFilterChange('breathingFormWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Tom" value={filters.breathingFormTone} onChange={e => handleFilterChange('breathingFormTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             </div>);
-            case 'Kekkijutsu': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Kekkijutsu': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SearchableSelect label="Temática" value={filters.kekkijutsuTematica || ''} onChange={e => handleFilterChange('kekkijutsuTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.kekkijutsuCountry} onChange={e => handleFilterChange('kekkijutsuCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Kekkijutsu)" value={filters.kekkijutsuKekkijutsuInspiration} onChange={e => handleFilterChange('kekkijutsuKekkijutsuInspiration', e.target.value)}>{DEMON_BLOOD_ARTS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -189,39 +190,39 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 <SearchableSelect label="Inspiração (Arma)" value={filters.kekkijutsuWeaponInspiration} onChange={e => handleFilterChange('kekkijutsuWeaponInspiration', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Acessório)" value={filters.kekkijutsuAccessoryInspiration} onChange={e => handleFilterChange('kekkijutsuAccessoryInspiration', e.target.value)}>{accessoryInspirationOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
-            case 'Local/Cenário': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Local/Cenário': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Tom" value={filters.locationTone} onChange={e => handleFilterChange('locationTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.locationTematica || ''} onChange={e => handleFilterChange('locationTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.locationCountry} onChange={e => handleFilterChange('locationCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Terreno Principal" value={filters.locationTerrain} onChange={e => handleFilterChange('locationTerrain', e.target.value)}>{TERRAINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     <TextInput label="Ou Especifique um Terreno" value={filters.locationTerrainCustom} onChange={e => handleFilterChange('locationTerrainCustom', e.target.value)} placeholder="Ex: Cidade no esqueleto de um Titã"/>
                 </div>
             </div>);
-            case 'Missões': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Missões': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} />
                 </div>
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
                 </div>
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     <TextInput label="Alvo Principal" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} placeholder="Ex: um oni que devora memórias, uma seita..."/>
                 </div>
             </div>);
-            case 'World Building': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'World Building': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.wbTematica || ''} onChange={e => handleFilterChange('wbTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.wbCountry} onChange={e => handleFilterChange('wbCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Escala da Ameaça" value={filters.wbThreatScale} onChange={e => handleFilterChange('wbThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     <TextInput label="Local Principal" value={filters.wbLocation} onChange={e => handleFilterChange('wbLocation', e.target.value)} placeholder="Ex: uma cidade sob uma cachoeira, uma ilha-prisão..."/>
                 </div>
             </div>);
-            case 'Evento': return (<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            case 'Evento': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Nível" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}>{EVENT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}>{EVENT_THREAT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -252,7 +253,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                     <div className="space-y-4">
                         <div className="border-t border-gray-700/50 pt-4">
                             <h3 className="text-sm font-semibold text-gray-300 mb-3">Diretrizes da Forja</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Select label="Gemini (Arquiteto)" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)}>
                                     {AI_FOCUS_GEMINI.map(o => <option key={o} value={o}>{o}</option>)}
                                 </Select>
@@ -292,24 +293,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                 </div>
 
                 <div className="border-t border-gray-700 pt-4">
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Referências de Estilo (Opcional)</label>
-                    <textarea
+                    <TextArea
+                        label="Referências de Estilo (Opcional)"
                         value={filters.styleReferences}
                         onChange={(e) => handleFilterChange('styleReferences', e.target.value)}
                         placeholder="Ex: Attack on Titan, Studio Ghibli, Yoshitaka Amano"
-                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm resize-none"
                         rows={2}
                         disabled={isLoading}
                     />
                 </div>
 
                 <div className="border-t border-gray-700 pt-4">
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Modificador de Prompt (Opcional)</label>
-                    <textarea
+                    <TextArea
+                        label="Modificador de Prompt (Opcional)"
                         value={promptModifier}
                         onChange={(e) => setPromptModifier(e.target.value)}
                         placeholder="Ex: Crie algo com um toque de terror cósmico."
-                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm resize-none"
                         rows={2}
                         disabled={isLoading}
                     />

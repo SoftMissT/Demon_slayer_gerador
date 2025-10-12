@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -6,9 +7,10 @@ import { ClipboardIcon } from './icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { MidjourneyIcon } from './icons/MidjourneyIcon';
 import { GptIcon } from './icons/GptIcon';
+import { GeminiIcon } from './icons/GeminiIcon';
 
 interface PromptCardProps {
-    model: 'midjourney' | 'gpt';
+    model: 'midjourney' | 'gpt' | 'gemini';
     prompt: string;
 }
 
@@ -25,6 +27,11 @@ export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
             title: "Prompt para DALL-E / GPT",
             className: "model-gpt",
             icon: <GptIcon className="w-6 h-6 text-crystal-blue" />
+        },
+        gemini: {
+            title: "Prompt para Gemini",
+            className: "model-gemini",
+            icon: <GeminiIcon className="w-6 h-6 text-elixir-green" />
         }
     };
 

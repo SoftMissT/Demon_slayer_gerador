@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { AlertTriangleIcon } from '../icons/AlertTriangleIcon';
 
@@ -12,7 +13,11 @@ const ErrorDetails: React.FC<{ message: string }> = ({ message }) => {
     let suggestion = "Por favor, tente novamente. Se o problema persistir, tente ajustar seus filtros ou recarregar a página.";
     let details = message;
 
-    if (message.toLowerCase().includes('api key not valid')) {
+    if (message.toLowerCase().includes('quota exceeded')) {
+        title = "Cota de Geração Excedida";
+        suggestion = "O limite de gerações de imagem gratuitas foi atingido por enquanto. Por favor, aguarde e tente novamente mais tarde.";
+        details = "A API do Google informou que a cota de uso foi excedida (erro de rate limit).";
+    } else if (message.toLowerCase().includes('api key not valid')) {
         title = "Erro de Chave de API";
         suggestion = "A chave de API configurada para o Gemini é inválida. Verifique a variável de ambiente GEMINI_API_KEY nas configurações do seu projeto.";
         details = "A API do Google retornou um erro de autenticação.";
@@ -27,10 +32,11 @@ const ErrorDetails: React.FC<{ message: string }> = ({ message }) => {
         suggestion = "Houve um problema ao criar a imagem. Isso pode ser temporário. Tente gerar a imagem novamente.";
     }
 
+
     return (
         <>
             <h3 className="font-bold text-lg">{title}</h3>
-            <p className="text-sm mt-1 text-red-300">{message}</p>
+            <p className="text-sm mt-1 text-red-300">{details}</p>
             <div className="mt-3 border-t border-red-800 pt-2">
                 <p className="text-sm font-semibold">Sugestão:</p>
                 <p className="text-sm">{suggestion}</p>

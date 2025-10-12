@@ -1,141 +1,118 @@
-
-
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getAiClient } from '../../lib/gemini';
-import { Type } from '@google/genai';
-// FIX: Corrected type import from the now separate types.ts file.
-import type { PromptGenerationResult } from '../../types';
+import { getOpenAiClient } from '../../lib/openai';
+import { getAiClient as getGeminiClient } from '../../lib/gemini';
+import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult } from '../../types';
 
-// Helper to format Midjourney params into a string
-const formatMjParams = (params: { [key: string]: any }, negativePrompt?: string): string => {
-    let paramString = '';
-    if (params.aspectRatio) paramString += ` --ar ${params.aspectRatio}`;
-    if (params.chaos) paramString += ` --c ${params.chaos}`;
-    if (params.quality) paramString += ` --q ${params.quality}`;
-    if (params.style) paramString += ` --style ${params.style}`;
-    if (params.stylize) paramString += ` --s ${params.stylize}`;
-    if (params.weird) paramString += ` --w ${params.weird}`;
-    if (params.version) {
-        if (params.version.startsWith('Niji')) {
-            paramString += ` --niji ${params.version.split(' ')[1]}`;
-        } else {
-            paramString += ` --v ${params.version}`;
-        }
+interface GeneratePromptsRequest {
+    basePrompt: string;
+    mjParams?: MidjourneyParameters;
+    gptParams: GptParameters;
+    geminiParams: GeminiParameters;
+    generateMidjourney: boolean;
+    generateGpt: boolean;
+    generateGemini: boolean;
+}
+
+interface ApiResponse {
+    result?: PromptGenerationResult;
+    message: string;
+}
+
+const buildMidjourneyPrompt = (base: string, params?: MidjourneyParameters): string => {
+    if (!params) return base;
+    let prompt = base;
+    const activeParams = Object.entries(params).filter(([, p]) => p.active);
+    if (activeParams.length > 0) {
+        prompt += ' ';
+        activeParams.forEach(([key, param]) => {
+            const paramKey = key === 'aspectRatio' ? 'ar' : key === 'version' ? 'v' : key === 'style' ? 'style' : key === 'stylize' ? 's' : key === 'chaos' ? 'c' : key === 'quality' ? 'q' : 'w';
+            if (paramKey === 'v' && param.value.toString().startsWith('Niji')) {
+                 prompt += `--niji ${param.value.toString().split(' ')[1]} `;
+            } else {
+                 prompt += `--${paramKey} ${param.value} `;
+            }
+        });
     }
-    if (negativePrompt) {
-        paramString += ` --no ${negativePrompt}`;
-    }
-    return paramString.trim();
+    return prompt.trim();
 };
-
-const buildPromptGenerationPrompt = (topic: string, negativePrompt: string, mjParams: any, gptParams: any): string => {
-    const mjParamsString = formatMjParams(mjParams, negativePrompt);
-    
-    return `Você é um "Alquimista de Prompts", um mestre na arte de traduzir ideias humanas em comandos visuais perfeitos para IAs de geração de imagem.
-Sua especialidade é criar prompts para Midjourney e DALL-E 3/GPT.
-
-**Missão:** Transforme a seguinte ideia do usuário em dois prompts distintos, um para cada plataforma, seguindo as diretrizes alquímicas abaixo.
-
-**Ideia Bruta do Usuário:**
-- Tópico Principal: ${topic}
-- Ingredientes a Evitar (Prompt Negativo): ${negativePrompt || 'Nenhum'}
-- Fórmula para GPT/DALL-E:
-  - Tom/Atmosfera: ${gptParams.tone}
-  - Estilo de Arte: ${gptParams.style}
-  - Composição/Ângulo: ${gptParams.composition}
-- Encantamento Final para Midjourney: ${mjParamsString}
-
-**Diretrizes Alquímicas:**
-
-1.  **Elixir para Midjourney:**
-    - **Fórmula:** Crie uma sequência potente de palavras-chave e frases descritivas curtas, separadas por vírgulas. Pense nisso como as anotações de um mestre artista: conciso, mas evocativo.
-    - **Foco:** Priorize termos de iluminação (ex: 'cinematic lighting', 'volumetric'), detalhes de câmera (ex: 'depth of field', '8k'), e estilo (ex: 'hyperdetailed', 'epic composition').
-    - **Estrutura:** Comece com o sujeito principal, adicione o cenário, depois os detalhes de estilo, e termine com os parâmetros técnicos.
-    - **Obrigatório:** O prompt DEVE terminar com a string de encantamento final exatamente como fornecida: \`${mjParamsString}\`.
-
-2.  **Transmutação para GPT/DALL-E:**
-    - **Fórmula:** Escreva um parágrafo narrativo rico e imersivo, como se estivesse descrevendo uma cena de um filme de alto orçamento ou uma passagem de um livro de fantasia.
-    - **Foco:** Use linguagem sensorial para descrever a cena. Incorpore a "Fórmula para GPT/DALL-E" de forma natural no texto para definir a atmosfera, o estilo visual e a perspectiva da câmera.
-    - **Estrutura:** Conte uma pequena história. Descreva o personagem, suas ações, o ambiente ao redor, a iluminação e a emoção geral da cena.
-
-A resposta final DEVE ser um único objeto JSON válido com duas chaves: "midjourneyPrompt" e "gptPrompt". Sem explicações, apenas o JSON.`;
-};
-
-
-const responseSchema = {
-    type: Type.OBJECT,
-    properties: {
-        midjourneyPrompt: { type: Type.STRING },
-        gptPrompt: { type: Type.STRING },
-    },
-    required: ["midjourneyPrompt", "gptPrompt"]
-};
-
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<PromptGenerationResult | { message: string }>
+    res: NextApiResponse<ApiResponse>
 ) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
     try {
-        const { topic, negativePrompt, mjParams, gptParams } = req.body;
+        const { basePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini } = req.body as GeneratePromptsRequest;
 
-        if (!topic) {
-            return res.status(400).json({ message: 'O tópico é obrigatório.' });
+        if (!basePrompt || typeof basePrompt !== 'string') {
+            return res.status(400).json({ message: 'O prompt base é obrigatório.' });
+        }
+        
+        if (!generateMidjourney && !generateGpt && !generateGemini) {
+            return res.status(400).json({ message: 'Pelo menos um tipo de prompt deve ser selecionado para geração.' });
         }
 
-        const aiClient = getAiClient();
-        if (!aiClient) {
-            return res.status(500).json({ message: 'Erro de configuração do servidor: a API Key do Google Gemini não foi encontrada.' });
+        const geminiClient = getGeminiClient();
+        if (!geminiClient) {
+            return res.status(500).json({ message: 'Nenhuma chave de API de IA está configurada no servidor.' });
         }
 
-        const prompt = buildPromptGenerationPrompt(topic, negativePrompt, mjParams, gptParams);
+        const requestedPrompts: string[] = [];
+        if (generateMidjourney) requestedPrompts.push('"midjourneyPrompt"');
+        if (generateGpt) requestedPrompts.push('"gptPrompt"');
+        if (generateGemini) requestedPrompts.push('"geminiPrompt"');
+        
+        let systemPrompt = `Você é um especialista em engenharia de prompts para IAs generativas de imagem. Sua tarefa é expandir um prompt base do usuário em prompts otimizados para os modelos solicitados. O resultado deve ser um objeto JSON contendo APENAS as seguintes chaves: ${requestedPrompts.join(', ')}.\n\n`;
 
-        const result = await aiClient.models.generateContent({
+        let userPrompt = `**Prompt Base do Usuário:**\n"${basePrompt}"\n\n`;
+        
+        if (generateMidjourney) {
+            systemPrompt += `Para "midjourneyPrompt":\n- Crie um prompt conciso e visual em INGLÊS. Use palavras-chave e frases curtas separadas por vírgulas.\n- Incorpore elementos de estilo como "cinematic lighting", "ultra detailed", "8k", "photorealistic".\n- Foque em descrever a composição, iluminação e a atmosfera visual.\n\n`;
+        }
+        if (generateGpt) {
+            systemPrompt += `Para "gptPrompt":\n- Crie um prompt narrativo e descritivo em INGLÊS com 2-3 frases detalhadas para DALL-E 3.\n- Descreva a cena como se estivesse escrevendo uma história, incluindo o humor, o estilo artístico e a composição, usando os parâmetros estruturados fornecidos.\n\n`;
+            userPrompt += `**Parâmetros Estruturados (para GPT/DALL-E):**\n- Tom/Atmosfera: ${gptParams.tone}\n- Estilo de Arte: ${gptParams.style}\n- Composição/Ângulo: ${gptParams.composition}\n\n`;
+        }
+        if (generateGemini) {
+             systemPrompt += `Para "geminiPrompt":\n- Crie um prompt narrativo em PORTUGUÊS, otimizado para o Gemini.\n- Descreva a cena de forma visual e detalhada, incorporando os parâmetros de alquimia fornecidos.\n\n`;
+            userPrompt += `**Parâmetros de Alquimia (para Gemini):**\n- Estilo de Arte: ${geminiParams.artStyle}\n- Iluminação: ${geminiParams.lighting}\n- Paleta de Cores: ${geminiParams.colorPalette}\n- Composição: ${geminiParams.composition}\n- Nível de Detalhe: ${geminiParams.detailLevel}\n`;
+        }
+        
+        const response = await geminiClient.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: prompt,
+            contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
             config: {
+                systemInstruction: systemPrompt,
                 responseMimeType: "application/json",
-                responseSchema: responseSchema,
             },
         });
-
-        const jsonText = result.text?.trim();
-        if (!jsonText) {
-            throw new Error("A resposta da IA estava vazia.");
+        
+        const content = response.text;
+        if (!content) {
+            throw new Error('A resposta da IA estava vazia.');
         }
 
-        const data = JSON.parse(jsonText);
+        const generatedPrompts = JSON.parse(content) as Partial<PromptGenerationResult>;
+
+        const result: PromptGenerationResult = {};
         
-        res.status(200).json(data);
+        if (generateMidjourney && generatedPrompts.midjourneyPrompt) {
+            result.midjourneyPrompt = buildMidjourneyPrompt(generatedPrompts.midjourneyPrompt, mjParams);
+        }
+        if (generateGpt && generatedPrompts.gptPrompt) {
+            result.gptPrompt = generatedPrompts.gptPrompt;
+        }
+        if (generateGemini && generatedPrompts.geminiPrompt) {
+            result.geminiPrompt = generatedPrompts.geminiPrompt;
+        }
+
+        res.status(200).json({ result, message: 'Prompts gerados com sucesso!' });
 
     } catch (error: any) {
         console.error("Erro em /api/generatePrompts:", error);
-
-        let detailedMessage = 'Ocorreu um erro desconhecido no servidor.';
-        if (error instanceof Error) {
-            detailedMessage = error.message;
-        } else if (typeof error === 'string') {
-            detailedMessage = error;
-        }
-
-        try {
-            const jsonMatch = detailedMessage.match(/({.*})/s);
-            if (jsonMatch && jsonMatch[0]) {
-                const errorObj = JSON.parse(jsonMatch[0]);
-                if (errorObj.error && errorObj.error.message) {
-                    detailedMessage = errorObj.error.message;
-                }
-            } else if (detailedMessage.includes("API key not valid")) {
-                detailedMessage = "API key not valid. Please pass a valid API key.";
-            }
-        } catch (e) {
-            // Parsing failed
-        }
-
-        res.status(500).json({ message: `Falha ao gerar prompts. Detalhes: ${detailedMessage}` });
+        res.status(500).json({ message: `Falha ao gerar prompts. Detalhes: ${error.message}` });
     }
 }

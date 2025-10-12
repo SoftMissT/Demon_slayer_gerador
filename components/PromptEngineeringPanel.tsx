@@ -1,194 +1,232 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { RefreshIcon } from './icons/RefreshIcon';
+import { TextArea } from './ui/TextArea';
 import { MidjourneyParameters } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
+import { PromptResultDisplay } from './PromptResultDisplay';
+import { MagicWandIcon } from './icons/MagicWandIcon';
 import { ErrorDisplay } from './ui/ErrorDisplay';
-import type { MidjourneyParameters as MidjourneyParametersType, GptParameters, PromptGenerationResult } from '../types';
-import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
-import { PotionIcon } from './icons/PotionIcon';
-import { PromptCard } from './PromptCard';
-import { ImageGenerationPanel } from './ImageGenerationPanel';
+import { GeminiParameters } from './GeminiParameters';
+import type { MidjourneyParameters as MidjourneyParams, GptParameters as GptParams, GeminiParameters as GeminiParams, PromptGenerationResult } from '../types';
+import useLocalStorage from '../hooks/useLocalStorage';
+import { SaveIcon } from './icons/SaveIcon';
+import { TrashIcon } from './icons/TrashIcon';
+import { Select } from './ui/Select';
+import { RefreshIcon } from './icons/RefreshIcon';
+import { TypingLoader } from './TypingLoader';
 
-
-const INITIAL_MJ_PARAMS: MidjourneyParametersType = {
-    aspectRatio: { active: false, value: '1:1' },
-    chaos: { active: false, value: 0 },
-    quality: { active: false, value: 1 },
-    style: { active: false, value: 'raw' },
-    stylize: { active: false, value: 100 },
-    weird: { active: false, value: 0 },
-    version: { active: false, value: '6' },
+const INITIAL_MJ_PARAMS: MidjourneyParams = {
+    aspectRatio: { value: '1:1', active: false },
+    version: { value: '6', active: false },
+    style: { value: 'raw', active: false },
+    stylize: { value: 100, active: false },
+    chaos: { value: 0, active: false },
+    quality: { value: 1, active: false },
+    weird: { value: 0, active: false },
 };
 
-const INITIAL_GPT_PARAMS: GptParameters = {
+const INITIAL_GPT_PARAMS: GptParams = {
     tone: 'cinematic',
     style: 'illustration',
-    composition: 'full_shot',
+    composition: 'close_up',
 };
 
-const Bubble: React.FC<{ style: React.CSSProperties }> = ({ style }) => <div className="bubble" style={style} />;
+const INITIAL_GEMINI_PARAMS: GeminiParams = {
+    artStyle: 'anime_manga',
+    lighting: 'cinematica',
+    colorPalette: 'vibrante',
+    composition: 'retrato',
+    detailLevel: 'detalhado',
+};
+
+interface AlchemyPreset {
+    name: string;
+    basePrompt: string;
+    mjParams: MidjourneyParams;
+    gptParams: GptParams;
+    geminiParams: GeminiParams;
+}
 
 export const PromptEngineeringPanel: React.FC = () => {
-    const [topic, setTopic] = useState('');
+    const [basePrompt, setBasePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
-    const [mjParamsEnabled, setMjParamsEnabled] = useState(false);
-    const [mjParams, setMjParams] = useState<MidjourneyParametersType>(INITIAL_MJ_PARAMS);
-    const [gptParams, setGptParams] = useState<GptParameters>(INITIAL_GPT_PARAMS);
-
+    const [mjParams, setMjParams] = useState<MidjourneyParams>(INITIAL_MJ_PARAMS);
+    const [isMjEnabled, setIsMjEnabled] = useState(true);
+    const [gptParams, setGptParams] = useState<GptParams>(INITIAL_GPT_PARAMS);
+    const [isGptEnabled, setIsGptEnabled] = useState(true);
+    const [geminiParams, setGeminiParams] = useState<GeminiParams>(INITIAL_GEMINI_PARAMS);
+    const [isGeminiEnabled, setIsGeminiEnabled] = useState(true);
+    
     const [result, setResult] = useState<PromptGenerationResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const bubbles = useMemo(() => Array.from({ length: 15 }).map((_, i) => {
-        const size = Math.random() * 20 + 5;
-        const style = {
-            width: `${size}px`,
-            height: `${size}px`,
-            left: `${Math.random() * 100}%`,
-            animationDuration: `${Math.random() * 10 + 5}s`,
-            animationDelay: `${Math.random() * 5}s`,
-        };
-        return <Bubble key={i} style={style} />;
-    }), []);
+    const [presets, setPresets] = useLocalStorage<AlchemyPreset[]>('kimetsu-alchemy-presets', []);
+    const [selectedPreset, setSelectedPreset] = useState<string>('');
+    const [loaderText, setLoaderText] = useState('Gerando prompts...');
 
-    const handleGenerate = async () => {
+    const handleGenerate = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         setResult(null);
-
-        const activeMjParams: { [key: string]: any } = {};
-        if (mjParamsEnabled) {
-            for (const key in mjParams) {
-                const paramKey = key as keyof MidjourneyParametersType;
-                const param = mjParams[paramKey];
-                if (param.active) {
-                    activeMjParams[key] = param.value;
-                }
-            }
-        }
+        setLoaderText('Destilando Magia...');
         
         try {
             const response = await fetch('/api/generatePrompts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    topic,
-                    negativePrompt,
-                    mjParams: activeMjParams,
-                    gptParams
+                    basePrompt: `Tópico Principal: ${basePrompt}. Evitar: ${negativePrompt || 'Nenhum'}.`,
+                    mjParams,
+                    gptParams,
+                    geminiParams,
+                    generateMidjourney: isMjEnabled,
+                    generateGpt: isGptEnabled,
+                    generateGemini: isGeminiEnabled,
                 }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao gerar prompts.');
+                throw new Error(errorData.message || 'Falha ao gerar os prompts.');
             }
 
-            const data: PromptGenerationResult = await response.json();
-            setResult(data);
+            const data = await response.json();
+            setResult(data.result);
+
         } catch (err: any) {
             setError(err.message);
         } finally {
             setIsLoading(false);
         }
-    };
-    
+    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled]);
 
-    const handleReset = () => {
-        setTopic('');
+    const handleSavePreset = useCallback(() => {
+        const name = prompt("Digite um nome para o preset:");
+        if (name && name.trim()) {
+            if (presets.some(p => p.name === name.trim())) {
+                alert('Já existe um preset com este nome.');
+                return;
+            }
+            const newPreset: AlchemyPreset = { name: name.trim(), basePrompt, mjParams, gptParams, geminiParams };
+            setPresets(prev => [...prev, newPreset].sort((a, b) => a.name.localeCompare(b.name)));
+            setSelectedPreset(name.trim());
+        }
+    }, [basePrompt, mjParams, gptParams, geminiParams, presets, setPresets]);
+
+    const handlePresetChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const name = e.target.value;
+        setSelectedPreset(name);
+        if (name) {
+            const preset = presets.find(p => p.name === name);
+            if (preset) {
+                setBasePrompt(preset.basePrompt);
+                setMjParams(preset.mjParams);
+                setGptParams(preset.gptParams);
+                setGeminiParams(preset.geminiParams);
+            }
+        }
+    }, [presets]);
+
+    const handleDeletePreset = useCallback(() => {
+        if (selectedPreset && window.confirm(`Tem certeza que deseja deletar o preset "${selectedPreset}"?`)) {
+            setPresets(prev => prev.filter(p => p.name !== selectedPreset));
+            setSelectedPreset('');
+        }
+    }, [selectedPreset, setPresets]);
+
+    const handleResetAll = () => {
+        setBasePrompt('');
         setNegativePrompt('');
         setMjParams(INITIAL_MJ_PARAMS);
         setGptParams(INITIAL_GPT_PARAMS);
-        setMjParamsEnabled(false);
+        setGeminiParams(INITIAL_GEMINI_PARAMS);
+        setIsMjEnabled(true);
+        setIsGptEnabled(true);
+        setIsGeminiEnabled(true);
         setResult(null);
-        setError(null);
+        setSelectedPreset('');
     };
 
+    const handleClearIdea = () => {
+        setBasePrompt('');
+        setNegativePrompt('');
+    };
+    
+    const isGenerationDisabled = isLoading || !basePrompt.trim() || (!isMjEnabled && !isGptEnabled && !isGeminiEnabled);
+
     return (
-        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                {bubbles}
-            </div>
+        <div className="alchemy-interface h-full flex flex-col gap-6">
+             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
             
-            {/* Left Column: Controls & Prompt Results */}
-            <div className="flex flex-col gap-4">
-                {/* Configuration Grid */}
-                <div className="alquimia-top-grid">
-                    <Card className="p-6 parameter-card prompt-editor-block">
-                        <h3 className="text-lg font-bold text-white font-gangofthree mb-3">Caldeirão</h3>
-                        <div className="space-y-4 h-full flex flex-col">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Tópico Principal / Ideia</label>
-                                <textarea
-                                    value={topic}
-                                    onChange={(e) => setTopic(e.target.value)}
-                                    placeholder="Ex: Um caçador de demônios samurai, com uma armadura steampunk, em uma floresta de bambu cyberpunk..."
-                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white resize-none flex-grow"
-                                />
-                            </div>
-                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Prompt Negativo (O que evitar)</label>
-                                <input
-                                    type="text"
-                                    value={negativePrompt}
-                                    onChange={(e) => setNegativePrompt(e.target.value)}
-                                    placeholder="Ex: texto, blur, baixa qualidade, cartoon"
-                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
-                                />
-                            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow">
+                <div className="flex flex-col gap-6">
+                     <Card className="flex-grow flex flex-col p-4 md:p-6">
+                        <div className="flex justify-between items-center mb-4">
+                             <h2 className="text-xl font-bold text-white font-gangofthree">Caldeirão</h2>
+                             <Button variant="ghost" size="sm" onClick={handleClearIdea}>
+                                <RefreshIcon className="w-4 h-4" />
+                                Limpar Ideia
+                             </Button>
+                        </div>
+                         <div className="space-y-4">
+                            <TextArea label="Tópico Principal / Ideia" value={basePrompt} onChange={(e) => setBasePrompt(e.target.value)} placeholder="Ex: um caçador de onis com uma máscara de raposa..." rows={3} disabled={isLoading}/>
+                            <TextArea label="Prompt Negativo (O que evitar)" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Ex: texto, blur, baixa qualidade, cartoon" rows={2} disabled={isLoading}/>
                         </div>
                     </Card>
-                    <Card className="p-6 parameter-card">
-                        <MidjourneyParameters 
-                            params={mjParams} 
-                            onParamsChange={setMjParams} 
-                            enabled={mjParamsEnabled}
-                            onEnabledChange={setMjParamsEnabled}
-                        />
+                    <Card className="p-4 md:p-6">
+                        <h3 className="text-lg font-bold text-white font-gangofthree mb-3">Presets da Alquimia</h3>
+                        <div className="flex items-center gap-2">
+                            <div className="flex-grow">
+                                <Select label="" value={selectedPreset} onChange={handlePresetChange}>
+                                    <option value="">Carregar preset...</option>
+                                    {presets.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                                </Select>
+                            </div>
+                            <Button variant="secondary" size="sm" onClick={handleSavePreset} className="!p-2" title="Salvar filtros atuais como um preset"><SaveIcon className="w-5 h-5" /></Button>
+                            {selectedPreset && <Button variant="danger" size="sm" onClick={handleDeletePreset} className="!p-2" title="Deletar preset selecionado"><TrashIcon className="w-5 h-5" /></Button>}
+                        </div>
                     </Card>
-                    <Card className="p-6 parameter-card">
-                        <GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} />
-                    </Card>
+                     <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
+                         <Card className="p-4 md:p-6"><GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} enabled={isGptEnabled} onEnabledChange={setIsGptEnabled} /></Card>
+                         <Card className="p-4 md:p-6"><GeminiParameters params={geminiParams} onParamsChange={setGeminiParams} enabled={isGeminiEnabled} onEnabledChange={setIsGeminiEnabled} /></Card>
+                     </div>
                 </div>
-                
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-4 flex-shrink-0">
-                    <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
-                        <RefreshIcon className="w-5 h-5" /> Resetar
-                    </Button>
-                    <Button onClick={handleGenerate} disabled={isLoading || !topic.trim()} className="alchemist-button">
-                        <PotionIcon className="w-5 h-5" />
-                        {isLoading ? 'Gerando...' : 'Gerar Prompts'}
-                    </Button>
+                <div className="flex flex-col gap-6">
+                    <Card className="p-4 md:p-6"><MidjourneyParameters params={mjParams} onParamsChange={setMjParams} enabled={isMjEnabled} onEnabledChange={setIsMjEnabled} /></Card>
+                    <div className="mt-auto">
+                         <Card className="p-4 md:p-6">
+                            <div className="flex items-center justify-between gap-4">
+                                <Button variant="secondary" onClick={handleResetAll} disabled={isLoading}>Resetar Tudo</Button>
+                                <Button onClick={handleGenerate} disabled={isGenerationDisabled} className="alchemist-button flex-grow">
+                                    <MagicWandIcon className="w-5 h-5" />
+                                    {isLoading ? 'Destilando...' : 'Gerar Prompts'}
+                                </Button>
+                            </div>
+                         </Card>
+                    </div>
                 </div>
-
-                {/* Prompt Results */}
-                {isLoading && !result && (
-                    <div className="flex justify-center items-center h-full">
-                        <AlchemyLoadingIndicator />
-                    </div>
-                )}
-                
-                {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
-
-                {result && (
-                    <div className="animate-fade-in-up space-y-4">
-                        <PromptCard model="midjourney" prompt={result.midjourneyPrompt} />
-                        <PromptCard model="gpt" prompt={result.gptPrompt} />
-                    </div>
-                )}
             </div>
 
-            {/* Right Column: Image Generation */}
-            <div className="h-full">
-                <ImageGenerationPanel 
-                    initialPrompt={result?.gptPrompt || ''} 
-                    mjParams={mjParams} 
-                    gptParams={gptParams} 
-                />
-            </div>
+            {(isLoading || result) && (
+                 <div className="results-container mt-6">
+                    {isLoading ? (
+                        <Card className="flex items-center justify-center h-64">
+                             <div className="🤚">
+                                <div className="👉"></div>
+                                <div className="👉"></div>
+                                <div className="👉"></div>
+                                <div className="👉"></div>
+                                <div className="🌴"></div>		
+                                <div className="👍"></div>
+                            </div>
+                        </Card>
+                    ) : result ? (
+                        <PromptResultDisplay result={result} />
+                    ) : null}
+                </div>
+            )}
         </div>
     );
 };

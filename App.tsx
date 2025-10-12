@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ForgeInterface } from './components/ForgeInterface';
+// FIX: Populated the placeholder content for the PromptEngineeringPanel component to resolve the import error.
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { AnimatePresence, motion } from 'framer-motion';

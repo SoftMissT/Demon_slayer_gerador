@@ -1,29 +1,42 @@
 import React from 'react';
-// FIX: Corrected type import from the now separate types.ts file.
 import type { GptParameters } from '../types';
 import { Select } from './ui/Select';
+import { Switch } from './ui/Switch';
 
 interface GptStructuredBuilderProps {
     params: GptParameters;
     onParamsChange: (params: GptParameters) => void;
+    enabled: boolean;
+    onEnabledChange: (enabled: boolean) => void;
 }
 
-export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ params, onParamsChange }) => {
+export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ params, onParamsChange, enabled, onEnabledChange }) => {
     const handleChange = (field: keyof GptParameters, value: any) => {
         onParamsChange({ ...params, [field]: value });
     };
 
     return (
         <div className="space-y-4">
-            <h3 className="text-lg font-bold text-white font-gangofthree">Parâmetros Estruturados (GPT/DALL-E)</h3>
+            <div className="flex justify-between items-center">
+                 <h3 className="text-lg font-bold text-white font-gangofthree">Parâmetros Estruturados (GPT/DALL-E)</h3>
+                 <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-300">Ativar</span>
+                    <Switch
+                        checked={enabled}
+                        onChange={(e) => onEnabledChange(e.target.checked)}
+                        aria-label="Ativar parâmetros do GPT/DALL-E"
+                    />
+                </div>
+            </div>
             <p className="text-sm text-gray-400">
                 Estes parâmetros ajudam a IA a construir um prompt mais rico e detalhado para modelos como DALL-E 3, que respondem bem a descrições em linguagem natural.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
                  <Select
                     label="Tom / Atmosfera"
                     value={params.tone}
                     onChange={(e) => handleChange('tone', e.target.value)}
+                    disabled={!enabled}
                 >
                     <option value="cinematic">Cinemático</option>
                     <option value="dark_fantasy">Fantasia Sombria</option>
@@ -37,6 +50,7 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
                     label="Estilo de Arte"
                     value={params.style}
                     onChange={(e) => handleChange('style', e.target.value)}
+                    disabled={!enabled}
                 >
                      <option value="illustration">Ilustração</option>
                     <option value="concept_art">Arte Conceitual</option>
@@ -49,6 +63,7 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
                     label="Composição / Ângulo"
                     value={params.composition}
                     onChange={(e) => handleChange('composition', e.target.value)}
+                    disabled={!enabled}
                 >
                     <option value="close_up">Close-up</option>
                     <option value="full_shot">Corpo Inteiro</option>
