@@ -45,6 +45,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [currentAiFocus, setCurrentAiFocus] = useState<Record<string, string> | null>(null);
 
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -52,6 +53,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
         setIsLoading(true);
         setError(null);
+        setCurrentAiFocus({
+            aiFocusGemini: filters.aiFocusGemini,
+            aiFocusGpt: filters.aiFocusGpt,
+            aiFocusDeepSeek: filters.aiFocusDeepSeek,
+        });
+
         if (count === 1) {
             setItems([]);
         }
@@ -69,6 +76,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
             setError(err.message || 'Ocorreu um erro desconhecido.');
         } finally {
             setIsLoading(false);
+            setCurrentAiFocus(null);
         }
     }, [isMobile, setHistory]);
 
@@ -171,6 +179,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
                             onToggleFavorite={handleToggleFavorite}
                             onGenerateVariant={handleGenerateVariant}
                             onClearResults={handleClearResults}
+                            aiFocus={currentAiFocus}
                         />
                     </div>
                     {!isMobile && (

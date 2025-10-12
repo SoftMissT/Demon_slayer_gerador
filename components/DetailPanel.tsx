@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import type { GeneratedItem, MissionNPC, MissionItem, WorldBuildingItem, BreathingFormItem, HunterItem, OniItem, NpcItem, MissionItemDetails } from '../types';
+import type { GeneratedItem, MissionNPC, MissionItem, WorldBuildingItem, BreathingFormItem, HunterItem, OniItem, NpcItem, MissionItemDetails, EventItem } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
@@ -510,6 +510,47 @@ const BreathingFormDetailView: React.FC<{ item: BreathingFormItem }> = ({ item }
     </>
 );
 
+const EventDetailView: React.FC<{ item: EventItem }> = ({ item }) => (
+    <>
+        <DetailSection title="Tipo do Evento">{item.eventType}</DetailSection>
+        <DetailSection title="Descrição">{item.descricao}</DetailSection>
+        
+        <div className="grid grid-cols-2 gap-4">
+            <DetailSection title="Nível">{item.level}</DetailSection>
+            <DetailSection title="Nível de Ameaça">{item.threatLevel}</DetailSection>
+        </div>
+
+        {item.consequencias && item.consequencias.length > 0 && (
+            <DetailSection title="Consequências Potenciais">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.consequencias.map((consequence: string, i: number) => <li key={i}>{consequence}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.participantes_chave && item.participantes_chave.length > 0 && (
+            <DetailSection title="Participantes Chave">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {item.participantes_chave.map((p, i) => (
+                        <Card key={i} className="!p-3 !bg-gray-800/70">
+                            <h5 className="font-bold text-white">{p.nome}</h5>
+                            <p className="text-xs text-gray-400 mt-1">{p.papel}</p>
+                        </Card>
+                    ))}
+                </div>
+            </DetailSection>
+        )}
+
+        {item.ganchos_narrativos && Array.isArray(item.ganchos_narrativos) && item.ganchos_narrativos.length > 0 && (
+            <DetailSection title="Ganchos de Aventura">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.ganchos_narrativos.map((hook: string, i: number) => <li key={i}>{hook}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+    </>
+);
+
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -566,14 +607,14 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     );
   }
   
-  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC';
+  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento';
   const currentName = ('title' in item && item.title) || item.nome;
 
   return (
     <Card className="detail-panel h-full flex flex-col !p-0 overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-700 flex-shrink-0">
             <div className="flex justify-between items-start">
-                <div className="flex-grow mr-2">
+                <div className="flex-grow mr-2 overflow-hidden">
                     {isEditingName ? (
                         <input
                             ref={nameInputRef}
@@ -590,7 +631,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                             onClick={() => setIsEditingName(true)}
                             title="Clique para editar o nome"
                         >
-                            <h2 className="text-xl font-bold text-white font-gangofthree">
+                            <h2 className="text-xl font-bold text-white font-gangofthree truncate">
                                 {currentName}
                             </h2>
                             <PencilIcon className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
@@ -603,6 +644,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                         item.categoria === 'Caçador' ? `${item.categoria} • ${'classe' in item && item.classe || 'N/A'}` :
                         item.categoria === 'Inimigo/Oni' ? `${item.categoria} • ${'power_level' in item && item.power_level || `${item.raridade} (Nível ${item.nivel_sugerido})`}` :
                         item.categoria === 'World Building' ? `${item.categoria}` :
+                        item.categoria === 'Evento' ? `${item.categoria} • Nível ${'level' in item && item.level || 'N/A'}` :
                         item.categoria === 'Forma de Respiração' ? `${item.categoria} • Derivada de ${'base_breathing_id' in item && item.base_breathing_id}` :
                         item.categoria === 'Kekkijutsu' ? `${item.categoria} • Nível ${item.nivel_sugerido}` :
                         `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
@@ -629,6 +671,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
              item.categoria === 'Inimigo/Oni' ? <OniDetailView item={item} /> :
              item.categoria === 'World Building' ? <WorldBuildingDetailView item={item} /> :
              item.categoria === 'Forma de Respiração' ? <BreathingFormDetailView item={item} /> :
+             item.categoria === 'Evento' ? <EventDetailView item={item} /> :
              (
                 <>
                     <DetailSection title="Descrição Curta">{item.descricao_curta}</DetailSection>

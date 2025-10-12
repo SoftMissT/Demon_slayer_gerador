@@ -17,6 +17,7 @@ interface ResultsPanelProps {
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
   onClearResults: () => void;
   title?: string;
+  aiFocus: Record<string, string> | null;
 }
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({
@@ -28,7 +29,8 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   onToggleFavorite,
   onGenerateVariant,
   onClearResults,
-  title = "Resultados da Forja"
+  title = "Resultados da Forja",
+  aiFocus,
 }) => {
   return (
     <div className="results-panel forge-panel rounded-lg p-4 flex flex-col h-full">
@@ -43,7 +45,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
       <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-[200px]">
         {isLoading && items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-            <ForgeLoadingIndicator />
+            <ForgeLoadingIndicator aiFocus={aiFocus} />
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">

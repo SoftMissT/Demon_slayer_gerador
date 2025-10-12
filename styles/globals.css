@@ -289,6 +289,8 @@ body {
   100% { background-position: 0% 50%; }
 }
 .alchemist-theme .main-header {
+    background: linear-gradient(135deg, var(--deep-purple) 0%, var(--void-black) 50%, var(--dark-blue) 100%);
+    box-shadow: 0 4px 30px -5px rgba(138, 43, 226, 0.6);
     border-bottom: 2px solid transparent;
     position: relative;
 }
@@ -302,6 +304,24 @@ body {
     background: linear-gradient(90deg, var(--potion-purple), var(--crystal-blue), var(--elixir-green), var(--alchemy-gold), var(--potion-purple));
     background-size: 200% 100%;
     animation: magic-flow 8s linear infinite;
+}
+
+.alchemist-theme .header-logo-title h1 {
+    background: linear-gradient(45deg, var(--elixir-green), var(--crystal-blue), var(--magic-pink)) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    font-size: 2.5rem !important;
+    text-shadow: 0 0 10px rgba(0, 191, 255, 0.7);
+    margin: 0;
+}
+
+.alchemist-theme .subtitle {
+    color: #E6E6FA;
+    font-size: 1.1rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
 }
 
 /* Thematic Cards */

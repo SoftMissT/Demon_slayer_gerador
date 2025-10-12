@@ -1,5 +1,5 @@
 // FIX: Populated with full type definitions to resolve module errors.
-export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missões' | 'World Building';
+export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missões' | 'World Building' | 'Evento';
 export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
 export type Tematica = 'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 'Cyberpunk' | 'Pós-apocalíptico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 'Biopunk' | '🧭 JOSEON (Coreia Histórica Expandida)' | '🤠 VELHO OESTE SOLAR' | 'DOS CAÇADORES DE SOMBRAS' | '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES' | '🕵️‍♂️ DO JAZZ & OCULTISMO' | '🧪 DO COLONIALISMO DE ALQUIMIA' | '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)' | '🤖 DA SINGULARIDADE (PÓS-HUMANA)' | '🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)' | '🛸 DO CREPÚSCULO CÓSMICO' | '💠 DA INFOCRACIA' | '🎭 DOS CINCO REINOS (WUXIA/XIANXIA)' | '🌃 DO SUBMUNDO NOTURNO' | '🧙 DA ALVORADA ANCESTRAL' | '🏜️ DO SAARA ETERNO' | '🧟 DA QUEDA DOS REINOS' | '🚪 DOS PORTAIS ESQUECIDOS' | '🪐 DA FRONTEIRA ESTELAR' | '🌌 DO ETERNO CREPÚSCULO' | '⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA' | '🎭 DOS CARNAVAIS SANGUE' | '🌃 DO RENASCIMENTO SOMBRIO' | '⚔️ DOS DEUSES CAÍDOS' | '🛸 DA COLONIZAÇÃO INTERGALÁCTICA' | 'Neon-Noir Megacidade' | 'Mythpunk Amazônico' | 'Shogunato Cibernético' | 'Coralpunk Oceânico' | 'Retro-Futuro 1950s' | 'Ártico Steampunk' | 'Paisagem dos Sonhos (Surreal)' | 'Tecno-Xamanismo';
 export type Tone = 'épico' | 'sombrio' | 'misterioso' | 'aventuresco' | 'cômico' | 'trágico' | 'esperançoso';
@@ -7,7 +7,7 @@ export type Tone = 'épico' | 'sombrio' | 'misterioso' | 'aventuresco' | 'cômic
 export interface FilterState {
   category: Category | '';
   // Hunter
-  hunterTematica: Tematica;
+  hunterTematica: Tematica | '';
   hunterCountry: string;
   hunterOrigin: string;
   hunterArchetype: string;
@@ -15,6 +15,7 @@ export interface FilterState {
   hunterWeapon: string;
   hunterBreathingStyles: string[];
   hunterAccessory: string;
+  hunterRank: string;
   // Oni
   oniPowerLevel: string;
   oniCountry: string;
@@ -22,9 +23,9 @@ export interface FilterState {
   oniInspirationKekkijutsu: string[];
   oniInspirationBreathing: string;
   oniPersonality: string;
-  oniTematica: Tematica;
+  oniTematica: Tematica | '';
   // NPC
-  npcTematica: Tematica;
+  npcTematica: Tematica | '';
   npcCountry: string;
   npcOrigin: string;
   npcProfession: string;
@@ -32,14 +33,14 @@ export interface FilterState {
   npcWeapon: string;
   npcAccessory: string;
   // Weapon
-  weaponRarity: Rarity;
-  weaponTematica: Tematica;
+  weaponRarity: Rarity | '';
+  weaponTematica: Tematica | '';
   weaponCountry: string;
   weaponType: string;
   weaponMetalColor: string;
   // Accessory
-  accessoryRarity: Rarity;
-  accessoryTematica: Tematica;
+  accessoryRarity: Rarity | '';
+  accessoryTematica: Tematica | '';
   accessoryOrigin: string;
   accessoryCountry: string;
   accessoryBreathingInspiration: string;
@@ -47,14 +48,14 @@ export interface FilterState {
   accessoryWeaponInspiration: string;
   // Breathing Form
   baseBreathingStyles: string[];
-  breathingFormTematica: Tematica;
+  breathingFormTematica: Tematica | '';
   breathingFormCountry: string;
   breathingFormOrigin: string;
   breathingFormTone: Tone;
   breathingFormWeapon: string;
   breathingFormArchetype: string;
   // Kekkijutsu
-  kekkijutsuTematica: Tematica;
+  kekkijutsuTematica: Tematica | '';
   kekkijutsuCountry: string;
   kekkijutsuKekkijutsuInspiration: string;
   kekkijutsuBreathingInspiration: string;
@@ -62,7 +63,7 @@ export interface FilterState {
   kekkijutsuAccessoryInspiration: string;
   // Location
   locationTone: Tone;
-  locationTematica: Tematica;
+  locationTematica: Tematica | '';
   locationCountry: string;
   locationTerrain: string;
   locationTerrainCustom: string;
@@ -73,14 +74,25 @@ export interface FilterState {
   protagonist: string;
   targets: string;
   moodModifiers: string;
-  missionTematica: Tematica;
+  missionTematica: Tematica | '';
   missionCountry: string;
   // World Building
   wbTone: Tone;
-  wbTematica: Tematica;
+  wbTematica: Tematica | '';
   wbCountry: string;
   wbThreatScale: string;
   wbLocation: string;
+  // Event
+  eventTone: Tone;
+  eventTematica: Tematica | '';
+  eventCountry: string;
+  eventLevel: string;
+  eventThreatLevel: string;
+  eventType: string;
+  // AI Collaboration Focus
+  aiFocusGemini: string;
+  aiFocusGpt: string;
+  aiFocusDeepSeek: string;
 }
 
 export interface FilterPreset {
@@ -267,6 +279,16 @@ export interface LocationItem extends BaseGeneratedItem {
     categoria: 'Local/Cenário';
 }
 
+export interface EventItem extends BaseGeneratedItem {
+    categoria: 'Evento';
+    level: string;
+    threatLevel: string;
+    eventType: string;
+    consequencias: string[];
+    participantes_chave: { nome: string; papel: string; }[];
+}
+
+
 export type GeneratedItem = 
     | WeaponItem
     | KekkijutsuItem
@@ -276,7 +298,8 @@ export type GeneratedItem =
     | BreathingFormItem
     | MissionItemDetails
     | WorldBuildingItem
-    | LocationItem;
+    | LocationItem
+    | EventItem;
 
 export interface MidjourneyParameter<T> {
   active: boolean;

@@ -1,27 +1,27 @@
+
+
 import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
-import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
-import { MagicWandIcon } from './icons/MagicWandIcon';
-import { Spinner } from './ui/Spinner';
 import type { PromptGenerationResult } from '../types';
+import { MidjourneyIcon } from './icons/MidjourneyIcon';
+import { GptIcon } from './icons/GptIcon';
 
 interface PromptResultDisplayProps {
   result: PromptGenerationResult;
-  onRefine: (promptToRefine: string, modelType: 'midjourney' | 'gpt') => Promise<void>;
 }
 
-const PromptCard: React.FC<{ 
-    title: string; 
+interface PromptCardProps {
+    title: string;
     prompt: string;
-    modelType: 'midjourney' | 'gpt';
-    onRefine: (promptToRefine: string, modelType: 'midjourney' | 'gpt') => Promise<void>;
     className?: string;
-}> = ({ title, prompt, modelType, onRefine, className }) => {
+    icon: React.ReactNode;
+}
+
+const PromptCard: React.FC<PromptCardProps> = ({ title, prompt, className, icon }) => {
     const [copied, setCopied] = useState(false);
-    const [isRefining, setIsRefining] = useState(false);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(prompt);
@@ -29,45 +29,42 @@ const PromptCard: React.FC<{
         setTimeout(() => setCopied(false), 2000);
     };
     
-    const handleRefineClick = async () => {
-        setIsRefining(true);
-        try {
-            await onRefine(prompt, modelType);
-        } catch (error) {
-            // Error is handled by the parent component
-            console.error("Refinement failed:", error);
-        } finally {
-            setIsRefining(false);
-        }
-    };
-
     return (
-        <Card className={`prompt-card flex flex-col ${className}`}>
-            <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                <h3 className="text-lg font-bold text-white font-gangofthree">{title}</h3>
+        <Card className={`prompt-card flex flex-col ${className} !p-4`}>
+            <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                    {icon}
+                    <h3 className="text-lg font-bold text-white font-gangofthree">{title}</h3>
+                </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="secondary" onClick={handleRefineClick} disabled={isRefining}>
-                        {isRefining ? <Spinner size="sm" /> : <MagicWandIcon className="w-5 h-5" />}
-                        {isRefining ? 'Refinando...' : 'Refinar com DeepSeek'}
-                    </Button>
-                    <Button variant="ghost" onClick={handleCopy} disabled={isRefining}>
+                    <Button variant="ghost" onClick={handleCopy}>
                         {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
                         {copied ? 'Copiado!' : 'Copiar'}
                     </Button>
                 </div>
             </div>
-            <div className="bg-gray-900/50 p-3 rounded-md text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto flex-grow">
+            <div className="bg-gray-900/50 p-4 rounded-md text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto flex-grow font-mono">
                 <code>{prompt}</code>
             </div>
         </Card>
     );
 };
 
-export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ result, onRefine }) => {
+export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ result }) => {
   return (
     <div className="space-y-6">
-        <PromptCard title="Prompt para Midjourney" prompt={result.midjourneyPrompt} modelType="midjourney" onRefine={onRefine} className="model-midjourney" />
-        <PromptCard title="Prompt para DALL-E / GPT" prompt={result.gptPrompt} modelType="gpt" onRefine={onRefine} className="model-gpt" />
+        <PromptCard 
+            title="Prompt para Midjourney" 
+            prompt={result.midjourneyPrompt} 
+            className="model-midjourney"
+            icon={<MidjourneyIcon className="w-6 h-6 text-alchemy-gold" />}
+        />
+        <PromptCard 
+            title="Prompt para DALL-E / GPT" 
+            prompt={result.gptPrompt} 
+            className="model-gpt"
+            icon={<GptIcon className="w-6 h-6 text-crystal-blue" />}
+        />
     </div>
   );
 };

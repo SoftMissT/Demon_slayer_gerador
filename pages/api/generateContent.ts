@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient as getGeminiClient } from '../../lib/gemini';
 import { getOpenAiClient } from '../../lib/openai';
@@ -23,7 +22,7 @@ const safeJsonParse = (jsonString: string | null | undefined) => {
 };
 
 // Step 2: Polish narrative with GPT
-const polishNarrativeWithGPT = async (item: GeneratedItem): Promise<GeneratedItem> => {
+const polishNarrativeWithGPT = async (item: GeneratedItem, focus: string): Promise<GeneratedItem> => {
     const openAiClient = getOpenAiClient();
     if (!openAiClient) {
         console.warn("OpenAI client not available, skipping narrative polish.");
@@ -38,7 +37,7 @@ const polishNarrativeWithGPT = async (item: GeneratedItem): Promise<GeneratedIte
             ganchos_narrativos: item.ganchos_narrativos,
         };
 
-        const gptPrompt = `Você é um escritor criativo e autor de módulos de RPG, especializado no universo de Demon Slayer. Sua tarefa é aprimorar o conteúdo a seguir. Reescreva as descrições e os ganchos narrativos para serem mais evocativos, detalhados e envolventes, mantendo os conceitos originais. Retorne um objeto JSON com quatro chaves: "nome", "descricao_curta", "descricao", "ganchos_narrativos". Responda apenas com o objeto JSON.\n\nConteúdo para aprimorar:\n${JSON.stringify(narrativeFields)}`;
+        const gptPrompt = `Você é um escritor criativo e autor de módulos de RPG, especializado no universo de Demon Slayer. Sua tarefa é aprimorar o conteúdo a seguir com um foco especial em "${focus}". Reescreva as descrições e os ganchos narrativos para serem mais evocativos, detalhados e envolventes, mantendo os conceitos originais. Retorne um objeto JSON com quatro chaves: "nome", "descricao_curta", "descricao", "ganchos_narrativos". Responda apenas com o objeto JSON.\n\nConteúdo para aprimorar:\n${JSON.stringify(narrativeFields)}`;
         
         const gptResponse = await openAiClient.chat.completions.create({
             model: 'gpt-4o-mini',
@@ -67,35 +66,48 @@ const polishNarrativeWithGPT = async (item: GeneratedItem): Promise<GeneratedIte
 };
 
 // Step 3: Refine mechanics with DeepSeek
-const refineMechanicsWithDeepSeek = async (item: GeneratedItem): Promise<GeneratedItem> => {
+const refineMechanicsWithDeepSeek = async (item: GeneratedItem, focus: string): Promise<GeneratedItem> => {
     if (!process.env.DEEPSEEK_API_KEY) {
-        console.warn("DeepSeek API key not available, skipping mechanics refinement.");
+        console.warn("DeepSeek API key not found, skipping mechanics refinement.");
         return item;
     }
 
     try {
-        const mechanicsFields: Record<string, any> = {};
-        const fieldsToRefine = ['dano', 'dados', 'tipo_de_dano', 'status_aplicado', 'efeitos_secundarios', 'mechanics', 'level_scaling', 'comportamento_combate', 'fraquezas_unicas'];
+        const mechanicalFields: Partial<GeneratedItem> = {};
+        // FIX: Changed type from `(keyof GeneratedItem)[]` to `(keyof any)[]` to resolve type errors.
+        // `keyof GeneratedItem` resolves to the intersection of keys across all union members, which
+        // is too restrictive and does not include specific mechanical fields.
+        const mechanicalKeys: (keyof any)[] = ['dano', 'dados', 'tipo_de_dano', 'status_aplicado', 'efeitos_secundarios', 'kekkijutsu', 'habilidades_especiais', 'arsenal', 'requirements', 'mechanics', 'level_scaling', 'fraquezas_unicas', 'trofeus_loot'];
         
-        for (const field of fieldsToRefine) {
-            if (field in item) {
-                mechanicsFields[field] = (item as any)[field];
+        mechanicalKeys.forEach(key => {
+            if (key in item) {
+                (mechanicalFields as any)[key] = item[key];
             }
+        });
+
+        if (Object.keys(mechanicalFields).length === 0) {
+            return item; // No mechanical fields to refine for this item type
         }
 
-        if (Object.keys(mechanicsFields).length > 0) {
-            const deepSeekPrompt = `Você é um designer especialista em sistemas de RPG de mesa. Sua tarefa é revisar e refinar as seguintes mecânicas de jogo para um RPG com tema de Demon Slayer. Garanta que sejam balanceadas, claramente escritas e interessantes. A raridade do item é '${item.raridade}' e o nível sugerido é '${item.nivel_sugerido}'. Ajuste os números, dados e descrições para um melhor gameplay. Retorne um objeto JSON contendo apenas os campos de mecânica refinados que você recebeu. Responda apenas com o objeto JSON.\n\nMecânicas para refinar:\n${JSON.stringify(mechanicsFields)}`;
-            
-            const refinedMechanics = await callDeepSeekAPI([{ role: 'user', content: deepSeekPrompt }]);
-            
-            if (refinedMechanics) {
-                return { ...item, ...refinedMechanics };
-            }
+        const deepSeekPrompt = `Você é um game designer especialista em balanceamento de TTRPGs. Seus parceiros de IA, Gemini e GPT, criaram um item com uma narrativa já polida. Sua tarefa é refinar APENAS os campos de mecânica de jogo para torná-los mais interessantes, balanceados e criativos, com um foco especial em "${focus}". Não altere a narrativa. Retorne APENAS um objeto JSON contendo os campos de mecânica de jogo que você refinou.
+
+Mecânicas para refinar:
+${JSON.stringify(mechanicalFields, null, 2)}
+
+Analise e melhore os valores, e então retorne apenas o JSON com os campos atualizados.`;
+
+        const refinedMechanics = await callDeepSeekAPI([
+            { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
+            { role: 'user', content: deepSeekPrompt }
+        ]);
+
+        if (refinedMechanics) {
+            return { ...item, ...refinedMechanics };
         }
     } catch (error) {
         console.error("Error refining mechanics with DeepSeek:", error);
     }
-    return item; // Return item with original mechanics on failure
+    return item; // Return GPT-polished item if DeepSeek refinement fails
 };
 
 
@@ -140,15 +152,15 @@ export default async function handler(
 
     let items: GeneratedItem[] = count > 1 ? geminiData.items : [geminiData]; 
     if (!Array.isArray(items)) {
-        throw new Error("A resposta da IA (Gemini) não continha um array de itens válido.");
+        throw new Error("A resposta da IA (Gemini) não continha um array de um array de itens válido.");
     }
     
-    // Step 2 & 3: Polish and Refine each item
+    // Step 2 & 3: Polish and refine each item in sequence
     const enhancedItems = await Promise.all(
         items.map(async (item) => {
-            const narrativelyPolishedItem = await polishNarrativeWithGPT(item);
-            const fullyRefinedItem = await refineMechanicsWithDeepSeek(narrativelyPolishedItem);
-            return fullyRefinedItem;
+            const narrativelyPolishedItem = await polishNarrativeWithGPT(item, filters.aiFocusGpt);
+            const mechanicallyRefinedItem = await refineMechanicsWithDeepSeek(narrativelyPolishedItem, filters.aiFocusDeepSeek);
+            return mechanicallyRefinedItem;
         })
     );
 

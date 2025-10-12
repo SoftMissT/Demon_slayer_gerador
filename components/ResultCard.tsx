@@ -45,7 +45,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   };
   
   // FIX: Corrected category name from 'Missão/Cenário' to 'Missões' to align with the defined types and fix a type error.
-  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC';
+  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento';
 
   return (
     <Card 

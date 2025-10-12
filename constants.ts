@@ -3,7 +3,7 @@ import type { Category, Rarity, Tematica, Tone, FilterState } from './types';
 import { ORIGINS_DATA } from './lib/originsData';
 
 export const CATEGORIES: Category[] = [
-    'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missões', 'World Building'
+    'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missões', 'World Building', 'Evento'
 ];
 
 export const RARITIES: Rarity[] = ['Aleatória', 'Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'];
@@ -300,70 +300,83 @@ export const ONI_POWER_LEVELS: string[] = [
     'Aleatório', 'Oni Comum', 'Oni de Elite', 'Lua Inferior', 'Lua Superior', 'Classe Muzan'
 ];
 
+export const HUNTER_RANKS: string[] = [
+    'Aleatório', 'Mizunoto', 'Mizunoe', 'Kanoto', 'Kanoe', 'Tsuchinoto', 'Tsuchinoe', 'Hinoto', 'Hinoe', 'Kinoto', 'Kinoe', 'Hashira'
+];
+
+export const EVENT_LEVELS: string[] = ['Aleatório', 'Regional', 'Estadual', 'Nacional', 'Continental', 'Global'];
+export const EVENT_THREAT_LEVELS: string[] = ['Aleatória', 'Nenhuma', 'Baixa', 'Média', 'Alta', 'Apocalíptica'];
+export const EVENT_TYPES: string[] = ['Aleatório', 'Festival Cultural', 'Baile da Nobreza', 'Campeonato Marcial', 'Treinamento de Caçadores', 'Evento Celestial (Cometa, Eclipse)', 'Desastre Natural Mágico', 'Conspiração Política', 'Descoberta Misteriosa'];
+
+export const AI_FOCUS_GEMINI: string[] = ['Estrutura Base (Padrão)', 'Lore Expansivo', 'Conceito Minimalista', 'Foco em Originalidade'];
+export const AI_FOCUS_GPT: string[] = ['Polimento Narrativo (Padrão)', 'Diálogos Vívidos', 'Descrição Cinematográfica', 'Tom Sombrio e Gótico'];
+export const AI_FOCUS_DEEPSEEK: string[] = ['Refinamento de Mecânicas (Padrão)', 'Balanceamento Competitivo', 'Regras Criativas/Exóticas', 'Simplicidade e Acessibilidade'];
+
 // FIX: Added ORIGINS export by deriving it from ORIGINS_DATA to resolve import error.
 export const ORIGINS: string[] = ['Aleatória', ...ORIGINS_DATA.map(o => o.nome)];
 
 export const INITIAL_FILTERS: FilterState = {
     category: '',
     // Hunter
-    hunterTematica: 'Aleatória',
-    hunterCountry: 'Aleatório',
-    hunterOrigin: 'Aleatória',
-    hunterArchetype: 'Aleatória',
-    hunterPersonality: 'Aleatória',
-    hunterWeapon: 'Aleatório',
+    hunterTematica: '',
+    hunterCountry: '',
+    hunterOrigin: '',
+    hunterArchetype: '',
+    hunterPersonality: '',
+    hunterWeapon: '',
     hunterBreathingStyles: [],
     hunterAccessory: 'Aleatório',
+    hunterRank: '',
     // Oni
-    oniPowerLevel: 'Aleatório',
-    oniCountry: 'Aleatório',
-    oniWeapon: 'Aleatório',
+    oniPowerLevel: '',
+    oniCountry: '',
+    oniWeapon: '',
     oniInspirationKekkijutsu: [],
     oniInspirationBreathing: 'Nenhuma',
-    oniPersonality: 'Aleatória',
-    oniTematica: 'Aleatória',
+    oniPersonality: '',
+    oniTematica: '',
     // NPC
-    npcTematica: 'Aleatória',
-    npcCountry: 'Aleatório',
-    npcOrigin: 'Aleatória',
-    npcProfession: 'Aleatória',
-    npcPersonality: 'Aleatória',
-    npcWeapon: 'Aleatório',
+    npcTematica: '',
+    npcCountry: '',
+    npcOrigin: '',
+    npcProfession: '',
+    npcPersonality: '',
+    npcWeapon: '',
     npcAccessory: 'Nenhum',
     // Weapon
-    weaponRarity: 'Aleatória',
-    weaponTematica: 'Aleatória',
-    weaponCountry: 'Aleatório',
-    weaponType: 'Aleatório',
-    weaponMetalColor: 'Aleatório',
+    weaponRarity: '',
+    weaponTematica: '',
+    weaponCountry: '',
+    weaponType: '',
+    weaponMetalColor: '',
     // Accessory
-    accessoryRarity: 'Aleatória',
-    accessoryTematica: 'Aleatória',
-    accessoryOrigin: 'Aleatória',
-    accessoryCountry: 'Aleatório',
+    accessoryRarity: '',
+    accessoryTematica: '',
+    accessoryOrigin: '',
+    accessoryCountry: '',
     accessoryBreathingInspiration: 'Nenhuma',
     accessoryKekkijutsuInspiration: 'Nenhuma',
     accessoryWeaponInspiration: 'Nenhuma',
     // Breathing Form
     baseBreathingStyles: [],
-    breathingFormTematica: 'Aleatória',
-    breathingFormCountry: 'Aleatório',
-    breathingFormOrigin: 'Aleatória',
+    breathingFormTematica: '',
+    breathingFormCountry: '',
+    breathingFormOrigin: '',
     breathingFormTone: 'épico',
-    breathingFormWeapon: 'Aleatório',
-    breathingFormArchetype: 'Aleatória',
+    breathingFormWeapon: '',
+    breathingFormArchetype: '',
     // Kekkijutsu
-    kekkijutsuTematica: 'Aleatória',
-    kekkijutsuCountry: 'Aleatório',
-    kekkijutsuKekkijutsuInspiration: 'Aleatória',
+    kekkijutsuTematica: '',
+    kekkijutsuCountry: '',
+    kekkijutsuKekkijutsuInspiration: '',
     kekkijutsuBreathingInspiration: 'Nenhuma',
     kekkijutsuWeaponInspiration: 'Nenhuma',
     kekkijutsuAccessoryInspiration: 'Nenhuma',
     // Location
     locationTone: 'misterioso',
-    locationTematica: 'Aleatória',
-    locationCountry: 'Aleatório',
-    locationTerrain: 'Aleatório',
+    locationTematica: '',
+    locationCountry: '',
+    locationTerrain: '',
     locationTerrainCustom: '',
     // Mission
     missionTone: 'sombrio',
@@ -372,12 +385,23 @@ export const INITIAL_FILTERS: FilterState = {
     protagonist: '',
     targets: '',
     moodModifiers: '',
-    missionTematica: 'Aleatória',
-    missionCountry: 'Aleatório',
+    missionTematica: '',
+    missionCountry: '',
     // World Building
     wbTone: 'épico',
-    wbTematica: 'Aleatória',
-    wbCountry: 'Aleatório',
-    wbThreatScale: 'Aleatória',
+    wbTematica: '',
+    wbCountry: '',
+    wbThreatScale: '',
     wbLocation: '',
+    // Event
+    eventTone: 'misterioso',
+    eventTematica: '',
+    eventCountry: '',
+    eventLevel: '',
+    eventThreatLevel: '',
+    eventType: '',
+    // AI Collaboration Focus
+    aiFocusGemini: 'Estrutura Base (Padrão)',
+    aiFocusGpt: 'Polimento Narrativo (Padrão)',
+    aiFocusDeepSeek: 'Refinamento de Mecânicas (Padrão)',
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -93,38 +94,6 @@ export const PromptEngineeringPanel: React.FC = () => {
         }
     };
     
-    const handleRefinePrompt = useCallback(async (promptToRefine: string, modelType: 'midjourney' | 'gpt') => {
-        setError(null);
-        try {
-            const response = await fetch('/api/refinePromptWithDeepSeek', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ promptToRefine, modelType }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao refinar o prompt.');
-            }
-
-            const data = await response.json();
-            
-            setResult(prevResult => {
-                if (!prevResult) return null;
-                const keyToUpdate = modelType === 'midjourney' ? 'midjourneyPrompt' : 'gptPrompt';
-                return {
-                    ...prevResult,
-                    [keyToUpdate]: data.refinedPrompt,
-                };
-            });
-
-        } catch (err: any) {
-            setError(err.message);
-            // Re-throw to allow the caller to handle its loading state
-            throw err;
-        }
-    }, []);
-
 
     const handleReset = () => {
         setTopic('');
@@ -209,7 +178,7 @@ export const PromptEngineeringPanel: React.FC = () => {
 
                     {result && !isLoading && (
                         <div className="animate-fade-in-up">
-                            <PromptResultDisplay result={result} onRefine={handleRefinePrompt} />
+                            <PromptResultDisplay result={result} />
                         </div>
                     )}
                 </div>

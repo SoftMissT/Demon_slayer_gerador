@@ -1,24 +1,44 @@
+import React, { useState, useEffect, useMemo } from 'react';
 
-import React, { useState, useEffect } from 'react';
-
-const STEPS = [
-    'Aquecendo a fornalha com Gemini...',
-    'Polindo a narrativa com a pena do GPT...',
-    'Ajustando as mecânicas com a lógica do DeepSeek...',
-    'Finalizando os últimos detalhes...',
+const DEFAULT_STEPS = [
+    'Etapa 1/3: Forjando a base com Google Gemini...',
+    'Etapa 2/3: Polindo a narrativa com GPT...',
+    'Etapa 3/3: Refinando mecânicas com DeepSeek...',
+    'Finalizando a forja...',
 ];
 
-export const ForgeLoadingIndicator: React.FC = () => {
-    const [message, setMessage] = useState(STEPS[0]);
+interface ForgeLoadingIndicatorProps {
+    aiFocus: Record<string, string> | null;
+}
+
+export const ForgeLoadingIndicator: React.FC<ForgeLoadingIndicatorProps> = ({ aiFocus }) => {
+    const [message, setMessage] = useState(DEFAULT_STEPS[0]);
+
+    const steps = useMemo(() => {
+        if (!aiFocus) return DEFAULT_STEPS;
+        
+        const formatFocus = (focus: string = '') => {
+            const match = focus.match(/^(.*?)(?:\s\(Padrão\))?$/);
+            return match ? match[1] : focus;
+        };
+
+        return [
+            `Etapa 1/3: Forjando com Gemini (Foco: ${formatFocus(aiFocus.aiFocusGemini)})`,
+            `Etapa 2/3: Polindo com GPT (Foco: ${formatFocus(aiFocus.aiFocusGpt)})`,
+            `Etapa 3/3: Refinando com DeepSeek (Foco: ${formatFocus(aiFocus.aiFocusDeepSeek)})`,
+            'Finalizando a forja...',
+        ];
+    }, [aiFocus]);
 
     useEffect(() => {
+        setMessage(steps[0]);
         let currentStep = 0;
         const intervalId = setInterval(() => {
-            currentStep = (currentStep + 1) % STEPS.length;
-            setMessage(STEPS[currentStep]);
+            currentStep = (currentStep + 1) % steps.length;
+            setMessage(steps[currentStep]);
         }, 3000); // Change message every 3 seconds
         return () => clearInterval(intervalId);
-    }, []);
+    }, [steps]);
 
     return (
         <div className="flex flex-col items-center justify-center text-center p-6 w-full max-w-md">

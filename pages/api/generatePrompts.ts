@@ -1,4 +1,5 @@
 
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -30,33 +31,36 @@ const formatMjParams = (params: { [key: string]: any }, negativePrompt?: string)
 const buildPromptGenerationPrompt = (topic: string, negativePrompt: string, mjParams: any, gptParams: any): string => {
     const mjParamsString = formatMjParams(mjParams, negativePrompt);
     
-    return `Você é um especialista em engenharia de prompts, criando prompts altamente eficazes para IAs de geração de imagem como Midjourney e DALL-E 3.
-Sua tarefa é gerar dois prompts distintos com base na entrada do usuário: um otimizado para Midjourney e outro para DALL-E 3 (que usa um modelo semelhante ao GPT para interpretação).
+    return `Você é um "Alquimista de Prompts", um mestre na arte de traduzir ideias humanas em comandos visuais perfeitos para IAs de geração de imagem.
+Sua especialidade é criar prompts para Midjourney e DALL-E 3/GPT.
 
-A entrada do usuário é a seguinte:
-- Tópico Principal / Ideia: ${topic}
-- Prompt Negativo (o que evitar): ${negativePrompt || 'Nenhum'}
-- Parâmetros de Estilo GPT/DALL-E:
+**Missão:** Transforme a seguinte ideia do usuário em dois prompts distintos, um para cada plataforma, seguindo as diretrizes alquímicas abaixo.
+
+**Ideia Bruta do Usuário:**
+- Tópico Principal: ${topic}
+- Ingredientes a Evitar (Prompt Negativo): ${negativePrompt || 'Nenhum'}
+- Fórmula para GPT/DALL-E:
   - Tom/Atmosfera: ${gptParams.tone}
   - Estilo de Arte: ${gptParams.style}
   - Composição/Ângulo: ${gptParams.composition}
-- Parâmetros Finais para Midjourney: ${mjParamsString}
+- Encantamento Final para Midjourney: ${mjParamsString}
 
-**Instruções para Gerar os Prompts:**
+**Diretrizes Alquímicas:**
 
-1.  **Prompt para Midjourney:**
-    - Crie um prompt conciso, focado em palavras-chave.
-    - Combine o tópico principal com palavras-chave estilísticas relevantes derivadas dos parâmetros GPT/DALL-E.
-    - O prompt deve ser uma série de frases descritivas e palavras-chave, separadas por vírgulas.
-    - **IMPORTANTE**: Anexe a string de parâmetros de Midjourney \`${mjParamsString}\` exatamente como fornecida no final do prompt.
+1.  **Elixir para Midjourney:**
+    - **Fórmula:** Crie uma sequência potente de palavras-chave e frases descritivas curtas, separadas por vírgulas. Pense nisso como as anotações de um mestre artista: conciso, mas evocativo.
+    - **Foco:** Priorize termos de iluminação (ex: 'cinematic lighting', 'volumetric'), detalhes de câmera (ex: 'depth of field', '8k'), e estilo (ex: 'hyperdetailed', 'epic composition').
+    - **Estrutura:** Comece com o sujeito principal, adicione o cenário, depois os detalhes de estilo, e termine com os parâmetros técnicos.
+    - **Obrigatório:** O prompt DEVE terminar com a string de encantamento final exatamente como fornecida: \`${mjParamsString}\`.
 
-2.  **Prompt para GPT/DALL-E:**
-    - Crie um parágrafo detalhado e descritivo.
-    - Use linguagem natural para descrever vividamente a cena, incorporando o tópico principal.
-    - Integre os parâmetros de estilo GPT/DALL-E (Tom, Estilo de Arte, Composição) de forma fluida na descrição.
+2.  **Transmutação para GPT/DALL-E:**
+    - **Fórmula:** Escreva um parágrafo narrativo rico e imersivo, como se estivesse descrevendo uma cena de um filme de alto orçamento ou uma passagem de um livro de fantasia.
+    - **Foco:** Use linguagem sensorial para descrever a cena. Incorpore a "Fórmula para GPT/DALL-E" de forma natural no texto para definir a atmosfera, o estilo visual e a perspectiva da câmera.
+    - **Estrutura:** Conte uma pequena história. Descreva o personagem, suas ações, o ambiente ao redor, a iluminação e a emoção geral da cena.
 
-A resposta DEVE ser um único objeto JSON com duas chaves: "midjourneyPrompt" e "gptPrompt".`;
+A resposta final DEVE ser um único objeto JSON válido com duas chaves: "midjourneyPrompt" e "gptPrompt". Sem explicações, apenas o JSON.`;
 };
+
 
 const responseSchema = {
     type: Type.OBJECT,

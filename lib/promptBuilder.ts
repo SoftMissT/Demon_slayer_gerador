@@ -196,6 +196,30 @@ const locationSchema = {
     }
 };
 
+const eventSchema = {
+    type: Type.OBJECT,
+    properties: {
+        ...baseItemSchemaProperties,
+        categoria: { type: Type.STRING, enum: ['Evento'] },
+        level: { type: Type.STRING, description: "A escala do evento (ex: Regional, Global)." },
+        threatLevel: { type: Type.STRING, description: "O nível de ameaça que o evento representa." },
+        eventType: { type: Type.STRING, description: "O tipo de evento (ex: Festival, Desastre Natural)." },
+        consequencias: { type: Type.ARRAY, items: { type: Type.STRING }, description: "As possíveis consequências ou resultados do evento." },
+        participantes_chave: { 
+            type: Type.ARRAY, 
+            items: { 
+                type: Type.OBJECT, 
+                properties: { 
+                    nome: { type: Type.STRING }, 
+                    papel: { type: Type.STRING } 
+                } 
+            },
+            description: "Personagens ou grupos importantes envolvidos no evento."
+        },
+        ganchos_narrativos: ganchosNarrativosSchema,
+    }
+};
+
 const categoryToSchemaMap: Record<Category, any> = {
     'Caçador': hunterSchema,
     'Inimigo/Oni': oniSchema,
@@ -207,6 +231,7 @@ const categoryToSchemaMap: Record<Category, any> = {
     'Local/Cenário': locationSchema,
     'Missões': missionSchema,
     'World Building': worldBuildingSchema,
+    'Evento': eventSchema,
 };
 
 // #endregion
@@ -241,6 +266,8 @@ Contexto Geral:
 - Estilo: Uma fusão criativa e detalhada do tema com os filtros especificados. Crie lore, descrições vívidas e mecânicas interessantes.
 - O campo 'nome' deve ser sempre único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
 
+Diretriz para Gemini (Arquiteto): Seu foco principal na criação da estrutura deste item deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
+
 `;
 
     if (promptModifier) {
@@ -251,17 +278,17 @@ Contexto Geral:
     prompt += `- Categoria Principal: ${filters.category}\n`;
 
     for (const [key, value] of Object.entries(activeFilters)) {
-        if (key !== 'category') {
+        if (key !== 'category' && !key.startsWith('aiFocus')) {
             const formattedValue = Array.isArray(value) ? value.join(', ') : value;
             prompt += `- ${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${formattedValue}\n`;
         }
     }
     
-    if (Object.keys(activeFilters).length <= 1) {
+    if (Object.keys(activeFilters).length <= 4) { // Increased to account for aiFocus filters
         prompt += '- Nenhum filtro específico aplicado. Use sua criatividade para gerar um item exemplar da categoria.\n';
     }
 
-    prompt += "\nLembre-se: a saída deve ser APENAS o JSON. Sem comentários, sem explicações, apenas o JSON puro e válido."
+    prompt += "\nLembre-se: a saída deve ser APENAS o JSON. Sem comentários, sem explicações, apenas o JSON puro e válido. Seja extremamente criativo e detalhado nas descrições, garantindo que o lore e a aparência sejam memoráveis e únicos."
 
     return prompt;
 };
