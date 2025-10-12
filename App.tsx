@@ -5,6 +5,7 @@ import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { MatrixBackground } from './components/MatrixBackground';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
@@ -37,17 +38,28 @@ const App: React.FC = () => {
                     onFavoritesClick={() => setIsFavoritesOpen(true)}
                     onHistoryClick={() => setIsHistoryOpen(true)}
                 />
-                <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 md:px-6 py-6">
-                    {activeView === 'forge' ? (
-                        <ForgeInterface
-                            isFavoritesOpen={isFavoritesOpen}
-                            onFavoritesClose={() => setIsFavoritesOpen(false)}
-                            isHistoryOpen={isHistoryOpen}
-                            onHistoryClose={() => setIsHistoryOpen(false)}
-                        />
-                    ) : (
-                        <PromptEngineeringPanel />
-                    )}
+                <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6 overflow-hidden">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeView}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="h-full py-6"
+                        >
+                            {activeView === 'forge' ? (
+                                <ForgeInterface
+                                    isFavoritesOpen={isFavoritesOpen}
+                                    onFavoritesClose={() => setIsFavoritesOpen(false)}
+                                    isHistoryOpen={isHistoryOpen}
+                                    onHistoryClose={() => setIsHistoryOpen(false)}
+                                />
+                            ) : (
+                                <PromptEngineeringPanel />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 </main>
                 <Footer onAboutClick={() => setIsAboutOpen(true)} />
                 <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />

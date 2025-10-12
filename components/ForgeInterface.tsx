@@ -160,7 +160,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     }, [selectedItem, favorites]);
 
     return (
-        <div className="forge-interface h-full relative" style={{ height: 'calc(100vh - 150px)'}}>
+        <div className="forge-interface h-full relative">
             <div className="grid grid-cols-12 gap-6 h-full">
                 {!isMobile && (
                     <div className="col-span-12 lg:col-span-4 xl:col-span-3 h-full">
