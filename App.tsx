@@ -6,14 +6,12 @@ import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HowItWorksModal } from './components/HowItWorksModal';
-import { ApiKeysModal } from './components/ApiKeysModal';
-import useLocalStorage from './hooks/useLocalStorage';
-import { validateAllApiKeys } from './lib/client/validationService';
 
-export interface ApiKeys {
-    gemini: string;
-    openai: string;
-    deepseek: string;
+// Placeholder for user data after Discord login
+export interface User {
+    id: string;
+    nickname: string;
+    avatar?: string;
 }
 
 const App: React.FC = () => {
@@ -26,56 +24,8 @@ const App: React.FC = () => {
     const [theme, setTheme] = useState('forge-theme');
     const [favoritesCount, setFavoritesCount] = useState(0);
 
-    const [isApiKeysModalOpen, setIsApiKeysModalOpen] = useState(false);
-    const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('kimetsu-forge-apikeys', {
-        gemini: '',
-        openai: '',
-        deepseek: '',
-    });
-    
-    const [areApiKeysValidated, setAreApiKeysValidated] = useState(false);
-
-    // Effect for initial validation on load
-    useEffect(() => {
-        const validateKeysOnLoad = async () => {
-            // Developer mode: Auto-load keys only in local development environment
-            if (process.env.NODE_ENV === 'development') {
-                const devKeys: ApiKeys = {
-                    gemini: process.env.NEXT_PUBLIC_DEV_GEMINI_KEY || '',
-                    openai: process.env.NEXT_PUBLIC_DEV_OPENAI_KEY || '',
-                    deepseek: process.env.NEXT_PUBLIC_DEV_DEEPSEEK_KEY || '',
-                };
-                if (devKeys.gemini && devKeys.openai && devKeys.deepseek) {
-                    console.log("DEV MODE: Loading API keys from .env.local");
-                    setApiKeys(devKeys);
-                    setAreApiKeysValidated(true); // Trusting dev keys for local simplicity
-                    return; // Skip normal validation
-                }
-            }
-
-            // Normal user flow: validate keys from local storage
-            const areKeysPresent = apiKeys.gemini && apiKeys.openai && apiKeys.deepseek;
-            if (areKeysPresent) {
-                const result = await validateAllApiKeys(apiKeys);
-                if (result.errors.length === 0) {
-                    setAreApiKeysValidated(true);
-                } else {
-                    // Clear invalid keys to force re-entry
-                    const invalidKeys = { ...apiKeys };
-                    if (!result.gemini) invalidKeys.gemini = '';
-                    if (!result.openai) invalidKeys.openai = '';
-                    if (!result.deepseek) invalidKeys.deepseek = '';
-                    setApiKeys(invalidKeys);
-                    setAreApiKeysValidated(false);
-                }
-            } else {
-                setAreApiKeysValidated(false);
-            }
-        };
-
-        validateKeysOnLoad();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Run only once on mount to avoid re-triggering dev mode check
+    // New state for user authentication
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
         document.body.classList.remove('forge-theme', 'alchemist-theme');
@@ -84,14 +34,20 @@ const App: React.FC = () => {
         setTheme(newTheme);
     }, [activeView]);
     
-    const handleApiKeysSave = (keys: ApiKeys) => {
-        setApiKeys(keys);
-        // After saving, we know they are valid because the modal validated them.
-        setAreApiKeysValidated(true);
-        setIsApiKeysModalOpen(false);
+    // Placeholder login/logout functions
+    const handleLogin = () => {
+        // In a real scenario, this would redirect to the Discord OAuth URL
+        // For now, we'll simulate a successful login
+        console.log("Redirecting to Discord for login...");
+        setUser({
+            id: '123456789',
+            nickname: 'Usuário Teste'
+        });
     };
 
-    const openApiKeysModal = () => setIsApiKeysModalOpen(true);
+    const handleLogout = () => {
+        setUser(null);
+    };
 
     return (
         <>
@@ -103,7 +59,9 @@ const App: React.FC = () => {
                     onFavoritesClick={() => setIsFavoritesOpen(true)}
                     onHistoryClick={() => setIsHistoryOpen(true)}
                     onHowItWorksClick={() => setIsHowItWorksOpen(true)}
-                    onApiKeysClick={openApiKeysModal}
+                    user={user}
+                    onLoginClick={handleLogin}
+                    onLogoutClick={handleLogout}
                     favoritesCount={favoritesCount}
                 />
                 <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6 overflow-hidden">
@@ -123,15 +81,13 @@ const App: React.FC = () => {
                                     isHistoryOpen={isHistoryOpen}
                                     onHistoryClose={() => setIsHistoryOpen(false)}
                                     onFavoritesCountChange={setFavoritesCount}
-                                    areApiKeysValidated={areApiKeysValidated}
-                                    openApiKeysModal={openApiKeysModal}
-                                    apiKeys={apiKeys}
+                                    isAuthenticated={!!user}
+                                    onLoginClick={handleLogin}
                                 />
                             ) : (
                                 <PromptEngineeringPanel 
-                                    areApiKeysValidated={areApiKeysValidated}
-                                    openApiKeysModal={openApiKeysModal}
-                                    apiKeys={apiKeys}
+                                    isAuthenticated={!!user}
+                                    onLoginClick={handleLogin}
                                 />
                             )}
                         </motion.div>
@@ -140,12 +96,6 @@ const App: React.FC = () => {
                 <Footer onAboutClick={() => setIsAboutOpen(true)} />
                 <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
                 <HowItWorksModal isOpen={isHowItWorksOpen} onClose={() => setIsHowItWorksOpen(false)} />
-                <ApiKeysModal
-                    isOpen={isApiKeysModalOpen} 
-                    onClose={() => setIsApiKeysModalOpen(false)} 
-                    onSave={handleApiKeysSave}
-                    currentKeys={apiKeys}
-                />
             </div>
         </>
     );

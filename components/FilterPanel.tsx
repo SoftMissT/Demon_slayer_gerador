@@ -29,11 +29,11 @@ import { TextArea } from './ui/TextArea';
 interface FilterPanelProps {
     onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
     isLoading: boolean;
-    areApiKeysValidated: boolean;
-    openApiKeysModal: () => void;
+    isAuthenticated: boolean;
+    onLoginClick: () => void;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading, areApiKeysValidated, openApiKeysModal }) => {
+export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading, isAuthenticated, onLoginClick }) => {
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
     const [count, setCount] = useState(1);
     const [promptModifier, setPromptModifier] = useState('');
@@ -237,8 +237,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
     };
 
     const handleGenerateClick = () => {
-        if (!areApiKeysValidated) {
-            openApiKeysModal();
+        if (!isAuthenticated) {
+            onLoginClick();
         } else {
             onGenerate(filters, count, promptModifier);
         }
@@ -346,15 +346,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         onClick={handleGenerateClick} 
                         disabled={isButtonDisabled} 
                         className="w-40 forge-anvil-button"
-                        title={!areApiKeysValidated ? "Configure e valide suas chaves de API para começar" : "Forjar item"}
+                        title={!isAuthenticated ? "Faça login com Discord para começar" : "Forjar item"}
                     >
                         {isLoading ? <Spinner size="sm" /> : <AnvilIcon className="w-5 h-5" />}
                         {isLoading ? 'Forjando...' : 'Forjar'}
                     </Button>
                 </div>
-                {!areApiKeysValidated && (
+                {!isAuthenticated && (
                     <p className="text-xs text-center text-yellow-400">
-                        As chaves de API são necessárias. Por favor, configure-as no menu "Chaves de API".
+                        É necessário fazer login com o Discord para usar a forja.
                     </p>
                 )}
             </div>

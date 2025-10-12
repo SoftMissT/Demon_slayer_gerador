@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
+import type { User } from '../App';
+import { DiscordLoginButton } from './DiscordLoginButton';
 
 interface HeaderProps {
   onAboutClick: () => void;
   onFavoritesClick: () => void;
   onHistoryClick: () => void;
   onHowItWorksClick: () => void;
-  onApiKeysClick: () => void;
   activeView: 'forge' | 'prompt';
   onViewChange: (view: 'forge' | 'prompt') => void;
   favoritesCount: number;
+  user: User | null;
+  onLoginClick: () => void;
+  onLogoutClick: () => void;
 }
 
 const TABS = [
@@ -21,10 +25,12 @@ export const Header: React.FC<HeaderProps> = ({
     onFavoritesClick, 
     onHistoryClick, 
     onHowItWorksClick, 
-    onApiKeysClick,
     activeView, 
     onViewChange, 
-    favoritesCount 
+    favoritesCount,
+    user,
+    onLoginClick,
+    onLogoutClick
 }) => {
     const [shareText, setShareText] = useState('Compartilhar');
 
@@ -82,9 +88,14 @@ export const Header: React.FC<HeaderProps> = ({
           <button className="button" onClick={onHistoryClick}>
               Histórico
           </button>
-          <button className="button" onClick={onApiKeysClick}>
-              Chaves de API
-          </button>
+          {user ? (
+              <div className="flex items-center gap-2 bg-gray-800 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-white">{user.nickname}</span>
+                  <button className="text-xs text-red-400 hover:underline" onClick={onLogoutClick}>Sair</button>
+              </div>
+          ) : (
+             <DiscordLoginButton onClick={onLoginClick} />
+          )}
           <button className="button" onClick={onAboutClick}>
               Sobre
           </button>

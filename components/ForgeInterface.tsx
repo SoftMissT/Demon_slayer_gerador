@@ -13,7 +13,7 @@ import { Modal } from './ui/Modal';
 import type { FilterState, GeneratedItem } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import useLocalStorage from '../hooks/useLocalStorage';
-import type { ApiKeys } from '../App';
+import { DiscordIcon } from './icons/DiscordIcon';
 
 interface ForgeInterfaceProps {
     isFavoritesOpen: boolean;
@@ -21,9 +21,8 @@ interface ForgeInterfaceProps {
     isHistoryOpen: boolean;
     onHistoryClose: () => void;
     onFavoritesCountChange: (count: number) => void;
-    areApiKeysValidated: boolean;
-    openApiKeysModal: () => void;
-    apiKeys: ApiKeys;
+    isAuthenticated: boolean;
+    onLoginClick: () => void;
 }
 
 const useWindowSize = () => {
@@ -40,11 +39,23 @@ const useWindowSize = () => {
     return size;
 };
 
+const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) => (
+    <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center text-center p-8 rounded-lg">
+        <h3 className="text-2xl font-bold font-gangofthree text-white mb-4">Acesso Restrito</h3>
+        <p className="text-gray-300 mb-6">Por favor, entre com sua conta do Discord para usar a Forja.</p>
+        <Button onClick={onLoginClick} className="!w-auto !flex-row !gap-2 !px-6 !py-3 !text-base">
+            <DiscordIcon className="w-6 h-6" />
+            Entrar com Discord
+        </Button>
+    </div>
+);
+
+
 export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ 
     isFavoritesOpen, onFavoritesClose, 
     isHistoryOpen, onHistoryClose, 
     onFavoritesCountChange, 
-    areApiKeysValidated, openApiKeysModal, apiKeys
+    isAuthenticated, onLoginClick
 }) => {
     const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
     const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
@@ -66,8 +77,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     }, [favorites, onFavoritesCountChange]);
 
     const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
-        if (!areApiKeysValidated) {
-            openApiKeysModal();
+        if (!isAuthenticated) {
+            onLoginClick();
             return;
         }
 
@@ -87,23 +98,26 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (isMobile) setIsFilterPanelOpen(false);
 
         try {
-            const promises = Array.from({ length: count }).map(() => 
-                orchestrateGeneration(filters, apiKeys, promptModifier)
-            );
-            const newItems = await Promise.all(promises);
+            // This will be replaced with a fetch call to a secure backend endpoint
+            // For now, the call is disabled if not authenticated.
+            alert("FUNCIONALIDADE DE GERAÇÃO EM DESENVOLVIMENTO PENDENTE DE BACKEND");
+            // const promises = Array.from({ length: count }).map(() => 
+            //     orchestrateGeneration(filters, promptModifier)
+            // );
+            // const newItems = await Promise.all(promises);
             
-            setItems(prev => [...newItems, ...prev]);
-            if (newItems.length > 0) {
-                setSelectedItem(newItems[0]);
-                setHistory(prev => [...newItems, ...prev].slice(0, 100));
-            }
+            // setItems(prev => [...newItems, ...prev]);
+            // if (newItems.length > 0) {
+            //     setSelectedItem(newItems[0]);
+            //     setHistory(prev => [...newItems, ...prev].slice(0, 100));
+            // }
         } catch (err: any) {
             setError(err.message || 'Ocorreu um erro desconhecido durante a geração.');
         } finally {
             setIsLoading(false);
             setCurrentAiFocus(null);
         }
-    }, [isMobile, setHistory, areApiKeysValidated, openApiKeysModal, apiKeys]);
+    }, [isMobile, setHistory, isAuthenticated, onLoginClick]);
 
     const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
@@ -134,8 +148,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     }, [selectedItem, setFavorites, setHistory]);
 
     const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
-        if (!areApiKeysValidated) {
-            openApiKeysModal();
+        if (!isAuthenticated) {
+            onLoginClick();
             return;
         }
 
@@ -153,19 +167,20 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (isMobile && isDetailModalOpen) setIsDetailModalOpen(false);
 
         try {
-            const variant = await orchestrateGeneration(filters as FilterState, apiKeys, modifier);
-            variant.nome = `${item.nome} (Variante ${variantType})`;
+            alert("FUNCIONALIDADE DE GERAÇÃO EM DESENVOLVIMENTO PENDENTE DE BACKEND");
+            // const variant = await orchestrateGeneration(filters as FilterState, modifier);
+            // variant.nome = `${item.nome} (Variante ${variantType})`;
             
-            setItems(prev => [variant, ...prev]);
-            setSelectedItem(variant);
-            setHistory(prev => [variant, ...prev]);
+            // setItems(prev => [variant, ...prev]);
+            // setSelectedItem(variant);
+            // setHistory(prev => [variant, ...prev]);
 
         } catch (err: any) {
             setError(err.message || 'Falha ao gerar variante.');
         } finally {
             setIsLoading(false);
         }
-    }, [setHistory, isMobile, isDetailModalOpen, areApiKeysValidated, openApiKeysModal, apiKeys]);
+    }, [setHistory, isMobile, isDetailModalOpen, isAuthenticated, onLoginClick]);
 
     const handleDeleteFromHistory = useCallback((itemId: string) => {
         setHistory(prev => prev.filter(item => item.id !== itemId));
@@ -189,13 +204,14 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
 
     return (
         <div className="forge-interface h-full relative">
-            <div className="forge-layout-wrapper">
+             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} />}
+            <div className={`forge-layout-wrapper ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 <div className="forge-column-filters">
                     <FilterPanel 
                         onGenerate={handleGenerate} 
                         isLoading={isLoading}
-                        areApiKeysValidated={areApiKeysValidated}
-                        openApiKeysModal={openApiKeysModal}
+                        isAuthenticated={isAuthenticated}
+                        onLoginClick={onLoginClick}
                     />
                 </div>
 
@@ -244,8 +260,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                            <FilterPanel 
                                 onGenerate={handleGenerate} 
                                 isLoading={isLoading} 
-                                areApiKeysValidated={areApiKeysValidated}
-                                openApiKeysModal={openApiKeysModal}
+                                isAuthenticated={isAuthenticated}
+                                onLoginClick={onLoginClick}
                            />
                         </div>
                     </Modal>

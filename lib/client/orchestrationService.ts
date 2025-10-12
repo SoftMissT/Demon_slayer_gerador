@@ -1,8 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import OpenAI from 'openai';
-import type { FilterState, GeneratedItem, Category, MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult } from '../../types';
+// FIX: Corrected the import for the ApiKeys type. It is now imported from `types.ts`, where it has been defined, instead of from `App.tsx` which did not export it.
+import type { FilterState, GeneratedItem, Category, MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys } from '../../types';
 import { buildGenerationPrompt, buildResponseSchema } from '../promptBuilder';
-import type { ApiKeys } from '../../App';
 import * as ALL_CONSTANTS from '../../constants';
 import { BREATHING_STYLES_DATA } from '../breathingStylesData';
 import { WEAPON_TYPES } from '../weaponData';

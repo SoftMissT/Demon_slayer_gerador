@@ -384,3 +384,10 @@ export interface PromptGenerationResult {
     gptPrompt?: string;
     geminiPrompt?: string;
 }
+
+// FIX: Added ApiKeys interface to provide a type for managing API keys for different AI services, resolving the import error in orchestrationService.ts.
+export interface ApiKeys {
+  gemini: string;
+  openai: string;
+  deepseek: string;
+}

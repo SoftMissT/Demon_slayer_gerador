@@ -8,14 +8,44 @@ Ela auxilia na geração de armas, inimigos, formas de respiração, NPCs e cen�
 - Criação de descrições detalhadas e prontas para uso em prompts de imagem, otimizadas para plataformas como Midjourney e DALL·E.
 - Aceleração do processo de criação de histórias com conteúdo gerado por uma colaboração de IAs.
 
-## 🔑 Bring Your Own Key (BYOK)
-Este projeto opera em um modelo "Traga Sua Própria Chave". **Você precisa fornecer suas próprias chaves de API** para os serviços de IA diretamente na interface da aplicação. Suas chaves são salvas localmente no seu navegador e nunca são enviadas para nosso servidor. Isso garante que suas chaves permaneçam seguras e que você tenha controle total sobre seu uso.
+## 🔐 Acesso via Discord & Whitelist
+O acesso ao Kimetsu Forge é gerenciado através da autenticação com o Discord. Para utilizar as funcionalidades, os usuários devem entrar com sua conta e ter seu ID do Discord na lista de acesso (whitelist) gerenciada pelo administrador.
+
+### Configuração da Whitelist (Google Sheets)
+
+A whitelist de usuários é lida a partir de uma planilha do Google Sheets. Para configurar, siga os passos:
+
+1.  **Crie uma Conta de Serviço no Google Cloud:**
+    *   Acesse o [Google Cloud Console](https://console.cloud.google.com/), crie um novo projeto e ative a **API do Google Sheets**.
+    *   Vá para **IAM e Admin > Contas de Serviço**, crie uma nova conta.
+    *   Dentro da conta de serviço, vá para a aba **Chaves**, clique em **Adicionar Chave > Criar nova chave**, selecione **JSON** e faça o download.
+
+2.  **Configure sua Planilha:**
+    *   Crie uma nova planilha no Google Sheets.
+    *   Renomeie a primeira aba (página) para `discord_id`.
+    *   Na coluna `A`, coloque os nicks dos usuários (opcional). Na coluna `B`, coloque os **IDs do Discord** dos usuários autorizados.
+    *   Clique em **Compartilhar** e adicione o `client_email` (do arquivo JSON baixado) como **Leitor**.
+
+3.  **Adicione as Variáveis de Ambiente:**
+    *   Crie um arquivo `.env.local` na raiz do seu projeto.
+    *   Adicione as seguintes variáveis, preenchendo com os dados do seu arquivo JSON e da URL da planilha:
+
+    ```env
+    # Credenciais da API do Google para a Whitelist
+    GOOGLE_SHEET_ID="ID_DA_SUA_PLANILHA_AQUI"
+    GOOGLE_SERVICE_ACCOUNT_EMAIL="client_email_do_seu_json@..."
+    GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nSUA_CHAVE_PRIVADA_AQUI\n-----END PRIVATE KEY-----\n"
+
+    # ... outras chaves de API
+    ```
+    *   **`GOOGLE_SHEET_ID`**: Encontrado na URL da sua planilha (`.../spreadsheets/d/`**`[ESTE_É_O_ID]`**`/edit`).
+    *   **`GOOGLE_PRIVATE_KEY`**: Copie o valor da `private_key` do arquivo JSON. **Importante:** Mantenha as quebras de linha (`\n`) dentro de aspas duplas, como no exemplo, para garantir o funcionamento correto.
 
 ## 🧠 Como Funciona: A Orquestração de IAs
-O Kimetsu Forge utiliza um fluxo de três etapas que roda diretamente no seu navegador para garantir resultados ricos e detalhados:
+O Kimetsu Forge utiliza um fluxo de três etapas que para garantir resultados ricos e detalhados:
 
 1.  **DeepSeek (O Conceitualizador):** A primeira IA gera a ideia base, o conceito bruto e fundamental do item, personagem ou técnica solicitada.
-2.  **Google Gemini (O Arquiteto):** Em seguida, o Gemini recebe esse conceito e o enriquece, adicionando lore, estrutura, detalhes mecânicos para RPG e um protótipo de descrição visual.
+2.  **Google Gemini (O Arquiteto):** Em seguida, o Gemini recebe esse conceito e o enriquece, adicionando lore, estrutura, detalhes mecânicos para RPG e um prototipo de descrição visual.
 3.  **OpenAI GPT-4o (O Artista Final):** Por fim, o modelo da OpenAI realiza o polimento final, aprimorando a narrativa para um tom de roleplay mais forte e refinando a descrição visual para que ela se torne um prompt de imagem pronto para ser usado.
 
 ## 🚀 Como Começar (Guia de Instalação)
@@ -39,42 +69,21 @@ Use o npm para instalar todos os pacotes necessários:
 npm install
 ```
 
-### 4. Execute o Servidor de Desenvolvimento
+### 4. Configure as Variáveis de Ambiente
+Crie um arquivo `.env.local` na raiz do projeto e adicione as chaves de API conforme as instruções na seção "Configuração da Whitelist".
+
+### 5. Execute o Servidor de Desenvolvimento
 Com tudo configurado, inicie a aplicação:
 ```bash
 npm run dev
 ```
 Abra [http://localhost:3000](http://localhost:3000) em seu navegador para ver o resultado.
 
-### 5. Configure suas Chaves de API (Usuário Padrão)
-Ao abrir a aplicação, clique no botão **"Chaves de API"** no cabeçalho. Você precisará obter e inserir suas chaves para os seguintes serviços:
-- **Google Gemini:** Obtenha sua chave no [Google AI Studio](https://aistudio.google.com/app/apikey).
-- **OpenAI (GPT-4o):** Obtenha sua chave na [Plataforma OpenAI](https://platform.openai.com/api-keys).
-- **DeepSeek:** Obtenha sua chave na [Plataforma DeepSeek](https://platform.deepseek.com/api_keys).
-
-As chaves são salvas no `localStorage` do seu navegador e são necessárias para que a geração de conteúdo funcione.
-
-### ⚡ Modo de Desenvolvedor (Apenas para Desenvolvimento Local)
-Para agilizar os testes na sua máquina local, você pode configurar um bypass para a inserção de chaves.
-
-1.  Na raiz do projeto, crie um arquivo chamado `.env.local`.
-2.  Adicione suas chaves de API pessoais a este arquivo. O Next.js exige que as variáveis comecem com `NEXT_PUBLIC_` para serem acessíveis no navegador durante o desenvolvimento.
-
-    ```
-    # Chaves de API para carregamento automático em ambiente de desenvolvimento local
-    NEXT_PUBLIC_DEV_GEMINI_KEY=sua_chave_gemini
-    NEXT_PUBLIC_DEV_OPENAI_KEY=sua_chave_openai
-    NEXT_PUBLIC_DEV_DEEPSEEK_KEY=sua_chave_deepseek
-    ```
-
-3.  Agora, ao executar `npm run dev`, a aplicação irá carregar essas chaves automaticamente, e você não precisará inseri-las no modal.
-
-**IMPORTANTE:** Este modo **só funciona localmente**. Por segurança, ele é desativado na versão de produção. **NÃO adicione estas variáveis de ambiente às configurações do seu projeto na Vercel.**
-
 ## 🧩 Tecnologias
 - **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).
 - **Frontend:** Next.js & React para uma arquitetura moderna e de alta performance.
 - **Estilização:** Tailwind CSS para um design rápido, responsivo e customizável.
+- **Whitelist:** Google Sheets API.
 
 ## ❤️ Apoie a Obra Original
 Kimetsu Forge é um projeto de fã, feito com carinho para a comunidade. A melhor forma de apoiar é consumindo a obra original de Koyoharu Gotouge.
