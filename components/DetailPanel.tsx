@@ -187,8 +187,8 @@ const MissionDetailView: React.FC<{ item: MissionItemDetails }> = ({ item }) => 
 const NpcDetailView: React.FC<{ item: NpcItem }> = ({ item }) => (
     <>
         {item.origem && <DetailSection title="Origem">{item.origem}</DetailSection>}
-        <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>}
-        <DetailSection title="História e Aparência Completa">{item.descricao || 'N/A'}</DetailSection>}
+        <DetailSection title="Descrição Curta (Aparência)">{item.descricao_curta || 'N/A'}</DetailSection>
+        <DetailSection title="História e Aparência Completa">{item.descricao || 'N/A'}</DetailSection>
         {item.voice_and_mannerisms && <DetailSection title="Voz e Maneirismos">{item.voice_and_mannerisms}</DetailSection>}
         {item.inventory_focal && <DetailSection title="Item Focal / Propriedade">{item.inventory_focal}</DetailSection>}
         {item.motivation && <DetailSection title="Motivação">{item.motivation}</DetailSection>}
