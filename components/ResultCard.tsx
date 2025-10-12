@@ -47,7 +47,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
 
   return (
     <Card 
-        className={`!p-3 flex flex-col justify-between group relative ${isSelected ? 'border-indigo-500 shadow-indigo-500/20' : ''}`}
+        className={`result-card !p-3 flex flex-col justify-between group relative ${isSelected ? 'selected-card' : ''}`}
         onClick={() => onSelect(item)}
     >
         <div>

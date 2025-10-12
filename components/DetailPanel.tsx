@@ -11,6 +11,7 @@ import { buildPlainTextForItem } from '../lib/textFormatters';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { PencilIcon } from './icons/PencilIcon';
+import { HammerIcon } from './icons/HammerIcon';
 
 
 interface DetailPanelProps {
@@ -569,7 +570,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   const currentName = ('title' in item && item.title) || item.nome;
 
   return (
-    <Card className="h-full flex flex-col !p-0 overflow-hidden">
+    <Card className="detail-panel h-full flex flex-col !p-0 overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-700 flex-shrink-0">
             <div className="flex justify-between items-start">
                 <div className="flex-grow mr-2">
@@ -642,7 +643,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         
         {canGenerateVariant && (
             <div className="mt-auto p-4 border-t border-gray-700 flex-shrink-0">
-                <h4 className="text-xs font-bold text-indigo-400 mb-2 font-gangofthree tracking-widest uppercase">Gerar Variação</h4>
+                <div className="flex items-center gap-2 mb-2">
+                    <HammerIcon className="w-4 h-4 text-indigo-400" />
+                    <h4 className="text-xs font-bold text-indigo-400 font-gangofthree tracking-widest uppercase">Gerar Variação</h4>
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                     <Button variant="secondary" onClick={() => onGenerateVariant(item, 'agressiva')}>Agressiva</Button>
                     <Button variant="secondary" onClick={() => onGenerateVariant(item, 'técnica')}>Técnica</Button>

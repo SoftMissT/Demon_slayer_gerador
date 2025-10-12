@@ -18,18 +18,21 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, 
     const getButtonClasses = (view: 'forge' | 'prompt') => {
         const base = "px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200";
         if (activeView === view) {
-            return `${base} bg-indigo-600 text-white`;
+            return `${base} header-button-active`; // Use a generic class for theme-based styling
         }
         return `${base} bg-gray-700 text-gray-300 hover:bg-gray-600`;
     }
 
   return (
-    <header className="py-4 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 flex justify-between items-center sticky top-0 z-40">
-      <div className="flex items-center gap-3">
-        <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-10 h-10 rounded-full" />
-        <h1 className="text-2xl font-bold font-kimetsu tracking-wider bg-gradient-to-r from-red-600 to-yellow-400 bg-clip-text text-transparent">
-          Kimetsu Forge
-        </h1>
+    <header className="main-header py-8 px-6 md:px-8 bg-gray-900/50 backdrop-blur-sm flex justify-between items-center sticky top-0 z-40">
+      <div className="flex items-center gap-4">
+        <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-12 h-12 rounded-full" />
+        <div className="header-logo-title">
+            <h1 className="font-bold font-kimetsu tracking-wider">
+                KIMETSU FORGE
+            </h1>
+            <p className="subtitle">Forjando Lendas em Aço e Magia</p>
+        </div>
       </div>
       
       <nav className="hidden md:flex items-center gap-2 p-1 bg-gray-800 rounded-lg">
@@ -50,6 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, 
         </Button>
         <AboutTooltip onClick={onAboutClick} />
       </div>
+      <div className="header-glow"></div>
     </header>
   );
 };

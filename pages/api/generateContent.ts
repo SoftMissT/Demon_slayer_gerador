@@ -1,9 +1,103 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getAiClient } from '../../lib/gemini';
-import { Type } from '@google/genai';
+import { getAiClient as getGeminiClient } from '../../lib/gemini';
+import { getOpenAiClient } from '../../lib/openai';
+import { callDeepSeekAPI } from '../../lib/deepseek';
 import type { FilterState, GeneratedItem } from '../../types';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
+
+// Helper function to safely parse JSON from AI responses
+const safeJsonParse = (jsonString: string | null | undefined) => {
+    if (!jsonString) return null;
+    try {
+        // Find JSON within markdown code blocks if they exist
+        const match = jsonString.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
+        if (match && (match[1] || match[2])) {
+            return JSON.parse(match[1] || match[2]);
+        }
+        return JSON.parse(jsonString); // Fallback for raw JSON
+    } catch (error) {
+        console.error("JSON parsing failed for string:", jsonString);
+        return null;
+    }
+};
+
+// Step 2: Polish narrative with GPT
+const polishNarrativeWithGPT = async (item: GeneratedItem): Promise<GeneratedItem> => {
+    const openAiClient = getOpenAiClient();
+    if (!openAiClient) {
+        console.warn("OpenAI client not available, skipping narrative polish.");
+        return item;
+    }
+
+    try {
+        const narrativeFields = {
+            nome: ('title' in item && item.title) || item.nome,
+            descricao_curta: item.descricao_curta,
+            descricao: item.descricao,
+            ganchos_narrativos: item.ganchos_narrativos,
+        };
+
+        const gptPrompt = `Você é um escritor criativo e autor de módulos de RPG, especializado no universo de Demon Slayer. Sua tarefa é aprimorar o conteúdo a seguir. Reescreva as descrições e os ganchos narrativos para serem mais evocativos, detalhados e envolventes, mantendo os conceitos originais. Retorne um objeto JSON com quatro chaves: "nome", "descricao_curta", "descricao", "ganchos_narrativos". Responda apenas com o objeto JSON.\n\nConteúdo para aprimorar:\n${JSON.stringify(narrativeFields)}`;
+        
+        const gptResponse = await openAiClient.chat.completions.create({
+            model: 'gpt-4o-mini',
+            response_format: { type: "json_object" },
+            messages: [
+                { role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' },
+                { role: 'user', content: gptPrompt }
+            ]
+        });
+
+        const polishedNarrative = safeJsonParse(gptResponse.choices[0].message.content);
+
+        if (polishedNarrative) {
+            return {
+                ...item,
+                nome: polishedNarrative.nome || item.nome,
+                descricao_curta: polishedNarrative.descricao_curta || item.descricao_curta,
+                descricao: polishedNarrative.descricao || item.descricao,
+                ganchos_narrativos: polishedNarrative.ganchos_narrativos || item.ganchos_narrativos,
+            };
+        }
+    } catch (error) {
+        console.error("Error polishing narrative with GPT:", error);
+    }
+    return item; // Return original item on failure
+};
+
+// Step 3: Refine mechanics with DeepSeek
+const refineMechanicsWithDeepSeek = async (item: GeneratedItem): Promise<GeneratedItem> => {
+    if (!process.env.DEEPSEEK_API_KEY) {
+        console.warn("DeepSeek API key not available, skipping mechanics refinement.");
+        return item;
+    }
+
+    try {
+        const mechanicsFields: Record<string, any> = {};
+        const fieldsToRefine = ['dano', 'dados', 'tipo_de_dano', 'status_aplicado', 'efeitos_secundarios', 'mechanics', 'level_scaling', 'comportamento_combate', 'fraquezas_unicas'];
+        
+        for (const field of fieldsToRefine) {
+            if (field in item) {
+                mechanicsFields[field] = (item as any)[field];
+            }
+        }
+
+        if (Object.keys(mechanicsFields).length > 0) {
+            const deepSeekPrompt = `Você é um designer especialista em sistemas de RPG de mesa. Sua tarefa é revisar e refinar as seguintes mecânicas de jogo para um RPG com tema de Demon Slayer. Garanta que sejam balanceadas, claramente escritas e interessantes. A raridade do item é '${item.raridade}' e o nível sugerido é '${item.nivel_sugerido}'. Ajuste os números, dados e descrições para um melhor gameplay. Retorne um objeto JSON contendo apenas os campos de mecânica refinados que você recebeu. Responda apenas com o objeto JSON.\n\nMecânicas para refinar:\n${JSON.stringify(mechanicsFields)}`;
+            
+            const refinedMechanics = await callDeepSeekAPI([{ role: 'user', content: deepSeekPrompt }]);
+            
+            if (refinedMechanics) {
+                return { ...item, ...refinedMechanics };
+            }
+        }
+    } catch (error) {
+        console.error("Error refining mechanics with DeepSeek:", error);
+    }
+    return item; // Return item with original mechanics on failure
+};
+
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,15 +114,16 @@ export default async function handler(
       return res.status(400).json({ message: 'Filtros inválidos ou categoria ausente.' });
     }
 
-    const aiClient = getAiClient();
-    if (!aiClient) {
+    // Step 1: Generate base structure with Gemini
+    const geminiClient = getGeminiClient();
+    if (!geminiClient) {
         return res.status(500).json({ message: 'Erro de configuração do servidor: a API Key do Google Gemini não foi encontrada.' });
     }
     
     const prompt = buildGenerationPrompt(filters, count, promptModifier);
     const schema = buildResponseSchema(filters, count);
     
-    const result = await aiClient.models.generateContent({
+    const geminiResult = await geminiClient.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
         config: {
@@ -38,19 +133,26 @@ export default async function handler(
         },
     });
 
-    const jsonText = result.text?.trim();
-    if (!jsonText) {
-      throw new Error("A resposta da IA estava vazia ou em formato inválido.");
+    const geminiData = safeJsonParse(geminiResult.text);
+    if (!geminiData) {
+      throw new Error("A resposta da IA (Gemini) estava vazia ou em formato inválido.");
     }
 
-    const responseData = JSON.parse(jsonText);
-    const items = count > 1 ? responseData.items : [responseData]; 
-
+    let items: GeneratedItem[] = count > 1 ? geminiData.items : [geminiData]; 
     if (!Array.isArray(items)) {
-        throw new Error("A resposta da IA não continha um array de itens válido.");
+        throw new Error("A resposta da IA (Gemini) não continha um array de itens válido.");
     }
+    
+    // Step 2 & 3: Polish and Refine each item
+    const enhancedItems = await Promise.all(
+        items.map(async (item) => {
+            const narrativelyPolishedItem = await polishNarrativeWithGPT(item);
+            const fullyRefinedItem = await refineMechanicsWithDeepSeek(narrativelyPolishedItem);
+            return fullyRefinedItem;
+        })
+    );
 
-    const processedItems = items.map((item: any) => ({
+    const processedItems = enhancedItems.map((item: any) => ({
         ...item,
         id: `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         createdAt: new Date().toISOString(),
@@ -60,31 +162,6 @@ export default async function handler(
 
   } catch (error: any) {
     console.error("Erro em /api/generateContent:", error);
-    
-    let detailedMessage = 'Ocorreu um erro desconhecido no servidor.';
-    if (error instanceof Error) {
-        detailedMessage = error.message;
-    } else if (typeof error === 'string') {
-        detailedMessage = error;
-    }
-
-    // A SDK do Gemini geralmente embute uma string JSON com detalhes na mensagem.
-    // Vamos tentar extrair uma mensagem mais limpa dela.
-    try {
-        const jsonMatch = detailedMessage.match(/({.*})/s); // Flag 's' para multiline
-        if (jsonMatch && jsonMatch[0]) {
-            const errorObj = JSON.parse(jsonMatch[0]);
-            if (errorObj.error && errorObj.error.message) {
-                detailedMessage = errorObj.error.message;
-            }
-        } else if (detailedMessage.includes("API key not valid")) {
-            // Fallback para o caso da regex falhar mas a mensagem ser clara
-            detailedMessage = "API key not valid. Please pass a valid API key.";
-        }
-    } catch (e) {
-        // Parsing falhou, mantenha a mensagem original.
-    }
-    
-    res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${detailedMessage}` });
+    res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${error.message}` });
   }
 }

@@ -1,21 +1,22 @@
+
 import React, { useState, useEffect } from 'react';
 
-const MESSAGES = [
-    'Aquecendo a fornalha...',
-    'Martelando o aço da criação...',
-    'Temperando a lâmina da imaginação...',
-    'Consultando os pergaminhos do ferreiro...',
-    'Canalizando o espírito do artesão...',
-    'Polindo os detalhes da lenda...',
+const STEPS = [
+    'Aquecendo a fornalha com Gemini...',
+    'Polindo a narrativa com a pena do GPT...',
+    'Ajustando as mecânicas com a lógica do DeepSeek...',
+    'Finalizando os últimos detalhes...',
 ];
 
 export const ForgeLoadingIndicator: React.FC = () => {
-    const [message, setMessage] = useState(MESSAGES[0]);
+    const [message, setMessage] = useState(STEPS[0]);
 
     useEffect(() => {
+        let currentStep = 0;
         const intervalId = setInterval(() => {
-            setMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
-        }, 2000);
+            currentStep = (currentStep + 1) % STEPS.length;
+            setMessage(STEPS[currentStep]);
+        }, 3000); // Change message every 3 seconds
         return () => clearInterval(intervalId);
     }, []);
 
@@ -75,7 +76,7 @@ export const ForgeLoadingIndicator: React.FC = () => {
                 </g>
             </svg>
             <p className="mt-4 text-lg font-semibold text-indigo-400">Forjando item...</p>
-            <p className="mt-2 text-gray-400 transition-opacity duration-500 h-6">{message}</p>
+            <p className="mt-2 text-gray-400 transition-all duration-500 h-6">{message}</p>
         </div>
     );
 };

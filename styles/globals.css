@@ -1,8 +1,24 @@
+/* existing styles */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Gang+of+Three&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Alchemist Theme Palette */
+  --deep-purple: #2D1B69;
+  --dark-blue: #1A1F2C;
+  --void-black: #0A0A14;
+  --alchemy-gold: #FFD700;
+  --potion-purple: #8A2BE2;
+  --elixir-green: #00FF7F;
+  --crystal-blue: #00BFFF;
+  --fire-orange: #FF4500;
+  --magic-pink: #FF1493;
+  --toxic-green: #39FF14;
+}
+
 
 body {
   @apply bg-gray-900 text-white antialiased;
@@ -66,51 +82,6 @@ body {
     @apply font-gangofthree;
 }
 
-/* New styles for the Forge Interface */
-.forge-background {
-    background-color: #1a1a1a;
-    background-image: 
-        radial-gradient(circle at center, rgba(139, 0, 0, 0.15) 0%, transparent 60%),
-        url('https://www.transparenttextures.com/patterns/dark-metal.png');
-}
-
-.forge-button {
-    background: linear-gradient(45deg, #8B0000, #FF8C00);
-    border: 2px solid #FFD700;
-    color: #F5F5F5;
-    text-shadow: 0 0 5px #000;
-    box-shadow: 0 0 10px #FF8C00, 0 0 20px #8B0000, inset 0 0 5px #FFD700;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.forge-button:hover:not(:disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px #FFD700, 0 0 40px #FF8C00, inset 0 0 10px #FFD700;
-}
-
-.forge-button::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-        transparent,
-        rgba(255, 215, 0, 0.4),
-        transparent 30%
-    );
-    animation: rotate 4s linear infinite;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.forge-button:hover:not(:disabled)::before {
-    opacity: 1;
-}
-
 @keyframes rotate {
     from {
         transform: rotate(0deg);
@@ -118,4 +89,273 @@ body {
     to {
         transform: rotate(360deg);
     }
+}
+
+
+/* --- FORGE THEME --- */
+.forge-theme {
+    --forge-bg: #1a1a1a;
+    --forge-primary: #8B0000;
+    --forge-highlight-orange: #FF8C00;
+    --forge-highlight-gold: #FFD700;
+    --forge-text-primary: #F5F5F5;
+    --forge-border: #444;
+    --forge-panel-bg: rgba(26, 26, 26, 0.7);
+
+    background-color: var(--forge-bg);
+    background-image: 
+        radial-gradient(ellipse at bottom, rgba(255, 140, 0, 0.15) 0%, transparent 60%),
+        url('https://www.transparenttextures.com/patterns/dark-metal.png');
+}
+
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Thematic Header */
+.forge-theme .main-header {
+    background: linear-gradient(135deg, #2a0c0c 0%, #1a1a1a 50%, #0c0c2a 100%);
+    border-bottom: 3px solid var(--forge-highlight-orange);
+    position: relative;
+    overflow: hidden;
+}
+
+.forge-theme .header-glow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--forge-highlight-orange), var(--forge-highlight-gold), var(--forge-highlight-orange));
+    animation: glow-pulse 2s infinite;
+}
+
+.forge-theme .header-logo-title h1 {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--forge-highlight-gold) !important;
+    font-size: 2.5rem !important;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    margin: 0;
+}
+
+.forge-theme .subtitle {
+    color: #e0e0e0;
+    font-size: 1.1rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
+}
+
+/* Robust Typography */
+.forge-theme .font-gangofthree, .forge-theme .font-kimetsu {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.forge-theme h2, .forge-theme h3, .forge-theme h4 {
+    color: var(--forge-text-primary);
+    text-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+}
+
+/* Thematic Panels and Cards */
+.forge-theme .forge-panel, 
+.forge-theme .result-card,
+.forge-theme .detail-panel {
+    background-color: var(--forge-panel-bg) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--forge-border) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 0 10px rgba(139,0,0,0.1);
+}
+
+.forge-theme .result-card:hover {
+    border-color: var(--forge-highlight-orange) !important;
+    transform: translateY(-2px);
+}
+
+@keyframes selected-pulse {
+    0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+    100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+}
+
+.forge-theme .result-card.selected-card {
+    border-color: var(--forge-highlight-gold) !important;
+    animation: selected-pulse 2s infinite;
+}
+
+.forge-theme .anvil-placeholder {
+    border-style: dashed;
+    border-color: var(--forge-border);
+    background-color: rgba(0,0,0,0.2);
+}
+
+/* Thematic Inputs */
+.forge-theme select, .forge-theme input {
+    background-color: var(--forge-bg) !important;
+    border-color: var(--forge-border) !important;
+    color: var(--forge-text-primary) !important;
+}
+.forge-theme select:hover, .forge-theme input:hover {
+    border-color: var(--forge-highlight-orange) !important;
+}
+.forge-theme select:focus, .forge-theme input:focus {
+    border-color: var(--forge-highlight-orange) !important;
+    box-shadow: 0 0 8px rgba(255, 140, 0, 0.7) !important;
+    outline: none;
+}
+
+/* The Great Anvil Button */
+@keyframes fire-pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px var(--forge-highlight-orange), 0 0 25px var(--forge-primary), inset 0 0 8px var(--forge-highlight-gold);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px var(--forge-highlight-gold), 0 0 40px var(--forge-highlight-orange), inset 0 0 12px var(--forge-highlight-gold);
+        transform: scale(1.03);
+    }
+}
+
+.forge-theme .forge-anvil-button {
+    background: linear-gradient(to top, var(--forge-primary), var(--forge-highlight-orange));
+    border: 2px solid var(--forge-highlight-gold);
+    color: var(--forge-bg);
+    font-weight: bold;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+    clip-path: polygon(0% 15%, 15% 0%, 85% 0%, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0% 85%);
+    transition: all 0.3s ease;
+    animation: fire-pulse 3s infinite ease-in-out;
+}
+.forge-theme .forge-anvil-button:disabled {
+    filter: grayscale(80%);
+    animation: none;
+}
+.forge-theme .forge-anvil-button:not(:disabled):hover {
+    animation-play-state: paused; /* Pause pulsing to show direct interaction */
+    transform: scale(1.05) !important;
+    box-shadow: 0 0 30px var(--forge-highlight-gold), 0 0 50px var(--forge-highlight-orange), inset 0 0 15px var(--forge-highlight-gold) !important;
+}
+
+.forge-theme .header-button-active {
+    background-color: var(--forge-highlight-orange) !important;
+    color: var(--forge-bg) !important;
+    font-weight: bold;
+    box-shadow: 0 0 10px var(--forge-highlight-orange);
+}
+
+
+/* --- ALCHEMIST THEME --- */
+.alchemist-theme {
+    position: relative;
+    overflow: hidden;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(45, 27, 105, 0.7) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(26, 31, 44, 0.8) 0%, transparent 40%),
+        var(--void-black);
+    color: #E6E6FA; /* Lavanda suave */
+}
+
+/* Animated Bubbles Background */
+@keyframes rise {
+  0% { transform: translateY(100%) scale(0.5); opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { transform: translateY(-100%) scale(1); opacity: 0; }
+}
+.alchemist-theme .bubble {
+  position: absolute;
+  bottom: -50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--magic-pink), transparent 60%);
+  animation: rise 15s infinite ease-in;
+  filter: drop-shadow(0 0 5px var(--magic-pink));
+}
+
+/* Header with Magic Flow */
+@keyframes magic-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.alchemist-theme .main-header {
+    border-bottom: 2px solid transparent;
+    position: relative;
+}
+.alchemist-theme .main-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--potion-purple), var(--crystal-blue), var(--elixir-green), var(--alchemy-gold), var(--potion-purple));
+    background-size: 200% 100%;
+    animation: magic-flow 8s linear infinite;
+}
+
+/* Thematic Cards */
+@keyframes energy-pulse {
+  0%, 100% { box-shadow: 0 0 15px var(--potion-purple), inset 0 0 5px rgba(138, 43, 226, 0.3); }
+  50% { box-shadow: 0 0 25px var(--magic-pink), inset 0 0 10px rgba(255, 20, 147, 0.4); }
+}
+.alchemist-theme .parameter-card,
+.alchemist-theme .prompt-card {
+    background: rgba(26, 31, 44, 0.7);
+    border: 1px solid var(--potion-purple);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.alchemist-theme .parameter-card:hover,
+.alchemist-theme .prompt-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--elixir-green);
+    animation: energy-pulse 2s infinite;
+}
+
+/* Main Button */
+@keyframes potion-bubble {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 15px var(--alchemy-gold); }
+    50% { transform: scale(1.05); box-shadow: 0 0 25px var(--magic-pink); }
+}
+.alchemist-theme .alchemist-button {
+    background: linear-gradient(45deg, var(--alchemy-gold), var(--fire-orange));
+    color: var(--void-black) !important;
+    font-weight: bold;
+    border: 1px solid var(--alchemy-gold);
+    transition: all 0.3s ease;
+}
+.alchemist-theme .alchemist-button:not(:disabled):hover {
+    animation: potion-bubble 1.5s infinite ease-in-out;
+}
+
+/* Inputs */
+.alchemist-theme input, .alchemist-theme textarea, .alchemist-theme select {
+    background: rgba(138, 43, 226, 0.1) !important;
+    border: 1px solid var(--crystal-blue) !important;
+    color: var(--elixir-green) !important;
+    transition: box-shadow 0.3s ease;
+}
+.alchemist-theme input:focus, .alchemist-theme textarea:focus, .alchemist-theme select:focus {
+    box-shadow: 0 0 10px var(--crystal-blue) !important;
+    outline: none;
+}
+
+/* Result Card Borders */
+.alchemist-theme .model-midjourney { border-left: 4px solid var(--alchemy-gold); }
+.alchemist-theme .model-gpt { border-left: 4px solid var(--crystal-blue); }
+
+/* Loading Indicator Floating */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.alchemist-theme .alchemy-loader {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Active Header Button */
+.alchemist-theme .header-button-active {
+    background: var(--potion-purple) !important;
+    color: white !important;
+    box-shadow: 0 0 10px var(--potion-purple);
 }

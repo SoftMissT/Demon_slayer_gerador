@@ -119,6 +119,10 @@ const App: React.FC = () => {
         setSelectedItem(null);
     }, [setGeneratedItems, setSelectedItem]);
 
+    const handleResetFilters = useCallback(() => {
+        setFilters(INITIAL_FILTERS);
+    }, [setFilters]);
+
     const onAboutClose = useCallback(() => setAboutModalOpen(false), []);
     const onFavoritesClose = useCallback(() => setFavoritesModalOpen(false), []);
     const onHistoryClose = useCallback(() => setHistoryModalOpen(false), []);
@@ -132,7 +136,7 @@ const App: React.FC = () => {
     const onErrorDismiss = useCallback(() => setError(null), []);
 
     return (
-        <div className="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+        <div className={`bg-gray-900 text-white min-h-screen flex flex-col font-sans`}>
             <Header 
                 onAboutClick={() => setAboutModalOpen(true)}
                 onFavoritesClick={() => setFavoritesModalOpen(true)}
@@ -142,8 +146,8 @@ const App: React.FC = () => {
             />
 
             <main className="flex-grow flex flex-col">
-                {activeView === 'forge' ? (
-                   <ForgeInterface
+                <div className={`w-full h-full flex-grow flex flex-col ${activeView === 'forge' ? 'forge-theme flex' : 'hidden'}`}>
+                    <ForgeInterface
                         filters={filters}
                         onFiltersChange={setFilters}
                         onGenerate={(count) => handleGenerateContent(count)}
@@ -156,12 +160,12 @@ const App: React.FC = () => {
                         onGenerateVariant={handleGenerateVariant}
                         onUpdate={handleUpdateItem}
                         onClearResults={handleClearResults}
+                        onResetFilters={handleResetFilters}
                     />
-                ) : (
-                    <div className="w-full h-full overflow-y-auto p-4 md:p-6 lg:p-8">
-                        <PromptEngineeringPanel />
-                    </div>
-                )}
+                </div>
+                <div className={`w-full h-full flex-grow flex flex-col p-4 md:p-6 lg:p-8 ${activeView === 'prompt' ? 'alchemist-theme flex' : 'hidden'}`}>
+                    <PromptEngineeringPanel />
+                </div>
             </main>
             
             <Footer onAboutClick={() => setAboutModalOpen(true)} />
