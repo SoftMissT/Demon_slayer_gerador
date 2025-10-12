@@ -46,7 +46,7 @@ export default async function handler(
         throw new Error("A resposta da IA não continha um array de itens válido.");
     }
 
-    const processedItems = items.map((item: Omit<GeneratedItem, 'id' | 'createdAt'>) => ({
+    const processedItems = items.map((item: any) => ({
         ...item,
         id: `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         createdAt: new Date().toISOString(),

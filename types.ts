@@ -81,6 +81,7 @@ interface BaseGeneratedItem {
   createdAt: string;
   nome: string;
   categoria: Category;
+  era: string;
   descricao_curta: string;
   descricao: string;
   raridade: Rarity;
