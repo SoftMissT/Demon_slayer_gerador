@@ -132,11 +132,11 @@ body {
 }
 
 .forge-theme .header-logo-title h1 {
-    background: none !important;
-    -webkit-background-clip: initial !important;
-    background-clip: initial !important;
-    -webkit-text-fill-color: initial !important;
-    color: var(--forge-highlight-gold) !important;
+    background: linear-gradient(45deg, var(--forge-highlight-gold), var(--forge-highlight-orange)) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
     font-size: 2.5rem !important;
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     margin: 0;
@@ -153,7 +153,15 @@ body {
 .forge-theme .font-gangofthree, .forge-theme .font-kimetsu {
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
-.forge-theme h2, .forge-theme h3, .forge-theme h4 {
+.forge-theme h2 {
+    background: linear-gradient(45deg, var(--forge-highlight-gold), var(--forge-highlight-orange));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+}
+.forge-theme h3, .forge-theme h4 {
     color: var(--forge-text-primary);
     text-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
 }
