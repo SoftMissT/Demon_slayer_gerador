@@ -1,3 +1,4 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -107,9 +108,30 @@ export default async function handler(
         
         res.status(200).json(data);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Erro em /api/generatePrompts:", error);
-        const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
-        res.status(500).json({ message: `Falha ao gerar prompts. Detalhes: ${errorMessage}` });
+
+        let detailedMessage = 'Ocorreu um erro desconhecido no servidor.';
+        if (error instanceof Error) {
+            detailedMessage = error.message;
+        } else if (typeof error === 'string') {
+            detailedMessage = error;
+        }
+
+        try {
+            const jsonMatch = detailedMessage.match(/({.*})/s);
+            if (jsonMatch && jsonMatch[0]) {
+                const errorObj = JSON.parse(jsonMatch[0]);
+                if (errorObj.error && errorObj.error.message) {
+                    detailedMessage = errorObj.error.message;
+                }
+            } else if (detailedMessage.includes("API key not valid")) {
+                detailedMessage = "API key not valid. Please pass a valid API key.";
+            }
+        } catch (e) {
+            // Parsing failed
+        }
+
+        res.status(500).json({ message: `Falha ao gerar prompts. Detalhes: ${detailedMessage}` });
     }
 }

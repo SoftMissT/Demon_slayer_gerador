@@ -132,41 +132,38 @@ const App: React.FC = () => {
             
             <main className="flex-grow">
                 {activeView === 'forge' ? (
-                    <>
-                        {error && <div className="p-4"><ErrorDisplay message={error} onDismiss={() => setError(null)} /></div>}
-                        <div className="main-grid-container">
-                            <div className="grid-column-wrapper">
-                                <FilterPanel 
-                                    filters={filters}
-                                    onFiltersChange={setFilters}
-                                    onGenerate={handleGenerate}
-                                    isLoading={isLoading}
-                                    onResetFilters={handleResetFilters}
-                                />
-                            </div>
-                            <div className="grid-column-wrapper">
-                                 <ResultsPanel
-                                    items={items}
-                                    isLoading={isLoading}
-                                    selectedItem={selectedItem}
-                                    onSelectItem={handleSelectItem}
-                                    favorites={favorites}
-                                    onToggleFavorite={handleToggleFavorite}
-                                    onGenerateVariant={handleGenerateVariant}
-                                    onClearResults={handleClearResults}
-                                />
-                            </div>
-                            <div className="grid-column-wrapper hidden lg:flex">
-                                <DetailPanel
-                                    item={selectedItem}
-                                    onGenerateVariant={handleGenerateVariant}
-                                    isFavorite={isFavorite}
-                                    onToggleFavorite={handleToggleFavorite}
-                                    onUpdate={handleUpdateItem}
-                                />
-                            </div>
+                    <div className="main-grid-container">
+                        <div className="grid-column-wrapper">
+                            <FilterPanel 
+                                filters={filters}
+                                onFiltersChange={setFilters}
+                                onGenerate={handleGenerate}
+                                isLoading={isLoading}
+                                onResetFilters={handleResetFilters}
+                            />
                         </div>
-                    </>
+                        <div className="grid-column-wrapper">
+                             <ResultsPanel
+                                items={items}
+                                isLoading={isLoading}
+                                selectedItem={selectedItem}
+                                onSelectItem={handleSelectItem}
+                                favorites={favorites}
+                                onToggleFavorite={handleToggleFavorite}
+                                onGenerateVariant={handleGenerateVariant}
+                                onClearResults={handleClearResults}
+                            />
+                        </div>
+                        <div className="grid-column-wrapper hidden lg:flex">
+                            <DetailPanel
+                                item={selectedItem}
+                                onGenerateVariant={handleGenerateVariant}
+                                isFavorite={isFavorite}
+                                onToggleFavorite={handleToggleFavorite}
+                                onUpdate={handleUpdateItem}
+                            />
+                        </div>
+                    </div>
                 ) : (
                     <div className="p-4 md:p-6 lg:p-8">
                         <PromptEngineeringPanel />
@@ -176,6 +173,9 @@ const App: React.FC = () => {
             
             <Footer onAboutClick={() => setIsAboutModalOpen(true)} />
 
+            {/* Overlays and Modals */}
+            {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
+            
             <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
             <FavoritesModal 
                 isOpen={isFavoritesModalOpen} 

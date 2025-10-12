@@ -1,3 +1,4 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Type } from '@google/genai';
@@ -57,9 +58,33 @@ export default async function handler(
 
     res.status(200).json({ items: processedItems, message: 'Conteúdo gerado com sucesso!' });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro em /api/generateContent:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido no servidor.';
-    res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${errorMessage}` });
+    
+    let detailedMessage = 'Ocorreu um erro desconhecido no servidor.';
+    if (error instanceof Error) {
+        detailedMessage = error.message;
+    } else if (typeof error === 'string') {
+        detailedMessage = error;
+    }
+
+    // A SDK do Gemini geralmente embute uma string JSON com detalhes na mensagem.
+    // Vamos tentar extrair uma mensagem mais limpa dela.
+    try {
+        const jsonMatch = detailedMessage.match(/({.*})/s); // Flag 's' para multiline
+        if (jsonMatch && jsonMatch[0]) {
+            const errorObj = JSON.parse(jsonMatch[0]);
+            if (errorObj.error && errorObj.error.message) {
+                detailedMessage = errorObj.error.message;
+            }
+        } else if (detailedMessage.includes("API key not valid")) {
+            // Fallback para o caso da regex falhar mas a mensagem ser clara
+            detailedMessage = "API key not valid. Please pass a valid API key.";
+        }
+    } catch (e) {
+        // Parsing falhou, mantenha a mensagem original.
+    }
+    
+    res.status(500).json({ message: `Falha ao gerar conteúdo. Detalhes: ${detailedMessage}` });
   }
 }
