@@ -102,7 +102,6 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
              break;
         default:
             addFilter('Categoria', filters.category);
-            // FIX: Removed incorrect reference to a generic 'era' property which does not exist on FilterState.
             break;
     }
 
@@ -128,21 +127,88 @@ export const buildResponseSchema = (filters: FilterState, count: number) => {
     let itemProperties: any = {
         nome: { type: Type.STRING, description: 'O nome do item/personagem/lugar.' },
         categoria: { type: Type.STRING, description: 'A categoria, deve ser igual à solicitada.', enum: [filters.category] },
-        // FIX: Added 'era' to the base schema to ensure it's returned by the API.
         era: { type: Type.STRING, description: 'A era/estilo do item, conforme filtro se aplicável.' },
         descricao_curta: { type: Type.STRING, description: 'Uma descrição concisa e evocativa de 1-2 frases.' },
         descricao: { type: Type.STRING, description: 'Uma descrição detalhada com background, aparência e lore.' },
+        raridade: { type: Type.STRING, description: "A raridade do item. Pode ser 'N/A' se não aplicável." },
+        nivel_sugerido: { type: Type.NUMBER, description: "O nível de poder ou de personagem sugerido para este item." },
     };
-    // FIX: Added 'era' to the required fields.
-    let requiredFields = ['nome', 'categoria', 'era', 'descricao_curta', 'descricao'];
+    let requiredFields = ['nome', 'categoria', 'era', 'descricao_curta', 'descricao', 'raridade', 'nivel_sugerido'];
 
     // Add category-specific properties
     switch (filters.category) {
         case 'Arma':
         case 'Acessório':
             itemProperties = { ...itemProperties,
-                raridade: { type: Type.STRING, enum: ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'] },
-                nivel_sugerido: { type: Type.NUMBER },
+                dano: { type: Type.STRING },
+                dados: { type: Type.STRING },
+                tipo_de_dano: { type: Type.STRING },
+                status_aplicado: { type: Type.STRING, description: "Efeito ou condição que a arma aplica." },
+                efeitos_secundarios: { type: Type.STRING, description: "Habilidades passivas ou ativas adicionais." },
+                ganchos_narrativos: { type: Type.STRING, description: "Ideias de como integrar o item na história." },
+            };
+            requiredFields.push('dano', 'dados');
+            break;
+
+        case 'Caçador':
+             itemProperties = { ...itemProperties,
+                classe: { type: Type.STRING, description: "O arquétipo ou classe do caçador." },
+                personalidade: { type: Type.STRING },
+                descricao_fisica: { type: Type.STRING },
+                background: { type: Type.STRING, description: "A história de origem do caçador." },
+                arsenal: { type: Type.OBJECT, properties: { arma: { type: Type.STRING }, empunhadura: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } }, required: ['nome', 'descricao'] } }, required: ['arma', 'empunhadura'] },
+                habilidades_especiais: { type: Type.OBJECT, properties: { respiracao: { type: Type.STRING }, variacoes_tecnica: { type: Type.ARRAY, items: { type: Type.STRING } } }, required: ['respiracao'] },
+                acessorio: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } }, required: ['nome', 'descricao'] },
+                ganchos_narrativos: { type: Type.ARRAY, items: { type: Type.STRING } },
+                uso_em_cena: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Como um mestre pode usar este personagem em uma cena." },
+             };
+            requiredFields.push('classe', 'personalidade', 'background', 'ganchos_narrativos');
+            break;
+        
+        case 'Inimigo/Oni':
+            itemProperties = { ...itemProperties,
+                power_level: { type: Type.STRING, description: "Nível de poder do Oni, ex: Lua Inferior, Oni Comum." },
+                descricao_fisica_detalhada: { type: Type.STRING },
+                kekkijutsu: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } }, required: ['nome', 'descricao'] },
+                comportamento_combate: { type: Type.ARRAY, items: { type: Type.STRING } },
+                comportamento_fora_combate: { type: Type.ARRAY, items: { type: Type.STRING } },
+                fraquezas_unicas: { type: Type.ARRAY, items: { type: Type.STRING } },
+                trofeus_loot: { type: Type.ARRAY, items: { type: Type.STRING } },
+                ganchos_narrativos: { type: Type.ARRAY, items: { type: Type.STRING } },
+            };
+            requiredFields.push('power_level', 'kekkijutsu', 'comportamento_combate');
+            break;
+
+        case 'NPC':
+            itemProperties = { ...itemProperties,
+                origem: { type: Type.STRING },
+                profession: { type: Type.STRING },
+                voice_and_mannerisms: { type: Type.STRING, description: "Como o NPC fala e se comporta." },
+                inventory_focal: { type: Type.STRING, description: "Um item importante que o NPC carrega." },
+                motivation: { type: Type.STRING, description: "O principal objetivo do NPC." },
+                secret: { type: Type.STRING, description: "Um segredo que o NPC esconde." },
+                dialogue_lines: { type: Type.ARRAY, items: { type: Type.STRING } },
+                ganchos_narrativos: { type: Type.ARRAY, items: { type: Type.STRING } },
+            };
+            requiredFields.push('origem', 'profession', 'motivation', 'secret');
+            break;
+
+        case 'Forma de Respiração':
+            itemProperties = { ...itemProperties,
+                base_breathing_id: { type: Type.STRING, description: "A respiração da qual esta forma deriva." },
+                derivation_type: { type: Type.STRING, description: "Tipo de derivação, ex: Híbrida, Evoluída." },
+                name_native: { type: Type.STRING, description: "Nome no idioma original (ex: japonês)." },
+                description_flavor: { type: Type.STRING, description: "Descrição narrativa e visual da forma." },
+                requirements: { type: Type.OBJECT, properties: { min_rank: { type: Type.STRING }, exhaustion_cost: { type: Type.STRING }, cooldown: { type: Type.STRING } }, required: ['min_rank', 'exhaustion_cost', 'cooldown'] },
+                mechanics: { type: Type.OBJECT, properties: { activation: { type: Type.STRING }, target: { type: Type.STRING }, initial_test: { type: Type.OBJECT, properties: { type: { type: Type.STRING }, dc_formula: { type: Type.STRING } }, required: ['type', 'dc_formula'] }, on_success_target: { type: Type.STRING }, on_fail_target: { type: Type.STRING }, damage_formula_rank: { type: Type.OBJECT, description: "Objeto com rank como chave e fórmula de dano como valor." } }, required: ['activation', 'target', 'initial_test'] },
+                level_scaling: { type: Type.OBJECT, description: "Objeto descrevendo como a habilidade escala com o nível/rank." },
+                micro_variants: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Pequenas variações ou customizações da forma." },
+            };
+            requiredFields.push('base_breathing_id', 'description_flavor', 'requirements', 'mechanics');
+            break;
+
+        case 'Kekkijutsu':
+            itemProperties = { ...itemProperties,
                 dano: { type: Type.STRING },
                 dados: { type: Type.STRING },
                 tipo_de_dano: { type: Type.STRING },
@@ -150,27 +216,47 @@ export const buildResponseSchema = (filters: FilterState, count: number) => {
                 efeitos_secundarios: { type: Type.STRING },
                 ganchos_narrativos: { type: Type.STRING },
             };
-            requiredFields.push('raridade', 'nivel_sugerido', 'dano', 'dados');
+            requiredFields.push('dano');
             break;
 
-        case 'Caçador':
-             itemProperties = { ...itemProperties,
-                raridade: { type: Type.STRING, description: "Inferida, não baseada em filtro." },
-                nivel_sugerido: { type: Type.NUMBER },
-                classe: { type: Type.STRING },
-                personalidade: { type: Type.STRING },
-                descricao_fisica: { type: Type.STRING },
-                background: { type: Type.STRING },
-                arsenal: { type: Type.OBJECT, properties: { arma: { type: Type.STRING }, empunhadura: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } } } } },
-                habilidades_especiais: { type: Type.OBJECT, properties: { respiracao: { type: Type.STRING }, variacoes_tecnica: { type: Type.ARRAY, items: { type: Type.STRING } } } },
-                acessorio: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } } },
-                ganchos_narrativos: { type: Type.ARRAY, items: { type: Type.STRING } },
-                uso_em_cena: { type: Type.ARRAY, items: { type: Type.STRING } },
-             };
-            requiredFields.push('raridade', 'nivel_sugerido', 'classe', 'personalidade', 'background', 'ganchos_narrativos');
+        case 'Local/Cenário':
+            itemProperties.ganchos_narrativos = { type: Type.STRING };
             break;
-        
-        // Add schemas for all other categories...
+
+        case 'Missão/Cenário':
+            const missionNpcSchema = { type: Type.OBJECT, properties: { id: { type: Type.STRING }, name: { type: Type.STRING }, role: { type: Type.STRING }, dialogue_example: { type: Type.STRING }, physical_trait: { type: Type.STRING }, goal: { type: Type.STRING }, secret: { type: Type.STRING }, twist: { type: Type.STRING } }, required: ['name', 'role', 'goal', 'secret'] };
+            const missionItemSchema = { type: Type.OBJECT, properties: { appearance: { type: Type.STRING }, origin: { type: Type.STRING }, wear: { type: Type.STRING }, quirk: { type: Type.STRING }, use: { type: Type.STRING } }, required: ['appearance', 'use'] };
+            itemProperties = { ...itemProperties,
+                title: { type: Type.STRING }, logline: { type: Type.STRING }, summary: { type: Type.STRING },
+                objectives: { type: Type.ARRAY, items: { type: Type.STRING } }, complications: { type: Type.ARRAY, items: { type: Type.STRING } }, failure_states: { type: Type.ARRAY, items: { type: Type.STRING } }, rewards: { type: Type.ARRAY, items: { type: Type.STRING } },
+                numberOfSessions: { type: Type.NUMBER }, environment: { type: Type.STRING },
+                protagonist_desc: { type: Type.OBJECT, properties: { silhouette: { type: Type.STRING }, face: { type: Type.STRING }, attire: { type: Type.STRING }, movement: { type: Type.STRING }, defining_feature: { type: Type.STRING } } },
+                oni_desc: { type: Type.OBJECT, properties: { scale: { type: Type.STRING }, skin: { type: Type.STRING }, appendages: { type: Type.STRING }, eyes: { type: Type.STRING }, sound_smell: { type: Type.STRING }, mystic_sign: { type: Type.STRING } } },
+                demonBloodArtType: { type: Type.STRING },
+                key_npcs: { type: Type.ARRAY, items: missionNpcSchema },
+                relevant_items: { type: Type.ARRAY, items: missionItemSchema },
+                scaling_hooks: { type: Type.STRING },
+                tone_variations: { type: Type.OBJECT, description: "Variações da missão com diferentes tons." },
+                sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
+                tone: { type: Type.STRING },
+            };
+            requiredFields = ['nome', 'categoria', 'era', 'descricao_curta', 'title', 'logline', 'summary', 'objectives'];
+            break;
+
+        case 'World Building':
+            const wbPlotSchema = { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['title', 'description'] };
+            const wbNpcSchema = { type: Type.OBJECT, properties: { name: { type: Type.STRING }, role: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'role'] };
+            const wbPoiSchema = { type: Type.OBJECT, properties: { name: { type: Type.STRING }, type: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'type'] };
+            const wbMissionSchema = { type: Type.OBJECT, properties: { title: { type: Type.STRING }, objective: { type: Type.STRING }, reward: { type: Type.STRING } }, required: ['title', 'objective'] };
+            itemProperties = { ...itemProperties,
+                plot_threads: { type: Type.ARRAY, items: wbPlotSchema },
+                adventure_hooks: { type: Type.ARRAY, items: { type: Type.STRING } },
+                key_npcs_wb: { type: Type.ARRAY, items: wbNpcSchema },
+                points_of_interest: { type: Type.ARRAY, items: wbPoiSchema },
+                mini_missions: { type: Type.ARRAY, items: wbMissionSchema },
+            };
+            requiredFields.push('plot_threads', 'adventure_hooks', 'key_npcs_wb', 'points_of_interest');
+            break;
     }
 
     const itemSchema = {
