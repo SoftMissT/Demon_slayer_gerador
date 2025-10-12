@@ -35,6 +35,7 @@ export const ApiKeysModal: React.FC<{
     const [inputValue, setInputValue] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [isValidating, setIsValidating] = useState(false);
+    const [isWaitingForSecret, setIsWaitingForSecret] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -47,6 +48,7 @@ export const ApiKeysModal: React.FC<{
         if (isOpen) {
             setKeys(currentKeys);
             setInputValue('');
+            setIsWaitingForSecret(false);
             
             const initialMessages: Message[] = [
                 { id: 1, sender: 'bot', content: (
@@ -71,6 +73,7 @@ export const ApiKeysModal: React.FC<{
             // Reset state when modal is closed
             setMessages([]);
             setStep('welcome');
+            setIsWaitingForSecret(false);
         }
     }, [isOpen, currentKeys]);
 
@@ -80,6 +83,43 @@ export const ApiKeysModal: React.FC<{
     
     const handleSend = async () => {
         if (!inputValue.trim() || step === 'done' || step === 'welcome' || isValidating) return;
+
+        // --- Developer Override Flow ---
+        const DEV_OVERRIDE_CODE = "forge_master_key_2025";
+        const DEV_SECRET_PHRASE = process.env.NEXT_PUBLIC_DEV_SECRET_PHRASE;
+
+        if (isWaitingForSecret) {
+            if (inputValue.trim() === DEV_SECRET_PHRASE) {
+                const devKeys: ApiKeys = {
+                    gemini: process.env.NEXT_PUBLIC_DEV_GEMINI_KEY || '',
+                    openai: process.env.NEXT_PUBLIC_DEV_OPENAI_KEY || '',
+                    deepseek: process.env.NEXT_PUBLIC_DEV_DEEPSEEK_KEY || '',
+                };
+                onSave(devKeys);
+                onClose();
+            } else {
+                addMessage('user', <code>Senha incorreta.</code>);
+                addMessage('bot', <span className="text-red-400">❌ Senha secreta inválida. O processo foi reiniciado.</span>);
+                setIsWaitingForSecret(false);
+                // Reset to the beginning of the normal flow
+                setTimeout(() => addMessage('bot', "Vamos tentar de novo. Por favor, insira sua chave do Google Gemini."), 500);
+                setStep('gemini');
+            }
+            setInputValue('');
+            return;
+        }
+
+        if (inputValue.trim() === DEV_OVERRIDE_CODE) {
+             if (DEV_SECRET_PHRASE) {
+                addMessage('user', <code>{DEV_OVERRIDE_CODE}</code>);
+                addMessage('bot', "🔑 Código mestre recebido. Por favor, insira a senha de desenvolvimento para continuar.");
+                setIsWaitingForSecret(true);
+             }
+             // Silently fail if the phrase is not set, to not expose the feature to regular users.
+             setInputValue('');
+             return;
+        }
+        // --- End Developer Override Flow ---
         
         const keyEntered = `****${inputValue.slice(-4)}`;
         addMessage('user', <code>{keyEntered}</code>);
@@ -202,13 +242,12 @@ export const ApiKeysModal: React.FC<{
                     ) : (
                         <div className="input-place">
                             <input
-                                type="password"
+                                type={isWaitingForSecret ? 'text' : 'password'}
                                 className="send-input"
-                                placeholder={PLACEHOLDERS[step]}
+                                placeholder={isWaitingForSecret ? 'Digite a senha...' : PLACEHOLDERS[step]}
                                 value={inputValue}
                                 onChange={e => setInputValue(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                // FIX: Corrected a type error in the `disabled` attribute logic. The TypeScript compiler correctly identified that `step` could never be `'done'` in this part of the code due to type narrowing in the parent ternary operator. The redundant and erroneous check has been removed.
                                 disabled={step === 'welcome' || isValidating}
                                 autoFocus
                             />

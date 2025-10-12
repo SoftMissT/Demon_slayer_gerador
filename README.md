@@ -54,6 +54,25 @@ Ao abrir a aplicação, clique no botão **"Chaves de API"** no cabeçalho. Voc�
 
 As chaves são salvas no `localStorage` do seu navegador e são necessárias para que a geração de conteúdo funcione.
 
+### ⚡ Modo de Desenvolvedor (Opcional)
+Para agilizar os testes, você pode configurar um bypass para a inserção de chaves com um sistema de "dois fatores" local.
+
+1.  Crie um arquivo `.env.local` na raiz do projeto.
+2.  Adicione suas chaves de API e uma frase secreta pessoal com os seguintes nomes de variáveis:
+
+    ```
+    # Chaves de API para carregamento automático
+    NEXT_PUBLIC_DEV_GEMINI_KEY=sua_chave_gemini
+    NEXT_PUBLIC_DEV_OPENAI_KEY=sua_chave_openai
+    NEXT_PUBLIC_DEV_DEEPSEEK_KEY=sua_chave_deepseek
+
+    # Senha para o segundo fator de autenticação local
+    NEXT_PUBLIC_DEV_SECRET_PHRASE=sua_frase_super_secreta_aqui
+    ```
+
+3.  Na aplicação, abra o modal "Chaves de API" e digite `forge_master_key` no chat.
+4.  O sistema pedirá a "frase secreta". Digite a frase que você definiu em `NEXT_PUBLIC_DEV_SECRET_PHRASE`. Isso carregará automaticamente as chaves do seu ambiente, permitindo o uso imediato.
+
 ## 🧩 Tecnologias
 - **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).
 - **Frontend:** Next.js & React para uma arquitetura moderna e de alta performance.
