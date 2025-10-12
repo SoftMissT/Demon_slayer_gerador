@@ -89,9 +89,10 @@ export const Header: React.FC<HeaderProps> = ({
               Histórico
           </button>
           {user ? (
-              <div className="flex items-center gap-2 bg-gray-800 p-2 rounded-lg">
-                  <span className="text-sm font-semibold text-white">{user.nickname}</span>
-                  <button className="text-xs text-red-400 hover:underline" onClick={onLogoutClick}>Sair</button>
+              <div className="flex items-center gap-3 bg-gray-800/50 p-1.5 pr-3 rounded-full border border-gray-700">
+                  <img src={user.avatar} alt="Avatar do usuário" className="w-8 h-8 rounded-full" />
+                  <span className="text-sm font-semibold text-white">{user.username}</span>
+                  <button className="text-xs text-red-400 hover:underline" onClick={onLogoutClick}>(Sair)</button>
               </div>
           ) : (
              <DiscordLoginButton onClick={onLoginClick} />

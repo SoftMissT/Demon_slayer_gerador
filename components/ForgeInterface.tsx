@@ -98,19 +98,16 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (isMobile) setIsFilterPanelOpen(false);
 
         try {
-            // This will be replaced with a fetch call to a secure backend endpoint
-            // For now, the call is disabled if not authenticated.
-            alert("FUNCIONALIDADE DE GERAÇÃO EM DESENVOLVIMENTO PENDENTE DE BACKEND");
-            // const promises = Array.from({ length: count }).map(() => 
-            //     orchestrateGeneration(filters, promptModifier)
-            // );
-            // const newItems = await Promise.all(promises);
+            const promises = Array.from({ length: count }).map(() => 
+                orchestrateGeneration(filters, promptModifier)
+            );
+            const newItems = await Promise.all(promises);
             
-            // setItems(prev => [...newItems, ...prev]);
-            // if (newItems.length > 0) {
-            //     setSelectedItem(newItems[0]);
-            //     setHistory(prev => [...newItems, ...prev].slice(0, 100));
-            // }
+            setItems(prev => [...newItems, ...prev]);
+            if (newItems.length > 0) {
+                setSelectedItem(newItems[0]);
+                setHistory(prev => [...newItems, ...prev].slice(0, 100));
+            }
         } catch (err: any) {
             setError(err.message || 'Ocorreu um erro desconhecido durante a geração.');
         } finally {
@@ -167,13 +164,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (isMobile && isDetailModalOpen) setIsDetailModalOpen(false);
 
         try {
-            alert("FUNCIONALIDADE DE GERAÇÃO EM DESENVOLVIMENTO PENDENTE DE BACKEND");
-            // const variant = await orchestrateGeneration(filters as FilterState, modifier);
-            // variant.nome = `${item.nome} (Variante ${variantType})`;
+            const variant = await orchestrateGeneration(filters as FilterState, modifier);
+            variant.nome = `${item.nome} (Variante ${variantType})`;
             
-            // setItems(prev => [variant, ...prev]);
-            // setSelectedItem(variant);
-            // setHistory(prev => [variant, ...prev]);
+            setItems(prev => [variant, ...prev]);
+            setSelectedItem(variant);
+            setHistory(prev => [variant, ...prev]);
 
         } catch (err: any) {
             setError(err.message || 'Falha ao gerar variante.');

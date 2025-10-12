@@ -8,10 +8,10 @@ let aiClient: GoogleGenAI | null = null;
  * Returns null and logs an error if the API key is not found.
  */
 export const getAiClient = (): GoogleGenAI | null => {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
-        console.error("A variável de ambiente GEMINI_API_KEY não está definida.");
+        console.error("A variável de ambiente API_KEY não está definida.");
         return null;
     }
 

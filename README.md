@@ -11,13 +11,29 @@ Ela auxilia na geração de armas, inimigos, formas de respiração, NPCs e cen�
 ## 🔐 Acesso via Discord & Whitelist
 O acesso ao Kimetsu Forge é gerenciado através da autenticação com o Discord. Para utilizar as funcionalidades, os usuários devem entrar com sua conta e ter seu ID do Discord na lista de acesso (whitelist) gerenciada pelo administrador.
 
-### Configuração da Whitelist (Google Sheets)
+### 1. Configuração do Discord
+
+Para que o login funcione, você precisa registrar um aplicativo no Portal de Desenvolvedores do Discord.
+
+1.  **Acesse o Portal de Desenvolvedores:** Vá para [discord.com/developers/applications](https://discord.com/developers/applications) e clique em **"New Application"**. Dê um nome ao seu aplicativo (ex: "Kimetsu Forge App") e aceite os termos.
+
+2.  **Obtenha o Client ID e Client Secret:**
+    *   Na página do seu aplicativo, vá para a aba **"OAuth2"**.
+    *   Copie o **CLIENT ID**.
+    *   Clique em **"Reset Secret"** para gerar e copiar o seu **CLIENT SECRET**. Guarde-o em segurança.
+
+3.  **Configure a Redirect URI:**
+    *   Ainda na aba **"OAuth2"**, na seção "Redirects", clique em **"Add Redirect"**.
+    *   Cole a URL de desenvolvimento `http://localhost:3000`.
+    *   **Importante:** Adicione também a URL do seu site em produção (quando você fizer o deploy na Vercel). Ex: `https://seu-projeto.vercel.app`.
+
+### 2. Configuração da Whitelist (Google Sheets)
 
 A whitelist de usuários é lida a partir de uma planilha do Google Sheets. Para configurar, siga os passos:
 
 1.  **Crie uma Conta de Serviço no Google Cloud:**
     *   Acesse o [Google Cloud Console](https://console.cloud.google.com/), crie um novo projeto e ative a **API do Google Sheets**.
-    *   Vá para **IAM e Admin > Contas de Serviço**, crie uma nova conta.
+    *   Vá para **IAM e Admin > Contas de Serviço**, crie uma nova conta de serviço.
     *   Dentro da conta de serviço, vá para a aba **Chaves**, clique em **Adicionar Chave > Criar nova chave**, selecione **JSON** e faça o download.
 
 2.  **Configure sua Planilha:**
@@ -26,20 +42,31 @@ A whitelist de usuários é lida a partir de uma planilha do Google Sheets. Para
     *   Na coluna `A`, coloque os nicks dos usuários (opcional). Na coluna `B`, coloque os **IDs do Discord** dos usuários autorizados.
     *   Clique em **Compartilhar** e adicione o `client_email` (do arquivo JSON baixado) como **Leitor**.
 
-3.  **Adicione as Variáveis de Ambiente:**
-    *   Crie um arquivo `.env.local` na raiz do seu projeto.
-    *   Adicione as seguintes variáveis, preenchendo com os dados do seu arquivo JSON e da URL da planilha:
+### 3. Variáveis de Ambiente
 
-    ```env
-    # Credenciais da API do Google para a Whitelist
-    GOOGLE_SHEET_ID="ID_DA_SUA_PLANILHA_AQUI"
-    GOOGLE_SERVICE_ACCOUNT_EMAIL="client_email_do_seu_json@..."
-    GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nSUA_CHAVE_PRIVADA_AQUI\n-----END PRIVATE KEY-----\n"
+Adicione todas as variáveis a seguir no seu provedor de hospedagem (Vercel) ou em um arquivo `.env.local` na raiz do projeto para desenvolvimento local.
 
-    # ... outras chaves de API
-    ```
-    *   **`GOOGLE_SHEET_ID`**: Encontrado na URL da sua planilha (`.../spreadsheets/d/`**`[ESTE_É_O_ID]`**`/edit`).
-    *   **`GOOGLE_PRIVATE_KEY`**: Copie o valor da `private_key` do arquivo JSON. **Importante:** Mantenha as quebras de linha (`\n`) dentro de aspas duplas, como no exemplo, para garantir o funcionamento correto.
+```env
+# Credenciais da API do Google para a Whitelist
+GOOGLE_SHEET_ID="ID_DA_SUA_PLANILHA_AQUI"
+GOOGLE_SERVICE_ACCOUNT_EMAIL="client_email_do_seu_json@..."
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nSUA_CHAVE_PRIVADA_AQUI\n-----END PRIVATE KEY-----\n"
+
+# Credenciais da Aplicação Discord para Autenticação
+DISCORD_CLIENT_ID="SEU_CLIENT_ID_DO_DISCORD_AQUI"
+DISCORD_CLIENT_SECRET="SEU_CLIENT_SECRET_DO_DISCORD_AQUI"
+DISCORD_REDIRECT_URI="http://localhost:3000" # Em produção, use a URL do seu site
+
+# Chaves de API para os modelos de IA
+# Chave para Google Gemini (https://aistudio.google.com/app/apikey)
+API_KEY="SUA_CHAVE_GEMINI_AQUI"
+# Chave para OpenAI (https://platform.openai.com/api-keys)
+OPENAI_API_KEY="SUA_CHAVE_OPENAI_AQUI"
+# Chave para DeepSeek (https://platform.deepseek.com/api_keys)
+DEEPSEEK_API_KEY="SUA_CHAVE_DEEPSEEK_AQUI"
+```
+*   **`GOOGLE_PRIVATE_KEY`**: Copie o valor da `private_key` do arquivo JSON. Na Vercel, você pode colar o valor de múltiplas linhas diretamente no campo.
+*   **`DISCORD_REDIRECT_URI`**: Para rodar localmente, use `http://localhost:3000`. Quando for para produção, mude para a URL do seu site na Vercel.
 
 ## 🧠 Como Funciona: A Orquestração de IAs
 O Kimetsu Forge utiliza um fluxo de três etapas que para garantir resultados ricos e detalhados:
@@ -70,7 +97,7 @@ npm install
 ```
 
 ### 4. Configure as Variáveis de Ambiente
-Crie um arquivo `.env.local` na raiz do projeto e adicione as chaves de API conforme as instruções na seção "Configuração da Whitelist".
+Crie um arquivo `.env.local` na raiz do projeto e adicione as chaves de API conforme as instruções na seção "Variáveis de Ambiente".
 
 ### 5. Execute o Servidor de Desenvolvimento
 Com tudo configurado, inicie a aplicação:
@@ -82,8 +109,10 @@ Abra [http://localhost:3000](http://localhost:3000) em seu navegador para ver o 
 ## 🧩 Tecnologias
 - **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).
 - **Frontend:** Next.js & React para uma arquitetura moderna e de alta performance.
-- **Estilização:** Tailwind CSS para um design rápido, responsivo e customizável.
+- **Autenticação:** Discord OAuth2
 - **Whitelist:** Google Sheets API.
+- **Estilização:** Tailwind CSS para um design rápido, responsivo e customizável.
+
 
 ## ❤️ Apoie a Obra Original
 Kimetsu Forge é um projeto de fã, feito com carinho para a comunidade. A melhor forma de apoiar é consumindo a obra original de Koyoharu Gotouge.

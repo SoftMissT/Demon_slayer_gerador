@@ -108,18 +108,17 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
         setResult(null);
         
         try {
-            alert("FUNCIONALIDADE DE GERAÇÃO EM DESENVOLVIMENTO PENDENTE DE BACKEND");
-            // const data = await generatePrompts({
-            //     basePrompt: `Tópico Principal: ${basePrompt}. Evitar: ${negativePrompt || 'Nenhum'}.`,
-            //     mjParams,
-            //     gptParams,
-            //     geminiParams,
-            //     generateMidjourney: isMjEnabled,
-            //     generateGpt: isGptEnabled,
-            //     generateGemini: isGeminiEnabled,
-            // });
+            const data = await generatePrompts({
+                basePrompt: `Tópico Principal: ${basePrompt}. Evitar: ${negativePrompt || 'Nenhum'}.`,
+                mjParams,
+                gptParams,
+                geminiParams,
+                generateMidjourney: isMjEnabled,
+                generateGpt: isGptEnabled,
+                generateGemini: isGeminiEnabled,
+            });
 
-            // setResult(data);
+            setResult(data);
 
         } catch (err: any) {
             setError(err.message);
