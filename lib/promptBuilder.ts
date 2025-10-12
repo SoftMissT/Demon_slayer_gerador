@@ -22,7 +22,7 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
 
     switch (filters.category) {
         case 'Caçador':
-            categorySpecificInstructions = 'Gere um Caçador de Demônios completo. A raridade deve ser inferida com base na combinação de origem, classe e habilidades, não um filtro direto. Inclua um acessório distintivo.';
+            categorySpecificInstructions = 'Gere um Caçador de Demônios completo. A raridade deve ser inferida com base na combinação de origem, classe e habilidades, não um filtro direto. Inclua um acessório distintivo. Na "descricao_fisica", descreva detalhadamente a aparência do caçador, incluindo como ele porta sua arma principal e a aparência de seu acessório distintivo, integrando-os visualmente ao personagem.';
             addFilter('Era/Estilo', filters.hunterEra);
             addFilter('País/Cultura', filters.hunterCountry);
             addFilter('Origem', filters.hunterOrigin);
@@ -36,6 +36,7 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
             categorySpecificInstructions = 'Gere um acessório mágico ou amaldiçoado. Descreva sua aparência, poderes e lore.';
             addFilter('Raridade', filters.accessoryRarity);
             addFilter('Era/Estilo', filters.accessoryEra);
+            addFilter('País/Cultura', filters.accessoryCountry);
             addFilter('Inspiração (Kekkijutsu)', filters.accessoryKekkijutsuInspiration);
             addFilter('Inspiração (Respiração)', filters.accessoryBreathingInspiration);
             addFilter('Inspiração (Arma)', filters.accessoryWeaponInspiration);
@@ -57,7 +58,7 @@ Foque em originalidade e detalhes que inspirem a narrativa.`;
             addFilter('Tipo de Terreno', filters.locationTerrain);
             break;
         case 'World Building':
-            categorySpecificInstructions = 'Gere as bases para um cenário de campanha. Crie um conceito central, 3 tramas, 5 ganchos, 4 NPCs, 3 locais e 2 mini-missões.';
+            categorySpecificInstructions = 'Gere as bases para um cenário de campanha. Crie um conceito central, 3 tramas, 2 facções internas, 2 ameaças externas, 3 eventos históricos, 4 tradições/tabus, 3 mistérios, 5 ganchos, 4 NPCs, 3 locais e 2 mini-missões. Os elementos devem ser interconectados e coerentes.';
             addFilter('Tom', filters.wbTone);
             addFilter('País', filters.wbCountry);
             addFilter('Era/Estilo', filters.wbEra);
@@ -154,7 +155,7 @@ export const buildResponseSchema = (filters: FilterState, count: number) => {
              itemProperties = { ...itemProperties,
                 classe: { type: Type.STRING, description: "O arquétipo ou classe do caçador." },
                 personalidade: { type: Type.STRING },
-                descricao_fisica: { type: Type.STRING },
+                descricao_fisica: { type: Type.STRING, description: "Descrição visual detalhada do caçador, incluindo traços faciais, cabelo, porte físico, cicatrizes, vestimentas e, crucialmente, como ele carrega sua arma e a aparência de seu acessório no corpo." },
                 background: { type: Type.STRING, description: "A história de origem do caçador." },
                 arsenal: { type: Type.OBJECT, properties: { arma: { type: Type.STRING }, empunhadura: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } }, required: ['nome', 'descricao'] } }, required: ['arma', 'empunhadura'] },
                 habilidades_especiais: { type: Type.OBJECT, properties: { respiracao: { type: Type.STRING }, variacoes_tecnica: { type: Type.ARRAY, items: { type: Type.STRING } } }, required: ['respiracao'] },
@@ -162,7 +163,7 @@ export const buildResponseSchema = (filters: FilterState, count: number) => {
                 ganchos_narrativos: { type: Type.ARRAY, items: { type: Type.STRING } },
                 uso_em_cena: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Como um mestre pode usar este personagem em uma cena." },
              };
-            requiredFields.push('classe', 'personalidade', 'background', 'ganchos_narrativos');
+            requiredFields.push('classe', 'personalidade', 'background', 'ganchos_narrativos', 'descricao_fisica');
             break;
         
         case 'Inimigo/Oni':
@@ -248,14 +249,23 @@ export const buildResponseSchema = (filters: FilterState, count: number) => {
             const wbNpcSchema = { type: Type.OBJECT, properties: { name: { type: Type.STRING }, role: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'role'] };
             const wbPoiSchema = { type: Type.OBJECT, properties: { name: { type: Type.STRING }, type: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'type'] };
             const wbMissionSchema = { type: Type.OBJECT, properties: { title: { type: Type.STRING }, objective: { type: Type.STRING }, reward: { type: Type.STRING } }, required: ['title', 'objective'] };
+            const wbFactionSchema = { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, objetivo: { type: Type.STRING }, descricao: { type: Type.STRING } }, required: ['nome', 'objetivo', 'descricao'] };
+            const wbThreatSchema = { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, tipo: { type: Type.STRING }, descricao: { type: Type.STRING } }, required: ['nome', 'tipo', 'descricao'] };
+            const wbHistorySchema = { type: Type.OBJECT, properties: { evento: { type: Type.STRING }, impacto: { type: Type.STRING } }, required: ['evento', 'impacto'] };
+            
             itemProperties = { ...itemProperties,
                 plot_threads: { type: Type.ARRAY, items: wbPlotSchema },
                 adventure_hooks: { type: Type.ARRAY, items: { type: Type.STRING } },
                 key_npcs_wb: { type: Type.ARRAY, items: wbNpcSchema },
                 points_of_interest: { type: Type.ARRAY, items: wbPoiSchema },
                 mini_missions: { type: Type.ARRAY, items: wbMissionSchema },
+                faccoes_internas: { type: Type.ARRAY, items: wbFactionSchema },
+                ameacas_externas: { type: Type.ARRAY, items: wbThreatSchema },
+                tradicoes_culturais: { type: Type.ARRAY, items: { type: Type.STRING } },
+                eventos_historicos_chave: { type: Type.ARRAY, items: wbHistorySchema },
+                misterios_segredos: { type: Type.ARRAY, items: { type: Type.STRING } },
             };
-            requiredFields.push('plot_threads', 'adventure_hooks', 'key_npcs_wb', 'points_of_interest');
+            requiredFields.push('plot_threads', 'adventure_hooks', 'key_npcs_wb', 'points_of_interest', 'faccoes_internas', 'ameacas_externas');
             break;
     }
 

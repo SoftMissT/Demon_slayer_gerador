@@ -1,5 +1,6 @@
 // FIX: Populated with full constant definitions to resolve module errors.
 import type { Category, Rarity, Era, Tone, FilterState } from './types';
+import { ORIGINS_DATA } from './lib/originsData';
 
 export const CATEGORIES: Category[] = [
     'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missão/Cenário', 'World Building'
@@ -34,7 +35,7 @@ export const METAL_COLORS: string[] = [
 ];
 
 export const COUNTRIES: string[] = [
-    'Aleatório', 'Japão', 'China', 'Coreia', 'Índia', 'Egito', 'Grécia', 'Roma', 'Nórdico (Viking)', 'Celta', 'Arábia', 'Pérsia', 'Asteca', 'Maia'
+    'Aleatório', 'Japão', 'China', 'Coreia', 'Índia', 'Egito', 'Grécia', 'Roma', 'Nórdico (Viking)', 'Celta', 'Arábia', 'Pérsia', 'Asteca', 'Maia', 'Rússia', 'Inglaterra (Medieval)', 'França (Renascentista)', 'Espanha (Conquistador)', 'Alemanha (Gótico)', 'Brasil (Colonial)', 'Império Inca', 'Polinésia (Tribal)', 'Africano (Tribal)'
 ];
 
 export const TERRAINS: string[] = [
@@ -45,13 +46,12 @@ export const THREAT_SCALES: string[] = [
     'Aleatória', 'Conflito Local', 'Guerra Regional', 'Ameaça Nacional', 'Crise Continental', 'Perigo Global', 'Evento de Extinção'
 ];
 
-export const ORIGINS: string[] = [
-    'Aleatória', 'Clã de Ferreiros', 'Família de Caçadores', 'Templo de Monges', 'Nobreza Caída', 'Sobrevivente de Massacre', 'Criação de Oni', 'Experimento Alquímico', 'Pacto Sobrenatural', 'Viajante Dimensional'
-];
-
 export const ONI_POWER_LEVELS: string[] = [
     'Aleatório', 'Oni Comum', 'Oni de Elite', 'Lua Inferior', 'Lua Superior', 'Classe Muzan'
 ];
+
+// FIX: Added ORIGINS export by deriving it from ORIGINS_DATA to resolve import error.
+export const ORIGINS: string[] = ['Aleatória', ...ORIGINS_DATA.map(o => o.nome)];
 
 export const INITIAL_FILTERS: FilterState = {
     category: '',
@@ -88,6 +88,7 @@ export const INITIAL_FILTERS: FilterState = {
     accessoryRarity: 'Aleatória',
     accessoryEra: 'Aleatória',
     accessoryOrigin: 'Aleatória',
+    accessoryCountry: 'Aleatório',
     accessoryBreathingInspiration: 'Nenhuma',
     accessoryKekkijutsuInspiration: 'Nenhuma',
     accessoryWeaponInspiration: 'Nenhuma',
@@ -98,7 +99,7 @@ export const INITIAL_FILTERS: FilterState = {
     breathingFormOrigin: 'Aleatória',
     breathingFormTone: 'épico',
     breathingFormWeapon: 'Aleatório',
-    breathingFormArchetype: 'Aleatório',
+    breathingFormArchetype: 'Aleatória',
     // Kekkijutsu
     kekkijutsuEra: 'Aleatória',
     kekkijutsuCountry: 'Aleatório',

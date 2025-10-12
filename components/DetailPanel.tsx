@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import type { GeneratedItem, MissionNPC, MissionItem, WorldBuildingItem, BreathingFormItem, HunterItem, OniItem, NpcItem, MissionItemDetails } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -9,6 +10,7 @@ import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
 import { buildPlainTextForItem } from '../lib/textFormatters';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
+import { PencilIcon } from './icons/PencilIcon';
 
 
 interface DetailPanelProps {
@@ -327,7 +329,7 @@ const OniDetailView: React.FC<{ item: OniItem }> = ({ item }) => (
 const WorldBuildingDetailView: React.FC<{ item: WorldBuildingItem }> = ({ item }) => {
     return (
     <>
-        <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>
+        <DetailSection title="Conceito Central">{item.descricao || 'N/A'}</DetailSection>
 
         {item.plot_threads && item.plot_threads.length > 0 && (
             <DetailSection title="Tramas Principais">
@@ -339,6 +341,61 @@ const WorldBuildingDetailView: React.FC<{ item: WorldBuildingItem }> = ({ item }
                         </div>
                     ))}
                 </div>
+            </DetailSection>
+        )}
+
+        {item.faccoes_internas && item.faccoes_internas.length > 0 && (
+            <DetailSection title="Facções Internas">
+                <div className="space-y-3">
+                    {item.faccoes_internas.map((faction, i: number) => (
+                        <div key={i} className="p-2 bg-gray-900/50 rounded-md">
+                            <h5 className="font-semibold text-white">{faction.nome}</h5>
+                            <p className="text-xs text-indigo-300"><strong>Objetivo:</strong> {faction.objetivo}</p>
+                            <p className="text-xs text-gray-400 mt-1">{faction.descricao}</p>
+                        </div>
+                    ))}
+                </div>
+            </DetailSection>
+        )}
+
+        {item.ameacas_externas && item.ameacas_externas.length > 0 && (
+            <DetailSection title="Ameaças Externas">
+                 <div className="space-y-3">
+                    {item.ameacas_externas.map((threat, i: number) => (
+                        <div key={i} className="p-2 bg-gray-900/50 rounded-md">
+                            <h5 className="font-semibold text-white">{threat.nome} <span className="text-xs text-gray-400 font-normal">({threat.tipo})</span></h5>
+                            <p className="text-xs text-gray-400 mt-1">{threat.descricao}</p>
+                        </div>
+                    ))}
+                </div>
+            </DetailSection>
+        )}
+
+        {item.eventos_historicos_chave && item.eventos_historicos_chave.length > 0 && (
+             <DetailSection title="Eventos Históricos Chave">
+                <ul className="list-disc pl-5 space-y-2">
+                    {item.eventos_historicos_chave.map((event, i: number) => (
+                       <li key={i}>
+                           <strong className="text-white">{event.evento}:</strong> <span className="text-gray-400">{event.impacto}</span>
+                       </li>
+                    ))}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.tradicoes_culturais && item.tradicoes_culturais.length > 0 && (
+             <DetailSection title="Tradições e Tabus">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.tradicoes_culturais.map((tradition: string, i: number) => <li key={i}>{tradition}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+        
+        {item.misterios_segredos && item.misterios_segredos.length > 0 && (
+             <DetailSection title="Mistérios e Segredos">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.misterios_segredos.map((mystery: string, i: number) => <li key={i}>{mystery}</li>)}
+                </ul>
             </DetailSection>
         )}
 
@@ -454,19 +511,42 @@ const BreathingFormDetailView: React.FC<{ item: BreathingFormItem }> = ({ item }
 
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(item?.nome || '');
   const [copied, setCopied] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setEditedItem(item);
-    setIsEditing(false); // Always reset editing state when item changes
+    setEditedName(item?.nome || '');
+    setIsEditingName(false);
   }, [item]);
   
+  useEffect(() => {
+    if (isEditingName) {
+        nameInputRef.current?.focus();
+        nameInputRef.current?.select();
+    }
+  }, [isEditingName]);
+
+  const handleNameSave = () => {
+    if (item && editedName.trim() && editedName.trim() !== item.nome) {
+        onUpdate({ ...item, nome: editedName.trim() });
+    }
+    setIsEditingName(false);
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+        handleNameSave();
+    } else if (e.key === 'Escape' && item) {
+        setEditedName(item.nome);
+        setIsEditingName(false);
+    }
+  };
+
   const handleCopy = () => {
     if (item) {
         const textToCopy = buildPlainTextForItem(item);
-        // FIX: Confirmed that `textToCopy` (a string) is passed directly to `writeText`, not called as a function, to prevent "not callable" errors.
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -486,14 +566,35 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
   }
   
   const canGenerateVariant = item.categoria !== 'Missão/Cenário' && item.categoria !== 'NPC';
+  const currentName = ('title' in item && item.title) || item.nome;
 
   return (
     <Card className="h-full flex flex-col">
         <div className="flex justify-between items-start mb-2 flex-shrink-0">
-            <div>
-                 <h2 className="text-xl font-bold text-white font-gangofthree">
-                    {('title' in item && item.title) || item.nome}
-                 </h2>
+            <div className="flex-grow mr-2">
+                 {isEditingName ? (
+                     <input
+                        ref={nameInputRef}
+                        type="text"
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        onBlur={handleNameSave}
+                        onKeyDown={handleNameKeyDown}
+                        className="text-xl font-bold text-white font-gangofthree bg-gray-700 border border-indigo-500 rounded-md px-2 py-1 -ml-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                 ) : (
+                    <div 
+                        className="flex items-center gap-2 cursor-pointer group -ml-2 p-1 rounded-md hover:bg-gray-700/50"
+                        onClick={() => setIsEditingName(true)}
+                        title="Clique para editar o nome"
+                    >
+                        <h2 className="text-xl font-bold text-white font-gangofthree">
+                            {currentName}
+                        </h2>
+                        <PencilIcon className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    </div>
+                 )}
+
                  <p className="text-sm text-indigo-400 pt-1 capitalize">
                     {item.categoria === 'Missão/Cenário' ? `${item.categoria} • Tom ${'tone' in item && item.tone || 'N/A'}` : 
                      item.categoria === 'NPC' ? `${('role' in item && item.role) || ('profession' in item && item.profession) || item.categoria} • ${'origem' in item && item.origem || ('relationship_to_pcs' in item && item.relationship_to_pcs)}` :
@@ -505,7 +606,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                      `${item.categoria} • ${item.raridade} (Nível ${item.nivel_sugerido})`}
                  </p>
             </div>
-            <div className="flex gap-1 items-center">
+            <div className="flex gap-1 items-center flex-shrink-0">
                 <Button variant="ghost" onClick={handleCopy} className="!p-2">
                     {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
                 </Button>

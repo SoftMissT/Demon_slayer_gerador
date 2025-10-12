@@ -31,7 +31,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   
   const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => style.nome);
   const weaponTypeOptions = WEAPON_TYPES.map(w => w.name);
-  const hunterArchetypeOptions = ['Aleatória', ...HUNTER_ARCHETYPES_DATA.map(a => a.nome)];
+  // FIX: Corrected property access from 'a.nome' to 'a.arquétipo' to match the 'Archetype' interface.
+  const hunterArchetypeOptions = ['Aleatória', ...HUNTER_ARCHETYPES_DATA.map(a => a.arquétipo)];
   const professionOptions = PROFESSIONS_BY_ERA[filters.npcEra] || PROFESSIONS_BY_ERA['all'];
 
 
@@ -86,6 +87,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           <>
             <Select label="Raridade" value={filters.accessoryRarity} onChange={(e) => handleFilterChange('accessoryRarity', e.target.value as Rarity)}>{RARITIES.map(r => <option key={r} value={r}>{r}</option>)}</Select>
             <Select label="Era / Estilo" value={filters.accessoryEra} onChange={(e) => handleFilterChange('accessoryEra', e.target.value as Era)}>{ERAS.map(e => <option key={e} value={e}>{e}</option>)}</Select>
+            <Select label="País/Cultura" value={filters.accessoryCountry} onChange={(e) => handleFilterChange('accessoryCountry', e.target.value)}>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</Select>
             <Select label="Inspiração (Origem)" value={filters.accessoryOrigin} onChange={(e) => handleFilterChange('accessoryOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
             <Select label="Inspiração (Respiração)" value={filters.accessoryBreathingInspiration} onChange={(e) => handleFilterChange('accessoryBreathingInspiration', e.target.value)}><option value="Nenhuma">Nenhuma</option>{breathingStyleOptions.map(b => <option key={b} value={b}>{b}</option>)}</Select>
           </>

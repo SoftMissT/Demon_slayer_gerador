@@ -15,6 +15,9 @@ import { HistoryModal } from './components/HistoryModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { DetailModal } from './components/DetailModal';
 import { INITIAL_FILTERS } from './constants';
+import { Button } from './components/ui/Button';
+import { SettingsIcon } from './components/icons/SettingsIcon';
+import { Modal } from './components/ui/Modal';
 
 
 const App: React.FC = () => {
@@ -31,6 +34,7 @@ const App: React.FC = () => {
     const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
     // Auto-select first item or last generated item
     useEffect(() => {
@@ -121,7 +125,7 @@ const App: React.FC = () => {
     const isFavorite = selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false;
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200 font-sans">
+        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200 font-gangofthree">
             <Header
                 onAboutClick={() => setIsAboutModalOpen(true)}
                 onFavoritesClick={() => setIsFavoritesModalOpen(true)}
@@ -133,7 +137,7 @@ const App: React.FC = () => {
             <main className="flex-grow">
                 {activeView === 'forge' ? (
                     <div className="main-grid-container">
-                        <div className="grid-column-wrapper">
+                        <div className="hidden md:flex grid-column-wrapper">
                             <FilterPanel 
                                 filters={filters}
                                 onFiltersChange={setFilters}
@@ -143,6 +147,12 @@ const App: React.FC = () => {
                             />
                         </div>
                         <div className="grid-column-wrapper">
+                             <div className="md:hidden mb-4">
+                                <Button onClick={() => setIsFilterModalOpen(true)} className="w-full">
+                                    <SettingsIcon className="w-5 h-5" />
+                                    Mostrar Filtros
+                                </Button>
+                             </div>
                              <ResultsPanel
                                 items={items}
                                 isLoading={isLoading}
@@ -154,7 +164,7 @@ const App: React.FC = () => {
                                 onClearResults={handleClearResults}
                             />
                         </div>
-                        <div className="grid-column-wrapper hidden lg:flex">
+                        <div className="grid-column-wrapper hidden md:flex">
                             <DetailPanel
                                 item={selectedItem}
                                 onGenerateVariant={handleGenerateVariant}
@@ -192,7 +202,7 @@ const App: React.FC = () => {
                 onDelete={handleDeleteFromHistory}
                 onClear={handleClearHistory}
             />
-            <div className="lg:hidden">
+            <div className="md:hidden">
                 <DetailModal
                     isOpen={isDetailModalOpen}
                     onClose={() => setIsDetailModalOpen(false)}
@@ -203,6 +213,25 @@ const App: React.FC = () => {
                     onUpdate={handleUpdateItem}
                 />
             </div>
+
+            {/* Mobile Filter Modal / Drawer */}
+            <Modal 
+                isOpen={isFilterModalOpen} 
+                onClose={() => setIsFilterModalOpen(false)} 
+                title="Filtros"
+                variant="drawer-left"
+            >
+                <FilterPanel 
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    onGenerate={(count) => {
+                        handleGenerate(count);
+                        setIsFilterModalOpen(false);
+                    }}
+                    isLoading={isLoading}
+                    onResetFilters={handleResetFilters}
+                />
+            </Modal>
         </div>
     );
 };

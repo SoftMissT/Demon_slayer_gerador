@@ -328,7 +328,7 @@ const OniDetailView: React.FC<{ item: OniItem }> = ({ item }) => (
 const WorldBuildingDetailView: React.FC<{ item: WorldBuildingItem }> = ({ item }) => {
     return (
     <>
-        <DetailSection title="Conceito Central">{item.descricao_curta || 'N/A'}</DetailSection>
+        <DetailSection title="Conceito Central">{item.descricao || 'N/A'}</DetailSection>
 
         {item.plot_threads && item.plot_threads.length > 0 && (
             <DetailSection title="Tramas Principais">
@@ -340,6 +340,61 @@ const WorldBuildingDetailView: React.FC<{ item: WorldBuildingItem }> = ({ item }
                         </div>
                     ))}
                 </div>
+            </DetailSection>
+        )}
+
+        {item.faccoes_internas && item.faccoes_internas.length > 0 && (
+            <DetailSection title="Facções Internas">
+                <div className="space-y-3">
+                    {item.faccoes_internas.map((faction, i: number) => (
+                        <div key={i} className="p-2 bg-gray-900/50 rounded-md">
+                            <h5 className="font-semibold text-white">{faction.nome}</h5>
+                            <p className="text-xs text-indigo-300"><strong>Objetivo:</strong> {faction.objetivo}</p>
+                            <p className="text-xs text-gray-400 mt-1">{faction.descricao}</p>
+                        </div>
+                    ))}
+                </div>
+            </DetailSection>
+        )}
+
+        {item.ameacas_externas && item.ameacas_externas.length > 0 && (
+            <DetailSection title="Ameaças Externas">
+                 <div className="space-y-3">
+                    {item.ameacas_externas.map((threat, i: number) => (
+                        <div key={i} className="p-2 bg-gray-900/50 rounded-md">
+                            <h5 className="font-semibold text-white">{threat.nome} <span className="text-xs text-gray-400 font-normal">({threat.tipo})</span></h5>
+                            <p className="text-xs text-gray-400 mt-1">{threat.descricao}</p>
+                        </div>
+                    ))}
+                </div>
+            </DetailSection>
+        )}
+
+        {item.eventos_historicos_chave && item.eventos_historicos_chave.length > 0 && (
+             <DetailSection title="Eventos Históricos Chave">
+                <ul className="list-disc pl-5 space-y-2">
+                    {item.eventos_historicos_chave.map((event, i: number) => (
+                       <li key={i}>
+                           <strong className="text-white">{event.evento}:</strong> <span className="text-gray-400">{event.impacto}</span>
+                       </li>
+                    ))}
+                </ul>
+            </DetailSection>
+        )}
+
+        {item.tradicoes_culturais && item.tradicoes_culturais.length > 0 && (
+             <DetailSection title="Tradições e Tabus">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.tradicoes_culturais.map((tradition: string, i: number) => <li key={i}>{tradition}</li>)}
+                </ul>
+            </DetailSection>
+        )}
+        
+        {item.misterios_segredos && item.misterios_segredos.length > 0 && (
+             <DetailSection title="Mistérios e Segredos">
+                <ul className="list-disc pl-5 space-y-1">
+                    {item.misterios_segredos.map((mystery: string, i: number) => <li key={i}>{mystery}</li>)}
+                </ul>
             </DetailSection>
         )}
 

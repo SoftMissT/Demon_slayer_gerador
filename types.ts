@@ -39,6 +39,7 @@ export interface FilterState {
   accessoryRarity: Rarity;
   accessoryEra: Era;
   accessoryOrigin: string;
+  accessoryCountry: string;
   accessoryBreathingInspiration: string;
   accessoryKekkijutsuInspiration: string;
   accessoryWeaponInspiration: string;
@@ -244,6 +245,11 @@ export interface WorldBuildingItem extends BaseGeneratedItem {
     key_npcs_wb: { name: string; role: string; description: string; }[];
     points_of_interest: { name: string; type: string; description: string; }[];
     mini_missions: { title: string; objective: string; reward: string; }[];
+    faccoes_internas: { nome: string; objetivo: string; descricao: string; }[];
+    ameacas_externas: { nome: string; tipo: string; descricao: string; }[];
+    tradicoes_culturais: string[];
+    eventos_historicos_chave: { evento: string; impacto: string; }[];
+    misterios_segredos: string[];
 }
 
 export interface LocationItem extends BaseGeneratedItem {
