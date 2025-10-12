@@ -213,7 +213,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     return (
         <div className="alchemy-interface h-full flex flex-col gap-6 relative">
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} />}
-            <div className={`${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
+            <div className={`h-full flex flex-col ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 <ErrorDisplay message={error} onDismiss={() => setError(null)} />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-grow min-h-0">
@@ -253,7 +253,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
 
                     {/* Right Column */}
                     <div className="flex flex-col gap-6 min-h-0 lg:col-span-2">
-                        <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
+                        <div className="inner-scroll flex-grow min-h-0 pr-2 -mr-2 space-y-6">
                             <Card className="p-4 md:p-6"><MidjourneyParameters params={mjParams} onParamsChange={setMjParams} enabled={isMjEnabled} onEnabledChange={setIsMjEnabled} /></Card>
                             
                             {(isLoading || result) && (
@@ -269,7 +269,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                             )}
                         </div>
                         
-                        <div className="flex-shrink-0 mt-6 lg:mt-0">
+                        <div className="flex-shrink-0 mt-auto pt-6">
                             <Card className="p-4 md:p-6">
                                 <div className="flex items-center justify-between gap-4">
                                     <Button variant="secondary" onClick={handleResetAll} disabled={isLoading}>Resetar Tudo</Button>

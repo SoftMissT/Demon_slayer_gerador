@@ -390,23 +390,6 @@ body {
   transform: translateX(1.5em);
 }
 
-/* Share Button */
-.button-share-pill {
-    background-color: #2c3e50;
-    color: white;
-    padding: 8px 20px;
-    border-radius: 9999px;
-    border: 1px solid #34495e;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-.button-share-pill:hover {
-    background-color: #34495e;
-}
-
-
 /* JP Matrix Background */
 .jp-matrix {
   display: grid;

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ForgeInterface } from './components/ForgeInterface';
@@ -29,6 +29,17 @@ const App: React.FC = () => {
     const [isAuthenticating, setIsAuthenticating] = useState(true);
     
     const [apiKeys] = useLocalStorage<ApiKeys>('kimetsu-forge-api-keys', { gemini: '', openai: '', deepseek: '' });
+    
+    const DEV_USER_ID = '166973299702759424';
+
+    const effectiveApiKeys = useMemo(() => {
+        if (user?.id === DEV_USER_ID) {
+            // This special user should always use server keys.
+            // Sending an empty object makes the backend fall back to process.env.
+            return { gemini: '', openai: '', deepseek: '' };
+        }
+        return apiKeys;
+    }, [user, apiKeys]);
 
 
     // Handles both localStorage session check and Discord OAuth callback on initial load
@@ -155,13 +166,13 @@ const App: React.FC = () => {
                                     onFavoritesCountChange={setFavoritesCount}
                                     isAuthenticated={!!user}
                                     onLoginClick={handleLogin}
-                                    apiKeys={apiKeys}
+                                    apiKeys={effectiveApiKeys}
                                 />
                             ) : (
                                 <PromptEngineeringPanel 
                                     isAuthenticated={!!user}
                                     onLoginClick={handleLogin}
-                                    apiKeys={apiKeys}
+                                    apiKeys={effectiveApiKeys}
                                 />
                             )}
                         </motion.div>

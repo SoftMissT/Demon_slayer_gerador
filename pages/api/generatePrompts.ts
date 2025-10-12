@@ -47,7 +47,8 @@ export default async function handler(
 
         const geminiClient = getAiClient(apiKeys?.gemini);
         if (!geminiClient) {
-            return res.status(500).json({ message: 'Cliente Gemini não inicializado. Verifique a chave de API.' });
+            const errorMessage = "O Alquimista de Prompts usa o Gemini como motor principal para criar e otimizar os prompts para outros modelos. Uma chave de API do Gemini válida é necessária para esta funcionalidade. Por favor, configure a chave no servidor ou adicione sua própria chave na seção 'Suas Chaves'.";
+            return res.status(500).json({ message: errorMessage });
         }
         
         const requestedPrompts: string[] = [];
@@ -82,30 +83,4 @@ export default async function handler(
             model: "gemini-2.5-flash",
             contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
             config: { systemInstruction, responseMimeType: "application/json" },
-        });
         
-        const content = response.text;
-        if (!content) {
-            throw new Error('A resposta da IA estava vazia.');
-        }
-
-        const generatedPrompts = JSON.parse(content) as Partial<PromptGenerationResult>;
-        const result: PromptGenerationResult = {};
-        
-        if (generateMidjourney && generatedPrompts.midjourneyPrompt) {
-            result.midjourneyPrompt = buildMidjourneyPrompt(generatedPrompts.midjourneyPrompt, mjParams);
-        }
-        if (generateGpt && generatedPrompts.gptPrompt) {
-            result.gptPrompt = generatedPrompts.gptPrompt;
-        }
-        if (generateGemini && generatedPrompts.geminiPrompt) {
-            result.geminiPrompt = generatedPrompts.geminiPrompt;
-        }
-
-        res.status(200).json(result);
-
-    } catch (error: any) {
-        console.error("Erro na API /generatePrompts:", error);
-        res.status(500).json({ message: error.message || 'Um erro inesperado ocorreu no servidor.' });
-    }
-}
