@@ -1,5 +1,4 @@
 
-
 // FIX: Removed self-referential import of 'Category' to resolve name conflict.
 // FIX: Populated with full type definitions to resolve module errors.
 export type Category = 'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 'Missões' | 'World Building' | 'Evento';
@@ -104,13 +103,6 @@ export interface FilterPreset {
   filters: FilterState;
 }
 
-// FIX: Added and exported the 'Provenance' type to resolve an import error in DetailPanel.tsx.
-export type Provenance = {
-  step: string;
-  model: string;
-  status: 'success' | 'skipped' | 'failed';
-};
-
 // FIX: Exported BaseGeneratedItem to make it accessible to other modules, resolving potential build errors.
 export interface BaseGeneratedItem {
   id: string;
@@ -124,7 +116,7 @@ export interface BaseGeneratedItem {
   raridade: Rarity;
   nivel_sugerido: number;
   ganchos_narrativos?: string | string[];
-  provenance?: Provenance[];
+  provenance?: { step: string; model: string; status: 'success' | 'skipped' | 'failed' }[];
 }
 
 export interface WeaponItem extends BaseGeneratedItem {
