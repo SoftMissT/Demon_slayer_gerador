@@ -38,7 +38,7 @@ const App: React.FC = () => {
                 onFavoritesClick={() => setIsFavoritesOpen(true)}
                 onHistoryClick={() => setIsHistoryOpen(true)}
             />
-            <main className="flex-grow container mx-auto px-4 md:px-6 py-6">
+            <main className="flex-grow w-full max-w-screen-2xl mx-auto px-4 md:px-6 py-6">
                 {activeView === 'forge' ? (
                     <ForgeInterface
                         isFavoritesOpen={isFavoritesOpen}

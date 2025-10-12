@@ -19,7 +19,9 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [position, setPosition] = useState<'down' | 'up'>('down');
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,12 +33,28 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleToggleOpen = () => {
+    if (!isOpen) {
+        if (buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            // max-h-60 is 15rem which is 240px. Add some buffer.
+            const dropdownHeight = 250; 
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+                setPosition('up');
+            } else {
+                setPosition('down');
+            }
+        }
+    }
+    setIsOpen(!isOpen);
+  };
+
   const toggleOption = (option: string) => {
     if (selected.includes(option)) {
       onChange(selected.filter((item) => item !== option));
     } else {
       if (maxSelection && selected.length >= maxSelection) {
-        // Optional: show a toast or message that limit is reached
         return; 
       }
       onChange([...selected, option]);
@@ -48,13 +66,18 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const dropdownClasses = `absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto ${
+    position === 'up' ? 'bottom-full mb-1' : 'mt-1'
+  }`;
 
   return (
     <div ref={ref} className="relative">
       <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggleOpen}
         className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left flex justify-between items-center"
       >
         <span className="truncate">
@@ -64,7 +87,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-20 w-full mt-1 bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className={dropdownClasses}>
           <div className="p-2">
             <input
               type="text"

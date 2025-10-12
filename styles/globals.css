@@ -154,7 +154,7 @@ body {
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 .forge-theme h2 {
-    background: linear-gradient(45deg, var(--forge-highlight-gold), #FF4500);
+    background: linear-gradient(45deg, var(--forge-highlight-gold), #FF6347);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
