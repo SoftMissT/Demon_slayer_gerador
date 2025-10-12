@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -17,6 +15,8 @@ import { TrashIcon } from './icons/TrashIcon';
 import { Select } from './ui/Select';
 import { RefreshIcon } from './icons/RefreshIcon';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
+import { generatePrompts } from '../lib/client/orchestrationService';
+import type { ApiKeys } from '../App';
 
 const INITIAL_MJ_PARAMS: MidjourneyParams = {
     aspectRatio: { value: '4:7', active: true },
@@ -60,7 +60,17 @@ interface AlchemyPreset {
     isGeminiEnabled: boolean;
 }
 
-export const PromptEngineeringPanel: React.FC = () => {
+interface PromptEngineeringPanelProps {
+    areApiKeysValidated: boolean;
+    openApiKeysModal: () => void;
+    apiKeys: ApiKeys;
+}
+
+export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
+    areApiKeysValidated,
+    openApiKeysModal,
+    apiKeys,
+}) => {
     const [basePrompt, setBasePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
     const [mjParams, setMjParams] = useState<MidjourneyParams>(INITIAL_MJ_PARAMS);
@@ -78,39 +88,34 @@ export const PromptEngineeringPanel: React.FC = () => {
     const [selectedPreset, setSelectedPreset] = useState<string>('');
 
     const handleGenerate = useCallback(async () => {
+        if (!areApiKeysValidated) {
+            openApiKeysModal();
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         setResult(null);
         
         try {
-            const response = await fetch('/api/generatePrompts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    basePrompt: `Tópico Principal: ${basePrompt}. Evitar: ${negativePrompt || 'Nenhum'}.`,
-                    mjParams,
-                    gptParams,
-                    geminiParams,
-                    generateMidjourney: isMjEnabled,
-                    generateGpt: isGptEnabled,
-                    generateGemini: isGeminiEnabled,
-                }),
-            });
+            const data = await generatePrompts({
+                basePrompt: `Tópico Principal: ${basePrompt}. Evitar: ${negativePrompt || 'Nenhum'}.`,
+                mjParams,
+                gptParams,
+                geminiParams,
+                generateMidjourney: isMjEnabled,
+                generateGpt: isGptEnabled,
+                generateGemini: isGeminiEnabled,
+            }, apiKeys);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Falha ao gerar os prompts.');
-            }
-
-            const data = await response.json();
-            setResult(data.result);
+            setResult(data);
 
         } catch (err: any) {
             setError(err.message);
         } finally {
             setIsLoading(false);
         }
-    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled]);
+    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, areApiKeysValidated, openApiKeysModal, apiKeys]);
 
     const handleSavePreset = useCallback(() => {
         const name = prompt("Digite um nome para o preset:");
@@ -178,7 +183,18 @@ export const PromptEngineeringPanel: React.FC = () => {
         setNegativePrompt('');
     };
     
-    const isGenerationDisabled = isLoading || !basePrompt.trim() || (!isMjEnabled && !isGptEnabled && !isGeminiEnabled);
+    const isGenerationDisabled = !basePrompt.trim() || (!isMjEnabled && !isGptEnabled && !isGeminiEnabled);
+
+    const handleGenerateClick = () => {
+        if (isLoading) return;
+        if (!areApiKeysValidated) {
+            openApiKeysModal();
+            return;
+        }
+        if (!isGenerationDisabled) {
+            handleGenerate();
+        }
+    };
 
     return (
         <div className="alchemy-interface h-full flex flex-col gap-6">
@@ -241,11 +257,16 @@ export const PromptEngineeringPanel: React.FC = () => {
                         <Card className="p-4 md:p-6">
                             <div className="flex items-center justify-between gap-4">
                                 <Button variant="secondary" onClick={handleResetAll} disabled={isLoading}>Resetar Tudo</Button>
-                                <Button onClick={handleGenerate} disabled={isGenerationDisabled} className="alchemist-button flex-grow">
+                                <Button onClick={handleGenerateClick} disabled={isLoading || isGenerationDisabled} className="alchemist-button flex-grow">
                                     <MagicWandIcon className="w-5 h-5" />
                                     {isLoading ? 'Destilando...' : 'Gerar Prompts'}
                                 </Button>
                             </div>
+                            {!areApiKeysValidated && (
+                                <p className="text-xs text-center text-yellow-400 mt-2">
+                                    As chaves de API são necessárias. Por favor, configure-as.
+                                </p>
+                            )}
                         </Card>
                     </div>
                 </div>

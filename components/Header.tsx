@@ -5,6 +5,7 @@ interface HeaderProps {
   onFavoritesClick: () => void;
   onHistoryClick: () => void;
   onHowItWorksClick: () => void;
+  onApiKeysClick: () => void;
   activeView: 'forge' | 'prompt';
   onViewChange: (view: 'forge' | 'prompt') => void;
   favoritesCount: number;
@@ -15,7 +16,16 @@ const TABS = [
     { id: 'prompt', label: 'Alquimia' },
 ];
 
-export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, onHistoryClick, onHowItWorksClick, activeView, onViewChange, favoritesCount }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+    onAboutClick, 
+    onFavoritesClick, 
+    onHistoryClick, 
+    onHowItWorksClick, 
+    onApiKeysClick,
+    activeView, 
+    onViewChange, 
+    favoritesCount 
+}) => {
     const [shareText, setShareText] = useState('Compartilhar');
 
     const handleShare = () => {
@@ -71,6 +81,9 @@ export const Header: React.FC<HeaderProps> = ({ onAboutClick, onFavoritesClick, 
           </button>
           <button className="button" onClick={onHistoryClick}>
               Histórico
+          </button>
+          <button className="button" onClick={onApiKeysClick}>
+              Chaves de API
           </button>
           <button className="button" onClick={onAboutClick}>
               Sobre

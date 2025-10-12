@@ -2,6 +2,7 @@ import React from 'react';
 import type { GeminiParameters as GeminiParametersType } from '../types';
 import { Select } from './ui/Select';
 import { Switch } from './ui/Switch';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface GeminiParametersProps {
     params: GeminiParametersType;
@@ -31,73 +32,90 @@ export const GeminiParameters: React.FC<GeminiParametersProps> = ({ params, onPa
             <p className="text-sm text-gray-400">
                 Diretrizes para criar um prompt narrativo e visual para o Gemini (Nano Banana).
             </p>
-            <div className={`grid grid-cols-1 xl:grid-cols-2 gap-4 transition-opacity duration-300 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                 <Select
-                    label="Estilo de Arte"
-                    value={params.artStyle}
-                    onChange={(e) => handleChange('artStyle', e.target.value)}
-                    disabled={!enabled}
-                >
-                    <option value="fotografia">Fotografia</option>
-                    <option value="pintura_oleo">Pintura a Óleo</option>
-                    <option value="anime_manga">Anime/Mangá</option>
-                    <option value="arte_conceitual">Arte Conceitual</option>
-                    <option value="aquarela">Aquarela</option>
-                    <option value="pixel_art">Pixel Art</option>
-                </Select>
-                 <Select
-                    label="Iluminação"
-                    value={params.lighting}
-                    onChange={(e) => handleChange('lighting', e.target.value)}
-                    disabled={!enabled}
-                >
-                    <option value="cinematica">Cinemática</option>
-                    <option value="luz_suave">Luz Suave</option>
-                    <option value="neon">Neon</option>
-                    <option value="por_do_sol">Pôr do Sol</option>
-                    <option value="dramatica">Dramática</option>
-                    <option value="ambiente">Ambiente</option>
-                </Select>
+            <AnimatePresence initial={false}>
+                {enabled && (
+                    <motion.div
+                        key="content"
+                        initial="collapsed"
+                        animate="open"
+                        exit="collapsed"
+                        variants={{
+                            open: { opacity: 1, height: 'auto', marginTop: '16px' },
+                            collapsed: { opacity: 0, height: 0, marginTop: '0px' }
+                        }}
+                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        className="overflow-hidden"
+                    >
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            <Select
+                                label="Estilo de Arte"
+                                value={params.artStyle}
+                                onChange={(e) => handleChange('artStyle', e.target.value)}
+                                disabled={!enabled}
+                            >
+                                <option value="fotografia">Fotografia</option>
+                                <option value="pintura_oleo">Pintura a Óleo</option>
+                                <option value="anime_manga">Anime/Mangá</option>
+                                <option value="arte_conceitual">Arte Conceitual</option>
+                                <option value="aquarela">Aquarela</option>
+                                <option value="pixel_art">Pixel Art</option>
+                            </Select>
+                            <Select
+                                label="Iluminação"
+                                value={params.lighting}
+                                onChange={(e) => handleChange('lighting', e.target.value)}
+                                disabled={!enabled}
+                            >
+                                <option value="cinematica">Cinemática</option>
+                                <option value="luz_suave">Luz Suave</option>
+                                <option value="neon">Neon</option>
+                                <option value="por_do_sol">Pôr do Sol</option>
+                                <option value="dramatica">Dramática</option>
+                                <option value="ambiente">Ambiente</option>
+                            </Select>
 
-                <Select
-                    label="Paleta de Cores"
-                    value={params.colorPalette}
-                    onChange={(e) => handleChange('colorPalette', e.target.value)}
-                    disabled={!enabled}
-                >
-                    <option value="vibrante">Vibrante</option>
-                    <option value="monocromatica">Monocromática</option>
-                    <option value="tons_pastel">Tons Pastel</option>
-                    <option value="sombria">Sombria</option>
-                    <option value="quente">Quente</option>
-                    <option value="fria">Fria</option>
-                </Select>
+                            <Select
+                                label="Paleta de Cores"
+                                value={params.colorPalette}
+                                onChange={(e) => handleChange('colorPalette', e.target.value)}
+                                disabled={!enabled}
+                            >
+                                <option value="vibrante">Vibrante</option>
+                                <option value="monocromatica">Monocromática</option>
+                                <option value="tons_pastel">Tons Pastel</option>
+                                <option value="sombria">Sombria</option>
+                                <option value="quente">Quente</option>
+                                <option value="fria">Fria</option>
+                            </Select>
 
-                <Select
-                    label="Composição"
-                    value={params.composition}
-                    onChange={(e) => handleChange('composition', e.target.value)}
-                    disabled={!enabled}
-                >
-                    <option value="close_up">Close-up</option>
-                    <option value="retrato">Retrato</option>
-                    <option value="plano_medio">Plano Médio</option>
-                    <option value="plano_aberto">Plano Aberto</option>
-                    <option value="paisagem">Paisagem</option>
-                </Select>
-                
-                 <Select
-                    label="Nível de Detalhe"
-                    value={params.detailLevel}
-                    onChange={(e) => handleChange('detailLevel', e.target.value)}
-                    disabled={!enabled}
-                >
-                    <option value="detalhado">Detalhado</option>
-                    <option value="hiper_realista">Hiper-realista</option>
-                    <option value="simplista">Simplista</option>
-                    <option value="esbocado">Esboçado</option>
-                </Select>
-            </div>
+                            <Select
+                                label="Composição"
+                                value={params.composition}
+                                onChange={(e) => handleChange('composition', e.target.value)}
+                                disabled={!enabled}
+                            >
+                                <option value="close_up">Close-up</option>
+                                <option value="retrato">Retrato</option>
+                                <option value="plano_medio">Plano Médio</option>
+                                <option value="plano_aberto">Plano Aberto</option>
+                                <option value="paisagem">Paisagem</option>
+                            </Select>
+                            
+                            <Select
+                                label="Nível de Detalhe"
+                                value={params.detailLevel}
+                                onChange={(e) => handleChange('detailLevel', e.target.value)}
+                                disabled={!enabled}
+                            >
+                                <option value="detalhado">Detalhado</option>
+                                <option value="hiper_realista">Hiper-realista</option>
+                                <option value="simplista">Simplista</option>
+                                <option value="esbocado">Esboçado</option>
+                            </Select>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

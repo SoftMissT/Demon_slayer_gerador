@@ -11,8 +11,9 @@ import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
 import type { FilterState, GeneratedItem } from '../types';
-import { generateContent } from '../services/geminiService';
+import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import useLocalStorage from '../hooks/useLocalStorage';
+import type { ApiKeys } from '../App';
 
 interface ForgeInterfaceProps {
     isFavoritesOpen: boolean;
@@ -20,6 +21,9 @@ interface ForgeInterfaceProps {
     isHistoryOpen: boolean;
     onHistoryClose: () => void;
     onFavoritesCountChange: (count: number) => void;
+    areApiKeysValidated: boolean;
+    openApiKeysModal: () => void;
+    apiKeys: ApiKeys;
 }
 
 const useWindowSize = () => {
@@ -36,7 +40,12 @@ const useWindowSize = () => {
     return size;
 };
 
-export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen, onFavoritesClose, isHistoryOpen, onHistoryClose, onFavoritesCountChange }) => {
+export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ 
+    isFavoritesOpen, onFavoritesClose, 
+    isHistoryOpen, onHistoryClose, 
+    onFavoritesCountChange, 
+    areApiKeysValidated, openApiKeysModal, apiKeys
+}) => {
     const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
     const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
     const { width } = useWindowSize();
@@ -57,6 +66,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     }, [favorites, onFavoritesCountChange]);
 
     const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
+        if (!areApiKeysValidated) {
+            openApiKeysModal();
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         setActiveFilters(filters);
@@ -73,19 +87,23 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
         if (isMobile) setIsFilterPanelOpen(false);
 
         try {
-            const newItems = await generateContent(filters, count, promptModifier);
+            const promises = Array.from({ length: count }).map(() => 
+                orchestrateGeneration(filters, apiKeys, promptModifier)
+            );
+            const newItems = await Promise.all(promises);
+            
             setItems(prev => [...newItems, ...prev]);
             if (newItems.length > 0) {
                 setSelectedItem(newItems[0]);
                 setHistory(prev => [...newItems, ...prev].slice(0, 100));
             }
         } catch (err: any) {
-            setError(err.message || 'Ocorreu um erro desconhecido.');
+            setError(err.message || 'Ocorreu um erro desconhecido durante a geração.');
         } finally {
             setIsLoading(false);
             setCurrentAiFocus(null);
         }
-    }, [isMobile, setHistory]);
+    }, [isMobile, setHistory, areApiKeysValidated, openApiKeysModal, apiKeys]);
 
     const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
@@ -116,6 +134,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
     }, [selectedItem, setFavorites, setHistory]);
 
     const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
+        if (!areApiKeysValidated) {
+            openApiKeysModal();
+            return;
+        }
+
         const modifier = `Gere uma variação deste item com um foco mais ${variantType}. Mantenha a essência, mas altere as mecânicas e a descrição para refletir a nova abordagem. Item base: ${item.nome} - ${item.descricao_curta}`;
         
         const filters: Partial<FilterState> = { category: item.categoria };
@@ -130,19 +153,19 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
         if (isMobile && isDetailModalOpen) setIsDetailModalOpen(false);
 
         try {
-            const newItems = await generateContent(filters as FilterState, 1, modifier);
-            if (newItems.length > 0) {
-                const variant = { ...newItems[0], nome: `${item.nome} (Variante ${variantType})`};
-                setItems(prev => [variant, ...prev]);
-                setSelectedItem(variant);
-                setHistory(prev => [variant, ...prev]);
-            }
+            const variant = await orchestrateGeneration(filters as FilterState, apiKeys, modifier);
+            variant.nome = `${item.nome} (Variante ${variantType})`;
+            
+            setItems(prev => [variant, ...prev]);
+            setSelectedItem(variant);
+            setHistory(prev => [variant, ...prev]);
+
         } catch (err: any) {
             setError(err.message || 'Falha ao gerar variante.');
         } finally {
             setIsLoading(false);
         }
-    }, [setHistory, isMobile, isDetailModalOpen]);
+    }, [setHistory, isMobile, isDetailModalOpen, areApiKeysValidated, openApiKeysModal, apiKeys]);
 
     const handleDeleteFromHistory = useCallback((itemId: string) => {
         setHistory(prev => prev.filter(item => item.id !== itemId));
@@ -168,7 +191,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
         <div className="forge-interface h-full relative">
             <div className="forge-layout-wrapper">
                 <div className="forge-column-filters">
-                    <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
+                    <FilterPanel 
+                        onGenerate={handleGenerate} 
+                        isLoading={isLoading}
+                        areApiKeysValidated={areApiKeysValidated}
+                        openApiKeysModal={openApiKeysModal}
+                    />
                 </div>
 
                 <div className="forge-column-results">
@@ -212,7 +240,14 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen,
                         <FilterIcon className="w-6 h-6" />
                     </Button>
                     <Modal isOpen={isFilterPanelOpen} onClose={() => setIsFilterPanelOpen(false)} variant="drawer-left" title="Filtros da Forja">
-                       <div className="p-4 h-full"><FilterPanel onGenerate={handleGenerate} isLoading={isLoading} /></div>
+                       <div className="p-4 h-full">
+                           <FilterPanel 
+                                onGenerate={handleGenerate} 
+                                isLoading={isLoading} 
+                                areApiKeysValidated={areApiKeysValidated}
+                                openApiKeysModal={openApiKeysModal}
+                           />
+                        </div>
                     </Modal>
                     {selectedItem && (
                       <DetailModal

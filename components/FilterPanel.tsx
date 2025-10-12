@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
@@ -30,16 +29,17 @@ import { TextArea } from './ui/TextArea';
 interface FilterPanelProps {
     onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
     isLoading: boolean;
+    areApiKeysValidated: boolean;
+    openApiKeysModal: () => void;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading }) => {
+export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading, areApiKeysValidated, openApiKeysModal }) => {
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
     const [count, setCount] = useState(1);
     const [promptModifier, setPromptModifier] = useState('');
     const [presets, setPresets] = useLocalStorage<FilterPreset[]>('kimetsu-forge-presets', []);
     const [selectedPreset, setSelectedPreset] = useState<string>('');
     
-    // FIX: Define options for select inputs based on imported data to resolve reference errors.
     const breathingStylesOptions = useMemo(() => BREATHING_STYLES_DATA.map(bs => bs.nome), []);
     const hunterArchetypeOptions = useMemo(() => ['Aleatório', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))], []);
     const weaponTypeOptions = useMemo(() => WEAPON_TYPES.map(w => w.name), []);
@@ -227,7 +227,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
             case 'Evento': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Nível" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}>{EVENT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}>{EVENT_THREAT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Tom" value={filters.eventTone} onChange={e => handleFilterChange('eventTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.eventTematica || ''} onChange={e => handleFilterChange('eventTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.eventCountry} onChange={e => handleFilterChange('eventCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -235,6 +235,16 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
             default: return <p className="text-sm text-gray-500 text-center py-4">Selecione uma categoria para ver os filtros.</p>;
         }
     };
+
+    const handleGenerateClick = () => {
+        if (!areApiKeysValidated) {
+            openApiKeysModal();
+        } else {
+            onGenerate(filters, count, promptModifier);
+        }
+    };
+
+    const isButtonDisabled = isLoading || !filters.category;
 
     return (
         <Card className="forge-panel flex flex-col h-full p-4">
@@ -332,11 +342,21 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading 
                             disabled={isLoading}
                         />
                     </div>
-                    <Button onClick={() => onGenerate(filters, count, promptModifier)} disabled={isLoading || !filters.category} className="w-40 forge-anvil-button">
+                    <Button 
+                        onClick={handleGenerateClick} 
+                        disabled={isButtonDisabled} 
+                        className="w-40 forge-anvil-button"
+                        title={!areApiKeysValidated ? "Configure e valide suas chaves de API para começar" : "Forjar item"}
+                    >
                         {isLoading ? <Spinner size="sm" /> : <AnvilIcon className="w-5 h-5" />}
-                        {isLoading ? 'Forjando...' : `Forjar`}
+                        {isLoading ? 'Forjando...' : 'Forjar'}
                     </Button>
                 </div>
+                {!areApiKeysValidated && (
+                    <p className="text-xs text-center text-yellow-400">
+                        As chaves de API são necessárias. Por favor, configure-as no menu "Chaves de API".
+                    </p>
+                )}
             </div>
         </Card>
     );
