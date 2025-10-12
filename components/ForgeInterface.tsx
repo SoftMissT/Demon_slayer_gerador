@@ -1,144 +1,222 @@
-import React, { useState, useCallback } from 'react';
-import type { GeneratedItem, FilterState, Category, Rarity } from '../types';
-import { CATEGORIES, RARITIES } from '../constants';
-import { Select } from './ui/Select';
-import { Button } from './ui/Button';
-import { AnvilIcon } from './icons/AnvilIcon';
-import { DetailPanel } from './DetailPanel';
-import { ResultsPanel } from './ResultsPanel';
-import { ForgeIcon } from './icons/ForgeIcon';
-import { Modal } from './ui/Modal';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FilterPanel } from './FilterPanel';
+import { ResultsPanel } from './ResultsPanel';
+import { DetailPanel } from './DetailPanel';
+import { FavoritesModal } from './FavoritesModal';
+import { HistoryModal } from './HistoryModal';
+import { DetailModal } from './DetailModal';
+import { ErrorDisplay } from './ui/ErrorDisplay';
+import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
+import { Modal } from './ui/Modal';
+import type { FilterState, GeneratedItem } from '../types';
+import { generateContent } from '../services/geminiService';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 interface ForgeInterfaceProps {
-  filters: FilterState;
-  onFiltersChange: (filters: FilterState) => void;
-  onGenerate: (count: number) => void;
-  isLoading: boolean;
-  items: GeneratedItem[];
-  selectedItem: GeneratedItem | null;
-  onSelectItem: (item: GeneratedItem) => void;
-  favorites: GeneratedItem[];
-  onToggleFavorite: (item: GeneratedItem) => void;
-  onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onUpdate: (item: GeneratedItem) => void;
-  onClearResults: () => void;
-  onResetFilters: () => void;
+    isFavoritesOpen: boolean;
+    onFavoritesClose: () => void;
+    isHistoryOpen: boolean;
+    onHistoryClose: () => void;
 }
 
-const AnvilPlaceholder: React.FC = () => (
-    <div className="anvil-placeholder h-full flex-grow flex flex-col items-center justify-center text-center text-gray-500 p-8 rounded-lg">
-        <ForgeIcon className="w-24 h-24 mx-auto mb-6 text-gray-600" />
-        <h3 className="text-2xl font-bold font-gangofthree text-gray-400">A Bigorna Aguarda</h3>
-        <p className="mt-2 max-w-sm">
-            Selecione filtros, clique em 'FORJAR' para criar um item. Itens forjados aparecerão no histórico abaixo e podem ser vistos em detalhe aqui.
-        </p>
-    </div>
-);
+const useWindowSize = () => {
+    const [size, setSize] = useState({ width: 0, height: 0 });
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handleResize = () => {
+            setSize({ width: window.innerWidth, height: window.innerHeight });
+        };
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    return size;
+};
 
-export const ForgeInterface: React.FC<ForgeInterfaceProps> = (props) => {
-    const { filters, onFiltersChange, onGenerate, isLoading, selectedItem, onResetFilters } = props;
-    const [isAdvancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ isFavoritesOpen, onFavoritesClose, isHistoryOpen, onHistoryClose }) => {
+    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
+    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
+    const { width } = useWindowSize();
+    const isMobile = useMemo(() => (width || 0) < 1024, [width]);
 
-    const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-        // A simplified rarity filter for better UX. It applies to relevant fields.
-        if (key === 'weaponRarity') {
-            onFiltersChange({
-                ...filters,
-                weaponRarity: value as Rarity,
-                accessoryRarity: value as Rarity,
-            });
-        } else {
-             onFiltersChange({ ...filters, [key]: value });
+    const [items, setItems] = useState<GeneratedItem[]>([]);
+    const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+    const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
+        setIsLoading(true);
+        setError(null);
+        if (count === 1) {
+            setItems([]);
         }
-    };
+        setSelectedItem(null);
+        if (isMobile) setIsFilterPanelOpen(false);
 
-    const handleGenerateFromModal = useCallback((count: number) => {
-        onGenerate(count);
-        setAdvancedFiltersOpen(false);
-    }, [onGenerate]);
+        try {
+            const newItems = await generateContent(filters, count, promptModifier);
+            setItems(prev => [...newItems, ...prev]);
+            if (newItems.length > 0) {
+                setSelectedItem(newItems[0]);
+                setHistory(prev => [...newItems, ...prev].slice(0, 100));
+            }
+        } catch (err: any) {
+            setError(err.message || 'Ocorreu um erro desconhecido.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [isMobile, setHistory]);
+
+    const handleSelectItem = useCallback((item: GeneratedItem) => {
+        setSelectedItem(item);
+        if (isMobile) {
+            setIsDetailModalOpen(true);
+        }
+    }, [isMobile]);
+
+    const handleToggleFavorite = useCallback((itemToToggle: GeneratedItem) => {
+        setFavorites(prev => {
+            const isFav = prev.some(item => item.id === itemToToggle.id);
+            if (isFav) {
+                return prev.filter(item => item.id !== itemToToggle.id);
+            } else {
+                return [itemToToggle, ...prev];
+            }
+        });
+    }, [setFavorites]);
+    
+    const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
+        const updateList = (list: GeneratedItem[]) => list.map(i => i.id === updatedItem.id ? updatedItem : i);
+        setItems(updateList);
+        setHistory(updateList);
+        setFavorites(updateList);
+        if (selectedItem?.id === updatedItem.id) {
+            setSelectedItem(updatedItem);
+        }
+    }, [selectedItem, setFavorites, setHistory]);
+
+    const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
+        const modifier = `Gere uma variação deste item com um foco mais ${variantType}. Mantenha a essência, mas altere as mecânicas e a descrição para refletir a nova abordagem. Item base: ${item.nome} - ${item.descricao_curta}`;
+        
+        // Construct a minimal filter state from the original item
+        const filters: Partial<FilterState> = { category: item.categoria, raridade: item.raridade };
+        
+        setIsLoading(true);
+        setError(null);
+        if (isMobile && isDetailModalOpen) setIsDetailModalOpen(false);
+
+        try {
+            const newItems = await generateContent(filters as FilterState, 1, modifier);
+            if (newItems.length > 0) {
+                const variant = { ...newItems[0], nome: `${item.nome} (Variante ${variantType})`};
+                setItems(prev => [variant, ...prev]);
+                setSelectedItem(variant);
+                setHistory(prev => [variant, ...prev]);
+            }
+        } catch (err: any) {
+            setError(err.message || 'Falha ao gerar variante.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [setHistory, isMobile, isDetailModalOpen]);
+
+    const handleDeleteFromHistory = useCallback((itemId: string) => {
+        setHistory(prev => prev.filter(item => item.id !== itemId));
+    }, [setHistory]);
+
+    const handleClearHistory = useCallback(() => {
+        setHistory([]);
+        onHistoryClose();
+    }, [setHistory, onHistoryClose]);
+
+    const handleClearResults = useCallback(() => {
+        setItems([]);
+        setSelectedItem(null);
+    }, []);
+
+    const isFavorite = useMemo(() => {
+        if (!selectedItem) return false;
+        return favorites.some(fav => fav.id === selectedItem.id);
+    }, [selectedItem, favorites]);
 
     return (
-        <div className="w-full h-full flex flex-col items-center p-4 md:p-6 gap-6 overflow-y-auto">
+        <div className="forge-interface h-full relative" style={{ height: 'calc(100vh - 150px)'}}>
+            <div className="grid grid-cols-12 gap-6 h-full">
+                {!isMobile && (
+                    <div className="col-span-12 lg:col-span-4 xl:col-span-3 h-full">
+                        <FilterPanel onGenerate={handleGenerate} isLoading={isLoading} />
+                    </div>
+                )}
 
-            {/* Filters */}
-            <div className="forge-filters forge-panel w-full max-w-5xl rounded-lg p-4 shadow-lg">
-                <h2 className="text-xl font-bold text-white mb-4 font-gangofthree">Opções da Forja</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                     <Select
-                        label="Categoria"
-                        value={filters.category}
-                        onChange={(e) => handleFilterChange('category', e.target.value as Category)}
-                    >
-                        <option value="" disabled>Selecione...</option>
-                        {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </Select>
-                     <Select label="Raridade" value={filters.weaponRarity} onChange={(e) => handleFilterChange('weaponRarity', e.target.value as Rarity)}>
-                        {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
-                    </Select>
-                    <Button 
-                        variant="secondary" 
-                        className="w-full self-end" 
-                        onClick={() => setAdvancedFiltersOpen(true)}
-                    >
-                        <FilterIcon className="w-5 h-5" />
-                        Filtros Avançados
-                    </Button>
-                </div>
-            </div>
-
-            {/* Forge Core: Preview */}
-            <div className="anvil-area w-full max-w-5xl flex-grow min-h-[400px] hidden lg:flex lg:flex-col">
-                {selectedItem ? (
-                     <div className="h-full max-h-[60vh] w-full">
-                        <DetailPanel 
-                            item={selectedItem}
-                            onGenerateVariant={props.onGenerateVariant}
-                            isFavorite={props.favorites.some(f => f.id === selectedItem.id)}
-                            onToggleFavorite={props.onToggleFavorite}
-                            onUpdate={props.onUpdate}
+                <div className="col-span-12 lg:col-span-8 xl:col-span-9 grid grid-cols-12 gap-6 h-full">
+                    <div className="col-span-12 xl:col-span-7 h-full">
+                        <ResultsPanel
+                            items={items}
+                            isLoading={isLoading && items.length === 0}
+                            selectedItem={selectedItem}
+                            onSelectItem={handleSelectItem}
+                            favorites={favorites}
+                            onToggleFavorite={handleToggleFavorite}
+                            onGenerateVariant={handleGenerateVariant}
+                            onClearResults={handleClearResults}
                         />
                     </div>
-                ) : (
-                    <AnvilPlaceholder />
-                )}
-            </div>
-
-            {/* Forge Button */}
-            <div className="my-2">
-                <Button 
-                    onClick={() => onGenerate(1)} 
-                    disabled={isLoading || !filters.category} 
-                    className="forge-anvil-button text-xl font-gangofthree px-12 py-6"
-                >
-                    <AnvilIcon className="w-6 h-6" />
-                    {isLoading ? 'FORJANDO...' : 'FORJAR ITEM'}
-                </Button>
-            </div>
-            
-            {/* History Panel */}
-            <div className="w-full max-w-7xl flex-grow">
-                 <ResultsPanel {...props} title="Histórico da Forja"/>
-            </div>
-
-             {/* Advanced Filters Modal */}
-            <Modal
-                isOpen={isAdvancedFiltersOpen}
-                onClose={() => setAdvancedFiltersOpen(false)}
-                title="Filtros Avançados"
-                variant="drawer-left"
-            >
-                <div className="h-full">
-                    <FilterPanel
-                        filters={filters}
-                        onFiltersChange={onFiltersChange}
-                        onGenerate={handleGenerateFromModal}
-                        isLoading={isLoading}
-                        onResetFilters={onResetFilters}
-                    />
+                    {!isMobile && (
+                         <div className="hidden xl:block xl:col-span-5 h-full">
+                           <AnimatePresence>
+                             {selectedItem && (
+                               <motion.div
+                                 initial={{ opacity: 0, y: 20 }}
+                                 animate={{ opacity: 1, y: 0 }}
+                                 exit={{ opacity: 0, y: -20 }}
+                                 transition={{ duration: 0.3 }}
+                                 className="h-full"
+                               >
+                                 <DetailPanel
+                                   item={selectedItem}
+                                   onGenerateVariant={handleGenerateVariant}
+                                   isFavorite={isFavorite}
+                                   onToggleFavorite={handleToggleFavorite}
+                                   onUpdate={handleUpdateItem}
+                                 />
+                               </motion.div>
+                             )}
+                           </AnimatePresence>
+                         </div>
+                    )}
                 </div>
-            </Modal>
+            </div>
+
+            {isMobile && (
+                <>
+                    <Button onClick={() => setIsFilterPanelOpen(true)} className="fixed bottom-4 right-4 z-30 !rounded-full !p-4 shadow-lg" aria-label="Abrir Filtros">
+                        <FilterIcon className="w-6 h-6" />
+                    </Button>
+                    <Modal isOpen={isFilterPanelOpen} onClose={() => setIsFilterPanelOpen(false)} variant="drawer-left" title="Filtros da Forja">
+                       <div className="p-4 h-full"><FilterPanel onGenerate={handleGenerate} isLoading={isLoading} /></div>
+                    </Modal>
+                    {selectedItem && (
+                      <DetailModal
+                          isOpen={isDetailModalOpen}
+                          onClose={() => setIsDetailModalOpen(false)}
+                          item={selectedItem}
+                          onGenerateVariant={handleGenerateVariant}
+                          isFavorite={isFavorite}
+                          onToggleFavorite={handleToggleFavorite}
+                          onUpdate={handleUpdateItem}
+                      />
+                    )}
+                </>
+            )}
+
+            <FavoritesModal isOpen={isFavoritesOpen} onClose={onFavoritesClose} favorites={favorites} onSelect={(item) => { handleSelectItem(item); onFavoritesClose(); }} onToggleFavorite={handleToggleFavorite} />
+            <HistoryModal isOpen={isHistoryOpen} onClose={onHistoryClose} history={history} onSelect={(item) => { handleSelectItem(item); onHistoryClose(); }} onDelete={handleDeleteFromHistory} onClear={handleClearHistory} />
+            <ErrorDisplay message={error} onDismiss={() => setError(null)} />
         </div>
     );
 };

@@ -339,13 +339,20 @@ body {
 /* Inputs */
 .alchemist-theme input, .alchemist-theme textarea, .alchemist-theme select {
     background: rgba(138, 43, 226, 0.1) !important;
-    border: 1px solid var(--crystal-blue) !important;
+    border: 1px solid var(--potion-purple) !important;
     color: var(--elixir-green) !important;
-    transition: box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .alchemist-theme input:focus, .alchemist-theme textarea:focus, .alchemist-theme select:focus {
-    box-shadow: 0 0 10px var(--crystal-blue) !important;
+    border-color: var(--magic-pink) !important;
+    box-shadow: 0 0 10px var(--magic-pink) !important;
     outline: none;
+}
+
+/* Dropdown Options */
+.alchemist-theme select option {
+    background-color: var(--void-black);
+    color: var(--elixir-green);
 }
 
 /* Result Card Borders */
