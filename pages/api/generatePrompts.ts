@@ -83,4 +83,30 @@ export default async function handler(
             model: "gemini-2.5-flash",
             contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
             config: { systemInstruction, responseMimeType: "application/json" },
-        
+        });
+
+        let result: PromptGenerationResult = {};
+        try {
+            const parsedJson = JSON.parse(response.text);
+            
+            if (generateMidjourney && parsedJson.midjourneyPrompt) {
+                result.midjourneyPrompt = buildMidjourneyPrompt(parsedJson.midjourneyPrompt, mjParams);
+            }
+            if (generateGpt && parsedJson.gptPrompt) {
+                result.gptPrompt = parsedJson.gptPrompt;
+            }
+            if (generateGemini && parsedJson.geminiPrompt) {
+                result.geminiPrompt = parsedJson.geminiPrompt;
+            }
+        } catch (e) {
+            console.error("Failed to parse Gemini response as JSON:", response.text);
+            throw new Error("A IA de Alquimia retornou uma resposta em formato inválido. Tente novamente.");
+        }
+
+        res.status(200).json(result);
+
+    } catch (error: any) {
+        console.error("Erro em /api/generatePrompts:", error);
+        res.status(500).json({ message: error.message || 'Falha ao gerar prompts.' });
+    }
+}
