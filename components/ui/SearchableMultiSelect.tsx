@@ -77,7 +77,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
           <ul>
             {filteredOptions.map((option) => {
               const isSelected = selected.includes(option);
-              const isDisabled = !isSelected && isMaxSelected;
+              const isDisabled = !!(!isSelected && isMaxSelected);
               return (
                 <li
                   key={option}
