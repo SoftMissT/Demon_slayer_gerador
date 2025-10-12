@@ -32,7 +32,8 @@ export default async function handler(
         const isWhitelisted = await isUserWhitelisted(userProfile.id);
 
         if (!isWhitelisted) {
-            return res.status(403).json({ message: 'Acesso negado. Você não está na lista de usuários autorizados (whitelist).' });
+            const message = `Acesso negado. O ID do Discord "${userProfile.id}" não foi encontrado na lista de autorizados. Verifique se este é o ID correto que consta na planilha.`;
+            return res.status(403).json({ message });
         }
         
         const user: User = {
@@ -45,6 +46,7 @@ export default async function handler(
 
     } catch (error: any) {
         console.error('[DISCORD_CALLBACK_ERROR]', error);
+        // If the error comes from googleSheets, it will be more specific now.
         res.status(500).json({ message: error.message || 'Ocorreu um erro interno durante a autenticação.' });
     }
 }
