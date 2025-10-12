@@ -248,7 +248,7 @@ function cleanFilters(filters: FilterState) {
     return cleaned;
 }
 
-export const buildGenerationPrompt = (baseConcept: string, filters: FilterState, count: number, promptModifier?: string): string => {
+export const buildGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string, baseConcept?: any): string => {
     const activeFilters = cleanFilters(filters);
 
     if (activeFilters.locationTerrainCustom) {
@@ -256,26 +256,28 @@ export const buildGenerationPrompt = (baseConcept: string, filters: FilterState,
     }
     delete activeFilters.locationTerrainCustom;
 
-    let prompt = `Você é um Arquiteto de Lore para RPG, especialista em "Demon Slayer: Kimetsu no Yaiba".
-Sua tarefa é pegar um conceito base e ENRIQUECÊ-LO com detalhes, seguindo os filtros fornecidos.
-Você deve estruturar a resposta em um JSON que adere estritamente ao schema.
-
-CONCEITO BASE PARA EXPANDIR:
-"${baseConcept}"
+    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba".
+Sua tarefa é enriquecer um conceito base, transformando-o em um item completo e detalhado para a categoria "${filters.category}".
+Você também deve criar um protótipo de prompt de imagem para este item.
+O resultado DEVE ser um objeto JSON que adere estritamente ao schema fornecido.
 
 Contexto Geral:
 - Crie lore, descrições vívidas e mecânicas interessantes para o jogo.
 - O campo 'imagePromptDescription' deve ser uma descrição visual concisa, com tags, pronta para ser refinada por outra IA.
 - O campo 'nome' deve ser único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
 
-Diretriz de Foco: Seu foco principal ao enriquecer este conceito deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
+Diretriz de Foco: Seu foco principal ao expandir este conceito deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
 `;
+
+    if (baseConcept && Object.keys(baseConcept).length > 0) {
+        prompt += `\nCONCEITO BASE PARA EXPANDIR (fornecido por outra IA):\n${JSON.stringify(baseConcept)}\n`;
+    }
 
     if (promptModifier) {
         prompt += `\nINSTRUÇÃO ESPECIAL (prioridade máxima):\n${promptModifier}\n\n`;
     }
 
-    prompt += 'Filtros a serem aplicados:\n';
+    prompt += 'Filtros a serem aplicados (combine-os com o conceito base):\n';
     prompt += `- Categoria Principal: ${filters.category}\n`;
     if (filters.styleReferences) {
         prompt += `- Referências de Estilo Visual: ${filters.styleReferences}\n`;
