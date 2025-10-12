@@ -1,320 +1,247 @@
+
 import { Type } from '@google/genai';
 import type { FilterState, Category } from '../types';
 
-// #region Schemas
-const ganchosNarrativosSchema = {
-    type: Type.ARRAY,
-    description: "Uma lista de 2 a 4 ganchos de aventura ou plot hooks para integrar o item na narrativa.",
-    items: { type: Type.STRING }
-};
+const buildBaseSchemaProperties = (category: Category) => ({
+    nome: { type: Type.STRING, description: 'O nome criativo e único do item/personagem/técnica.' },
+    categoria: { type: Type.STRING, description: `A categoria do item gerado. DEVE SER EXATAMENTE "${category}".` },
+    tematica: { type: Type.STRING, description: 'A temática principal que inspirou o item, como "Cyberpunk" ou "Medieval Fantasia".' },
+    descricao_curta: { type: Type.STRING, description: 'Uma descrição de uma ou duas frases que captura a essência.' },
+    descricao: { type: Type.STRING, description: 'Uma descrição detalhada (pelo menos 3 parágrafos) incluindo aparência, história, lore e como ele se encaixa no mundo. Este campo será o "gameText" principal.' },
+    imagePromptDescription: { type: Type.STRING, description: 'Um protótipo de prompt para IA de imagem (ex: Midjourney). Descreva a aparência visual de forma concisa e evocativa, focada em adjetivos e composição.' },
+    raridade: { type: Type.STRING, enum: ['Aleatória', 'Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado', 'N/A'], description: 'A raridade.' },
+    nivel_sugerido: { type: Type.INTEGER, description: 'O nível de personagem sugerido para usar ou encontrar este item.' },
+    ganchos_narrativos: {
+        type: Type.ARRAY,
+        description: 'Pelo menos 3 ideias ou ganchos de aventura distintos e criativos para um mestre de RPG usar.',
+        items: { type: Type.STRING }
+    },
+});
 
-const baseItemSchemaProperties = {
-    nome: { type: Type.STRING, description: "Nome criativo e único para o item." },
-    categoria: { type: Type.STRING, description: "A categoria do item gerado." },
-    tematica: { type: Type.STRING, description: "A temática ou estilo em que o item se encaixa." },
-    descricao_curta: { type: Type.STRING, description: "Uma descrição de uma a duas frases que captura a essência do item." },
-    descricao: { type: Type.STRING, description: "Uma descrição detalhada (2-3 parágrafos) com lore, aparência e contexto." },
-    imagePromptDescription: { type: Type.STRING, description: "Um protótipo de prompt para um gerador de imagem, focado em descrever a aparência visual do item com tags (ex: 'close-up, dramatic lighting, anime style')." },
-    raridade: { type: Type.STRING, description: "A raridade do item (Ex: Comum, Raro, Lendário).", enum: ['Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado', 'N/A'] },
-    nivel_sugerido: { type: Type.NUMBER, description: "Nível de poder ou desafio sugerido para o item (1 a 20)." },
-};
-
-const weaponSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, description: "A categoria do item.", enum: ['Arma', 'Acessório'] },
-        dano: { type: Type.STRING, description: "Fórmula de dano para sistemas de RPG (ex: '2d6', '1d10+FOR')." },
-        dados: { type: Type.STRING, description: "Detalhes sobre os dados de dano." },
-        tipo_de_dano: { type: Type.STRING, description: "Tipo de dano (ex: Cortante, Perfurante, Fogo, Gelo)." },
-        status_aplicado: { type: Type.STRING, description: "Efeito de status que a arma pode aplicar (ex: 'Sangramento', 'Atordoamento', 'Nenhum')." },
-        efeitos_secundarios: { type: Type.STRING, description: "Habilidade passiva ou ativa única da arma." },
-        ganchos_narrativos: ganchosNarrativosSchema,
-    }
-};
-
-const kekkijutsuSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, description: "A categoria.", enum: ['Kekkijutsu'] },
-        dano: { type: Type.STRING, description: "Fórmula de dano para a técnica (ex: '4d8', '3d12+INT')." },
-        dados: { type: Type.STRING, description: "Detalhes sobre os dados." },
-        tipo_de_dano: { type: Type.STRING, description: "Tipo de dano elemental ou físico." },
-        status_aplicado: { type: Type.STRING, description: "Efeito de status principal (ex: 'Paralisia', 'Medo', 'Corrupção')." },
-        efeitos_secundarios: { type: Type.STRING, description: "Efeitos adicionais ou condições de uso." },
-        ganchos_narrativos: ganchosNarrativosSchema,
-    }
-};
-
-const hunterSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Caçador'] },
-        classe: { type: Type.STRING, description: "O arquétipo ou classe do caçador." },
-        personalidade: { type: Type.STRING, description: "Traços de personalidade marcantes." },
-        descricao_fisica: { type: Type.STRING, description: "Descrição detalhada da aparência física." },
-        background: { type: Type.STRING, description: "História de origem e motivações do personagem." },
-        arsenal: {
-            type: Type.OBJECT,
-            properties: {
-                arma: { type: Type.STRING },
-                empunhadura: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } } },
-            }
+const SCHEMAS: Record<Category, any> = {
+    'Arma': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Arma'),
+            dano: { type: Type.STRING, description: 'O dano base da arma, ex: "2d8".' },
+            dados: { type: Type.STRING, description: 'O dado rolado para o ataque, ex: "d20".' },
+            tipo_de_dano: { type: Type.STRING, description: 'O tipo de dano, ex: "Cortante", "Perfurante", "Mágico".' },
+            status_aplicado: { type: Type.STRING, description: 'Qualquer status negativo aplicado, ex: "Sangramento", "Veneno".', nullable: true },
+            efeitos_secundarios: { type: Type.STRING, description: 'Efeitos adicionais ou passivos da arma.', nullable: true },
         },
-        habilidades_especiais: {
-            type: Type.OBJECT,
-            properties: {
-                respiracao: { type: Type.STRING, description: "Estilo de respiração principal." },
-                variacoes_tecnica: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Lista de técnicas notáveis." },
-            }
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'dano', 'dados', 'tipo_de_dano']
+    },
+    'Acessório': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Acessório'),
+            dano: { type: Type.STRING, nullable: true },
+            dados: { type: Type.STRING, nullable: true },
+            tipo_de_dano: { type: Type.STRING, nullable: true },
+            status_aplicado: { type: Type.STRING, description: 'Qualquer status aplicado, ex: "Invisibilidade", "Resistência a Fogo".', nullable: true },
+            efeitos_secundarios: { type: Type.STRING, description: 'Efeitos adicionais, passivos ou de ativação do acessório.' },
         },
-        acessorio: {
-            type: Type.OBJECT,
-            properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } }
-        },
-        uso_em_cena: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Como um mestre pode usar este personagem em cena." },
-        ganchos_narrativos: ganchosNarrativosSchema,
-    }
-};
-
-const oniSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Inimigo/Oni'] },
-        power_level: { type: Type.STRING, description: "Nível de poder do Oni (ex: 'Lua Inferior 3', 'Classe Muzan')." },
-        descricao_fisica_detalhada: { type: Type.STRING, description: "Descrição vívida e detalhada da aparência do Oni." },
-        kekkijutsu: {
-            type: Type.OBJECT,
-            properties: {
-                nome: { type: Type.STRING, description: "Nome do Kekkijutsu." },
-                descricao: { type: Type.STRING, description: "Descrição detalhada do Kekkijutsu." },
-            }
-        },
-        comportamento_combate: { type: Type.ARRAY, items: { type: Type.STRING } },
-        comportamento_fora_combate: { type: Type.ARRAY, items: { type: Type.STRING } },
-        fraquezas_unicas: { type: Type.ARRAY, items: { type: Type.STRING } },
-        trofeus_loot: { type: Type.ARRAY, items: { type: Type.STRING } },
-        ganchos_narrativos: ganchosNarrativosSchema,
-    }
-};
-
-const npcSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['NPC'] },
-        origem: { type: Type.STRING },
-        voice_and_mannerisms: { type: Type.STRING, description: "Voz, tiques e maneirismos do NPC." },
-        inventory_focal: { type: Type.STRING, description: "Um item importante que o NPC carrega." },
-        motivation: { type: Type.STRING, description: "A principal motivação do NPC." },
-        secret: { type: Type.STRING, description: "Um segredo que o NPC guarda." },
-        dialogue_lines: { type: Type.ARRAY, items: { type: Type.STRING } },
-        ganchos_narrativos: ganchosNarrativosSchema,
-    }
-};
-
-const breathingFormSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Forma de Respiração'] },
-        base_breathing_id: { type: Type.STRING, description: "Nome da respiração da qual esta forma deriva." },
-        description_flavor: { type: Type.STRING, description: "Descrição poética e visual da forma." },
-        requirements: {
-            type: Type.OBJECT,
-            properties: {
-                min_rank: { type: Type.STRING },
-                exhaustion_cost: { type: Type.STRING },
-                cooldown: { type: Type.STRING },
-            }
-        },
-        mechanics: {
-            type: Type.OBJECT,
-            properties: {
-                activation: { type: Type.STRING },
-                target: { type: Type.STRING },
-                initial_test: { type: Type.OBJECT, properties: { type: { type: Type.STRING }, dc_formula: { type: Type.STRING } } },
-                on_success_target: { type: Type.STRING },
-                on_fail_target: { type: Type.STRING },
-                damage_formula_rank: { type: Type.OBJECT, properties: { Mizunoto: { type: Type.STRING }, Hashira: { type: Type.STRING } } },
-            }
-        }
-    }
-};
-
-const missionSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Missões'] },
-        title: { type: Type.STRING },
-        logline: { type: Type.STRING },
-        summary: { type: Type.STRING },
-        objectives: { type: Type.ARRAY, items: { type: Type.STRING } },
-        complications: { type: Type.ARRAY, items: { type: Type.STRING } },
-        failure_states: { type: Type.ARRAY, items: { type: Type.STRING } },
-        rewards: { type: Type.ARRAY, items: { type: Type.STRING } },
-        numberOfSessions: { type: Type.NUMBER },
-        environment: { type: Type.STRING },
-        protagonist_desc: { type: Type.OBJECT, properties: { silhouette: { type: Type.STRING }, face: { type: Type.STRING }, attire: { type: Type.STRING }, movement: { type: Type.STRING }, defining_feature: { type: Type.STRING } } },
-        oni_desc: { type: Type.OBJECT, properties: { scale: { type: Type.STRING }, skin: { type: Type.STRING }, appendages: { type: Type.STRING }, eyes: { type: Type.STRING }, sound_smell: { type: Type.STRING }, mystic_sign: { type: Type.STRING } } },
-        demonBloodArtType: { type: Type.STRING },
-        key_npcs: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, name: { type: Type.STRING }, role: { type: Type.STRING }, dialogue_example: { type: Type.STRING }, physical_trait: { type: Type.STRING }, goal: { type: Type.STRING }, secret: { type: Type.STRING }, twist: { type: Type.STRING } } } },
-        relevant_items: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { appearance: { type: Type.STRING }, origin: { type: Type.STRING }, wear: { type: Type.STRING }, quirk: { type: Type.STRING }, use: { type: Type.STRING } } } },
-        scaling_hooks: { type: Type.STRING },
-        tone_variations: { type: Type.OBJECT, properties: { hope: { type: Type.STRING }, horror: { type: Type.STRING }, mystery: { type: Type.STRING } } },
-        sensitive_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
-    }
-};
-
-const worldBuildingSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['World Building'] },
-        plot_threads: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING } } } },
-        adventure_hooks: { type: Type.ARRAY, items: { type: Type.STRING } },
-        key_npcs_wb: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, role: { type: Type.STRING }, description: { type: Type.STRING } } } },
-        points_of_interest: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, type: { type: Type.STRING }, description: { type: Type.STRING } } } },
-        mini_missions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, objective: { type: Type.STRING }, reward: { type: Type.STRING } } } },
-        faccoes_internas: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, objetivo: { type: Type.STRING }, descricao: { type: Type.STRING } } } },
-        ameacas_externas: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, tipo: { type: Type.STRING }, descricao: { type: Type.STRING } } } },
-        tradicoes_culturais: { type: Type.ARRAY, items: { type: Type.STRING } },
-        eventos_historicos_chave: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { evento: { type: Type.STRING }, impacto: { type: Type.STRING } } } },
-        misterios_segredos: { type: Type.ARRAY, items: { type: Type.STRING } },
-    }
-};
-
-const locationSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Local/Cenário'] },
-        ganchos_narrativos: ganchosNarrativosSchema,
-    }
-};
-
-const eventSchema = {
-    type: Type.OBJECT,
-    properties: {
-        ...baseItemSchemaProperties,
-        categoria: { type: Type.STRING, enum: ['Evento'] },
-        level: { type: Type.STRING, description: "A escala do evento (ex: Regional, Global)." },
-        threatLevel: { type: Type.STRING, description: "O nível de ameaça que o evento representa." },
-        eventType: { type: Type.STRING, description: "O tipo de evento (ex: Festival, Desastre Natural)." },
-        consequencias: { type: Type.ARRAY, items: { type: Type.STRING }, description: "As possíveis consequências ou resultados do evento." },
-        participantes_chave: { 
-            type: Type.ARRAY, 
-            items: { 
-                type: Type.OBJECT, 
-                properties: { 
-                    nome: { type: Type.STRING }, 
-                    papel: { type: Type.STRING } 
-                } 
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'efeitos_secundarios']
+    },
+    'Caçador': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Caçador'),
+            classe: { type: Type.STRING, description: 'O arquétipo ou classe do caçador, ex: "Kenshi", "Bujin".' },
+            personalidade: { type: Type.STRING, description: 'Traços de personalidade marcantes.' },
+            descricao_fisica: { type: Type.STRING, description: 'Descrição detalhada da aparência física.' },
+            background: { type: Type.STRING, description: 'A história de origem e motivações do caçador.' },
+            arsenal: {
+                type: Type.OBJECT, properties: {
+                    arma: { type: Type.STRING, description: 'A arma principal do caçador.' },
+                    empunhadura: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, descricao: { type: Type.STRING } } }
+                }
             },
-            description: "Personagens ou grupos importantes envolvidos no evento."
+            habilidades_especiais: {
+                type: Type.OBJECT, properties: {
+                    respiracao: { type: Type.STRING, description: 'A principal forma de respiração.' },
+                    variacoes_tecnica: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Técnicas únicas ou variações da respiração.' }
+                }
+            },
         },
-        ganchos_narrativos: ganchosNarrativosSchema,
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'classe', 'personalidade', 'descricao_fisica', 'background']
+    },
+    'Inimigo/Oni': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Inimigo/Oni'),
+            power_level: { type: Type.STRING, description: 'O nível de poder do Oni, ex: "Lua Inferior".' },
+            descricao_fisica_detalhada: { type: Type.STRING, description: 'Descrição detalhada da aparência, incluindo traços monstruosos.' },
+            kekkijutsu: {
+                type: Type.OBJECT, properties: {
+                    nome: { type: Type.STRING, description: 'O nome da Arte Demoníaca de Sangue.' },
+                    descricao: { type: Type.STRING, description: 'O que a arte faz em detalhes.' }
+                }
+            },
+            comportamento_combate: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Táticas e comportamentos em combate.' },
+            comportamento_fora_combate: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Comportamento social ou quando não está em alerta.' },
+            fraquezas_unicas: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Fraquezas específicas além da luz solar ou lâminas de Nichirin.' },
+            trofeus_loot: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Itens que podem ser obtidos ao derrotá-lo.' }
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'power_level', 'kekkijutsu', 'comportamento_combate']
+    },
+    'NPC': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('NPC'),
+            origem: { type: Type.STRING, description: 'A origem cultural ou geográfica do NPC.' },
+            profession: { type: Type.STRING, description: 'A profissão ou papel principal do NPC na sociedade.' },
+            motivation: { type: Type.STRING, description: 'O que move e motiva as ações deste NPC.' },
+            secret: { type: Type.STRING, description: 'Um segredo importante que o NPC guarda.' },
+            dialogue_lines: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Exemplos de falas que revelam sua personalidade.' },
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'origem', 'profession', 'motivation', 'secret']
+    },
+    'Forma de Respiração': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Forma de Respiração'),
+            name_native: { type: Type.STRING, description: 'O nome da técnica no idioma original (ex: japonês), com tradução.', nullable: true },
+            description_flavor: { type: Type.STRING, description: 'Descrição poética e visual da técnica em ação.' },
+            mechanics: {
+                type: Type.OBJECT, properties: {
+                    activation: { type: Type.STRING, description: 'Como a técnica é ativada (ex: Ação, Reação).' },
+                    target: { type: Type.STRING, description: 'O alvo ou área de efeito.' },
+                    on_success_target: { type: Type.STRING, description: 'O que acontece ao alvo em caso de sucesso.' },
+                    damage_formula_rank: { type: Type.OBJECT, properties: {}, additionalProperties: { type: Type.STRING }, description: 'Fórmula de dano baseada no rank do caçador, ex: {"Mizunoto": "2d6", "Hashira": "4d10+FOR"}.' }
+                }
+            }
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'description_flavor', 'mechanics']
+    },
+    'Kekkijutsu': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Kekkijutsu'),
+            dano: { type: Type.STRING, description: 'O dano base da técnica, ex: "3d10".', nullable: true },
+            dados: { type: Type.STRING, description: 'O dado para teste de resistência, ex: "CD 15 Destreza".', nullable: true },
+            tipo_de_dano: { type: Type.STRING, description: 'O tipo de dano, ex: "Necrótico", "Psíquico".', nullable: true },
+            status_aplicado: { type: Type.STRING, description: 'Qualquer status negativo aplicado, ex: "Paralisia", "Medo".', nullable: true },
+            efeitos_secundarios: { type: Type.STRING, description: 'Efeitos adicionais da técnica.' },
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos']
+    },
+    'Local/Cenário': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Local/Cenário'),
+            points_of_interest: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING } } }, description: 'Locais chave dentro deste cenário.' },
+            key_npcs_wb: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, role: { type: Type.STRING }, description: { type: Type.STRING } } }, description: 'NPCs importantes que podem ser encontrados aqui.' },
+            ameacas_externas: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, tipo: { type: Type.STRING }, descricao: { type: Type.STRING } } }, description: 'Perigos e ameaças comuns neste local.' },
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'points_of_interest']
+    },
+    'Missões': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Missões'),
+            title: { type: Type.STRING, description: 'O título da missão.' },
+            logline: { type: Type.STRING, description: 'Resumo da missão em uma frase.' },
+            summary: { type: Type.STRING, description: 'Sumário detalhado da missão.' },
+            objectives: { type: Type.ARRAY, items: { type: Type.STRING } },
+            complications: { type: Type.ARRAY, items: { type: Type.STRING } },
+            rewards: { type: Type.ARRAY, items: { type: Type.STRING } },
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'title', 'logline', 'summary', 'objectives']
+    },
+    'World Building': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('World Building'),
+            plot_threads: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING } } }, description: 'Fios de enredo para desenvolver.' },
+            faccoes_internas: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, objetivo: { type: Type.STRING }, descricao: { type: Type.STRING } } }, description: 'Facções e seus objetivos.' },
+            misterios_segredos: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Mistérios para os jogadores investigarem.' }
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'plot_threads', 'faccoes_internas', 'misterios_segredos']
+    },
+    'Evento': {
+        type: Type.OBJECT,
+        properties: {
+            ...buildBaseSchemaProperties('Evento'),
+            eventType: { type: Type.STRING, description: 'O tipo do evento, ex: "Festival Cultural", "Desastre Natural".' },
+            consequencias: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'As possíveis consequências e desfechos do evento.' },
+            participantes_chave: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { nome: { type: Type.STRING }, papel: { type: Type.STRING } } }, description: 'Personagens ou grupos chave envolvidos.' },
+        },
+        required: ['nome', 'categoria', 'tematica', 'descricao_curta', 'descricao', 'imagePromptDescription', 'raridade', 'nivel_sugerido', 'ganchos_narrativos', 'eventType', 'consequencias']
     }
-};
-
-const categoryToSchemaMap: Record<Category, any> = {
-    'Caçador': hunterSchema,
-    'Inimigo/Oni': oniSchema,
-    'NPC': npcSchema,
-    'Arma': weaponSchema,
-    'Acessório': weaponSchema,
-    'Forma de Respiração': breathingFormSchema,
-    'Kekkijutsu': kekkijutsuSchema,
-    'Local/Cenário': locationSchema,
-    'Missões': missionSchema,
-    'World Building': worldBuildingSchema,
-    'Evento': eventSchema,
-};
-
-// #endregion
-
-function cleanFilters(filters: FilterState) {
-    const cleaned: Record<string, any> = {};
-    for (const key in filters) {
-        const value = filters[key as keyof FilterState];
-        if (value && value !== 'Aleatória' && value !== 'Aleatório' && value !== 'Nenhuma' && (!Array.isArray(value) || value.length > 0)) {
-            cleaned[key] = value;
-        }
-    }
-    return cleaned;
-}
-
-export const buildGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string, baseConcept?: any): string => {
-    const activeFilters = cleanFilters(filters);
-
-    if (activeFilters.locationTerrainCustom) {
-        activeFilters.locationTerrain = activeFilters.locationTerrainCustom;
-    }
-    delete activeFilters.locationTerrainCustom;
-
-    let prompt = `Você é um mestre de RPG especialista em criar conteúdo para o universo de "Demon Slayer: Kimetsu no Yaiba".
-Sua tarefa é enriquecer um conceito base, transformando-o em um item completo e detalhado para a categoria "${filters.category}".
-Você também deve criar um protótipo de prompt de imagem para este item.
-O resultado DEVE ser um objeto JSON que adere estritamente ao schema fornecido.
-
-Contexto Geral:
-- Crie lore, descrições vívidas e mecânicas interessantes para o jogo.
-- O campo 'imagePromptDescription' deve ser uma descrição visual concisa, com tags, pronta para ser refinada por outra IA.
-- O campo 'nome' deve ser único e criativo. 'descricao_curta' deve ser um teaser, e 'descricao' deve ser um texto rico e elaborado.
-
-Diretriz de Foco: Seu foco principal ao expandir este conceito deve ser em "${filters.aiFocusGemini || 'Estrutura Base (Padrão)'}".
-`;
-
-    if (baseConcept && Object.keys(baseConcept).length > 0) {
-        prompt += `\nCONCEITO BASE PARA EXPANDIR (fornecido por outra IA):\n${JSON.stringify(baseConcept)}\n`;
-    }
-
-    if (promptModifier) {
-        prompt += `\nINSTRUÇÃO ESPECIAL (prioridade máxima):\n${promptModifier}\n\n`;
-    }
-
-    prompt += 'Filtros a serem aplicados (combine-os com o conceito base):\n';
-    prompt += `- Categoria Principal: ${filters.category}\n`;
-    if (filters.styleReferences) {
-        prompt += `- Referências de Estilo Visual: ${filters.styleReferences}\n`;
-    }
-
-    for (const [key, value] of Object.entries(activeFilters)) {
-        if (key !== 'category' && !key.startsWith('aiFocus') && key !== 'styleReferences') {
-            const formattedValue = Array.isArray(value) ? value.join(', ') : value;
-            prompt += `- ${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${formattedValue}\n`;
-        }
-    }
-    
-    prompt += "\nLembre-se: a saída deve ser APENAS o JSON. Sem comentários, sem explicações, apenas o JSON puro e válido. Seja extremamente criativo e detalhado nas descrições."
-
-    return prompt;
 };
 
 export const buildResponseSchema = (filters: FilterState, count: number) => {
     if (!filters.category) {
         throw new Error("Category is required to build a response schema.");
     }
-    const itemSchema = categoryToSchemaMap[filters.category];
-    if (!itemSchema) {
-        throw new Error(`No schema found for category: ${filters.category}`);
+    const schema = SCHEMAS[filters.category];
+    if (!schema) {
+        throw new Error(`No schema defined for category: ${filters.category}`);
     }
-
     if (count > 1) {
         return {
             type: Type.OBJECT,
             properties: {
                 items: {
                     type: Type.ARRAY,
-                    items: itemSchema,
+                    items: schema
                 }
-            },
-            required: ['items'],
+            }
         };
     }
-    return itemSchema;
+    return schema;
+};
+
+export const buildGenerationPrompt = (filters: FilterState, count: number, promptModifier?: string, baseConcept?: any): string => {
+    let prompt = `Você é um mestre de RPG e escritor de fantasia especialista no universo de Demon Slayer. Sua tarefa é criar ${count > 1 ? count + ' itens únicos' : 'um item único'} para um jogo de RPG de mesa, seguindo estritamente as especificações abaixo. A resposta DEVE ser um objeto JSON (ou um objeto com uma chave "items" contendo um array se count > 1) que valide com o schema fornecido.
+
+**Categoria:** ${filters.category}
+`;
+
+    if (baseConcept && Object.keys(baseConcept).length > 0) {
+        prompt += `\n**Conceito Base (Inspiração Inicial):**\n${JSON.stringify(baseConcept, null, 2)}\nUse este conceito como ponto de partida, mas sinta-se à vontade para expandir e adicionar detalhes criativos.`;
+    }
+
+    prompt += "\n**Filtros e Diretrizes:**\n";
+
+    const addFilter = (label: string, value: any) => {
+        if (value && (!Array.isArray(value) || value.length > 0)) {
+            prompt += `- **${label}:** ${Array.isArray(value) ? value.join(', ') : value}\n`;
+        }
+    };
+
+    switch (filters.category) {
+        case 'Caçador':
+            addFilter('Temática', filters.hunterTematica);
+            addFilter('País de Origem', filters.hunterCountry);
+            addFilter('Arquétipo', filters.hunterArchetype);
+            addFilter('Personalidade', filters.hunterPersonality);
+            addFilter('Respirações Base', filters.hunterBreathingStyles);
+            addFilter('Rank', filters.hunterRank);
+            break;
+        case 'Inimigo/Oni':
+            addFilter('Temática', filters.oniTematica);
+            addFilter('País de Origem', filters.oniCountry);
+            addFilter('Nível de Poder', filters.oniPowerLevel);
+            addFilter('Personalidade', filters.oniPersonality);
+            addFilter('Inspiração de Kekkijutsu', filters.oniInspirationKekkijutsu);
+            break;
+        // Add cases for other categories...
+    }
+
+    if (promptModifier) {
+        prompt += `\n**Instrução Adicional:** ${promptModifier}\n`;
+    }
+
+    prompt += `
+**Requisitos Obrigatórios:**
+1.  **Criatividade:** Crie algo verdadeiramente único e memorável. Evite clichês.
+2.  **Descrição Rica:** A 'descricao' deve ser longa, detalhada e imersiva, com pelo menos três parágrafos, explorando a história, aparência e lore.
+3.  **Ganchos de RPG:** Os 'ganchos_narrativos' devem ser criativos e fornecer ideias concretas para aventuras.
+4.  **Prompt de Imagem:** O 'imagePromptDescription' deve ser uma descrição visual concisa, focada em adjetivos, iluminação e composição, pronta para ser usada em uma IA de imagem.
+5.  **Validação de Schema:** O JSON de saída DEVE ser estritamente validado pelo schema fornecido.
+`;
+
+    return prompt;
 };
