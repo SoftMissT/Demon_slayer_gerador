@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Modal } from './ui/Modal';
 // FIX: Corrected import path for DetailPanel component.
-import { DetailPanel } from '../DetailPanel';
+import { DetailPanel } from './DetailPanel';
 // FIX: Corrected import path for types.
 import type { GeneratedItem } from '../types';
 
