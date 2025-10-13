@@ -48,9 +48,6 @@ const INITIAL_GEMINI_PARAMS: GeminiParams = {
     detailLevel: 'detalhado',
 };
 
-// FIX: Changed interface extending a complex type to a type alias with an intersection.
-// An interface cannot extend `AlchemyHistoryItem['inputs']`, which is a type, not an identifier.
-// This resolves the "An interface can only extend an identifier/qualified-name" error.
 type AlchemyPreset = AlchemyHistoryItem['inputs'] & {
     name: string;
 };
@@ -167,13 +164,6 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
         }
     }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, isAuthenticated, onLoginClick, setHistory]);
 
-    const handleSavePreset = useCallback(() => {
-        // Presets are not implemented for Alquimia yet, this is a placeholder
-    }, []);
-    const handleDeletePreset = useCallback(() => {}, []);
-    const handlePresetChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {}, []);
-
-
     const handleResetAll = () => {
         setBasePrompt('');
         setNegativePrompt('');
@@ -212,39 +202,49 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
             <div className={`h-full flex flex-col ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 <ErrorDisplay message={error} onDismiss={() => setError(null)} />
                 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-grow min-h-0">
-                    {/* Left Column */}
-                    <div className="flex flex-col gap-0 min-h-0 lg:col-span-3">
-                        <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
-                            <Card className="flex-grow flex flex-col p-4 md:p-6">
-                                <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-                                    <h2 className="text-xl font-bold text-white font-gangofthree">Caldeirão</h2>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <button className="button" onClick={handleClearIdea}>
-                                            <RefreshIcon className="w-4 h-4" />
-                                            <span>Limpar Ideia</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <TextArea label="Tópico Principal / Ideia" value={basePrompt} onChange={(e) => setBasePrompt(e.target.value)} placeholder="Ex: um caçador de onis com uma máscara de raposa..." rows={5} disabled={isLoading}/>
-                                    <TextArea label="Prompt Negativo (O que evitar)" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Ex: texto, blur, baixa qualidade, cartoon" rows={2} disabled={isLoading}/>
-                                </div>
-                            </Card>
-                            <Card className="p-4 md:p-6"><GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} enabled={isGptEnabled} onEnabledChange={setIsGptEnabled} /></Card>
-                            <Card className="p-4 md:p-6"><GeminiParameters params={geminiParams} onParamsChange={setGeminiParams} enabled={isGeminiEnabled} onEnabledChange={setIsGeminiEnabled} /></Card>
-                        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow min-h-0">
+                    {/* Column 1: Inputs & Actions */}
+                    <div className="lg:col-span-4 flex flex-col gap-6">
+                        <Card className="flex-grow flex flex-col p-4 md:p-6 forge-panel">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold text-white font-gangofthree">Caldeirão</h2>
+                                <button className="button" onClick={handleClearIdea}>
+                                    <RefreshIcon className="w-4 h-4" />
+                                    <span>Limpar Ideia</span>
+                                </button>
+                            </div>
+                            <div className="space-y-4 flex-grow flex flex-col">
+                                <TextArea label="Tópico Principal / Ideia" value={basePrompt} onChange={(e) => setBasePrompt(e.target.value)} placeholder="Ex: um caçador de onis com uma máscara de raposa..." rows={5} disabled={isLoading} className="flex-grow"/>
+                                <TextArea label="Prompt Negativo (O que evitar)" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Ex: texto, blur, baixa qualidade, cartoon" rows={2} disabled={isLoading}/>
+                            </div>
+                        </Card>
+                        <Card className="p-4 md:p-6 flex-shrink-0 forge-panel">
+                             <div className="flex items-center justify-between gap-4">
+                                <button onClick={handleResetAll} disabled={isLoading} className="button w-40">Resetar Tudo</button>
+                                <button onClick={handleGenerateClick} disabled={isLoading || isGenerationDisabled} className="button flex-grow">
+                                    <MagicWandIcon className="w-5 h-5" />
+                                    {isLoading ? 'Destilando...' : 'Gerar Prompts'}
+                                </button>
+                            </div>
+                        </Card>
                     </div>
 
-                    {/* Right Column */}
-                    <div className="flex flex-col gap-6 min-h-0 lg:col-span-2">
-                        <div className="inner-scroll flex-grow min-h-0 pr-2 -mr-2 space-y-6">
-                            <Card className="p-4 md:p-6"><MidjourneyParameters params={mjParams} onParamsChange={setMjParams} enabled={isMjEnabled} onEnabledChange={setIsMjEnabled} /></Card>
-                            
-                            {(isLoading || result) && (
+                    {/* Column 2: Parameters */}
+                    <div className="lg:col-span-4 flex flex-col gap-6 min-h-0">
+                         <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
+                            <Card className="p-4 md:p-6 forge-panel"><GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} enabled={isGptEnabled} onEnabledChange={setIsGptEnabled} /></Card>
+                            <Card className="p-4 md:p-6 forge-panel"><GeminiParameters params={geminiParams} onParamsChange={setGeminiParams} enabled={isGeminiEnabled} onEnabledChange={setIsGeminiEnabled} /></Card>
+                            <Card className="p-4 md:p-6 forge-panel"><MidjourneyParameters params={mjParams} onParamsChange={setMjParams} enabled={isMjEnabled} onEnabledChange={setIsMjEnabled} /></Card>
+                        </div>
+                    </div>
+                    
+                    {/* Column 3: Results */}
+                    <div className="lg:col-span-4 flex flex-col min-h-0">
+                        <div className="inner-scroll flex-grow pr-2 -mr-2">
+                             {(isLoading || result) && (
                                 <div className="results-container">
                                     {isLoading ? (
-                                        <Card className="flex items-center justify-center p-6">
+                                        <Card className="flex items-center justify-center p-6 forge-panel">
                                             <AlchemyLoadingIndicator />
                                         </Card>
                                     ) : result ? (
@@ -256,23 +256,6 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                                     ) : null}
                                 </div>
                             )}
-                        </div>
-                        
-                        <div className="flex-shrink-0 mt-auto pt-6">
-                            <Card className="p-4 md:p-6">
-                                <div className="flex items-center justify-between gap-4">
-                                    <button onClick={handleResetAll} disabled={isLoading} className="button w-40">Resetar Tudo</button>
-                                    <button onClick={handleGenerateClick} disabled={isLoading || isGenerationDisabled} className="button flex-grow">
-                                        <MagicWandIcon className="w-5 h-5" />
-                                        {isLoading ? 'Destilando...' : 'Gerar Prompts'}
-                                    </button>
-                                </div>
-                                {!isAuthenticated && (
-                                    <p className="text-xs text-center text-yellow-400 mt-2">
-                                        É necessário fazer login para usar a Alquimia.
-                                    </p>
-                                )}
-                            </Card>
                         </div>
                     </div>
                 </div>

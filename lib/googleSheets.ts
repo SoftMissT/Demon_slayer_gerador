@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import { JWT } from 'google-auth-library';
-import type { GeneratedItem } from '../types';
+import type { GeneratedItem, User } from '../types';
 
 // In-memory cache for the whitelist
 let whitelistedIds: Set<string> | null = null;
@@ -10,6 +10,32 @@ const TARGET_SHEET_NAME = 'discord_id';
 
 // Shared JWT client to avoid re-creating it on every call
 let jwtClient: JWT | null = null;
+
+// The full header row for the log sheet.
+const LOG_HEADERS = [
+    'nome_usuario', 'timestamp', 'id', 'categoria', 'nome', 'descricao_curta', 'raridade', 'nivel_sugerido', 'tematica', 'image_prompt',
+    // Weapon
+    'arma_dano', 'arma_tipo_de_dano', 'arma_status_aplicado', 'arma_efeitos_secundarios',
+    // Accessory
+    'acessorio_efeitos_passivos', 'acessorio_efeitos_ativos', 'acessorio_condicao_ativacao',
+    // Kekkijutsu
+    'kekkijutsu_dano', 'kekkijutsu_tipo_de_dano', 'kekkijutsu_status_aplicado', 'kekkijutsu_efeitos_secundarios',
+    // Hunter
+    'cacador_classe', 'cacador_personalidade', 'cacador_background',
+    // Oni
+    'oni_power_level', 'oni_kekkijutsu_nome', 'oni_kekkijutsu_descricao', 'oni_fraquezas_unicas',
+    // NPC
+    'npc_origem', 'npc_motivacao', 'npc_segredo', 'npc_profissao',
+    // Mission
+    'missao_titulo', 'missao_logline', 'missao_objetivos',
+    // World Building
+    'wb_plot_threads', 'wb_faccoes', 'wb_ameacas',
+    // Event
+    'evento_level', 'evento_threat_level', 'evento_tipo',
+    // Breathing Form
+    'respiracao_base', 'respiracao_mecanicas',
+    'dados_completos_json'
+];
 
 function getJwtClient(): JWT {
     if (jwtClient) {
@@ -23,7 +49,6 @@ function getJwtClient(): JWT {
         throw new Error('As credenciais da conta de serviço do Google (EMAIL, PRIVATE_KEY) não estão configuradas corretamente nas variáveis de ambiente.');
     }
 
-    // Use a single client with read/write permissions for both functions
     jwtClient = new JWT({
         email: serviceAccountEmail,
         key: privateKey,
@@ -33,13 +58,6 @@ function getJwtClient(): JWT {
     return jwtClient;
 }
 
-
-/**
- * Fetches the list of whitelisted Discord IDs from a specified Google Sheet.
- * Implements an in-memory cache and enhanced debugging for configuration issues.
- * @returns {Promise<Set<string>>} A set containing the whitelisted user IDs.
- * @throws {Error} If fetching from Google Sheets fails due to configuration or network issues.
- */
 async function getWhitelistedIds(): Promise<Set<string>> {
     const now = Date.now();
     if (whitelistedIds && (now - lastFetchTime < CACHE_DURATION)) {
@@ -57,7 +75,6 @@ async function getWhitelistedIds(): Promise<Set<string>> {
         const auth = getJwtClient();
         const sheets = google.sheets({ version: 'v4', auth });
         
-        // Step 1: Verify spreadsheet existence and tab name for better error reporting.
         const spreadsheetMeta = await sheets.spreadsheets.get({
             spreadsheetId: sheetId,
         });
@@ -71,7 +88,6 @@ async function getWhitelistedIds(): Promise<Set<string>> {
             throw new Error(`A planilha foi encontrada, mas a aba com o nome exato "${TARGET_SHEET_NAME}" não existe. Abas disponíveis: [${availableSheets}]. Verifique se há erros de digitação ou espaços extras.`);
         }
 
-        // Step 2: Fetch the actual data.
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
             range: `${TARGET_SHEET_NAME}!B2:B`, 
@@ -100,15 +116,13 @@ async function getWhitelistedIds(): Promise<Set<string>> {
         return whitelistedIds;
 
     } catch (error: any) {
-        // Log the original, detailed error for server-side debugging.
         console.error('Original Google Sheets API Error:', error.code, error.message);
         
-        // If it's our custom error, rethrow it directly.
         if (error.message.startsWith('A planilha foi encontrada, mas a aba')) {
             throw error;
         }
 
-        let detailedErrorMessage = 'Falha ao buscar a lista de autorização.';
+        let detailedErrorMessage = 'Falha ao buscar la lista de autorização.';
 
         if (error.message) {
             const msg = error.message.toLowerCase();
@@ -129,12 +143,6 @@ async function getWhitelistedIds(): Promise<Set<string>> {
     }
 }
 
-/**
- * Checks if a given Discord user ID is present in the Google Sheets whitelist.
- * @param {string} userId - The Discord user ID to verify.
- * @returns {Promise<boolean>} A promise that resolves to true if the user is whitelisted, and false otherwise.
- * @throws {Error} If fetching the whitelist fails.
- */
 export async function isUserWhitelisted(userId: string): Promise<boolean> {
     if (!userId) {
         return false;
@@ -143,46 +151,98 @@ export async function isUserWhitelisted(userId: string): Promise<boolean> {
     return ids.has(userId);
 }
 
-/**
- * Appends a new row to the generation log sheet with details of the generated item.
- * This is a fire-and-forget function; it logs errors but does not throw them,
- * ensuring that logging failures do not interrupt the main generation flow.
- * @param {GeneratedItem} item - The item that was generated.
- */
-export async function logGenerationToSheet(item: GeneratedItem): Promise<void> {
+export async function logGenerationToSheet(item: GeneratedItem, user?: User | null): Promise<void> {
     const sheetId = process.env.GOOGLE_SHEET_ID;
     const logSheetName = process.env.GOOGLE_SHEET_LOG_NAME;
 
-    if (!sheetId) {
-        console.error('GOOGLE_SHEET_ID is not set. Skipping sheet logging.');
-        return;
-    }
-
-    if (!logSheetName) {
-        console.warn('GOOGLE_SHEET_LOG_NAME is not set. Skipping sheet logging.');
+    if (!sheetId || !logSheetName) {
+        console.error('GOOGLE_SHEET_ID or GOOGLE_SHEET_LOG_NAME is not set. Skipping sheet logging.');
         return;
     }
 
     try {
         const auth = getJwtClient();
         const sheets = google.sheets({ version: 'v4', auth });
+
+        const rowMap = new Map<string, string>();
+        LOG_HEADERS.forEach(header => rowMap.set(header, ''));
+
+        // Populate common fields
+        rowMap.set('nome_usuario', user?.username || 'N/A');
+        rowMap.set('timestamp', item.createdAt || new Date().toISOString());
+        rowMap.set('id', item.id);
+        rowMap.set('categoria', item.categoria);
+        rowMap.set('nome', ('title' in item && item.title) || item.nome);
+        rowMap.set('descricao_curta', item.descricao_curta);
+        rowMap.set('raridade', item.raridade || 'N/A');
+        rowMap.set('nivel_sugerido', String(item.nivel_sugerido || 'N/A'));
+        rowMap.set('tematica', item.tematica || 'N/A');
+        rowMap.set('image_prompt', item.imagePromptDescription || '');
+        rowMap.set('dados_completos_json', JSON.stringify(item));
         
-        const timestamp = item.createdAt || new Date().toISOString();
-        const name = ('title' in item && item.title) || item.nome;
-        
-        const rowData = [
-            timestamp,
-            item.id,
-            item.categoria,
-            name,
-            item.descricao_curta,
-            item.imagePromptDescription || '',
-            JSON.stringify(item),
-        ];
+        // Populate category-specific fields
+        switch (item.categoria) {
+            case 'Arma':
+                rowMap.set('arma_dano', item.dano || '');
+                rowMap.set('arma_tipo_de_dano', item.tipo_de_dano || '');
+                rowMap.set('arma_status_aplicado', item.status_aplicado || '');
+                rowMap.set('arma_efeitos_secundarios', item.efeitos_secundarios || '');
+                break;
+            case 'Acessório':
+                rowMap.set('acessorio_efeitos_passivos', item.efeitos_passivos || '');
+                rowMap.set('acessorio_efeitos_ativos', item.efeitos_ativos || '');
+                rowMap.set('acessorio_condicao_ativacao', item.condicao_ativacao || '');
+                break;
+            case 'Kekkijutsu':
+                rowMap.set('kekkijutsu_dano', item.dano || '');
+                rowMap.set('kekkijutsu_tipo_de_dano', item.tipo_de_dano || '');
+                rowMap.set('kekkijutsu_status_aplicado', item.status_aplicado || '');
+                rowMap.set('kekkijutsu_efeitos_secundarios', item.efeitos_secundarios || '');
+                break;
+            case 'Caçador':
+                rowMap.set('cacador_classe', item.classe || '');
+                rowMap.set('cacador_personalidade', item.personalidade || '');
+                rowMap.set('cacador_background', item.background || '');
+                break;
+            case 'Inimigo/Oni':
+                rowMap.set('oni_power_level', item.power_level || '');
+                rowMap.set('oni_kekkijutsu_nome', item.kekkijutsu?.nome || '');
+                rowMap.set('oni_kekkijutsu_descricao', item.kekkijutsu?.descricao || '');
+                rowMap.set('oni_fraquezas_unicas', item.fraquezas_unicas?.join(', ') || '');
+                break;
+            case 'NPC':
+                rowMap.set('npc_origem', item.origem || '');
+                rowMap.set('npc_motivacao', item.motivation || '');
+                rowMap.set('npc_segredo', item.secret || '');
+                rowMap.set('npc_profissao', item.profession || '');
+                break;
+            case 'Missões':
+                rowMap.set('missao_titulo', item.title || '');
+                rowMap.set('missao_logline', item.logline || '');
+                rowMap.set('missao_objetivos', item.objectives?.join('; ') || '');
+                break;
+            case 'World Building':
+                 rowMap.set('wb_plot_threads', item.plot_threads?.map(p => p.title).join('; ') || '');
+                 rowMap.set('wb_faccoes', item.faccoes_internas?.map(f => f.nome).join(', ') || '');
+                 rowMap.set('wb_ameacas', item.ameacas_externas?.map(a => a.nome).join(', ') || '');
+                break;
+            case 'Evento':
+                rowMap.set('evento_level', item.level || '');
+                rowMap.set('evento_threat_level', item.threatLevel || '');
+                rowMap.set('evento_tipo', item.eventType || '');
+                break;
+            case 'Forma de Respiração':
+                 rowMap.set('respiracao_base', item.base_breathing_id || '');
+                 rowMap.set('respiracao_mecanicas', item.mechanics ? `${item.mechanics.activation}, ${item.mechanics.on_success_target}` : '');
+                break;
+        }
+
+        const rowData = LOG_HEADERS.map(header => rowMap.get(header) || '');
+        const range = `${logSheetName}!A:AS`; // Updated range for 45 columns
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: `${logSheetName}!A:G`,
+            range: range,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
                 values: [rowData],
@@ -191,7 +251,6 @@ export async function logGenerationToSheet(item: GeneratedItem): Promise<void> {
         
         console.log(`Successfully logged generation ID ${item.id} to Google Sheet.`);
     } catch (error: any) {
-        // The service account might have read-only permissions. Provide a helpful error.
         let errorMessage = error.message;
         if (error.code === 403 || error.message?.toLowerCase().includes('permission denied')) {
             errorMessage = 'Permission Denied (403). A conta de serviço precisa de permissão de "Editor" na planilha para registrar os logs.';

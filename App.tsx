@@ -187,6 +187,7 @@ const App: React.FC = () => {
                                     setFavorites={setForgeFavorites}
                                     selectedItem={selectedForgeItem}
                                     setSelectedItem={setSelectedForgeItem}
+                                    user={user}
                                 />
                             ) : (
                                 <PromptEngineeringPanel 

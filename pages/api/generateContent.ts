@@ -1,4 +1,5 @@
 
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { GoogleGenAI, Type } from "@google/genai";
 import OpenAI from 'openai';
@@ -6,7 +7,7 @@ import { getAiClient } from '../../lib/gemini';
 import { getOpenAiClient } from '../../lib/openai';
 import { callDeepSeekAPI } from '../../lib/deepseek';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
-import type { FilterState, GeneratedItem, Category, ApiKeys } from '../../types';
+import type { FilterState, GeneratedItem, Category, ApiKeys, User } from '../../types';
 import { logGenerationToSheet } from '../../lib/googleSheets';
 
 // Helper to safely parse JSON from AI responses
@@ -32,7 +33,7 @@ export default async function handler(
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    const { filters, promptModifier, apiKeys } = req.body as { filters: FilterState, promptModifier?: string, apiKeys?: ApiKeys };
+    const { filters, promptModifier, apiKeys, user } = req.body as { filters: FilterState, promptModifier?: string, apiKeys?: ApiKeys, user?: User };
     
     if (!filters || !filters.category) {
         return res.status(400).json({ message: 'A categoria é obrigatória nos filtros.' });
@@ -130,7 +131,7 @@ export default async function handler(
 
         // Non-blocking call to log the result to the sheet.
         // Errors are handled inside the function itself.
-        logGenerationToSheet(result);
+        logGenerationToSheet(result, user);
 
         res.status(200).json(result);
 

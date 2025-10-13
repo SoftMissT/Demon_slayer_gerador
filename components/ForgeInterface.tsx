@@ -7,7 +7,7 @@ import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
-import type { FilterState, GeneratedItem } from '../types';
+import type { FilterState, GeneratedItem, User } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import { DiscordIcon } from './icons/DiscordIcon';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
@@ -22,6 +22,7 @@ interface ForgeInterfaceProps {
     setFavorites: React.Dispatch<React.SetStateAction<GeneratedItem[]>>;
     selectedItem: GeneratedItem | null;
     setSelectedItem: React.Dispatch<React.SetStateAction<GeneratedItem | null>>;
+    user: User | null;
 }
 
 const useWindowSize = () => {
@@ -55,6 +56,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     history, setHistory,
     favorites, setFavorites,
     selectedItem, setSelectedItem,
+    user,
 }) => {
     const { width } = useWindowSize();
     const isDesktop = useMemo(() => (width || 0) >= 1024, [width]);
@@ -99,7 +101,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
 
         try {
             const promises = Array.from({ length: count }).map(() => 
-                orchestrateGeneration(filters, promptModifier)
+                orchestrateGeneration(filters, promptModifier, undefined, user)
             );
             const newItems = await Promise.all(promises);
             
@@ -114,7 +116,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             setIsLoading(false);
             setCurrentAiFocus(null);
         }
-    }, [isDesktop, setHistory, isAuthenticated, onLoginClick, setSelectedItem]);
+    }, [isDesktop, setHistory, isAuthenticated, onLoginClick, setSelectedItem, user]);
 
     const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
@@ -162,7 +164,7 @@ setError(null);
         setSelectedItem(null);
 
         try {
-            const variant = await orchestrateGeneration(filters as FilterState, modifier);
+            const variant = await orchestrateGeneration(filters as FilterState, modifier, undefined, user);
             variant.nome = `${item.nome} (Variante ${variantType})`;
             
             setItems(prev => [variant, ...prev]);
@@ -174,7 +176,7 @@ setError(null);
         } finally {
             setIsLoading(false);
         }
-    }, [setHistory, isDetailModalOpen, isAuthenticated, onLoginClick, setSelectedItem]);
+    }, [setHistory, isDetailModalOpen, isAuthenticated, onLoginClick, setSelectedItem, user]);
 
     const handleClearResults = useCallback(() => {
         setItems([]);
