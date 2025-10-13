@@ -20,7 +20,6 @@ const App: React.FC = () => {
     
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-    const [theme, setTheme] = useState('forge-theme');
 
     const [user, setUser] = useState<User | null>(null);
     const [authError, setAuthError] = useState<string | null>(null);
@@ -90,10 +89,9 @@ const App: React.FC = () => {
 
 
     useEffect(() => {
-        document.body.classList.remove('forge-theme', 'alchemist-theme');
-        const newTheme = activeView === 'prompt' ? 'alchemist-theme' : 'forge-theme';
-        document.body.classList.add(newTheme);
-        setTheme(newTheme);
+        document.body.classList.remove('mode-forge', 'mode-alchemy');
+        const newThemeClass = activeView === 'prompt' ? 'mode-alchemy' : 'mode-forge';
+        document.body.classList.add(newThemeClass);
     }, [activeView]);
     
     const handleLogin = async () => {
@@ -154,18 +152,15 @@ const App: React.FC = () => {
 
     return (
         <>
-            <div className={`relative z-10 flex flex-col min-h-screen bg-transparent text-white font-sans kimetsu-forge-app ${theme}`}>
+            <div className={`relative z-10 flex flex-col min-h-screen bg-transparent text-white font-sans kimetsu-forge-app`}>
                 <Header
                     activeView={activeView}
                     onViewChange={setActiveView}
                     onAboutClick={() => setIsAboutOpen(true)}
-                    onFavoritesClick={() => setIsFavoritesOpen(true)}
-                    onHistoryClick={() => setIsHistoryOpen(true)}
                     onHowItWorksClick={() => setIsHowItWorksOpen(true)}
                     user={user}
                     onLoginClick={handleLogin}
                     onLogoutClick={handleLogout}
-                    favoritesCount={activeFavorites.length}
                 />
                 <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6 overflow-hidden">
                     <AnimatePresence mode="wait">
