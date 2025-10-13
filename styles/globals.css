@@ -195,64 +195,54 @@ body {
     scrollbar-color: #4f46e5 rgba(0,0,0,0.2);
 }
 
-/* --- NEW BUTTON STYLE --- */
+/* --- NEW BUTTON STYLE (UIVERSE) --- */
 .button {
-  position: relative;
-  height: 40px;
-  background-color: #000;
-  display: flex;
-  align-items: center;
-  color: white;
-  flex-direction: row;
-  justify-content: center;
-  border: none;
-  padding: 12px;
-  gap: 8px;
-  border-radius: 8px;
+  padding: 0.75rem 1.5rem; /* Keeps height around 40px */
   cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
   font-weight: 600;
-  font-size: 0.9rem;
-}
-.button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  left: -4px;
-  top: -1px;
-  margin: auto;
-  width: calc(100% + 8px);
-  height: 48px;
-  border-radius: 10px;
-  background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100% );
-  z-index: -10;
-  pointer-events: none;
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 1rem;
+  border: none;
+  position: relative;
+  background: #100720;
+  transition: 0.1s;
+  /* Flex properties */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 1; /* Ensure content is above the blurred ::after */
 }
 
 .button::after {
-  content: "";
+  content: '';
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2% );
+  filter: blur(15px);
   z-index: -1;
   position: absolute;
-  inset: 0;
-  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100% );
-  transform: translate3d(0, 0, 0) scale(0.95);
-  filter: blur(20px);
-}
-.button:not(:disabled):hover::after {
-  filter: blur(30px);
-}
-.button:not(:disabled):hover::before {
-  transform: rotate(-180deg);
-}
-.button:active::before {
-  scale: 0.7;
+  left: 0;
+  top: 0;
+  border-radius: inherit;
 }
 
+.button:active {
+  transform: scale(0.9) rotate(3deg);
+  background: radial-gradient( circle farthest-corner at 10% 20%,  rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2% );
+  transition: 0.5s;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #100720;
+    transform: none;
+}
+.button:disabled::after {
+    display: none;
+}
 
 /* Prompt Card Styles */
 .prompt-card {
@@ -266,63 +256,6 @@ body {
 .model-midjourney:hover { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
 .model-gpt:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
 .model-gemini:hover { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
-
-/* Special Reset Button */
-.special-reset-button {
-  position: relative;
-  width: 150px;
-  height: 40px;
-  background-color: #000;
-  display: flex;
-  align-items: center;
-  color: white;
-  flex-direction: row;
-  justify-content: center;
-  border: none;
-  padding: 12px;
-  gap: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.special-reset-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  left: -4px;
-  top: -1px;
-  margin: auto;
-  width: calc(100% + 8px);
-  height: 48px;
-  border-radius: 10px;
-  background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100% );
-  z-index: -10;
-  pointer-events: none;
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.special-reset-button::after {
-  content: "";
-  z-index: -1;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100% );
-  transform: translate3d(0, 0, 0) scale(0.95);
-  filter: blur(20px);
-}
-
-.special-reset-button:hover::after {
-  filter: blur(30px);
-}
-
-.special-reset-button:hover::before {
-  transform: rotate(-180deg);
-}
-
-.special-reset-button:active::before {
-  scale: 0.7;
-}
-
 
 /* From Uiverse.io by gharsh11032000 */ 
 /* The switch - the box around the slider */
@@ -559,64 +492,6 @@ body {
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
-}
-
-/* Alchemy Clear Button */
-.alchemy-clear-button {
-  position: relative;
-  width: auto;
-  height: 40px;
-  background-color: #000;
-  display: flex;
-  align-items: center;
-  color: white;
-  flex-direction: row;
-  justify-content: center;
-  border: none;
-  padding: 0 16px;
-  gap: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.alchemy-clear-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  left: -4px;
-  top: -4px;
-  margin: auto;
-  width: calc(100% + 8px);
-  height: 48px;
-  border-radius: 10px;
-  background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100% );
-  z-index: -10;
-  pointer-events: none;
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.alchemy-clear-button::after {
-  content: "";
-  z-index: -1;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100% );
-  transform: translate3d(0, 0, 0) scale(0.95);
-  filter: blur(20px);
-}
-
-.alchemy-clear-button:hover::after {
-  filter: blur(30px);
-}
-
-.alchemy-clear-button:hover::before {
-  transform: rotate(-180deg);
-}
-
-.alchemy-clear-button:active::before {
-  scale: 0.7;
 }
 
 /* --- API Key Chat Modal Styles --- */

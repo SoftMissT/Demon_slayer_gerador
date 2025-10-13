@@ -230,7 +230,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                                         <Button variant="secondary" size="sm" onClick={handleSavePreset} className="!p-2" title="Salvar preset"><SaveIcon className="w-5 h-5" /></Button>
                                         {selectedPreset && <Button variant="danger" size="sm" onClick={handleDeletePreset} className="!p-2" title="Deletar preset"><TrashIcon className="w-5 h-5" /></Button>}
                                         <div className="w-px h-6 bg-gray-700 mx-2 hidden sm:block"></div>
-                                        <button className="alchemy-clear-button" onClick={handleClearIdea}>
+                                        <button className="button" onClick={handleClearIdea}>
                                             <RefreshIcon className="w-4 h-4" />
                                             <span>Limpar Ideia</span>
                                         </button>

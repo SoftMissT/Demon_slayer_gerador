@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
@@ -253,7 +254,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             case 'Evento': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Nível" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}>{EVENT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}>{EVENT_THREAT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Tom" value={filters.eventTone} onChange={e => handleFilterChange('eventTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.eventTematica || ''} onChange={e => handleFilterChange('eventTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.eventCountry} onChange={e => handleFilterChange('eventCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -276,7 +277,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
         <Card className="forge-panel flex flex-col h-full p-4">
             <div className="flex justify-between items-center flex-shrink-0 mb-4">
                 <h2 className="text-xl font-bold text-white font-gangofthree">BIGORNA</h2>
-                <button className="special-reset-button" onClick={handleResetFilters} title="Limpar todos os filtros e seleções">
+                <button className="button !py-2 !px-4 !text-sm !w-[150px]" onClick={handleResetFilters} title="Limpar todos os filtros e seleções">
                     <RefreshIcon className="w-4 h-4" />
                     <span>Limpar Filtros</span>
                 </button>
