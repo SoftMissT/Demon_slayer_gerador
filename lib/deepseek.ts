@@ -14,7 +14,7 @@ interface DeepSeekMessage {
 export const callDeepSeekAPI = async (messages: DeepSeekMessage[], userApiKey?: string): Promise<any> => {
     const apiKey = userApiKey || process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
-        throw new Error('Nenhuma chave de API da DeepSeek foi encontrada (nem do usuário, nem do ambiente).');
+        throw new Error('Nenhuma chave de API da DeepSeek foi encontrada no ambiente do servidor.');
     }
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {

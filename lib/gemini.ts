@@ -11,7 +11,7 @@ export const getAiClient = (apiKeyOverride?: string): GoogleGenAI | null => {
     const apiKey = apiKeyOverride || process.env.API_KEY;
 
     if (!apiKey) {
-        console.error("Nenhuma chave de API do Gemini foi encontrada (nem do usuário, nem do ambiente).");
+        console.error("Nenhuma chave de API do Gemini foi encontrada no ambiente do servidor.");
         return null;
     }
 

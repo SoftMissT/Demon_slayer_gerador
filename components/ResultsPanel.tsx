@@ -53,6 +53,7 @@ const formatFilterKey = (key: string): string => {
         weaponCountry: 'País da Arma',
         weaponType: 'Tipo de Arma',
         weaponMetalColor: 'Cor do Metal',
+        weaponDamageType: 'Tipo de Dano',
         accessoryRarity: 'Raridade',
         accessoryTematica: 'Temática do Acessório',
         accessoryOrigin: 'Origem do Acessório',

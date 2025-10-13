@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import type { User } from '../types';
 import { DiscordLoginButton } from './DiscordLoginButton';
-import { KeyIcon } from './icons/KeyIcon';
 import { StarIcon } from './icons/StarIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
 import { Tooltip } from './ui/Tooltip';
@@ -12,7 +11,6 @@ interface HeaderProps {
   onFavoritesClick: () => void;
   onHistoryClick: () => void;
   onHowItWorksClick: () => void;
-  onApiKeysClick: () => void;
   activeView: 'forge' | 'prompt';
   onViewChange: (view: 'forge' | 'prompt') => void;
   favoritesCount: number;
@@ -31,7 +29,6 @@ export const Header: React.FC<HeaderProps> = ({
     onFavoritesClick, 
     onHistoryClick, 
     onHowItWorksClick,
-    onApiKeysClick, 
     activeView, 
     onViewChange, 
     favoritesCount,
@@ -107,11 +104,6 @@ export const Header: React.FC<HeaderProps> = ({
           
           {user ? (
               <>
-                <Tooltip text="Suas Chaves de API">
-                    <button className="header-action-button" onClick={onApiKeysClick}>
-                        <KeyIcon className="w-5 h-5" />
-                    </button>
-                </Tooltip>
                 <div className="w-px h-6 bg-gray-700 mx-1"></div>
                 <div className="flex items-center gap-2 bg-gray-800/50 p-1 pr-3 rounded-full border border-gray-700">
                     <img src={user.avatar} alt="Avatar do usuário" className="w-8 h-8 rounded-full" />

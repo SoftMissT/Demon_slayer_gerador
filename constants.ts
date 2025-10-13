@@ -15,7 +15,8 @@ export const TEMATICAS: Tematica[] = [
     'Steampunk',
     'Cyberpunk',
     // FIX: Corrected a typo in 'Pós-apocalíptico' to match the 'Tematica' type.
-    'Pós-apocalípico',
+    // FIX: Corrected a typo in 'Pós-apocalíptico' to match the 'Tematica' type.
+    'Pós-apocalíptico',
     'Tempos Atuais',
     'Futurista (Sci-Fi)',
     'Biopunk',
@@ -293,6 +294,8 @@ export const TERRAINS: string[] = [
     'Distrito Industrial Abandonado'
 ];
 
+export const DAMAGE_TYPES: string[] = ['Aleatória', 'Cortante', 'Perfurante', 'Contundente', 'Fogo', 'Gelo', 'Elétrico', 'Venenoso', 'Sagrado', 'Sombrio'];
+
 export const THREAT_SCALES: string[] = [
     'Aleatória', 'Conflito Local', 'Guerra Regional', 'Ameaça Nacional', 'Crise Continental', 'Perigo Global', 'Evento de Extinção'
 ];
@@ -351,6 +354,7 @@ export const INITIAL_FILTERS: FilterState = {
     weaponCountry: '',
     weaponType: '',
     weaponMetalColor: '',
+    weaponDamageType: '',
     // Accessory
     accessoryRarity: '',
     accessoryTematica: '',

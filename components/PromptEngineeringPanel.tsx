@@ -9,7 +9,7 @@ import { PromptResultDisplay } from './PromptResultDisplay';
 import { MagicWandIcon } from './icons/MagicWandIcon';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { GeminiParameters } from './GeminiParameters';
-import type { MidjourneyParameters as MidjourneyParams, GptParameters as GptParams, GeminiParameters as GeminiParams, PromptGenerationResult, ApiKeys } from '../types';
+import type { MidjourneyParameters as MidjourneyParams, GptParameters as GptParams, GeminiParameters as GeminiParams, PromptGenerationResult } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { SaveIcon } from './icons/SaveIcon';
 import { TrashIcon } from './icons/TrashIcon';
@@ -65,7 +65,6 @@ interface AlchemyPreset {
 interface PromptEngineeringPanelProps {
     isAuthenticated: boolean;
     onLoginClick: () => void;
-    apiKeys: ApiKeys;
 }
 
 const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) => (
@@ -82,7 +81,6 @@ const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) =
 export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     isAuthenticated,
     onLoginClick,
-    apiKeys,
 }) => {
     const [basePrompt, setBasePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
@@ -119,7 +117,6 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                 generateMidjourney: isMjEnabled,
                 generateGpt: isGptEnabled,
                 generateGemini: isGeminiEnabled,
-                apiKeys,
             });
 
             setResult(data);
@@ -129,7 +126,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
         } finally {
             setIsLoading(false);
         }
-    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, isAuthenticated, onLoginClick, apiKeys]);
+    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, isAuthenticated, onLoginClick]);
 
     const handleSavePreset = useCallback(() => {
         const name = prompt("Digite um nome para o preset:");
@@ -270,11 +267,11 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                         <div className="flex-shrink-0 mt-auto pt-6">
                             <Card className="p-4 md:p-6">
                                 <div className="flex items-center justify-between gap-4">
-                                    <Button variant="secondary" onClick={handleResetAll} disabled={isLoading}>Resetar Tudo</Button>
-                                    <Button onClick={handleGenerateClick} disabled={isLoading || isGenerationDisabled} className="alchemist-button flex-grow">
+                                    <button onClick={handleResetAll} disabled={isLoading} className="button w-40">Resetar Tudo</button>
+                                    <button onClick={handleGenerateClick} disabled={isLoading || isGenerationDisabled} className="button flex-grow">
                                         <MagicWandIcon className="w-5 h-5" />
                                         {isLoading ? 'Destilando...' : 'Gerar Prompts'}
-                                    </Button>
+                                    </button>
                                 </div>
                                 {!isAuthenticated && (
                                     <p className="text-xs text-center text-yellow-400 mt-2">

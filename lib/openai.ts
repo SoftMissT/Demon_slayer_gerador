@@ -11,7 +11,7 @@ export const getOpenAiClient = (apiKeyOverride?: string): OpenAI | null => {
     const apiKey = apiKeyOverride || process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-        console.warn("Nenhuma chave de API da OpenAI foi encontrada (nem do usuário, nem do ambiente). A etapa de polimento será ignorada.");
+        console.warn("Nenhuma chave de API da OpenAI foi encontrada no ambiente do servidor. A etapa de polimento será ignorada.");
         return null;
     }
 

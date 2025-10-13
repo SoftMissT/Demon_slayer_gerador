@@ -1,3 +1,4 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys } from '../../types';
@@ -46,7 +47,7 @@ export default async function handler(
 
         const geminiClient = getAiClient(apiKeys?.gemini);
         if (!geminiClient) {
-            const errorMessage = "O Alquimista de Prompts usa o Gemini como motor principal para criar e otimizar os prompts para outros modelos. Uma chave de API do Gemini válida é necessária para esta funcionalidade. Por favor, configure a chave no servidor ou adicione sua própria chave na seção 'Suas Chaves'.";
+            const errorMessage = "O Alquimista de Prompts usa o Gemini como motor principal, mas a chave de API do Gemini não está configurada corretamente no servidor. Entre em contato com o administrador.";
             return res.status(500).json({ message: errorMessage });
         }
         

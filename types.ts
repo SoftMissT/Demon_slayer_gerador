@@ -17,7 +17,7 @@ export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'L
 
 export type Tematica = 
     'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 
-    'Cyberpunk' | 'Pós-apocalípico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 
+    'Cyberpunk' | 'Pós-apocalíptico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 
     'Biopunk' | '🧭 JOSEON (Coreia Histórica Expandida)' | '🤠 VELHO OESTE SOLAR' | 
     'DOS CAÇADORES DE SOMBRAS' | '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES' | '🕵️‍♂️ DO JAZZ & OCULTISMO' |
     '🧪 DO COLONIALISMO DE ALQUIMIA' | '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)' |
@@ -68,6 +68,7 @@ export interface FilterState {
     weaponCountry: string;
     weaponType: string;
     weaponMetalColor: string;
+    weaponDamageType: string;
     // Accessory
     accessoryRarity: Rarity | '';
     accessoryTematica: Tematica | '';

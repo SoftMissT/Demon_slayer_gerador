@@ -14,7 +14,7 @@ import {
     CATEGORIES, RARITIES, TEMATICAS, TONES, DEMON_BLOOD_ARTS, PERSONALITIES,
     METAL_COLORS, COUNTRIES, TERRAINS, THREAT_SCALES, ONI_POWER_LEVELS, ORIGINS, 
     INITIAL_FILTERS, HUNTER_RANKS, EVENT_LEVELS, EVENT_THREAT_LEVELS, EVENT_TYPES,
-    AI_FOCUS_GEMINI, AI_FOCUS_GPT, AI_FOCUS_DEEPSEEK
+    AI_FOCUS_GEMINI, AI_FOCUS_GPT, AI_FOCUS_DEEPSEEK, DAMAGE_TYPES
 } from '../constants';
 import type { FilterState, Category, Tematica, Rarity, Tone, FilterPreset } from '../types';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
@@ -71,6 +71,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
         setCount(1);
     }, []);
     
+    const handleResetMissionFilters = useCallback(() => {
+        setFilters(prev => ({
+            ...prev,
+            missionTone: INITIAL_FILTERS.missionTone,
+            intensity: INITIAL_FILTERS.intensity,
+            missionScale: INITIAL_FILTERS.missionScale,
+            protagonist: INITIAL_FILTERS.protagonist,
+            targets: INITIAL_FILTERS.targets,
+            moodModifiers: INITIAL_FILTERS.moodModifiers,
+            missionTematica: INITIAL_FILTERS.missionTematica,
+            missionCountry: INITIAL_FILTERS.missionCountry,
+            missionThreatScale: INITIAL_FILTERS.missionThreatScale,
+            missionEventType: INITIAL_FILTERS.missionEventType,
+        }));
+    }, []);
+
     const handleSavePreset = useCallback(() => {
         const name = prompt("Digite um nome para o preset:");
         if (name && name.trim()) {
@@ -165,6 +181,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 <SearchableSelect label="Temática" value={filters.weaponTematica || ''} onChange={e => handleFilterChange('weaponTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.weaponCountry} onChange={e => handleFilterChange('weaponCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Tipo de Dano" value={filters.weaponDamageType} onChange={e => handleFilterChange('weaponDamageType', e.target.value)}>{DAMAGE_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}>{METAL_COLORS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
             case 'Acessório': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -201,24 +218,29 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                     <TextInput label="Ou Especifique um Terreno" value={filters.locationTerrainCustom} onChange={e => handleFilterChange('locationTerrainCustom', e.target.value)} placeholder="Ex: Cidade no esqueleto de um Titã"/>
                 </div>
             </div>);
-            case 'Missões': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <div className="md:col-span-2">
-                    <SearchableSelect label="Tipo de Evento Central" value={filters.missionEventType} onChange={e => handleFilterChange('missionEventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+            case 'Missões': return (<>
+                <div className="flex justify-end -mb-2">
+                    <Button variant="ghost" size="sm" onClick={handleResetMissionFilters}>Limpar Filtros da Missão</Button>
                 </div>
-                <div className="md:col-span-2">
-                    <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} tooltip="Controla a complexidade e o perigo da missão. Valores mais altos geram missões com mais reviravoltas, inimigos poderosos e consequências impactantes." />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                    <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                    <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                    <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                    <div className="md:col-span-2">
+                        <SearchableSelect label="Tipo de Evento Central" value={filters.missionEventType} onChange={e => handleFilterChange('missionEventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                    </div>
+                    <div className="md:col-span-2">
+                        <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} tooltip="Controla a complexidade e o perigo da missão. Valores mais altos geram missões com mais reviravoltas, inimigos poderosos e consequências impactantes." />
+                    </div>
+                    <div className="md:col-span-2">
+                        <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
+                    </div>
+                    <div className="md:col-span-2">
+                        <TextInput label="Alvo Principal" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} placeholder="Ex: um oni que devora memórias, uma seita..."/>
+                    </div>
                 </div>
-                <div className="md:col-span-2">
-                    <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
-                </div>
-                <div className="md:col-span-2">
-                    <TextInput label="Alvo Principal" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} placeholder="Ex: um oni que devora memórias, uma seita..."/>
-                </div>
-            </div>);
+            </>);
             case 'World Building': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.wbTematica || ''} onChange={e => handleFilterChange('wbTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -346,15 +368,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                             disabled={isLoading}
                         />
                     </div>
-                    <Button 
+                    <button 
                         onClick={handleGenerateClick} 
                         disabled={isButtonDisabled} 
-                        className="w-40 forge-anvil-button"
+                        className="button w-40"
                         title={!isAuthenticated ? "Faça login com Discord para começar" : "Forjar item"}
                     >
                         {isLoading ? <Spinner size="sm" /> : <AnvilIcon className="w-5 h-5" />}
                         {isLoading ? 'Forjando...' : 'Forjar'}
-                    </Button>
+                    </button>
                 </div>
                 {!isAuthenticated && (
                     <p className="text-xs text-center text-yellow-400">

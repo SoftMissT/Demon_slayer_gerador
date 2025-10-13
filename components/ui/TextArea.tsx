@@ -14,10 +14,18 @@ export const TextArea: React.FC<TextAreaProps> = ({ label, tooltip, ...props }) 
         <label className="text-sm font-medium text-gray-400">{label}</label>
         {tooltip && <InfoTooltip text={tooltip} />}
       </div>
-      <textarea
-        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        {...props}
-      />
+       <div className="input-main-container">
+            <div className="poda-container">
+                <div className="glow"></div>
+                <div className="darkBorderBg"></div>
+                <div className="border"></div>
+                <div className="white"></div>
+                <textarea
+                  className="input-field textarea"
+                  {...props}
+                />
+            </div>
+        </div>
     </div>
   );
 };

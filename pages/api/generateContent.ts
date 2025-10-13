@@ -59,7 +59,7 @@ export default async function handler(
         // Step 2: Gemini for enrichment
         const geminiClient = getAiClient(apiKeys?.gemini);
         if (!geminiClient) {
-            return res.status(500).json({ message: 'Cliente Gemini não inicializado. Verifique a chave de API.' });
+            return res.status(500).json({ message: 'A chave de API do Gemini não está configurada corretamente no servidor. A geração falhou.' });
         }
         let enrichedItem: GeneratedItem | null = null;
         try {
