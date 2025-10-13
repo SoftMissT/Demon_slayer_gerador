@@ -1,4 +1,6 @@
+
 import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { InfoTooltip } from './InfoTooltip';
 
 // FIX: Redefined SelectProps to correctly type this custom component. It now extends
@@ -67,7 +69,7 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
   const selectedLabel = selectedOption?.label || 'Selecione...';
   const isPlaceholder = !selectedOption || !value;
 
-  const dropdownClasses = `select-menu absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto ${
+  const dropdownClasses = `absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto ${
     position === 'up' ? 'bottom-full mb-1' : 'mt-1'
   }`;
 
@@ -90,8 +92,16 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
         <svg className={`w-4 h-4 ml-2 transform transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </button>
 
+      <AnimatePresence>
       {isOpen && (
-        <div className={dropdownClasses}>
+        <motion.div 
+            initial={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className={dropdownClasses}
+            style={{ originY: position === 'up' ? '100%' : '0%' }}
+        >
           <ul>
             {options.map(option => (
               <li
@@ -103,8 +113,9 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

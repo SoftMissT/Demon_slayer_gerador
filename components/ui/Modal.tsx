@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 
 interface ModalProps {
@@ -25,14 +26,14 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   const isDrawer = variant === 'drawer-left';
 
-  const panelBaseClasses = `bg-gray-800 border-gray-700 flex flex-col transform transition-all duration-300 ease-in-out`;
+  const panelBaseClasses = `bg-gray-800 border-gray-700 flex flex-col transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]`;
   
   const panelVariantClasses = {
       center: `rounded-lg shadow-xl p-6 w-full max-w-2xl border ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`,
       'drawer-left': `h-full w-full max-w-sm border-r ${isOpen ? 'translate-x-0' : '-translate-x-full'}`
   };
   
-  const backdropClasses = `fixed inset-0 bg-black z-50 transition-opacity duration-300 ease-in-out ${isOpen ? 'bg-opacity-75' : 'bg-opacity-0 pointer-events-none'}`;
+  const backdropClasses = `fixed inset-0 bg-black z-50 transition-opacity duration-300 ease-out ${isOpen ? 'bg-opacity-75' : 'bg-opacity-0 pointer-events-none'}`;
   
   const containerClasses = isDrawer 
     ? 'fixed top-0 left-0 h-full z-50' 

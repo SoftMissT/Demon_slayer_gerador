@@ -13,6 +13,7 @@ import { AuthOverlay } from './AuthOverlay';
 import { TextArea } from './ui/TextArea';
 import { Button } from './ui/Button';
 import { MagicWandIcon } from './icons/MagicWandIcon';
+import { CauldronIcon } from './icons/CauldronIcon';
 import { Checkbox } from './ui/Checkbox';
 import { MidjourneyParameters as MidjourneyParametersComponent } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
@@ -22,6 +23,7 @@ import { PromptResultDisplay } from './PromptResultDisplay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
 import { generatePrompts } from '../lib/client/orchestrationService';
+import { Bubbles } from './Bubbles';
 
 // Initial state for parameters
 const INITIAL_MJ_PARAMS: MidjourneyParameters = {
@@ -138,56 +140,69 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
 
     return (
         <div className="h-full relative p-2">
+            <Bubbles />
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} />}
-            <div className={`h-full grid grid-cols-1 lg:grid-cols-2 gap-2 ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
+            <div className={`h-full grid grid-cols-1 lg:grid-cols-2 gap-4 ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 
                 {/* Left Column: Inputs */}
-                <div className="flex flex-col gap-2 overflow-y-auto inner-scroll pr-1">
-                    <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/50 space-y-4">
+                <div className="flex flex-col gap-2 overflow-y-auto inner-scroll pr-1 pb-4">
+                    <div className="alchemist-panel-header">
+                        <h2 className="text-xl font-bold font-gangofthree text-white">Laboratório de Alquimia</h2>
+                        <div className="magic-flow"></div>
+                    </div>
+
+                    <div className="ingredient-flask">
                         <TextArea
-                            label="Prompt Base"
+                            label="Ingrediente Principal (Prompt Base)"
                             value={basePrompt}
                             onChange={(e) => setBasePrompt(e.target.value)}
                             placeholder="Descreva a cena, personagem ou ideia principal..."
                             rows={4}
                         />
                         <TextArea
-                            label="Prompt Negativo (Opcional)"
+                            label="Catalisador Negativo (Opcional)"
                             value={negativePrompt}
                             onChange={(e) => setNegativePrompt(e.target.value)}
                             placeholder="O que você quer evitar na imagem? Ex: texto, mãos feias, baixa qualidade..."
                             rows={2}
                         />
                     </div>
-
-                    <div className="flex items-center gap-4 p-3 bg-gray-900/50 rounded-lg border border-gray-700/50">
-                        <p className="text-sm font-medium text-gray-300">Destilar para:</p>
-                        <Checkbox label="Midjourney" checked={generateFor.midjourney} onChange={e => setGenerateFor(f => ({ ...f, midjourney: e.target.checked }))} />
-                        <Checkbox label="GPT / DALL-E" checked={generateFor.gpt} onChange={e => setGenerateFor(f => ({ ...f, gpt: e.target.checked }))} />
-                        <Checkbox label="Gemini" checked={generateFor.gemini} onChange={e => setGenerateFor(f => ({ ...f, gemini: e.target.checked }))} />
+                    
+                    <div className="ingredient-flask">
+                         <div className="flex items-center gap-4 p-3">
+                            <p className="text-sm font-medium text-gray-300">Destilar para:</p>
+                            <Checkbox label="Midjourney" checked={generateFor.midjourney} onChange={e => setGenerateFor(f => ({ ...f, midjourney: e.target.checked }))} />
+                            <Checkbox label="GPT / DALL-E" checked={generateFor.gpt} onChange={e => setGenerateFor(f => ({ ...f, gpt: e.target.checked }))} />
+                            <Checkbox label="Gemini" checked={generateFor.gemini} onChange={e => setGenerateFor(f => ({ ...f, gemini: e.target.checked }))} />
+                        </div>
                     </div>
 
-                    {generateFor.midjourney && <MidjourneyParametersComponent params={mjParams} setParams={setMjParams} />}
-                    {generateFor.gpt && <GptStructuredBuilder params={gptParams} setParams={setGptParams} />}
-                    {generateFor.gemini && <GeminiParametersComponent params={geminiParams} setParams={setGeminiParams} />}
-                    
-                    <Button 
-                        onClick={handleGenerate} 
-                        disabled={isLoading || !basePrompt.trim()} 
-                        className="w-full alchemist-button mt-2 sticky bottom-0"
-                    >
-                        <MagicWandIcon className="w-5 h-5"/>
-                        {isLoading ? 'Destilando...' : 'Destilar Prompts'}
-                    </Button>
+                    {generateFor.midjourney && <div className="ingredient-flask"><MidjourneyParametersComponent params={mjParams} setParams={setMjParams} /></div>}
+                    {generateFor.gpt && <div className="ingredient-flask"><GptStructuredBuilder params={gptParams} setParams={setGptParams} /></div>}
+                    {generateFor.gemini && <div className="ingredient-flask"><GeminiParametersComponent params={geminiParams} setParams={setGeminiParams} /></div>}
                 </div>
 
                 {/* Right Column: Outputs */}
                 <div className="flex flex-col gap-2 overflow-y-auto inner-scroll pr-1">
-                    {isLoading ? (
-                        <div className="h-full flex items-center justify-center">
+                    <div className="cauldron-container">
+                        {isLoading ? (
                             <AlchemyLoadingIndicator />
-                        </div>
-                    ) : results ? (
+                        ) : (
+                            <>
+                            <CauldronIcon className="w-24 h-24 text-gray-400 mb-4 animate-float" />
+                            <Button 
+                                onClick={handleGenerate} 
+                                disabled={!basePrompt.trim()} 
+                                className="w-full max-w-xs alchemist-button"
+                            >
+                                <MagicWandIcon className="w-5 h-5"/>
+                                Destilar Prompts
+                            </Button>
+                            </>
+                        )}
+                    </div>
+                    
+                    {results ? (
                         <PromptResultDisplay 
                             results={results}
                             inputs={{ basePrompt, negativePrompt, mjParams, gptParams, geminiParams }}
@@ -195,11 +210,10 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                             onFavorite={handleToggleFavorite}
                             isFavorited={isCurrentResultFavorited}
                         />
-                    ) : (
+                    ) : !isLoading && (
                          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-8">
-                            <MagicWandIcon className="w-24 h-24 mb-6 opacity-20" />
                             <h2 className="text-2xl font-bold font-gangofthree text-white">Caldeirão Vazio</h2>
-                            <p className="mt-2 max-w-md">Escreva seu prompt base, ajuste os parâmetros e clique em "Destilar" para criar prompts otimizados para as IAs de imagem.</p>
+                            <p className="mt-2 max-w-md">Adicione seus ingredientes, ajuste os catalisadores e clique em "Destilar" para criar poções de prompt otimizadas.</p>
                         </div>
                     )}
                     

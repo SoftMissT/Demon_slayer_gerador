@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=M+PLUS+1p:wght@400;700&family=Sawarabi+Mincho&display=swap');
 
 @tailwind base;
@@ -42,11 +43,13 @@ h1, h2, h3, h4, h5, h6 {
     --accent-weak: rgba(255, 142, 94, 0.12);
 }
 .theme-alchemist {
-    --bg: #1a1a1a;
-    --panel-bg: rgba(18, 13, 22, 0.7);
-    --border-color: rgba(155, 107, 255, 0.2);
-    --accent: var(--brand-accent);
-    --accent-weak: rgba(155, 107, 255, 0.12);
+    --bg: #100f1a;
+    --panel-bg: rgba(22, 19, 36, 0.7);
+    --border-color: rgba(155, 107, 255, 0.3);
+    --accent: #9B6BFF;    /* roxo */
+    --accent-secondary: #23c5d6; /* ciano mistico */
+    --accent-tertiary: #ff69b4;  /* rosa magico */
+    --accent-weak: rgba(155, 107, 255, 0.15);
 }
 
 /* Themed Background Pattern */
@@ -145,13 +148,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Component: Themed Buttons */
-.forge-button, .alchemist-button {
+.forge-button {
   background: var(--accent);
+  color: white;
+  box-shadow: 0 8px 24px var(--accent-weak);
+}
+.alchemist-button {
+  background-image: linear-gradient(45deg, var(--accent-secondary), var(--accent), var(--accent-tertiary));
   color: white;
   box-shadow: 0 8px 24px var(--accent-weak);
 }
 .forge-button:hover, .alchemist-button:hover {
     filter: brightness(1.1);
+    transform: translateY(-1px);
 }
 
 /* Result Card Styles */
@@ -218,126 +227,203 @@ h1, h2, h3, h4, h5, h6 {
 .animate-pulse-slow {
     animation: pulse-slow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+@keyframes float {
+	0% { transform: translatey(0px); }
+	50% { transform: translatey(-10px); }
+	100% { transform: translatey(0px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+}
+@keyframes magic-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
-/* API Keys Modal Chat Styles */
-.api-keys-chat-container {
-    background-color: #1e1e1e;
-    color: white;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+/* About Modal Action Buttons */
+.crunchyroll-button {
+    --color: #f47521;
+    background-color: transparent !important;
+    border-color: var(--color) !important;
+    color: var(--color) !important;
 }
-.nav-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #2a2a2a;
-    border-bottom: 1px solid #444;
+.crunchyroll-button:hover {
+    background-color: rgba(244, 117, 33, 0.1) !important;
+    color: #ff9a59 !important;
 }
-.close { cursor: pointer; }
-.messages-area {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
+.discord-button {
+    --color: #5865f2;
+    background-color: transparent !important;
+    border-color: var(--color) !important;
+    color: var(--color) !important;
 }
-.message-bubble {
-    padding: 10px 15px;
-    border-radius: 18px;
-    margin-bottom: 10px;
-    max-width: 80%;
+.discord-button:hover {
+    background-color: rgba(88, 101, 242, 0.1) !important;
+    color: #8a94ff !important;
 }
-.bot-message {
-    background-color: #333;
-    align-self: flex-start;
+.panini-button {
+    --color: #e62429;
+    background-color: transparent !important;
+    border-color: var(--color) !important;
+    color: var(--color) !important;
 }
-.sender-area {
-    padding: 10px;
-    background-color: #2a2a2a;
-    border-top: 1px solid #444;
+.panini-button:hover {
+     background-color: rgba(230, 36, 41, 0.1) !important;
+    color: #ff5c61 !important;
 }
-.api-key-input {
-    width: 100%;
-    padding: 8px 12px;
-    background-color: #333;
-    border: 1px solid #555;
-    border-radius: 8px;
-    color: white;
-    outline: none;
+
+/* === ALCHEMIST THEME OVERHAUL === */
+.bubbles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -5;
+  pointer-events: none;
 }
-.api-key-input:focus {
+.bubble {
+  position: absolute;
+  bottom: -50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-secondary), transparent);
+  opacity: 0.1;
+  animation-name: rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.alchemist-panel-header {
+  text-align: center;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.alchemist-panel-header .magic-flow {
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-secondary), var(--accent), var(--accent-tertiary), transparent);
+  background-size: 200% 100%;
+  animation: magic-flow 4s linear infinite;
+}
+
+.ingredient-flask {
+  background: rgba(155, 107, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 20px 20px 8px 8px;
+  padding: 1.75rem 1rem 1rem;
+  margin-top: 1rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.ingredient-flask:hover {
+    box-shadow: 0 0 15px var(--accent-weak);
     border-color: var(--accent);
 }
-
-/* Custom Discord Login Button */
-.tooltip-container {
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 17px;
-  border-radius: 10px;
-}
-
-.tooltip {
+.ingredient-flask::before { /* Cork stopper */
+  content: '';
   position: absolute;
-  top: 0;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s;
-  border-radius: 8px;
-  background: #232222;
-  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.295);
-  width: max-content;
+  width: 25%;
+  height: 16px;
+  background: #5a3d2b;
+  border: 2px solid #3b281c;
+  border-radius: 4px 4px 2px 2px;
+}
+.ingredient-flask .card, .ingredient-flask .card:hover {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
-.tooltip-container:hover .tooltip {
-  top: -130%;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  animation: shake 0.5s;
-}
-
-@keyframes shake {
-  0% { transform: translateX(-50%) rotate(0deg); }
-  25% { transform: translateX(-50%) rotate(10deg); }
-  50% { transform: translateX(-50%) rotate(-10deg); }
-  75% { transform: translateX(-50%) rotate(5deg); }
-  100% { transform: translateX(-50%) rotate(0deg); }
-}
-
-.borde-back {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  background: #333;
-  transition: all 0.3s;
+.cauldron-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-}
-
-.tooltip-container:hover .borde-back {
-  background: #5865f2;
-}
-
-.icon {
-  width: 40px;
-  height: 40px;
-  font-size: 30px;
-  border-radius: 8px;
-  background: #232222;
-  color: #fff;
-  transition: all 0.3s;
-  display: flex;
   justify-content: center;
-  align-items: center;
+  min-height: 250px;
+  padding: 2rem;
+  position: relative;
 }
 
-.tooltip-container:hover .icon {
-  background: #5865f2;
+.alchemy-loader .cauldron-bubbles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+.alchemy-loader .cauldron-bubbles span {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    position: absolute;
+    animation: bubble-up 1s ease-in-out infinite;
+    box-shadow: 0 0 5px var(--accent);
+}
+.alchemy-loader .cauldron-bubbles span:nth-child(1) { left: 45%; animation-duration: 1.2s; }
+.alchemy-loader .cauldron-bubbles span:nth-child(2) { left: 55%; animation-delay: .5s; }
+.alchemy-loader .cauldron-bubbles span:nth-child(3) { left: 40%; animation-duration: 1.5s; animation-delay: .8s; }
+.alchemy-loader .cauldron-bubbles span:nth-child(4) { left: 60%; animation-delay: 1s; }
+@keyframes bubble-up {
+    0% { bottom: 20%; opacity: 1; transform: scale(0.5); }
+    100% { bottom: 80%; opacity: 0; transform: scale(1.5); }
+}
+
+.theme-alchemist .prompt-card {
+    border-radius: 40px 40px 8px 8px;
+    border: 1px solid var(--border-color);
+    position: relative;
+    padding-top: 1.5rem;
+    box-shadow: 0 0 10px var(--accent-weak);
+}
+.theme-alchemist .prompt-card::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 12px;
+    background: #c0c0c0;
+    border-radius: 4px;
+    border: 2px solid #808080;
+}
+.theme-alchemist .model-midjourney { background-image: linear-gradient(to top, rgba(58, 12, 163, 0.3), rgba(67, 97, 238, 0.1)); }
+.theme-alchemist .model-gpt { background-image: linear-gradient(to top, rgba(0, 100, 0, 0.3), rgba(144, 238, 144, 0.1)); }
+.theme-alchemist .model-gemini { background-image: linear-gradient(to top, rgba(181, 23, 158, 0.3), rgba(247, 37, 133, 0.1)); }
+
+
+/* === HEADER TITLE === */
+.header-title-wrapper h1 {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+.header-title-wrapper p {
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+.theme-forge .header-title-wrapper h1 {
+  color: #D94D3F; /* Fiery red */
+  text-shadow: 0 0 6px rgba(255, 142, 94, 0.5), 0 0 16px rgba(212, 76, 63, 0.4);
+}
+.theme-alchemist .header-title-wrapper h1 {
+  color: #B28DFF; /* Mystical purple */
+  text-shadow: 0 0 8px rgba(155, 107, 255, 0.6), 0 0 18px rgba(35, 197, 214, 0.4);
 }

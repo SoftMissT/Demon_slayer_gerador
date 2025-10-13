@@ -1,4 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { InfoTooltip } from './InfoTooltip';
 
 interface SearchableMultiSelectProps {
@@ -91,9 +93,16 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
         </span>
         <svg className={`w-4 h-4 ml-2 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </button>
-
+      <AnimatePresence>
       {isOpen && (
-        <div className={dropdownClasses}>
+        <motion.div 
+            initial={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className={dropdownClasses}
+            style={{ originY: position === 'up' ? '100%' : '0%' }}
+        >
           <div className="p-2">
             <input
               type="text"
@@ -125,8 +134,9 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
               );
             })}
           </ul>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,7 +1,6 @@
 
-
-
 import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { GeneratedItem } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -96,13 +95,21 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                         </Button>
                     </Tooltip>
                 )}
+                <AnimatePresence>
                 {menuOpen && canGenerateVariant && (
-                    <div className="absolute bottom-full right-0 mb-2 w-36 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 py-1">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute bottom-full right-0 mb-2 w-36 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 py-1 origin-bottom-right"
+                    >
                         <button onClick={(e) => {e.stopPropagation(); handleVariantClick('agressiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Agressiva</button>
                         <button onClick={(e) => {e.stopPropagation(); handleVariantClick('técnica')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Técnica</button>
                         <button onClick={(e) => {e.stopPropagation(); handleVariantClick('defensiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Defensiva</button>
-                    </div>
+                    </motion.div>
                 )}
+                </AnimatePresence>
             </div>
         </div>
     </Card>

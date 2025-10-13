@@ -7,7 +7,6 @@ import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { MatrixBackground } from './components/MatrixBackground';
 import { AboutModal } from './components/AboutModal';
-import { ApiKeysModal } from './components/ApiKeysModal';
 import { HistoryModal } from './components/HistoryModal';
 import { FavoritesModal } from './components/FavoritesModal';
 import { HowItWorksModal } from './components/HowItWorksModal';
@@ -35,7 +34,6 @@ export default function App() {
 
     // Modal States
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-    const [isApiKeysModalOpen, setIsApiKeysModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [isHowItWorksModalOpen, setIsHowItWorksModalOpen] = useState(false);
@@ -118,7 +116,6 @@ export default function App() {
                     activeView={activeView}
                     onViewChange={setActiveView}
                     onOpenAbout={() => setIsAboutModalOpen(true)}
-                    onOpenApiKeys={() => setIsApiKeysModalOpen(true)}
                     onOpenHistory={() => setIsHistoryModalOpen(true)}
                     onOpenFavorites={() => setIsFavoritesModalOpen(true)}
                     onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
@@ -152,7 +149,6 @@ export default function App() {
                     )}
                 </main>
                 
-                <ApiKeysModal isOpen={isApiKeysModalOpen} onClose={() => setIsApiKeysModalOpen(false)} />
                 <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
                 <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
 

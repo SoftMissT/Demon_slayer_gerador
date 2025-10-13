@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { User } from '../types';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { ForgeIcon } from './icons/ForgeIcon';
@@ -9,7 +10,6 @@ import { StarIcon } from './icons/StarIcon';
 import { SettingsIcon } from './icons/SettingsIcon';
 import { HelpIcon } from './icons/HelpIcon';
 import { BookIcon } from './icons/BookIcon';
-import { KeyIcon } from './icons/KeyIcon';
 import { Tooltip } from './ui/Tooltip';
 import { Button } from './ui/Button';
 
@@ -19,7 +19,6 @@ interface HeaderProps {
     activeView: AppView;
     onViewChange: (view: AppView) => void;
     onOpenAbout: () => void;
-    onOpenApiKeys: () => void;
     onOpenHistory: () => void;
     onOpenFavorites: () => void;
     onOpenHowItWorks: () => void;
@@ -53,7 +52,7 @@ const ViewToggleButton: React.FC<{ activeView: AppView, onViewChange: (view: App
 
 
 export const Header: React.FC<HeaderProps> = ({
-    activeView, onViewChange, onOpenAbout, onOpenApiKeys, onOpenHistory, onOpenFavorites, onOpenHowItWorks, user, onLogout, favoritesCount
+    activeView, onViewChange, onOpenAbout, onOpenHistory, onOpenFavorites, onOpenHowItWorks, user, onLogout, favoritesCount
 }) => {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -61,9 +60,14 @@ export const Header: React.FC<HeaderProps> = ({
         <header className="flex-shrink-0 flex items-center justify-between p-2 border-b border-gray-800">
             <div className="flex items-center gap-2 md:gap-4">
                  <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-10 h-10" />
-                <h1 className="text-xl md:text-2xl font-bold font-gangofthree hidden sm:block text-white">
-                    Kimetsu Forge
-                </h1>
+                <div className="header-title-wrapper hidden sm:block">
+                    <h1 className="text-xl md:text-2xl font-bold font-gangofthree">
+                        KIMETSU FORGE
+                    </h1>
+                    <p className="text-xs -mt-1 text-gray-400">
+                        Forjando Lendas em Aço e Magia
+                    </p>
+                </div>
             </div>
 
             <div className="flex-grow flex justify-center">
@@ -89,22 +93,25 @@ export const Header: React.FC<HeaderProps> = ({
                     <Tooltip text="Ajuda & Configurações">
                         <button onClick={() => setSettingsOpen(!settingsOpen)} className="p-2 text-gray-400 hover:text-white transition-colors"><SettingsIcon className="w-6 h-6" /></button>
                     </Tooltip>
+                    <AnimatePresence>
                     {settingsOpen && (
-                        <div 
-                            className="absolute top-full right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20 py-1"
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="absolute top-full right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20 py-1 origin-top-right"
                             onMouseLeave={() => setSettingsOpen(false)}
                         >
                             <button onClick={() => { onOpenHowItWorks(); setSettingsOpen(false); }} className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700">
                                 <BookIcon className="w-5 h-5"/> Como Funciona
                             </button>
-                            <button onClick={() => { onOpenApiKeys(); setSettingsOpen(false); }} className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                                <KeyIcon className="w-5 h-5"/> Chaves de API
-                            </button>
                              <button onClick={() => { onOpenAbout(); setSettingsOpen(false); }} className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700">
                                 <HelpIcon className="w-5 h-5"/> Sobre & Ajuda
                             </button>
-                        </div>
+                        </motion.div>
                     )}
+                    </AnimatePresence>
                 </div>
 
                 {user && (

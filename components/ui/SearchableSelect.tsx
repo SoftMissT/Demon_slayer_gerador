@@ -1,4 +1,6 @@
+
 import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { InfoTooltip } from './InfoTooltip';
 
 interface SearchableSelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'children'> {
@@ -68,7 +70,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, child
   const selectedLabel = selectedOption?.label || placeholder;
   const isPlaceholder = !selectedOption || !value;
   
-  const dropdownClasses = `select-menu absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col ${
+  const dropdownClasses = `absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col ${
     position === 'up' ? 'bottom-full mb-1' : 'mt-1'
   }`;
 
@@ -91,8 +93,16 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, child
         <svg className={`w-4 h-4 ml-2 transform transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </button>
 
+      <AnimatePresence>
       {isOpen && (
-        <div className={dropdownClasses}>
+        <motion.div 
+            initial={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className={dropdownClasses}
+            style={{ originY: position === 'up' ? '100%' : '0%' }}
+        >
           <div className="p-2 flex-shrink-0">
             <input
               type="text"
@@ -114,8 +124,9 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, child
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };
