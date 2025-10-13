@@ -1,38 +1,13 @@
-// FIX: Populated types.ts with comprehensive type definitions to resolve module and type errors across the application.
 
-// For App/Header/Authentication
-export interface User {
-    id: string;
-    username: string;
-    avatar: string;
-}
+import { CATEGORIES, RARITIES, TEMATICAS, TONES } from './constants';
 
-// From constants.ts
-export type Category = 
-    'Caçador' | 'Inimigo/Oni' | 'NPC' | 'Arma' | 'Acessório' | 
-    'Forma de Respiração' | 'Kekkijutsu' | 'Local/Cenário' | 
-    'Missões' | 'World Building' | 'Evento';
+// Base types from constants
+export type Category = typeof CATEGORIES[number];
+export type Rarity = typeof RARITIES[number];
+export type Tematica = typeof TEMATICAS[number];
+export type Tone = typeof TONES[number];
 
-export type Rarity = 'Aleatória' | 'Comum' | 'Incomum' | 'Raro' | 'Épico' | 'Lendário' | 'Amaldiçoado' | 'N/A';
-
-export type Tematica = 
-    'Aleatória' | 'Período Edo (Japão Feudal)' | 'Medieval Fantasia' | 'Steampunk' | 
-    'Cyberpunk' | 'Pós-apocalíptico' | 'Tempos Atuais' | 'Futurista (Sci-Fi)' | 
-    'Biopunk' | '🧭 JOSEON (Coreia Histórica Expandida)' | '🤠 VELHO OESTE SOLAR' | 
-    'DOS CAÇADORES DE SOMBRAS' | '🏴‍☠️ DOS IMPÉRIOS FLUTUANTES' | '🕵️‍♂️ DO JAZZ & OCULTISMO' |
-    '🧪 DO COLONIALISMO DE ALQUIMIA' | '🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)' |
-    '🤖 DA SINGULARIDADE (PÓS-HUMANA)' | '🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)' |
-    '🛸 DO CREPÚSCULO CÓSMICO' | '💠 DA INFOCRACIA' | '🎭 DOS CINCO REINOS (WUXIA/XIANXIA)' |
-    '🌃 DO SUBMUNDO NOTURNO' | '🧙 DA ALVORADA ANCESTRAL' | '🏜️ DO SAARA ETERNO' |
-    '🧟 DA QUEDA DOS REINOS' | '🚪 DOS PORTAIS ESQUECIDOS' | '🪐 DA FRONTEIRA ESTELAR' |
-    '🌌 DO ETERNO CREPÚSCULO' | '⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA' | '🎭 DOS CARNAVAIS SANGUE' |
-    '🌃 DO RENASCIMENTO SOMBRIO' | '⚔️ DOS DEUSES CAÍDOS' | '🛸 DA COLONIZAÇÃO INTERGALÁTICA' |
-    'Neon-Noir Megacidade' | 'Mythpunk Amazônico' | 'Shogunato Cibernético' | 
-    'Coralpunk Oceânico' | 'Retro-Futuro 1950s' | 'Ártico Steampunk' | 
-    'Paisagem dos Sonhos (Surreal)' | 'Tecno-Xamanismo';
-
-export type Tone = 'épico' | 'sombrio' | 'misterioso' | 'aventuresco' | 'cômico' | 'trágico' | 'esperançoso';
-
+// Filter State
 export interface FilterState {
     category: Category | '';
     styleReferences: string;
@@ -129,152 +104,70 @@ export interface FilterState {
     aiFocusDeepSeek: string;
 }
 
-export interface FilterPreset {
-    name: string;
-    filters: FilterState;
+
+// Provenance for generated items
+export interface Provenance {
+    step: string;
+    model: string;
+    status: 'success' | 'failed' | 'skipped';
+    error?: string;
+    reason?: string;
 }
 
-// From DetailPanel.tsx, etc.
-interface BaseItem {
+// Base for generated items
+export interface GeneratedItem {
     id: string;
     nome: string;
     categoria: Category;
-    tematica: string;
+    tematica: Tematica | string;
     descricao_curta: string;
     descricao: string;
-    imagePromptDescription?: string;
-    raridade: Rarity;
+    imagePromptDescription: string;
+    raridade: Rarity | string;
     nivel_sugerido: number;
+    ganchos_narrativos: string[] | string;
+    provenance: Provenance[];
     createdAt: string;
-    ganchos_narrativos?: string[] | string;
-    provenance?: any[];
+    [key: string]: any;
 }
 
-export interface WeaponItem extends BaseItem {
-    categoria: 'Arma';
+export interface HunterItem extends GeneratedItem {
+    classe: string;
+    personalidade: string;
+    background: string;
+}
+
+export interface OniItem extends GeneratedItem {
+    power_level: string;
+    comportamento_combate: string;
+    fraquezas_unicas: string[];
+}
+
+export interface NpcItem extends GeneratedItem {
+    origem: string;
+    motivation: string;
+    secret: string;
+}
+
+export interface WeaponItem extends GeneratedItem {
     dano: string;
-    dados: string;
     tipo_de_dano: string;
     status_aplicado: string;
     efeitos_secundarios: string;
 }
 
-export interface AccessoryItem extends BaseItem {
-    categoria: 'Acessório';
+export interface KekkijutsuItem extends WeaponItem {}
+
+export interface AccessoryItem extends GeneratedItem {
     efeitos_passivos: string;
     efeitos_ativos: string;
     condicao_ativacao: string;
 }
 
-export interface KekkijutsuItem extends BaseItem {
-    categoria: 'Kekkijutsu';
-    dano: string;
-    dados: string;
-    tipo_de_dano: string;
-    status_aplicado: string;
-    efeitos_secundarios: string;
-}
+export interface BreathingFormItem extends GeneratedItem {}
 
-export interface HunterItem extends BaseItem {
-    categoria: 'Caçador';
-    classe: string;
-    personalidade: string;
-    descricao_fisica: string;
-    background: string;
-    arsenal: {
-        arma: string;
-        empunhadura: {
-            nome: string;
-            descricao: string;
-        };
-    };
-    habilidades_especiais: {
-        respiracao: string;
-        variacoes_tecnica: string[];
-    };
-    acessorio: {
-        nome: string;
-        descricao: string;
-    };
-    uso_em_cena: string[];
-}
-
-export interface OniItem extends BaseItem {
-    categoria: 'Inimigo/Oni';
-    power_level: string;
-    descricao_fisica_detalhada: string;
-    kekkijutsu: {
-        nome: string;
-        descricao: string;
-    };
-    comportamento_combate: string[];
-    comportamento_fora_combate: string[];
-    fraquezas_unicas: string[];
-    trofeus_loot: string[];
-}
-
-export interface NpcItem extends BaseItem {
-    categoria: 'NPC';
-    origem: string;
-    voice_and_mannerisms: string;
-    inventory_focal: string;
-    motivation: string;
-    secret: string;
-    dialogue_lines: string[];
-    profession?: string;
-    role?: string;
-    relationship_to_pcs?: string;
-}
-
-export interface BreathingFormItem extends BaseItem {
-    categoria: 'Forma de Respiração';
-    base_breathing_id: string;
-    derivation_type?: string;
-    name_native?: string;
-    description_flavor: string;
-    requirements: {
-        min_rank: string;
-        exhaustion_cost: string;
-        cooldown: string;
-    };
-    mechanics: {
-        activation: string;
-        target: string;
-        initial_test: {
-            type: string;
-            dc_formula: string;
-        };
-        on_success_target: string;
-        on_fail_target: string;
-        damage_formula_rank: Record<string, string>;
-    };
-    level_scaling?: Record<string, any>;
-    micro_variants?: (string | Record<string, unknown>)[];
-}
-
-export interface MissionNPC {
-    id: string;
-    name: string;
-    role: string;
-    dialogue_example: string;
-    physical_trait: string;
-    goal: string;
-    secret: string;
-    twist: string;
-}
-
-export interface MissionItem {
-    appearance: string;
-    origin: string;
-    wear: string;
-    quirk: string;
-    use: string;
-}
-
-export interface MissionItemDetails extends BaseItem {
-    categoria: 'Missões';
+export interface MissionItemDetails {
     title: string;
-    tone?: string;
     logline: string;
     summary: string;
     objectives: string[];
@@ -282,98 +175,44 @@ export interface MissionItemDetails extends BaseItem {
     failure_states: string[];
     rewards: string[];
     numberOfSessions: number;
-    environment: string;
-    protagonist_desc: {
-        silhouette: string;
-        face: string;
-        attire: string;
-        movement: string;
-        defining_feature: string;
-    };
-    oni_desc: {
-        scale: string;
-        skin: string;
-        appendages: string;
-        eyes: string;
-        sound_smell: string;
-        mystic_sign: string;
-    };
-    demonBloodArtType: string;
-    key_npcs: MissionNPC[];
-    relevant_items: MissionItem[];
-    scaling_hooks: string;
-    tone_variations: Record<string, string>;
-    sensitive_flags: string[];
-    diff?: {
-        summary: string;
-        changes: string[];
-    };
-    micro_variants?: (string | Record<string, unknown>)[];
 }
 
-export interface WorldBuildingItem extends BaseItem {
-    categoria: 'World Building';
-    plot_threads: { title: string; description: string }[];
-    adventure_hooks: string[];
-    key_npcs_wb: { name: string; role: string; description: string }[];
-    points_of_interest: { name: string; type: string; description: string }[];
-    mini_missions: { title: string; objective: string; reward: string }[];
-    faccoes_internas: { nome: string; objetivo: string; descricao: string }[];
-    ameacas_externas: { nome: string; tipo: string; descricao: string }[];
-    tradicoes_culturais: string[];
-    eventos_historicos_chave: { evento: string; impacto: string }[];
-    misterios_segredos: string[];
+export interface MissionItem extends GeneratedItem {
+    details: MissionItemDetails;
 }
 
-export interface LocationItem extends BaseItem {
-    categoria: 'Local/Cenário';
+export interface WorldBuildingItem extends GeneratedItem {}
+
+export interface EventItem extends GeneratedItem {}
+
+
+// Auth & API
+export interface User {
+  id: string;
+  username: string;
+  avatar: string;
 }
 
-export interface EventItem extends BaseItem {
-    categoria: 'Evento';
-    level: string;
-    threatLevel: string;
-    eventType: string;
-    consequencias: string[];
-    participantes_chave: { nome: string; papel: string }[];
+export interface AIFlags {
+  useDeepSeek: boolean;
+  useGemini: boolean;
+  useGpt: boolean;
 }
 
-export type GeneratedItem =
-// FIX: Removed BaseItem from the union to make it a strict discriminated union.
-// This allows TypeScript to correctly narrow types based on the 'categoria' property,
-// resolving type errors in the DetailPanel component.
-    | WeaponItem
-    | AccessoryItem
-    | KekkijutsuItem
-    | HunterItem
-    | OniItem
-    | NpcItem
-    | BreathingFormItem
-    | MissionItemDetails
-    | WorldBuildingItem
-    | LocationItem
-    | EventItem;
+export interface ApiKeys {
+    gemini: string;
+    openai: string;
+    deepseek: string;
+}
 
-
-// For PromptEngineeringPanel / Alquimia
-export interface MidjourneyParameter<T> {
-    value: T;
+// Prompt Alchemy types
+export interface MidjourneyParam {
+    value: string | number;
     active: boolean;
 }
 
 export interface MidjourneyParameters {
-    aspectRatio: MidjourneyParameter<string>;
-    version: MidjourneyParameter<string>;
-    style: MidjourneyParameter<string>;
-    stylize: MidjourneyParameter<number>;
-    chaos: MidjourneyParameter<number>;
-    quality: MidjourneyParameter<number>;
-    weird: MidjourneyParameter<number>;
-    artStyle: MidjourneyParameter<string>;
-    lighting: MidjourneyParameter<string>;
-    colorPalette: MidjourneyParameter<string>;
-    composition: MidjourneyParameter<string>;
-    detailLevel: MidjourneyParameter<string>;
+    [key: string]: MidjourneyParam;
 }
 
 export interface GptParameters {
@@ -401,22 +240,12 @@ export interface AlchemyHistoryItem {
     createdAt: string;
     inputs: {
         basePrompt: string;
-        negativePrompt: string;
-        mjParams: MidjourneyParameters;
+        negativePrompt?: string;
+        mjParams?: MidjourneyParameters;
         gptParams: GptParameters;
         geminiParams: GeminiParameters;
-        isMjEnabled: boolean;
-        isGptEnabled: boolean;
-        isGeminiEnabled: boolean;
     };
-    result: PromptGenerationResult;
-}
-
-// FIX: Added ApiKeys type to support user-provided API keys from ApiKeysModal, resolving import errors in `pages/api/generateImage.ts` and `components/ApiKeysModal.tsx`.
-export interface ApiKeys {
-    gemini: string;
-    openai: string;
-    deepseek: string;
+    outputs: PromptGenerationResult;
 }
 
 export type HistoryItem = GeneratedItem | AlchemyHistoryItem;

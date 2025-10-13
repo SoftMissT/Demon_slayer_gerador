@@ -1,7 +1,9 @@
 
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
-import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult } from '../../types';
+// FIX: Corrected import path for types.
+import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, MidjourneyParam } from '../../types';
 
 interface GeneratePromptsRequest {
     basePrompt: string;
@@ -15,10 +17,17 @@ interface GeneratePromptsRequest {
     generateGemini: boolean;
 }
 
-const buildMidjourneyPrompt = (base: string, params?: MidjourneyParameters): string => {
-    if (!params) return base;
+const buildMidjourneyPrompt = (base: string, negativePrompt?: string, params?: MidjourneyParameters): string => {
     let prompt = base;
-    const activeParams = Object.entries(params).filter(([, p]) => p.active);
+
+    if (negativePrompt) {
+        prompt += ` --no ${negativePrompt}`;
+    }
+
+    if (!params) return prompt;
+
+    // FIX: Correctly typed `p` as MidjourneyParam to resolve type errors.
+    const activeParams = Object.entries(params).filter(([, p]: [string, MidjourneyParam]) => p.active);
     const technicalParams = activeParams.filter(([key]) => !['artStyle', 'lighting', 'colorPalette', 'composition', 'detailLevel'].includes(key));
     if (technicalParams.length > 0) {
         prompt += ' ';
@@ -69,10 +78,11 @@ export default async function handler(
         if (generateMidjourney) {
             systemInstruction += `Para "midjourneyPrompt":\n- Crie um prompt conciso e visual em INGLÊS. Use palavras-chave e frases curtas separadas por vírgulas.\n- Incorpore elementos de estilo como "cinematic lighting", "ultra detailed", "8k", "photorealistic".\n\n`;
             if (mjParams) {
+                // FIX: Correctly typed `param` to resolve type errors.
                 const descriptiveParams = [{ label: 'Estilo de Arte', param: mjParams.artStyle }, { label: 'Iluminação', param: mjParams.lighting }, { label: 'Paleta de Cores', param: mjParams.colorPalette }, { label: 'Composição', param: mjParams.composition }, { label: 'Nível de Detalhe', param: mjParams.detailLevel }].filter(({ param }) => param?.active);
                 if (descriptiveParams.length > 0) {
                     userPrompt += `**Parâmetros Descritivos (para Midjourney):**\n`;
-                    descriptiveParams.forEach(({ label, param }) => { if(param) userPrompt += `- ${label}: ${param.value}\n`; });
+                    descriptiveParams.forEach(({ label, param }: {label: string, param: MidjourneyParam | undefined}) => { if(param) userPrompt += `- ${label}: ${param.value}\n`; });
                     userPrompt += '\n';
                 }
             }
@@ -102,7 +112,7 @@ export default async function handler(
             const parsedJson = JSON.parse(response.text);
             
             if (generateMidjourney && parsedJson.midjourneyPrompt) {
-                result.midjourneyPrompt = buildMidjourneyPrompt(parsedJson.midjourneyPrompt, mjParams);
+                result.midjourneyPrompt = buildMidjourneyPrompt(parsedJson.midjourneyPrompt, negativePrompt, mjParams);
             }
             if (generateGpt && parsedJson.gptPrompt) {
                 result.gptPrompt = parsedJson.gptPrompt;

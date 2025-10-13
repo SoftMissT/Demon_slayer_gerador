@@ -7,7 +7,7 @@ import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
-import type { FilterState, GeneratedItem, User } from '../types';
+import type { FilterState, GeneratedItem, User, AIFlags } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
 import { ChevronRightIcon } from './icons/ChevronRightIcon';
@@ -66,7 +66,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedItem]);
 
-    const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
+    const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => {
         if (!isAuthenticated) {
             onLoginClick();
             return;
@@ -88,9 +88,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (!isDesktop) setIsFilterPanelOpen(false);
 
         try {
-            // FIX: Removed an extraneous 'undefined' argument from the 'orchestrateGeneration' call to match the function's signature, resolving a type error.
             const promises = Array.from({ length: count }).map(() => 
-                orchestrateGeneration(filters, promptModifier, user)
+                orchestrateGeneration(filters, promptModifier, aiFlags, user)
             );
             const newItems = await Promise.all(promises);
             
@@ -148,13 +147,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
         
         setIsLoading(true);
-setError(null);
+        setError(null);
         if (isDetailModalOpen) setIsDetailModalOpen(false);
         setSelectedItem(null);
 
         try {
-            // FIX: Removed an extraneous 'undefined' argument from the 'orchestrateGeneration' call to match the function's signature, resolving a type error.
-            const variant = await orchestrateGeneration(filters as FilterState, modifier, user);
+            const variant = await orchestrateGeneration(filters as FilterState, modifier, { useDeepSeek: true, useGemini: true, useGpt: true }, user);
             variant.nome = `${item.nome} (Variante ${variantType})`;
             
             setItems(prev => [variant, ...prev]);

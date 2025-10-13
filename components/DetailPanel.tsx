@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import type { GeneratedItem, ApiKeys, HunterItem, OniItem, NpcItem, WeaponItem, AccessoryItem, KekkijutsuItem, BreathingFormItem, MissionItemDetails, WorldBuildingItem, EventItem } from '../types';
+import type { GeneratedItem, HunterItem, OniItem, NpcItem, WeaponItem, AccessoryItem, KekkijutsuItem, BreathingFormItem, MissionItemDetails, WorldBuildingItem, EventItem } from '../types';
 import { AccordionSection } from './AccordionSection';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
@@ -11,7 +11,6 @@ import { SaveIcon } from './icons/SaveIcon';
 import { CopyIcon } from './icons/CopyIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { buildPlainTextForItem } from '../lib/textFormatters';
-import useLocalStorage from '../hooks/useLocalStorage';
 import { DotsVerticalIcon } from './icons/DotsVerticalIcon';
 import { Tooltip } from './ui/Tooltip';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
@@ -29,7 +28,6 @@ const ImageGenerator: React.FC<{ item: GeneratedItem }> = ({ item }) => {
   const [imageData, setImageData] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKeys] = useLocalStorage<ApiKeys>('kimetsu-forge-api-keys', { gemini: '', openai: '', deepseek: '' });
   
   const handleGenerateImage = async () => {
     setIsLoading(true);
@@ -38,7 +36,7 @@ const ImageGenerator: React.FC<{ item: GeneratedItem }> = ({ item }) => {
       const response = await fetch('/api/generateImage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: item.imagePromptDescription, apiKeys }),
+        body: JSON.stringify({ prompt: item.imagePromptDescription }),
       });
       if (!response.ok) {
         const err = await response.json();

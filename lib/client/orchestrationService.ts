@@ -1,5 +1,6 @@
 
-import type { FilterState, GeneratedItem, MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, User } from '../../types';
+// FIX: Corrected import path for types.
+import type { FilterState, GeneratedItem, MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, User, AIFlags } from '../../types';
 
 /**
  * Calls the backend API to orchestrate the generation of a new item.
@@ -8,13 +9,13 @@ import type { FilterState, GeneratedItem, MidjourneyParameters, GptParameters, G
  * @param user - Optional user object for logging.
  * @returns A promise that resolves to the generated item.
  */
-export const orchestrateGeneration = async (filters: FilterState, promptModifier?: string, user?: User | null): Promise<GeneratedItem> => {
+export const orchestrateGeneration = async (filters: FilterState, promptModifier: string, aiFlags: AIFlags, user?: User | null): Promise<GeneratedItem> => {
     const response = await fetch('/api/generateContent', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ filters, promptModifier, user }),
+        body: JSON.stringify({ filters, promptModifier, user, aiFlags }),
     });
 
     if (!response.ok) {

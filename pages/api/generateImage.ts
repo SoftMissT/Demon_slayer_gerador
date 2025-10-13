@@ -1,8 +1,10 @@
 
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import { Modality } from '@google/genai';
-import type { GptParameters, MidjourneyParameters, ApiKeys } from '../../types';
+// FIX: Corrected import path for types.
+import type { GptParameters, MidjourneyParameters, MidjourneyParam } from '../../types';
 
 interface ImageResponse {
     base64Image?: string;
@@ -18,13 +20,14 @@ const buildEnhancedImagePrompt = (prompt: string, mjParams?: MidjourneyParameter
     }
 
     if (mjParams) {
-        const activeParams = Object.entries(mjParams).filter(([, p]) => p.active);
+// FIX: Correctly typed `mjParams` to resolve a type error when accessing the 'active' property.
+        const activeParams = Object.entries(mjParams).filter(([, p]: [string, MidjourneyParam]) => p.active);
         if (activeParams.length > 0) {
             finalPrompt += `\n**Inspirações Adicionais (estilo Midjourney):**\n`;
             if (mjParams.style?.active) finalPrompt += `- Estética: ${mjParams.style.value}\n`;
-            if (mjParams.stylize?.active) finalPrompt += `- Nível de Estilização: ${mjParams.stylize.value > 500 ? 'Alto e artístico' : 'Moderado e fiel'}\n`;
-            if (mjParams.chaos?.active) finalPrompt += `- Nível de Caos/Surpresa: ${mjParams.chaos.value > 50 ? 'Alto' : 'Baixo'}\n`;
-            if (mjParams.weird?.active) finalPrompt += `- Elementos Incomuns/Estranhos: ${mjParams.weird.value > 1000 ? 'Muito Presentes' : 'Sutis'}\n`;
+            if (mjParams.stylize?.active) finalPrompt += `- Nível de Estilização: ${Number(mjParams.stylize.value) > 500 ? 'Alto e artístico' : 'Moderado e fiel'}\n`;
+            if (mjParams.chaos?.active) finalPrompt += `- Nível de Caos/Surpresa: ${Number(mjParams.chaos.value) > 50 ? 'Alto' : 'Baixo'}\n`;
+            if (mjParams.weird?.active) finalPrompt += `- Elementos Incomuns/Estranhos: ${Number(mjParams.weird.value) > 1000 ? 'Muito Presentes' : 'Sutis'}\n`;
         }
     }
 
@@ -42,12 +45,12 @@ export default async function handler(
     }
     
     try {
-        const { prompt, mjParams, gptParams, apiKeys } = req.body as { prompt: string, mjParams?: MidjourneyParameters, gptParams?: GptParameters, apiKeys?: ApiKeys };
+        const { prompt, mjParams, gptParams } = req.body as { prompt: string, mjParams?: MidjourneyParameters, gptParams?: GptParameters };
         if (!prompt || typeof prompt !== 'string') {
             return res.status(400).json({ message: 'O prompt é obrigatório e deve ser uma string.' });
         }
 
-        const aiClient = getAiClient(apiKeys?.gemini);
+        const aiClient = getAiClient();
         if (!aiClient) {
             return res.status(500).json({ message: 'A chave da API do Gemini não está configurada no servidor.' });
         }

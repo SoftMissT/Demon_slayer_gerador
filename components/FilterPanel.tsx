@@ -1,230 +1,211 @@
-
-import React, { useState, useEffect } from 'react';
-import type { FilterState } from '../types';
-import { INITIAL_FILTERS, CATEGORIES, TEMATICAS, RARITIES, TONES, DEMON_BLOOD_ARTS, PERSONALITIES, METAL_COLORS, COUNTRIES, ORIGINS, TERRAINS, DAMAGE_TYPES, THREAT_SCALES, ONI_POWER_LEVELS, HUNTER_RANKS, EVENT_LEVELS, EVENT_THREAT_LEVELS, EVENT_TYPES, AI_FOCUS_GEMINI, AI_FOCUS_GPT, AI_FOCUS_DEEPSEEK } from '../constants';
-import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
-import { WEAPON_TYPES } from '../lib/weaponData';
-import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
-import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
+import React, { useState, useCallback, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { SearchableSelect } from './ui/SearchableSelect';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { TextInput } from './ui/TextInput';
 import { TextArea } from './ui/TextArea';
+import { Switch } from './ui/Switch';
 import { SparklesIcon } from './icons/SparklesIcon';
-import { RefreshIcon } from './icons/RefreshIcon';
-import { AnvilIcon } from './icons/AnvilIcon';
-
-const BreathingStyles = BREATHING_STYLES_DATA.map(bs => bs.nome);
-const WeaponTypesList = WEAPON_TYPES.map(wt => wt.name);
-const HunterArchetypes = ['Aleatório', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))];
-
+import type { FilterState, Category, AIFlags } from '../types';
+import { INITIAL_FILTERS, CATEGORIES, RARITIES, TEMATICAS, TONES, DEMON_BLOOD_ARTS, PERSONALITIES, METAL_COLORS, COUNTRIES, TERRAINS, DAMAGE_TYPES, THREAT_SCALES, ONI_POWER_LEVELS, HUNTER_RANKS, EVENT_LEVELS, EVENT_THREAT_LEVELS, EVENT_TYPES, AI_FOCUS_GEMINI, AI_FOCUS_GPT, AI_FOCUS_DEEPSEEK, ORIGINS } from '../constants';
+import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
+import { WEAPON_TYPES } from '../lib/weaponData';
+import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
+import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 
 interface FilterPanelProps {
-  onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
+  onGenerate: (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => void;
   isLoading: boolean;
   isAuthenticated: boolean;
   onLoginClick: () => void;
 }
 
-const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div className="space-y-4 p-4 mb-4 border border-gray-700/50 rounded-lg bg-gray-800/30">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-indigo-400">{title}</h3>
-        {children}
-    </div>
-);
+const BREATHING_STYLES = ['Aleatória', ...BREATHING_STYLES_DATA.map(bs => bs.nome)];
+const WEAPON_OPTIONS = WEAPON_TYPES.map(w => w.name);
+const ARCHETYPES = ['Aleatório', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))];
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading }) => {
-  const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
-  const [promptModifier, setPromptModifier] = useState('');
-  const [professions, setProfessions] = useState<string[]>(PROFESSIONS_BY_TEMATICA.all);
+export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading, isAuthenticated, onLoginClick }) => {
+    const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
+    const [promptModifier, setPromptModifier] = useState('');
+    const [aiFlags, setAiFlags] = useState<AIFlags>({ useDeepSeek: true, useGemini: true, useGpt: true });
+    
+    const handleFilterChange = (field: keyof FilterState, value: any) => {
+        setFilters(prev => ({ ...prev, [field]: value }));
+    };
 
-  const handleFilterChange = (field: keyof FilterState, value: any) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
+    const handleSubmit = () => {
+        if (!isAuthenticated) {
+            onLoginClick();
+            return;
+        }
+        if (!filters.category) {
+            alert("Por favor, selecione uma categoria para gerar.");
+            return;
+        }
+        onGenerate(filters, 1, promptModifier, aiFlags);
+    };
+    
+    const selectedTematica = filters[`${filters.category.toLowerCase()}Tematica` as keyof FilterState] as string || 'Aleatória';
+    const professionOptions = useMemo(() => {
+        const key = Object.keys(PROFESSIONS_BY_TEMATICA).find(k => k === selectedTematica) || 'all';
+        return PROFESSIONS_BY_TEMATICA[key] || [];
+    }, [selectedTematica]);
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategory = e.target.value as FilterState['category'];
-    setFilters(prev => ({
-      ...INITIAL_FILTERS,
-      category: newCategory,
-      aiFocusGemini: prev.aiFocusGemini,
-      aiFocusGpt: prev.aiFocusGpt,
-      aiFocusDeepSeek: prev.aiFocusDeepSeek,
-      styleReferences: prev.styleReferences
-    }));
-  };
-  
-  useEffect(() => {
-    const tematicaKey = filters.npcTematica || 'all';
-    const availableProfessions = PROFESSIONS_BY_TEMATICA[tematicaKey] || PROFESSIONS_BY_TEMATICA.all;
-    setProfessions(availableProfessions);
-    if (!availableProfessions.includes(filters.npcProfession)) {
-      handleFilterChange('npcProfession', 'Aleatória');
-    }
-  }, [filters.npcTematica]);
+    const renderFilters = () => {
+        if (!filters.category) return null;
+        
+        const categoryKey = filters.category;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (filters.category) {
-      onGenerate(filters, 1, promptModifier);
-    }
-  };
-  
-  const renderCategoryFilters = () => {
-    switch (filters.category) {
-      case 'Caçador':
         return (
-          <div className="space-y-4">
-            <SearchableSelect label="Temática" value={filters.hunterTematica} onChange={e => handleFilterChange('hunterTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-            <SearchableSelect label="País de Origem" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}><option value="">Aleatória</option>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</SearchableSelect>
-            <SearchableSelect label="Clã / Origem" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}><option value="">Aleatória</option>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-            <SearchableSelect label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>{HunterArchetypes.map(a => <option key={a} value={a}>{a}</option>)}</SearchableSelect>
-            <Select label="Personalidade" value={filters.hunterPersonality} onChange={e => handleFilterChange('hunterPersonality', e.target.value)}><option value="">Aleatória</option>{PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}</Select>
-            <SearchableMultiSelect label="Respirações (max 2)" selected={filters.hunterBreathingStyles} onChange={v => handleFilterChange('hunterBreathingStyles', v)} options={BreathingStyles} maxSelection={2} />
-            <SearchableSelect label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}><option value="">Aleatória</option>{WeaponTypesList.map(w => <option key={w} value={w}>{w}</option>)}</SearchableSelect>
-            <Select label="Rank" value={filters.hunterRank} onChange={e => handleFilterChange('hunterRank', e.target.value)}><option value="">Aleatório</option>{HUNTER_RANKS.map(r => <option key={r} value={r}>{r}</option>)}</Select>
-          </div>
-        );
-       case 'Inimigo/Oni':
-        return (
-          <div className="space-y-4">
-            <SearchableSelect label="Temática" value={filters.oniTematica} onChange={e => handleFilterChange('oniTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-            <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}><option value="">Aleatório</option>{ONI_POWER_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</Select>
-            <Select label="Personalidade" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}><option value="">Aleatória</option>{PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}</Select>
-            <SearchableSelect label="País de Origem" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}><option value="">Aleatória</option>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</SearchableSelect>
-            <SearchableMultiSelect label="Inspiração de Kekkijutsu" selected={filters.oniInspirationKekkijutsu} onChange={v => handleFilterChange('oniInspirationKekkijutsu', v)} options={DEMON_BLOOD_ARTS} maxSelection={2} />
-          </div>
-        );
-      case 'NPC':
-        return (
-          <div className="space-y-4">
-            <SearchableSelect label="Temática" value={filters.npcTematica} onChange={e => handleFilterChange('npcTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-            <SearchableSelect label="País de Origem" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}><option value="">Aleatória</option>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</SearchableSelect>
-            <SearchableSelect label="Clã / Origem" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}><option value="">Aleatória</option>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-            <SearchableSelect label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>{professions.map(p => <option key={p} value={p}>{p}</option>)}</SearchableSelect>
-            <Select label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}><option value="">Aleatória</option>{PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}</Select>
-          </div>
-        );
-      case 'Arma':
-         return (
-            <div className="space-y-4">
-                <Select label="Raridade" value={filters.weaponRarity} onChange={e => handleFilterChange('weaponRarity', e.target.value)}><option value="">Aleatória</option>{RARITIES.map(r => <option key={r} value={r}>{r}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.weaponTematica} onChange={e => handleFilterChange('weaponTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}><option value="">Aleatória</option>{WeaponTypesList.map(w => <option key={w} value={w}>{w}</option>)}</SearchableSelect>
-                <Select label="Cor do Metal" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}><option value="">Aleatória</option>{METAL_COLORS.map(c => <option key={c} value={c}>{c}</option>)}</Select>
-                <Select label="Tipo de Dano" value={filters.weaponDamageType} onChange={e => handleFilterChange('weaponDamageType', e.target.value)}><option value="">Aleatória</option>{DAMAGE_TYPES.map(d => <option key={d} value={d}>{d}</option>)}</Select>
-            </div>
-        );
-        case 'Acessório':
-         return (
-            <div className="space-y-4">
-                <Select label="Raridade" value={filters.accessoryRarity} onChange={e => handleFilterChange('accessoryRarity', e.target.value)}><option value="">Aleatória</option>{RARITIES.map(r => <option key={r} value={r}>{r}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.accessoryTematica} onChange={e => handleFilterChange('accessoryTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <SearchableSelect label="Origem" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}><option value="">Aleatória</option>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-            </div>
-        );
-      case 'Forma de Respiração':
-        return (
-             <div className="space-y-4">
-                <SearchableMultiSelect label="Respirações Base (max 2)" selected={filters.baseBreathingStyles} onChange={v => handleFilterChange('baseBreathingStyles', v)} options={BreathingStyles} maxSelection={2} />
-                <SearchableSelect label="Temática" value={filters.breathingFormTematica} onChange={e => handleFilterChange('breathingFormTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <Select label="Tom" value={filters.breathingFormTone} onChange={e => handleFilterChange('breathingFormTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-             </div>
-        );
-      case 'Kekkijutsu':
-        return (
-             <div className="space-y-4">
-                <SearchableSelect label="Temática" value={filters.kekkijutsuTematica} onChange={e => handleFilterChange('kekkijutsuTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <Select label="Inspiração de Kekkijutsu" value={filters.kekkijutsuKekkijutsuInspiration} onChange={e => handleFilterChange('kekkijutsuKekkijutsuInspiration', e.target.value)}><option value="">Aleatória</option>{DEMON_BLOOD_ARTS.map(k => <option key={k} value={k}>{k}</option>)}</Select>
-             </div>
-        );
-      case 'Local/Cenário':
-        return (
-             <div className="space-y-4">
-                <Select label="Tom" value={filters.locationTone} onChange={e => handleFilterChange('locationTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.locationTematica} onChange={e => handleFilterChange('locationTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <SearchableSelect label="País" value={filters.locationCountry} onChange={e => handleFilterChange('locationCountry', e.target.value)}><option value="">Aleatória</option>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</SearchableSelect>
-                <Select label="Terreno" value={filters.locationTerrain} onChange={e => handleFilterChange('locationTerrain', e.target.value)}><option value="">Aleatória</option>{TERRAINS.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-             </div>
-        );
-        case 'Missões':
-        return (
-             <div className="space-y-4">
-                <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.missionTematica} onChange={e => handleFilterChange('missionTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <Select label="Escala de Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}><option value="">Aleatória</option>{THREAT_SCALES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-             </div>
-        );
-       case 'World Building':
-        return (
-             <div className="space-y-4">
-                <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.wbTematica} onChange={e => handleFilterChange('wbTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <Select label="Escala de Ameaça" value={filters.wbThreatScale} onChange={e => handleFilterChange('wbThreatScale', e.target.value)}><option value="">Aleatória</option>{THREAT_SCALES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-             </div>
-        );
-       case 'Evento':
-        return (
-             <div className="space-y-4">
-                <Select label="Tom" value={filters.eventTone} onChange={e => handleFilterChange('eventTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-                <SearchableSelect label="Temática" value={filters.eventTematica} onChange={e => handleFilterChange('eventTematica', e.target.value)}><option value="">Aleatória</option>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
-                <Select label="Nível do Evento" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}><option value="">Aleatório</option>{EVENT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</Select>
-                <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}><option value="">Aleatória</option>{EVENT_THREAT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</Select>
-                <Select label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}><option value="">Aleatório</option>{EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
-             </div>
-        );
-      default:
-        return <p className="text-gray-500 text-sm p-4 text-center">Selecione uma categoria para ver os filtros específicos.</p>;
-    }
-  };
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={categoryKey}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
+                >
+                    {/* Common fields can be added here if any */}
+                    
+                    {categoryKey === 'Caçador' && (
+                        <>
+                            <SearchableSelect label="Temática" value={filters.hunterTematica} onChange={e => handleFilterChange('hunterTematica', e.target.value)}>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
+                            <SearchableSelect label="País de Origem" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</SearchableSelect>
+                            <SearchableSelect label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)} tooltip="Define a classe e habilidades base do caçador.">{ARCHETYPES.map(a => <option key={a} value={a}>{a}</option>)}</SearchableSelect>
+                            <SearchableMultiSelect label="Estilos de Respiração" selected={filters.hunterBreathingStyles} onChange={v => handleFilterChange('hunterBreathingStyles', v)} options={BREATHING_STYLES} maxSelection={2} tooltip="Selecione até 2 estilos de respiração para inspiração." />
+                            <Select label="Rank" value={filters.hunterRank} onChange={e => handleFilterChange('hunterRank', e.target.value)}>{HUNTER_RANKS.map(r => <option key={r} value={r}>{r}</option>)}</Select>
+                            <Select label="Personalidade" value={filters.hunterPersonality} onChange={e => handleFilterChange('hunterPersonality', e.target.value)}>{PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}</Select>
+                            <Select label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>{WEAPON_OPTIONS.map(w => <option key={w} value={w}>{w}</option>)}</Select>
+                        </>
+                    )}
+                    
+                    {categoryKey === 'Inimigo/Oni' && (
+                        <>
+                           <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}>{ONI_POWER_LEVELS.map(p => <option key={p} value={p}>{p}</option>)}</Select>
+                           <SearchableMultiSelect label="Inspiração de Kekkijutsu" selected={filters.oniInspirationKekkijutsu} onChange={v => handleFilterChange('oniInspirationKekkijutsu', v)} options={DEMON_BLOOD_ARTS} maxSelection={2} />
+                           <Select label="Personalidade" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>{PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}</Select>
+                        </>
+                    )}
+                    
+                    {categoryKey === 'NPC' && (
+                        <>
+                            <SearchableSelect label="Temática" value={filters.npcTematica} onChange={e => handleFilterChange('npcTematica', e.target.value)}>{TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
+                            <SearchableSelect label="País de Origem" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}>{COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}</SearchableSelect>
+                            <SearchableSelect label="Origem/Background" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                            <Select label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>{professionOptions.map(p => <option key={p} value={p}>{p}</option>)}</Select>
+                            <Select label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}>{PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}</Select>
+                        </>
+                    )}
+                    
+                    {categoryKey === 'Arma' && (
+                        <>
+                            <Select label="Raridade" value={filters.weaponRarity} onChange={e => handleFilterChange('weaponRarity', e.target.value)}>{RARITIES.map(r => <option key={r} value={r}>{r}</option>)}</Select>
+                            <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>{WEAPON_OPTIONS.map(w => <option key={w} value={w}>{w}</option>)}</SearchableSelect>
+                            <Select label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}>{METAL_COLORS.map(c => <option key={c} value={c}>{c}</option>)}</Select>
+                            <Select label="Tipo de Dano" value={filters.weaponDamageType} onChange={e => handleFilterChange('weaponDamageType', e.target.value)}>{DAMAGE_TYPES.map(d => <option key={d} value={d}>{d}</option>)}</Select>
+                        </>
+                    )}
 
-  return (
-    <form onSubmit={handleSubmit} className="filter-panel h-full flex flex-col bg-gray-900 rounded-lg border border-gray-700/50">
-        <div className="p-4 flex items-center justify-between border-b border-gray-700/50 flex-shrink-0">
-            <div className="flex items-center gap-3">
-                <AnvilIcon className="w-6 h-6 text-indigo-400" />
+                    {categoryKey === 'Acessório' && (
+                         <Select label="Raridade" value={filters.accessoryRarity} onChange={e => handleFilterChange('accessoryRarity', e.target.value)}>{RARITIES.map(r => <option key={r} value={r}>{r}</option>)}</Select>
+                    )}
+                    
+                    {categoryKey === 'Missões' && (
+                        <>
+                            <Select label="Tom da Missão" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
+                            <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>{THREAT_SCALES.map(s => <option key={s} value={s}>{s}</option>)}</Select>
+                            <Select label="Tipo de Evento Central" value={filters.missionEventType} onChange={e => handleFilterChange('missionEventType', e.target.value)}>{EVENT_TYPES.map(e => <option key={e} value={e}>{e}</option>)}</Select>
+                        </>
+                    )}
+                    
+                    {categoryKey === 'World Building' && (
+                        <>
+                            <SearchableSelect label="Local Principal" value={filters.wbLocation} onChange={e => handleFilterChange('wbLocation', e.target.value)}>{TERRAINS.map(t => <option key={t} value={t}>{t}</option>)}</SearchableSelect>
+                            <Select label="Escala da Ameaça" value={filters.wbThreatScale} onChange={e => handleFilterChange('wbThreatScale', e.target.value)}>{THREAT_SCALES.map(s => <option key={s} value={s}>{s}</option>)}</Select>
+                            <Select label="Tom Geral" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value)}>{TONES.map(t => <option key={t} value={t}>{t}</option>)}</Select>
+                        </>
+                    )}
+
+                    {categoryKey === 'Evento' && (
+                        <>
+                            <Select label="Nível do Evento" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}>{EVENT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</Select>
+                            <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}>{EVENT_THREAT_LEVELS.map(t => <option key={t} value={t}>{t}</option>)}</Select>
+                            <Select label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(e => <option key={e} value={e}>{e}</option>)}</Select>
+                        </>
+                    )}
+
+                </motion.div>
+            </AnimatePresence>
+        );
+    };
+
+    return (
+        <div className="filter-panel h-full flex flex-col bg-gray-900/50 rounded-lg border border-gray-700/50">
+            <div className="p-4 border-b border-gray-700/50 flex-shrink-0">
                 <h2 className="text-xl font-bold font-gangofthree text-white">Bigorna</h2>
             </div>
-            <Button type="button" variant="ghost" onClick={() => setFilters(INITIAL_FILTERS)} className="text-xs">
-                <RefreshIcon className="w-4 h-4" /> Limpar
-            </Button>
-        </div>
-      
-        <div className="flex-grow overflow-y-auto p-4 inner-scroll">
-            <FilterSection title="Configuração Principal">
-                <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
-                    <option value="" disabled>Selecione uma categoria...</option>
-                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </Select>
-                {filters.category && renderCategoryFilters()}
-            </FilterSection>
-
-             <FilterSection title="Diretrizes da Forja">
-                <Select label="Foco Criativo (Gemini)" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)} tooltip="Define a prioridade do Gemini: criar a estrutura base, expandir a lore, focar em originalidade ou simplificar o conceito.">
-                    {AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}
-                </Select>
-                <Select label="Foco Narrativo (GPT)" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)} tooltip="Define a prioridade do GPT no polimento final: melhorar a narrativa, criar diálogos vívidos, descrições cinematográficas ou um tom mais sombrio.">
-                    {AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}
-                </Select>
-                <Select label="Foco de Mecânicas (DeepSeek)" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)} tooltip="Define a prioridade do DeepSeek: refinar mecânicas, balancear para combate, criar regras exóticas ou simplificar para fácil acesso.">
-                    {AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}
-                </Select>
-            </FilterSection>
             
-            <FilterSection title="Refinamento Avançado">
-                <TextInput label="Referências de Estilo" value={filters.styleReferences} onChange={e => handleFilterChange('styleReferences', e.target.value)} placeholder="Ex: Ghibli, Yoshitaka Amano, Dark Souls" tooltip="Nomes de artistas, jogos ou mídias para guiar o estilo visual e temático do item." />
-                <TextArea label="Modificador de Prompt (Opcional)" value={promptModifier} onChange={e => setPromptModifier(e.target.value)} placeholder="Instrução de alta prioridade. Ex: 'evitar clichês', 'foco em horror cósmico'." rows={3} tooltip="Uma instrução direta para a IA que sobrepõe outros filtros. Use para refinar o resultado com comandos específicos." />
-            </FilterSection>
-        </div>
+            <div className="flex-grow p-4 overflow-y-auto space-y-4 inner-scroll">
+                <div>
+                    <Select label="1. Categoria" value={filters.category} onChange={e => handleFilterChange('category', e.target.value as Category)}>
+                        <option value="" disabled>Selecione o que forjar...</option>
+                        {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </Select>
+                </div>
+                
+                {renderFilters()}
 
-        <div className="p-4 border-t border-gray-700/50 mt-auto flex-shrink-0 bg-gray-900/80">
-            <Button type="submit" disabled={isLoading || !filters.category} className="w-full forge-button">
-                <SparklesIcon className="w-5 h-5" />
-                {isLoading ? 'Forjando...' : 'Forjar Item'}
-            </Button>
+                <hr className="border-gray-700/50 my-4"/>
+
+                <div className="space-y-4">
+                    <TextInput 
+                        label="2. Referências de Estilo" 
+                        value={filters.styleReferences}
+                        onChange={e => handleFilterChange('styleReferences', e.target.value)}
+                        placeholder="Ex: Demon Slayer, Yoshitaka Amano"
+                        tooltip="Inspirações visuais e temáticas para a IA (nomes de artistas, jogos, animes)."
+                    />
+                    <TextArea 
+                        label="3. Modificador de Prompt" 
+                        value={promptModifier}
+                        onChange={e => setPromptModifier(e.target.value)}
+                        placeholder="Ex: Foco em terror cósmico, evitar clichês"
+                        rows={2}
+                        tooltip="Uma instrução curta e de alta prioridade para guiar a geração."
+                    />
+                </div>
+                
+                <hr className="border-gray-700/50 my-4"/>
+                
+                <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-gray-400">4. Diretrizes da Forja (Foco da IA)</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                        <Select label="Foco do Gemini (Estrutura)" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)}>{AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}</Select>
+                        <Select label="Foco do GPT (Polimento)" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)}>{AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}</Select>
+                        <Select label="Foco do DeepSeek (Conceito)" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)}>{AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}</Select>
+                    </div>
+                </div>
+
+                 <div className="space-y-2 pt-2">
+                    <Switch label="Usar DeepSeek (Conceito)" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({...f, useDeepSeek: e.target.checked}))}/>
+                    <Switch label="Usar Gemini (Estrutura)" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({...f, useGemini: e.target.checked}))}/>
+                    <Switch label="Usar GPT (Polimento)" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({...f, useGpt: e.target.checked}))}/>
+                 </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-700/50 flex-shrink-0">
+                <Button 
+                    onClick={handleSubmit} 
+                    disabled={isLoading || !filters.category} 
+                    className="w-full forge-button"
+                >
+                    <SparklesIcon className="w-5 h-5"/>
+                    {isLoading ? 'Forjando...' : 'Forjar Item'}
+                </Button>
+            </div>
         </div>
-    </form>
-  );
+    );
 };
