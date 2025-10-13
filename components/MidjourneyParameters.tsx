@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { MidjourneyParameters as MidjourneyParametersType, MidjourneyParam } from '../types';
 import { Card } from './ui/Card';

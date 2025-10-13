@@ -1,71 +1,38 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import type { 
-    AlchemyHistoryItem, 
-    FavoriteItem,
-    MidjourneyParameters,
-    GptParameters,
-    GeminiParameters,
-    PromptGenerationResult,
-    User
-} from '../types';
-import useLocalStorage from '../hooks/useLocalStorage';
+import React, { useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthOverlay } from './AuthOverlay';
-import { TextArea } from './ui/TextArea';
-import { Button } from './ui/Button';
-import { MagicWandIcon } from './icons/MagicWandIcon';
-import { CauldronIcon } from './icons/CauldronIcon';
-import { Switch } from './ui/Switch';
-import { MidjourneyParameters as MidjourneyParametersComponent } from './MidjourneyParameters';
+import { CollapsibleSection } from './ui/CollapsibleSection';
+import { MidjourneyParameters } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
 import { GeminiParametersComponent } from './GeminiParameters';
 import { PromptResultDisplay } from './PromptResultDisplay';
-import { ErrorDisplay } from './ui/ErrorDisplay';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
+import { Button } from './ui/Button';
+import { TextArea } from './ui/TextArea';
+import { Checkbox } from './ui/Checkbox';
+import { ErrorDisplay } from './ui/ErrorDisplay';
 import { generatePrompts } from '../lib/client/orchestrationService';
-import { CollapsibleSection } from './ui/CollapsibleSection';
-import { SaveIcon } from './icons/SaveIcon';
-import { TrashIcon } from './icons/TrashIcon';
-import { Select } from './ui/Select';
+import { MagicWandIcon } from './icons/MagicWandIcon';
+import type {
+    User,
+    AlchemyHistoryItem,
+    MidjourneyParameters as MJParams,
+    GptParameters,
+    GeminiParameters,
+    PromptGenerationResult
+} from '../types';
 
-// Initial state for parameters
-const INITIAL_MJ_PARAMS: MidjourneyParameters = {
+const INITIAL_MJ_PARAMS: MJParams = {
     aspectRatio: { active: false, value: '16:9' },
-    chaos: { active: false, value: 0 },
+    chaos: { active: false, value: 10 },
     quality: { active: false, value: 1 },
     style: { active: false, value: '' },
     stylize: { active: false, value: 250 },
-    version: { active: true, value: '6' },
+    version: { active: false, value: '6' },
     weird: { active: false, value: 0 },
-    artStyle: { active: false, value: '' },
-    lighting: { active: false, value: '' },
-    colorPalette: { active: false, value: '' },
-    composition: { active: false, value: '' },
-    detailLevel: { active: false, value: '' },
 };
 const INITIAL_GPT_PARAMS: GptParameters = { tone: 'Cinematic', style: 'Concept Art', composition: 'Dynamic Angle' };
 const INITIAL_GEMINI_PARAMS: GeminiParameters = { artStyle: 'Anime/Manga', lighting: 'Cinematic Lighting', colorPalette: 'Vibrant', composition: 'Dynamic Angle', detailLevel: 'Detailed' };
-
-interface PromptInputs {
-    basePrompt: string;
-    negativePrompt: string;
-    mjParams: MidjourneyParameters;
-    gptParams: GptParameters;
-    geminiParams: GeminiParameters;
-    generateFor: {
-        midjourney: boolean;
-        gpt: boolean;
-        gemini: boolean;
-    }
-}
-const INITIAL_INPUTS: PromptInputs = {
-    basePrompt: '',
-    negativePrompt: '',
-    mjParams: INITIAL_MJ_PARAMS,
-    gptParams: INITIAL_GPT_PARAMS,
-    geminiParams: INITIAL_GEMINI_PARAMS,
-    generateFor: { midjourney: true, gpt: true, gemini: true }
-};
-
 
 interface PromptEngineeringPanelProps {
     isAuthenticated: boolean;
@@ -84,234 +51,141 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     setHistory,
     favorites,
     setFavorites,
-    selectedItem,
+    selectedItem
 }) => {
-    // Input state
-    const [inputs, setInputs] = useState<PromptInputs>(INITIAL_INPUTS);
+    const [basePrompt, setBasePrompt] = useState('');
+    const [negativePrompt, setNegativePrompt] = useState('');
+    const [mjParams, setMjParams] = useState<MJParams>(INITIAL_MJ_PARAMS);
+    const [gptParams, setGptParams] = useState<GptParameters>(INITIAL_GPT_PARAMS);
+    const [geminiParams, setGeminiParams] = useState<GeminiParameters>(INITIAL_GEMINI_PARAMS);
     
-    // Generation state
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [results, setResults] = useState<PromptGenerationResult | null>(null);
+    const [generateMidjourney, setGenerateMidjourney] = useState(true);
+    const [generateGpt, setGenerateGpt] = useState(true);
+    const [generateGemini, setGenerateGemini] = useState(true);
 
-    // Preset state
-    const [presets, setPresets] = useLocalStorage<Record<string, PromptInputs>>('kimetsu-alchemy-presets', {});
-    const [selectedPreset, setSelectedPreset] = useState('');
-    
-    // Effect to load state from a selected history item
-    useEffect(() => {
-        if (selectedItem && selectedItem.inputs) { // Added outputs check to prevent crash on old data
-            const mergedInputs = {
-                ...INITIAL_INPUTS,
-                ...selectedItem.inputs,
-                mjParams: { ...INITIAL_MJ_PARAMS, ...(selectedItem.inputs.mjParams || {}) },
-                gptParams: { ...INITIAL_GPT_PARAMS, ...(selectedItem.inputs.gptParams || {}) },
-                geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(selectedItem.inputs.geminiParams || {}) },
-                generateFor: selectedItem.outputs ? { 
-                    midjourney: !!selectedItem.outputs.midjourneyPrompt,
-                    gpt: !!selectedItem.outputs.gptPrompt,
-                    gemini: !!selectedItem.outputs.geminiPrompt 
-                } : INITIAL_INPUTS.generateFor
-            };
-            setInputs(mergedInputs);
-            if (selectedItem.outputs) {
-                setResults(selectedItem.outputs);
-            } else {
-                setResults(null);
-            }
-        }
-    }, [selectedItem]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [results, setResults] = useState<PromptGenerationResult | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    const latestHistoryItem = useMemo(() => history[0] || null, [history]);
 
     const handleGenerate = useCallback(async () => {
-        if (!isAuthenticated) {
-            onLoginClick();
-            return;
-        }
-        if (!inputs.basePrompt.trim()) {
-            setError("Por favor, insira um prompt base para começar a alquimia.");
-            return;
-        }
-
         setIsLoading(true);
         setError(null);
         setResults(null);
-        
         try {
-            const generated = await generatePrompts({
-                basePrompt: inputs.basePrompt,
-                negativePrompt: inputs.negativePrompt,
-                mjParams: inputs.mjParams,
-                gptParams: inputs.gptParams,
-                geminiParams: inputs.geminiParams,
-                generateMidjourney: inputs.generateFor.midjourney,
-                generateGpt: inputs.generateFor.gpt,
-                generateGemini: inputs.generateFor.gemini,
+            const resultData = await generatePrompts({
+                basePrompt,
+                negativePrompt,
+                mjParams,
+                gptParams,
+                geminiParams,
+                generateMidjourney,
+                generateGpt,
+                generateGemini,
             });
-            setResults(generated);
-            const historyItem: AlchemyHistoryItem = {
+            setResults(resultData);
+            const newHistoryItem: AlchemyHistoryItem = {
                 id: `alchemy_${Date.now()}`,
                 createdAt: new Date().toISOString(),
-                inputs: {
-                    basePrompt: inputs.basePrompt,
-                    negativePrompt: inputs.negativePrompt,
-                    mjParams: inputs.mjParams,
-                    gptParams: inputs.gptParams,
-                    geminiParams: inputs.geminiParams
-                },
-                outputs: generated,
+                inputs: { basePrompt, negativePrompt, mjParams, gptParams, geminiParams },
+                outputs: resultData,
             };
-            setHistory(prev => [historyItem, ...prev].slice(0, 100));
-
+            setHistory(prev => [newHistoryItem, ...prev]);
         } catch (err: any) {
-            setError(err.message || 'Ocorreu um erro desconhecido durante a geração do prompt.');
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
-    }, [isAuthenticated, onLoginClick, inputs, setHistory]);
-    
-    const handleToggleFavorite = useCallback((itemToToggle: AlchemyHistoryItem) => {
-        setFavorites(prev => {
-            const isFav = prev.some(item => item.id === itemToToggle.id);
-            if (isFav) {
-                return prev.filter(item => item.id !== itemToToggle.id);
-            } else {
-                return [itemToToggle, ...prev];
-            }
-        });
+    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini, setHistory]);
+
+    const handleToggleFavorite = useCallback((item: AlchemyHistoryItem) => {
+        setFavorites(prev =>
+            prev.some(fav => fav.id === item.id)
+                ? prev.filter(fav => fav.id !== item.id)
+                : [item, ...prev]
+        );
     }, [setFavorites]);
-
-    const isCurrentResultFavorited = useMemo(() => {
-        if (!results || !history.length) return false;
-        const currentHistoryItem = history[0];
-        return favorites.some(fav => fav.id === currentHistoryItem.id);
-    }, [results, favorites, history]);
-
-    // Preset Handlers
-    const handleSavePreset = () => {
-        const presetName = prompt("Digite um nome para este preset de Alquimia:");
-        if (presetName && presetName.trim()) {
-            setPresets(prev => ({ ...prev, [presetName.trim()]: inputs }));
-            setSelectedPreset(presetName.trim());
-        }
-    };
-    const handleLoadPreset = (presetName: string) => {
-        if (presetName && presets[presetName]) {
-            const loadedPreset = presets[presetName];
-            setInputs({
-                ...INITIAL_INPUTS,
-                ...loadedPreset,
-                mjParams: { ...INITIAL_MJ_PARAMS, ...(loadedPreset.mjParams || {}) },
-                gptParams: { ...INITIAL_GPT_PARAMS, ...(loadedPreset.gptParams || {}) },
-                geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(loadedPreset.geminiParams || {}) },
-            });
-            setSelectedPreset(presetName);
-        } else {
-            setSelectedPreset('');
-        }
-    };
-    const handleDeletePreset = () => {
-        if (selectedPreset && window.confirm(`Tem certeza que deseja apagar o preset "${selectedPreset}"?`)) {
-            const newPresets = { ...presets };
-            delete newPresets[selectedPreset];
-            setPresets(newPresets);
-            setSelectedPreset('');
-        }
-    };
     
-    const presetOptions = useMemo(() => ([
-        { value: '', label: 'Carregar preset...', disabled: true },
-        ...Object.keys(presets).map(name => ({ value: name, label: name }))
-    ]), [presets]);
+    const isFavorited = useMemo(() => {
+        if (!latestHistoryItem) return false;
+        return favorites.some(fav => fav.id === latestHistoryItem.id);
+    }, [favorites, latestHistoryItem]);
+
+    if (!isAuthenticated) {
+        return <AuthOverlay onLoginClick={onLoginClick} view="alchemist" />;
+    }
 
     return (
-        <div className="h-full relative p-2">
-            {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="alchemist" />}
-            <div className={`grid md:grid-cols-2 gap-4 h-full ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
-                
-                {/* --- Left Column: Inputs --- */}
-                <div className="h-full flex flex-col">
-                    <div className="flex-grow overflow-y-auto inner-scroll pr-2">
-                         <div className="flex flex-col gap-2">
-                            <div className="ingredient-flask">
-                                <h3 className="text-lg font-bold text-center mb-2">Caldeirão Principal</h3>
-                                <TextArea
-                                    label="Ingrediente Principal (Prompt Base)"
-                                    value={inputs.basePrompt}
-                                    onChange={(e) => setInputs(i => ({...i, basePrompt: e.target.value}))}
-                                    placeholder="Descreva a cena, personagem ou ideia principal..."
-                                    rows={4}
-                                />
-                                <TextArea
-                                    label="Catalisador Negativo (Opcional)"
-                                    value={inputs.negativePrompt}
-                                    onChange={(e) => setInputs(i => ({...i, negativePrompt: e.target.value}))}
-                                    placeholder="O que você quer evitar na imagem? Ex: texto, mãos feias..."
-                                    rows={2}
-                                />
-                                <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
-                                    <h3 className="text-sm font-semibold text-gray-300 mb-2">Gerenciar Presets de Alquimia</h3>
-                                    <div className="flex gap-2">
-                                        <div className="flex-grow">
-                                            <Select label="" options={presetOptions} value={selectedPreset} onChange={handleLoadPreset} placeholder="Carregar preset..." />
-                                        </div>
-                                        <Button variant="secondary" size="sm" onClick={handleSavePreset} title="Salvar preset atual">
-                                            <SaveIcon className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="danger" size="sm" onClick={handleDeletePreset} disabled={!selectedPreset} title="Apagar preset selecionado">
-                                            <TrashIcon className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="ingredient-flask">
-                                <div className="flex items-center justify-around gap-4 p-3 flex-wrap">
-                                    <p className="text-sm font-medium flex-shrink-0">Destilar para:</p>
-                                    <Switch label="Midjourney" checked={inputs.generateFor.midjourney} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, midjourney: e.target.checked}}))} />
-                                    <Switch label="GPT / DALL-E" checked={inputs.generateFor.gpt} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, gpt: e.target.checked}}))} />
-                                    <Switch label="Gemini" checked={inputs.generateFor.gemini} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, gemini: e.target.checked}}))} />
-                                </div>
-                            </div>
-
-                            {inputs.generateFor.midjourney && <CollapsibleSection title="Caldeirão Midjourney"><MidjourneyParametersComponent params={inputs.mjParams} setParams={p => setInputs(i => ({...i, mjParams: typeof p === 'function' ? p(i.mjParams) : p }))} /></CollapsibleSection>}
-                            {inputs.generateFor.gpt && <CollapsibleSection title="Caldeirão GPT"><GptStructuredBuilder params={inputs.gptParams} setParams={p => setInputs(i => ({...i, gptParams: typeof p === 'function' ? p(i.gptParams) : p }))} /></CollapsibleSection>}
-                            {inputs.generateFor.gemini && <CollapsibleSection title="Caldeirão Gemini"><GeminiParametersComponent params={inputs.geminiParams} setParams={p => setInputs(i => ({...i, geminiParams: typeof p === 'function' ? p(i.geminiParams) : p }))} /></CollapsibleSection>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-full">
+            {/* Left Panel: Inputs */}
+            <div className="flex flex-col h-full bg-gray-900/50 rounded-lg border border-gray-700/50 p-3">
+                <div className="overflow-y-auto space-y-4 inner-scroll pr-2">
+                    <CollapsibleSection title="Prompt Base" defaultOpen>
+                        <div className="space-y-4 p-2">
+                            <TextArea label="Ideia Principal" value={basePrompt} onChange={(e) => setBasePrompt(e.target.value)} rows={4} placeholder="Ex: Um caçador de demônios com uma máscara de raposa em uma floresta de bambu..." />
+                            <TextArea label="Prompt Negativo (O que evitar)" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} rows={2} placeholder="Ex: texto, logos, má qualidade, deformado" />
                         </div>
-                    </div>
-                     <div className="flex-shrink-0 pt-4 mt-auto border-t border-gray-700/50">
-                        <Button 
-                            onClick={handleGenerate} 
-                            disabled={isLoading || !inputs.basePrompt.trim()} 
-                            className="w-full alchemist-button"
-                            size="lg"
-                        >
-                            <MagicWandIcon className="w-5 h-5"/>
-                            {isLoading ? 'Destilando...' : 'Destilar Prompts'}
-                        </Button>
-                    </div>
-                </div>
+                    </CollapsibleSection>
+                    
+                     <CollapsibleSection title="Modelos Alvo">
+                        <div className="p-2 space-y-2">
+                            <Checkbox label="Gerar para Midjourney" checked={generateMidjourney} onChange={e => setGenerateMidjourney(e.target.checked)} />
+                            <Checkbox label="Gerar para DALL-E / GPT" checked={generateGpt} onChange={e => setGenerateGpt(e.target.checked)} />
+                            <Checkbox label="Gerar para Gemini" checked={generateGemini} onChange={e => setGenerateGemini(e.target.checked)} />
+                        </div>
+                    </CollapsibleSection>
 
-                {/* --- Right Column: Outputs --- */}
-                <div className="h-full flex flex-col">
+                    <CollapsibleSection title="Parâmetros Midjourney">
+                        <div className="p-2">
+                            <MidjourneyParameters params={mjParams} setParams={setMjParams} />
+                        </div>
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Estrutura GPT">
+                        <div className="p-2">
+                            <GptStructuredBuilder params={gptParams} setParams={setGptParams} />
+                        </div>
+                    </CollapsibleSection>
+                    <CollapsibleSection title="Parâmetros Gemini">
+                         <div className="p-2">
+                            <GeminiParametersComponent params={geminiParams} setParams={setGeminiParams} />
+                        </div>
+                    </CollapsibleSection>
+                </div>
+                <div className="pt-3 border-t border-gray-700/50">
+                    <Button onClick={handleGenerate} disabled={isLoading || !basePrompt.trim()} className="w-full alchemist-button" size="lg">
+                        <MagicWandIcon className="w-5 h-5" />
+                        {isLoading ? 'Destilando...' : 'Destilar Prompts'}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Right Panel: Outputs */}
+            <div className="h-full">
+                <AnimatePresence mode="wait">
                     {isLoading ? (
-                        <AlchemyLoadingIndicator />
+                        <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full flex items-center justify-center">
+                            <AlchemyLoadingIndicator />
+                        </motion.div>
                     ) : results ? (
-                        <PromptResultDisplay 
-                            results={results}
-                            inputs={history[0]?.inputs}
-                            onRegenerate={handleGenerate}
-                            onFavorite={handleToggleFavorite}
-                            isFavorited={isCurrentResultFavorited}
-                            historyItem={history[0]}
-                        />
+                        <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                            <PromptResultDisplay
+                                results={results}
+                                inputs={{ basePrompt, negativePrompt, mjParams, gptParams, geminiParams }}
+                                onRegenerate={handleGenerate}
+                                historyItem={latestHistoryItem}
+                                onFavorite={handleToggleFavorite}
+                                isFavorited={isFavorited}
+                            />
+                        </motion.div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-8 bg-gray-900/50 rounded-lg border border-gray-700/50">
-                            <CauldronIcon className="w-24 h-24 mb-6 opacity-20" />
-                            <h2 className="text-2xl font-bold font-gangofthree text-white">Poções de Prompt</h2>
-                            <p className="mt-2 max-w-md">Os prompts destilados aparecerão aqui, prontos para serem usados.</p>
+                        <div key="placeholder" className="h-full flex flex-col items-center justify-center text-center p-8 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                            <MagicWandIcon className="w-24 h-24 mb-6 opacity-20 text-gray-500" />
+                            <h2 className="text-2xl font-bold font-gangofthree text-white">Caldeirão Vazio</h2>
+                            <p className="text-gray-400 mt-2 max-w-md">Preencha os ingredientes do seu prompt e clique em "Destilar" para iniciar a alquimia.</p>
                         </div>
                     )}
-                </div>
+                </AnimatePresence>
             </div>
             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
         </div>

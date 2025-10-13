@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import type { GeminiParameters } from '../types';
 import { Card } from './ui/Card';

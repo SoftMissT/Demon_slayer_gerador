@@ -1,109 +1,132 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDownIcon } from '../icons/ChevronDownIcon';
 import { InfoTooltip } from './InfoTooltip';
 
-type Option = {
+export interface SelectOption {
     value: string;
     label: string;
     disabled?: boolean;
-};
-
-interface SelectProps {
-  label: string;
-  tooltip?: string;
-  options: (string | Option)[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  // FIX: Added disabled prop to allow the select to be disabled.
-  disabled?: boolean;
 }
 
-export const Select: React.FC<SelectProps> = ({ label, tooltip, options, value, onChange, placeholder = 'Selecione uma opção...', disabled = false }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+// FIX: Used Omit to resolve type conflict for the 'onChange' property. This allows a custom signature while retaining other HTML attributes.
+// FIX: Added 'disabled' prop to the component interface.
+interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+    label: string;
+    options: readonly string[] | string[] | SelectOption[];
+    value: string;
+    onChange: (value: string) => void;
+    tooltip?: string;
+    placeholder?: string;
+    disabled?: boolean;
+}
 
-  const handleToggle = () => {
-    // FIX: Prevent opening the dropdown if the component is disabled.
-    if (disabled) return;
-    if (!isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      });
-    }
-    setIsOpen(!isOpen);
-  };
+export const Select: React.FC<SelectProps> = ({ label, options, value, onChange, tooltip, placeholder, disabled, ...props }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const selectRef = useRef<HTMLButtonElement>(null);
+    const [theme, setTheme] = useState('');
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isOpen &&
-        triggerRef.current && !triggerRef.current.contains(event.target as Node) &&
-        dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
-      ) {
+    useEffect(() => {
+        if (selectRef.current) {
+            const currentTheme = selectRef.current.closest('.theme-forge') ? 'theme-forge' : 'theme-alchemist';
+            setTheme(currentTheme);
+        }
+    }, []);
+
+    useEffect(() => {
+        const updatePosition = () => {
+            if (isOpen && selectRef.current) {
+                const rect = selectRef.current.getBoundingClientRect();
+                setDropdownPosition({
+                    top: rect.bottom + window.scrollY,
+                    left: rect.left + window.scrollX,
+                    width: rect.width,
+                });
+            }
+        };
+
+        if (isOpen) {
+            updatePosition();
+            window.addEventListener('resize', updatePosition);
+            window.addEventListener('scroll', updatePosition);
+        }
+
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition);
+        };
+    }, [isOpen]);
+
+
+    const normalizedOptions: SelectOption[] = options.map(opt =>
+        typeof opt === 'string' ? { value: opt, label: opt } : opt
+    );
+
+    const handleSelect = (optionValue: string) => {
+        onChange(optionValue);
         setIsOpen(false);
-      }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-  
-  const normalizedOptions = useMemo(() => options.map(opt => typeof opt === 'string' ? { value: opt, label: opt } : opt), [options]);
-  const selectedOption = useMemo(() => normalizedOptions.find(opt => opt.value === value), [normalizedOptions, value]);
 
-  return (
-    <div>
-      <div className="flex items-center gap-1.5 mb-1">
-        <label className="block text-sm font-medium text-gray-400">{label}</label>
-        {tooltip && <InfoTooltip text={tooltip} />}
-      </div>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={handleToggle}
-        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex justify-between items-center text-left select-button min-h-[42px] disabled:bg-gray-800 disabled:cursor-not-allowed"
-        disabled={disabled}
-      >
-        <span className={`truncate ${!disabled && value ? 'text-white' : 'text-gray-400'}`}>{selectedOption?.label || placeholder}</span>
-        <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
+    const selectedLabel = normalizedOptions.find(opt => opt.value === value)?.label || placeholder || 'Selecione...';
 
-      {!disabled && isOpen && createPortal(
-          <motion.div
-            ref={dropdownRef}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2, ease: "circOut" }}
+    const DropdownMenu = () => (
+        <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'circOut' }}
+            className="custom-dropdown"
             style={{
-              position: 'fixed',
-              top: position.top,
-              left: position.left,
-              width: position.width,
+                position: 'absolute',
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                width: `${dropdownPosition.width}px`,
             }}
-            className="z-[100] custom-dropdown border border-gray-600 rounded-md shadow-lg"
-          >
-            <ul className="max-h-60 overflow-auto inner-scroll custom-dropdown">
-              {normalizedOptions.map(option => (
-                <li
-                  key={option.value}
-                  onClick={() => { if (!option.disabled) { onChange(option.value); setIsOpen(false); } }}
-                  className={`dropdown-option ${option.value === value ? 'selected' : ''} ${option.disabled ? 'disabled' : ''}`}
-                >
-                  {option.label}
-                </li>
-              ))}
+        >
+            <ul className="max-h-60 overflow-y-auto">
+                {placeholder && <li className="dropdown-option disabled">{placeholder}</li>}
+                {normalizedOptions.map((option) => (
+                    <li
+                        key={option.value}
+                        className={`dropdown-option ${value === option.value && !option.disabled ? 'selected' : ''} ${option.disabled ? 'disabled' : ''}`}
+                        onClick={() => !option.disabled && handleSelect(option.value)}
+                    >
+                        {option.label}
+                    </li>
+                ))}
             </ul>
-          </motion.div>,
-          document.body
-        )}
-    </div>
-  );
+        </motion.div>
+    );
+
+    return (
+        <div className="w-full">
+            <div className="flex items-center gap-1.5 mb-1">
+                <label className="text-sm font-medium">{label}</label>
+                {tooltip && <InfoTooltip text={tooltip} />}
+            </div>
+            <button
+                ref={selectRef}
+                type="button"
+                className="custom-select-trigger"
+                onClick={() => setIsOpen(!isOpen)}
+                disabled={disabled}
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
+            >
+                <span className="truncate">{selectedLabel}</span>
+                <ChevronDownIcon className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+                {isOpen && createPortal(
+                    <div className={`fixed inset-0 z-[1000] ${theme}`} onClick={() => setIsOpen(false)}>
+                        <DropdownMenu />
+                    </div>,
+                    document.body
+                )}
+            </AnimatePresence>
+        </div>
+    );
 };

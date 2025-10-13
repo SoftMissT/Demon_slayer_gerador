@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import type { GptParameters } from '../types';
 import { Card } from './ui/Card';

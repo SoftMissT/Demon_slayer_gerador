@@ -1,147 +1,145 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDownIcon } from '../icons/ChevronDownIcon';
 import { InfoTooltip } from './InfoTooltip';
 
 interface SearchableMultiSelectProps {
-  label: string;
-  options: { value: string; label: string }[];
-  selected: string[];
-  onChange: (selected: string[]) => void;
-  placeholder?: string;
-  tooltip?: string;
+    label: string;
+    options: readonly string[] | string[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+    placeholder?: string;
+    tooltip?: string;
 }
 
-export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
-  label,
-  options,
-  selected,
-  onChange,
-  placeholder = 'Selecione...',
-  tooltip
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({ label, options, selected, onChange, placeholder, tooltip }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const selectRef = useRef<HTMLButtonElement>(null);
+    const [theme, setTheme] = useState('');
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
-  const handleToggle = () => {
-    if (!isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      });
-    }
-    setIsOpen(!isOpen);
-  };
+    useEffect(() => {
+        if (selectRef.current) {
+            const currentTheme = selectRef.current.closest('.theme-forge') ? 'theme-forge' : 'theme-alchemist';
+            setTheme(currentTheme);
+        }
+    }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isOpen &&
-        triggerRef.current && !triggerRef.current.contains(event.target as Node) &&
-        dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-        setSearchTerm('');
-      }
+    useEffect(() => {
+        const updatePosition = () => {
+            if (isOpen && selectRef.current) {
+                const rect = selectRef.current.getBoundingClientRect();
+                setDropdownPosition({
+                    top: rect.bottom + window.scrollY,
+                    left: rect.left + window.scrollX,
+                    width: rect.width,
+                });
+            }
+        };
+
+        if (isOpen) {
+            updatePosition();
+            window.addEventListener('resize', updatePosition);
+            window.addEventListener('scroll', updatePosition);
+        }
+
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition);
+        };
+    }, [isOpen]);
+
+    const filteredOptions = options.filter(option =>
+        option.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleToggle = (option: string) => {
+        if (selected.includes(option)) {
+            onChange(selected.filter(item => item !== option));
+        } else {
+            onChange([...selected, option]);
+        }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
 
-  const handleToggleOption = (value: string) => {
-    if (selected.includes(value)) {
-      onChange(selected.filter((item) => item !== value));
-    } else {
-      onChange([...selected, value]);
-    }
-  };
+    const displayValue = selected.length > 0
+        ? selected.length > 2
+            ? `${selected.length} selecionados`
+            : selected.join(', ')
+        : placeholder || 'Selecione...';
 
-  const filteredOptions = useMemo(() =>
-    options.filter(
-      (option) =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
-    [options, searchTerm]
-  );
-
-  return (
-    <div>
-      <div className="flex items-center gap-1.5 mb-1">
-        <label className="block text-sm font-medium text-gray-400">{label}</label>
-        {tooltip && <InfoTooltip text={tooltip} />}
-      </div>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={handleToggle}
-        className="flex items-center justify-between w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left min-h-[42px] select-button"
-      >
-        <div className="flex flex-wrap gap-1 flex-grow">
-          {selected.length === 0 ? <span className="text-gray-400">{placeholder}</span> : 
-            selected.map(value => {
-                const option = options.find(o => o.value === value);
-                return (
-                    <span key={value} className="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center">
-                        {option?.label || value}
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleToggleOption(value); }}
-                            className="ml-1.5 text-indigo-200 hover:text-white"
-                        >
-                            &times;
-                        </button>
-                    </span>
-                );
-            })
-          }
-        </div>
-        <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && createPortal(
-          <motion.div
-            ref={dropdownRef}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2, ease: "circOut" }}
+    const DropdownMenu = () => (
+        <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'circOut' }}
+            className="custom-dropdown"
             style={{
-              position: 'fixed',
-              top: position.top,
-              left: position.left,
-              width: position.width,
+                position: 'absolute',
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                width: `${dropdownPosition.width}px`,
             }}
-            className="z-[100] custom-dropdown border border-gray-600 rounded-md shadow-lg"
-          >
-            <div className="p-2 border-b border-gray-700">
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2 text-white text-sm"
-                autoFocus
-              />
+            onClick={(e) => e.stopPropagation()}
+        >
+            <div className="p-2">
+                <input
+                    type="text"
+                    placeholder="Buscar..."
+                    className="dropdown-search-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    autoFocus
+                />
             </div>
-            <ul className="max-h-60 overflow-auto inner-scroll custom-dropdown">
-              {filteredOptions.map((option) => (
-                <li
-                  key={option.value}
-                  onClick={() => handleToggleOption(option.value)}
-                  className={`dropdown-option ${selected.includes(option.value) ? 'selected' : ''}`}
-                >
-                  {option.label}
-                </li>
-              ))}
+            <ul className="max-h-52 overflow-y-auto">
+                {filteredOptions.map((option) => (
+                    <li
+                        key={option}
+                        className="dropdown-option flex items-center"
+                        onClick={() => handleToggle(option)}
+                    >
+                        <input
+                            type="checkbox"
+                            readOnly
+                            checked={selected.includes(option)}
+                            className="form-checkbox h-4 w-4 rounded mr-3"
+                        />
+                        {option}
+                    </li>
+                ))}
             </ul>
-          </motion.div>,
-          document.body
-        )}
-    </div>
-  );
+        </motion.div>
+    );
+
+    return (
+        <div className="w-full">
+            <div className="flex items-center gap-1.5 mb-1">
+                <label className="text-sm font-medium">{label}</label>
+                {tooltip && <InfoTooltip text={tooltip} />}
+            </div>
+            <button
+                ref={selectRef}
+                type="button"
+                className="custom-select-trigger"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
+            >
+                <span className="truncate">{displayValue}</span>
+                <ChevronDownIcon className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+                {isOpen && createPortal(
+                    <div className={`fixed inset-0 z-[1000] ${theme}`} onClick={() => setIsOpen(false)}>
+                        <DropdownMenu />
+                    </div>,
+                    document.body
+                )}
+            </AnimatePresence>
+        </div>
+    );
 };
