@@ -254,7 +254,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             case 'Evento': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Nível" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}>{EVENT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}>{EVENT_THREAT_LEVELS.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <SearchableSelect label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <Select label="Tom" value={filters.eventTone} onChange={e => handleFilterChange('eventTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.eventTematica || ''} onChange={e => handleFilterChange('eventTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.eventCountry} onChange={e => handleFilterChange('eventCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>

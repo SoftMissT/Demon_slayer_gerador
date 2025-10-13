@@ -231,11 +231,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
              {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} />}
             <div className={`h-full ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 {isDesktop ? (
-                    <div className="flex h-full">
+                    <div className="flex h-full gap-2">
                         <motion.div
                             animate={{ 
                                 width: isFilterPanelCollapsed ? 0 : 'clamp(480px, 33vw, 620px)',
-                                marginRight: isFilterPanelCollapsed ? 0 : '0.5rem'
+                                marginRight: isFilterPanelCollapsed ? 0 : -8 // to hide the gap
                             }}
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                             className="flex-shrink-0 h-full overflow-hidden"
@@ -244,17 +244,18 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                                 {filterPanelContent}
                             </div>
                         </motion.div>
+                        
                         <div className="flex-grow flex min-w-0 h-full">
                              <Button
                                 variant="secondary"
                                 onClick={() => setIsFilterPanelCollapsed(!isFilterPanelCollapsed)}
-                                className="!p-2 h-12 self-center -ml-2 z-10"
+                                className="!p-2 h-12 self-center -ml-3 z-20"
                                 title={isFilterPanelCollapsed ? "Mostrar Filtros" : "Ocultar Filtros"}
                                 aria-expanded={!isFilterPanelCollapsed}
                             >
                                 {isFilterPanelCollapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
                             </Button>
-                            <div className="flex-grow min-w-0 h-full overflow-y-auto pl-2 pr-1">
+                            <div className="flex-grow min-w-0 h-full overflow-y-auto ml-2">
                                 {resultsPanelContent}
                             </div>
                         </div>

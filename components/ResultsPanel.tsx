@@ -178,7 +178,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
             <p>Use os filtros para gerar seus itens.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
             <AnimatePresence>
                 {items.map(item => (
                    <motion.div
