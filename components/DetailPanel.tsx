@@ -1,196 +1,139 @@
 import React, { useState, useEffect } from 'react';
-import type { GeneratedItem, ProvenanceEntry, Kekkijutsu, GeneratedOni, GeneratedHunter, GeneratedWeapon } from '../types';
-import { Button } from './ui/Button';
+import type { GeneratedItem, ProvenanceEntry } from '../types';
 import { Card } from './ui/Card';
+import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
-import { DownloadIcon } from './icons/DownloadIcon';
-import { CopyIcon } from './icons/CopyIcon';
 import { PencilIcon } from './icons/PencilIcon';
 import { SaveIcon } from './icons/SaveIcon';
+import { DownloadIcon } from './icons/DownloadIcon';
 import { buildPlainTextForItem } from '../lib/textFormatters';
-import { Tooltip } from './ui/Tooltip';
-import { TagIcon } from './icons/TagIcon';
-import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
-import { TextArea } from './ui/TextArea';
-import { TextInput } from './ui/TextInput';
-// FIX: Imported ClipboardIcon to resolve reference error.
-import { ClipboardIcon } from './icons/ClipboardIcon';
-import { KatanaIcon } from './icons/KatanaIcon';
+import { AnvilIcon } from './icons/AnvilIcon';
 
 interface DetailPanelProps {
-    item: GeneratedItem | null;
-    onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-    isFavorite: boolean;
-    onToggleFavorite: (item: GeneratedItem) => void;
-    onUpdate: (item: GeneratedItem) => void;
+  item: GeneratedItem | null;
+  onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
+  isFavorite: boolean;
+  onToggleFavorite: (item: GeneratedItem) => void;
+  onUpdate: (item: GeneratedItem) => void;
 }
 
-const DetailSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div>
-        <h4 className="font-bold text-indigo-400 mb-2 font-gangofthree text-lg uppercase tracking-wider">{title}</h4>
-        <div className="prose prose-sm prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-1 text-gray-300">{children}</div>
-    </div>
-);
-
-const ProvenanceItem: React.FC<{ entry: ProvenanceEntry }> = ({ entry }) => {
-    let statusColor = 'text-gray-400';
-    if (entry.status === 'success') statusColor = 'text-green-400';
-    if (entry.status === 'failed') statusColor = 'text-red-400';
-
+const ProvenanceStep: React.FC<{ entry: ProvenanceEntry }> = ({ entry }) => {
+    const statusClasses = {
+        success: 'border-green-500/50 text-green-400',
+        failed: 'border-red-500/50 text-red-400',
+        skipped: 'border-gray-600/50 text-gray-500'
+    };
     return (
-        <li className="flex items-center justify-between text-xs">
-            <div>
-                <span className="font-semibold">{entry.step}</span>
-                <span className="text-gray-500"> ({entry.model})</span>
-            </div>
-            <span className={`font-mono capitalize ${statusColor}`}>{entry.status}</span>
-        </li>
+        <div className={`p-2 border rounded-md text-xs ${statusClasses[entry.status]}`}>
+            <p><strong>{entry.step} ({entry.model})</strong></p>
+            <p>Status: <span className="font-semibold">{entry.status}</span></p>
+            {entry.error && <p className="text-red-500 mt-1">Error: {entry.error}</p>}
+            {entry.reason && <p className="text-gray-400 mt-1">Reason: {entry.reason}</p>}
+        </div>
     );
 };
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ item, isFavorite, onToggleFavorite, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
-    const [copied, setCopied] = useState(false);
-    const [copiedPrompt, setCopiedPrompt] = useState(false);
+    const [editedItem, setEditedItem] = useState<GeneratedItem | null>(item);
 
     useEffect(() => {
-        setEditableItem(item);
-        setIsEditing(false); 
+        setEditedItem(item);
+        setIsEditing(false); // Reset editing state when item changes
     }, [item]);
 
-    if (!item || !editableItem) {
-        return (
-            <div className="flex items-center justify-center h-full text-center text-gray-500 bg-gray-800/30 rounded-lg">
-                 <div>
-                    <KatanaIcon className="w-24 h-24 mx-auto opacity-50" />
-                    <p className="mt-4">Selecione um item para ver seus segredos.</p>
-                </div>
-            </div>
-        );
-    }
-    
-    const handleFieldChange = (field: keyof GeneratedItem, value: any) => {
-        setEditableItem(prev => prev ? { ...prev, [field]: value } : null);
-    };
-
     const handleSave = () => {
-        if (editableItem) {
-            onUpdate(editableItem);
+        if (editedItem) {
+            onUpdate(editedItem);
+            setIsEditing(false);
         }
-        setIsEditing(false);
     };
-
+    
     const handleDownload = () => {
+        if (!item) return;
         const text = buildPlainTextForItem(item);
         const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const filename = (item.nome || item.title || 'item').replace(/[\s/]/g, '_');
-        a.download = `${filename}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = `${item.nome?.replace(/\s+/g, '_') || 'item'}.txt`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         URL.revokeObjectURL(url);
     };
-    
-    const handleCopy = () => {
-        const text = buildPlainTextForItem(item);
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
 
-    const handleCopyPrompt = () => {
-        if (item.imagePromptDescription) {
-            navigator.clipboard.writeText(item.imagePromptDescription);
-            setCopiedPrompt(true);
-            setTimeout(() => setCopiedPrompt(false), 2000);
-        }
+    if (!item || !editedItem) {
+        return (
+             <div className="h-full flex flex-col items-center justify-center bg-gray-800/30 rounded-lg p-4 text-center text-gray-500">
+                <AnvilIcon className="w-24 h-24 mx-auto opacity-50" />
+                <p className="mt-4">Selecione um item para ver seus detalhes.</p>
+            </div>
+        );
     }
 
-    const currentName = ('title' in editableItem && editableItem.title) || editableItem.nome;
-    
+    const currentName = ('title' in item && item.title) || item.nome;
+
     return (
-        <Card className="h-full flex flex-col bg-gray-800/30">
-            <header className="p-4 border-b border-gray-700 flex justify-between items-start gap-4 flex-shrink-0">
-                <div className="flex-grow">
-                    {isEditing ? (
-                         <TextInput label="" value={currentName} onChange={e => handleFieldChange('nome', e.target.value)} />
-                    ) : (
-                        <h2 className="text-2xl font-bold text-white font-gangofthree">{currentName}</h2>
-                    )}
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mt-1 flex-wrap">
-                        <TagIcon className="w-4 h-4" />
-                        <span>{item.categoria}</span>
-                        {item.raridade && <><span>•</span><span>{item.raridade}</span></>}
-                        {item.nivel_sugerido && <><span>•</span><span>Nível {item.nivel_sugerido}</span></>}
+        <Card className="h-full flex flex-col !p-0">
+            <header className="p-4 border-b border-gray-700 flex-shrink-0">
+                <div className="flex justify-between items-start">
+                    <div className="flex-grow pr-4">
+                        <h2 className="text-xl font-bold text-white font-gangofthree">{currentName}</h2>
+                        <p className="text-sm text-indigo-400">{item.categoria} • {item.raridade}</p>
                     </div>
-                </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                    {isEditing ? (
-                        <Tooltip text="Salvar Alterações">
-                            <Button variant="primary" className="!p-2" onClick={handleSave}>
-                                <SaveIcon className="w-5 h-5" />
-                            </Button>
-                        </Tooltip>
-                    ) : (
-                         <Tooltip text="Editar Item">
-                            <Button variant="ghost" className="!p-2" onClick={() => setIsEditing(true)}>
-                                <PencilIcon className="w-5 h-5" />
-                            </Button>
-                        </Tooltip>
-                    )}
-                    <Tooltip text={isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}>
-                        <Button variant="ghost" className="!p-2" onClick={() => onToggleFavorite(item)}>
-                            <StarIcon className={`w-5 h-5 ${isFavorite ? 'text-yellow-400' : ''}`} filled={isFavorite} />
+                    <div className="flex-shrink-0 flex items-center gap-2">
+                        {isEditing ? (
+                            <Button onClick={handleSave} size="sm"><SaveIcon className="w-4 h-4" /> Salvar</Button>
+                        ) : (
+                            <Button onClick={() => setIsEditing(true)} size="sm" variant="secondary"><PencilIcon className="w-4 h-4" /> Editar</Button>
+                        )}
+                        <Button onClick={() => onToggleFavorite(item)} variant="ghost" className="!p-2">
+                            <StarIcon className="w-5 h-5" filled={isFavorite} />
                         </Button>
-                    </Tooltip>
+                    </div>
                 </div>
             </header>
-            <div className="flex-grow p-4 overflow-y-auto space-y-6 inner-scroll">
-                <DetailSection title="Descrição Curta">
-                    {isEditing ? <TextArea value={editableItem.descricao_curta} onChange={e => handleFieldChange('descricao_curta', e.target.value)} rows={3}/> : <p>{item.descricao_curta}</p>}
-                </DetailSection>
-                 <DetailSection title="Descrição Detalhada">
-                    {isEditing ? <TextArea value={editableItem.descricao || ''} onChange={e => handleFieldChange('descricao', e.target.value)} rows={8}/> : <p>{item.descricao}</p>}
-                </DetailSection>
-
-                {item.ganchos_narrativos && (
-                     <DetailSection title="Ganchos Narrativos">
-                        {Array.isArray(item.ganchos_narrativos) ? (
-                            <ul className="list-disc list-inside">{item.ganchos_narrativos.map((g, i) => <li key={i}>{g}</li>)}</ul>
-                        ) : <p>{item.ganchos_narrativos}</p>}
-                    </DetailSection>
-                )}
-                 {item.provenance && (
-                    <DetailSection title="Proveniência da IA">
-                        <ul className="space-y-1">
-                            {item.provenance.map((p, i) => <ProvenanceItem key={i} entry={p} />)}
-                        </ul>
-                    </DetailSection>
+            <div className="flex-grow overflow-y-auto p-4 inner-scroll prose prose-sm prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-headings:font-gangofthree prose-headings:text-indigo-400 prose-ul:list-disc prose-ul:pl-5">
+                {isEditing ? (
+                    <div className="space-y-4">
+                        <textarea className="w-full bg-gray-900 rounded p-2 text-sm" rows={3} value={editedItem.descricao_curta} onChange={e => setEditedItem({...editedItem, descricao_curta: e.target.value})} />
+                        <textarea className="w-full bg-gray-900 rounded p-2 text-sm" rows={10} value={editedItem.descricao} onChange={e => setEditedItem({...editedItem, descricao: e.target.value})} />
+                    </div>
+                ) : (
+                    <>
+                        <p className="italic text-gray-300">{item.descricao_curta}</p>
+                        <h4>Descrição Completa</h4>
+                        <p>{item.descricao}</p>
+                        
+                        {item.ganchos_narrativos && (
+                            <>
+                                <h4>Ganchos Narrativos</h4>
+                                {Array.isArray(item.ganchos_narrativos) ? (
+                                    <ul>{item.ganchos_narrativos.map((hook, i) => <li key={i}>{hook}</li>)}</ul>
+                                ) : (
+                                    <p>{item.ganchos_narrativos}</p>
+                                )}
+                            </>
+                        )}
+                        {item.imagePromptDescription && (
+                            <>
+                                <h4>Prompt de Imagem Sugerido</h4>
+                                <code className="block bg-gray-900/50 p-2 rounded text-xs font-mono break-all">{item.imagePromptDescription}</code>
+                            </>
+                        )}
+                    </>
                 )}
             </div>
-             <footer className="p-4 border-t border-gray-700 flex-shrink-0">
-                {item.imagePromptDescription && (
-                    <div className="mb-4">
-                        <label className="text-xs font-semibold text-gray-400 uppercase">PROMPT DE IMAGEM</label>
-                        <div className="relative">
-                             <p className="text-sm font-mono p-2 pr-10 bg-gray-900 rounded text-gray-300 mt-1">{item.imagePromptDescription}</p>
-                             <Button variant="ghost" className="!p-1.5 absolute top-1/2 right-1.5 -translate-y-1/2" onClick={handleCopyPrompt}>
-                                {copiedPrompt ? <ClipboardCheckIcon className="w-4 h-4 text-green-400" /> : <ClipboardIcon className="w-4 h-4" />}
-                             </Button>
-                        </div>
+            <footer className="p-4 border-t border-gray-700 flex-shrink-0 space-y-3">
+                 <div className="space-y-2">
+                    <h4 className="text-xs font-bold uppercase text-gray-400">Processo de Geração</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        {item.provenance.map((p, i) => <ProvenanceStep key={i} entry={p} />)}
                     </div>
-                )}
-                <div className="flex justify-end items-center gap-2">
-                    <Button variant="secondary" onClick={handleDownload}><DownloadIcon className="w-5 h-5"/> Baixar TXT</Button>
-                    <Button variant="secondary" onClick={handleCopy}>
-                        {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5"/>}
-                        {copied ? 'Copiado!' : 'Copiar'}
-                    </Button>
                 </div>
+                <Button onClick={handleDownload} variant="secondary" className="w-full"><DownloadIcon className="w-5 h-5" /> Baixar como .txt</Button>
             </footer>
         </Card>
     );

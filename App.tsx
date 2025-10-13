@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
+// FIX: Added Variants to fix a type error with the ease property in Framer Motion transitions.
+import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { Header } from './components/Header';
 import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { HistoryModal } from './components/HistoryModal';
 import { FavoritesModal } from './components/FavoritesModal';
-import { HowItWorksModal } from './components/HowItWorksModal';
 import useLocalStorage from './hooks/useLocalStorage';
 import type { User, GeneratedItem, AlchemyHistoryItem, HistoryItem, FavoriteItem } from './types';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
@@ -34,7 +35,6 @@ export default function App() {
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
-    const [isHowItWorksModalOpen, setIsHowItWorksModalOpen] = useState(false);
     const [appError, setAppError] = useState<string | null>(null);
     
     const handleLoginClick = useCallback(async () => {
@@ -115,6 +115,11 @@ export default function App() {
         setIsFavoritesModalOpen(false);
     }, [setSelectedItem, setActiveView, setSelectedAlchemyItem]);
     
+    const viewVariants: Variants = {
+        hidden: { opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } },
+        visible: { opacity: 1, transition: { duration: 0.4, ease: 'easeInOut' } },
+    };
+
     return (
         <div className={`app-container h-screen overflow-hidden ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
             <AnimatedThemedBackground view={activeView} />
@@ -125,7 +130,6 @@ export default function App() {
                     onOpenAbout={() => setIsAboutModalOpen(true)}
                     onOpenHistory={() => setIsHistoryModalOpen(true)}
                     onOpenFavorites={() => setIsFavoritesModalOpen(true)}
-                    onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
                     user={user}
                     onLoginClick={handleLoginClick}
                     onLogout={handleLogout}
@@ -133,33 +137,43 @@ export default function App() {
                 />
 
                 <main className="flex-grow p-2 overflow-hidden relative backdrop-blur-[2px]">
-                    {activeView === 'forge' ? (
-                        <ForgeInterface 
-                            isAuthenticated={isAuthenticated}
-                            onLoginClick={handleLoginClick}
-                            history={forgeHistory}
-                            setHistory={setForgeHistory}
-                            favorites={forgeFavorites}
-                            setFavorites={setForgeFavorites}
-                            selectedItem={selectedItem}
-                            setSelectedItem={setSelectedItem}
-                            user={user}
-                        />
-                    ) : (
-                        <PromptEngineeringPanel 
-                             isAuthenticated={isAuthenticated}
-                             onLoginClick={handleLoginClick}
-                             history={alchemyHistory}
-                             setHistory={setAlchemyHistory}
-                             favorites={alchemyFavorites}
-                             setFavorites={setAlchemyFavorites}
-                             selectedItem={selectedAlchemyItem}
-                        />
-                    )}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeView}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            variants={viewVariants}
+                            className="h-full w-full"
+                        >
+                            {activeView === 'forge' ? (
+                                <ForgeInterface 
+                                    isAuthenticated={isAuthenticated}
+                                    onLoginClick={handleLoginClick}
+                                    history={forgeHistory}
+                                    setHistory={setForgeHistory}
+                                    favorites={forgeFavorites}
+                                    setFavorites={setForgeFavorites}
+                                    selectedItem={selectedItem}
+                                    setSelectedItem={setSelectedItem}
+                                    user={user}
+                                />
+                            ) : (
+                                <PromptEngineeringPanel 
+                                     isAuthenticated={isAuthenticated}
+                                     onLoginClick={handleLoginClick}
+                                     history={alchemyHistory}
+                                     setHistory={setAlchemyHistory}
+                                     favorites={alchemyFavorites}
+                                     setFavorites={setAlchemyFavorites}
+                                     selectedItem={selectedAlchemyItem}
+                                />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 </main>
                 
                 <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
-                <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
 
                 <HistoryModal
                     isOpen={isHistoryModalOpen}

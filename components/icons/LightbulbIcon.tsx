@@ -1,9 +1,20 @@
+// FIX: Implemented the LightbulbIcon component to resolve 'not a module' error. This file was empty.
 import React from 'react';
 
 export const LightbulbIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 14.25l.225.225.225-.225a2.25 2.25 0 013.182 0l.225.225.225-.225a2.25 2.25 0 013.182 0l.225.225.225-.225a2.25 2.25 0 013.182 0l.225.225.225-.225M9.5 14.25L3 21m6.5-6.75v6.75" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75h-.008v.008H12v-.008z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 7.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15.09 14.32a1 1 0 0 1-.28.95A4.8 4.8 0 0 1 12 16a4.8 4.8 0 0 1-2.81-.73 1 1 0 0 1-.28-.95A2.4 2.4 0 0 1 9.2 12h5.6a2.4 2.4 0 0 1 .29 2.32Z" />
+    <path d="M12 2a6 6 0 0 0-5 9.33a7 7 0 0 0 10 0A6 6 0 0 0 12 2Z" />
+    <path d="M12 16v2" />
+    <path d="M10 20h4" />
   </svg>
 );
