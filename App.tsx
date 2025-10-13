@@ -2,18 +2,16 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
-import { Footer } from './components/Footer';
 import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
-import { MatrixBackground } from './components/MatrixBackground';
 import { AboutModal } from './components/AboutModal';
 import { HistoryModal } from './components/HistoryModal';
 import { FavoritesModal } from './components/FavoritesModal';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import useLocalStorage from './hooks/useLocalStorage';
-// FIX: Corrected import path for types after creating the file.
 import type { User, GeneratedItem, AlchemyHistoryItem, HistoryItem, FavoriteItem } from './types';
-import { constructAvatarUrl } from './lib/discord';
+import { ErrorDisplay } from './components/ui/ErrorDisplay';
+import { AnimatedThemedBackground } from './components/AnimatedThemedBackground';
 
 type AppView = 'forge' | 'alchemist';
 
@@ -31,12 +29,15 @@ export default function App() {
     // Alchemy State
     const [alchemyHistory, setAlchemyHistory] = useLocalStorage<AlchemyHistoryItem[]>('kimetsu-alchemy-history', []);
     const [alchemyFavorites, setAlchemyFavorites] = useLocalStorage<AlchemyHistoryItem[]>('kimetsu-alchemy-favorites', []);
+    const [selectedAlchemyItem, setSelectedAlchemyItem] = useState<AlchemyHistoryItem | null>(null);
+
 
     // Modal States
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [isHowItWorksModalOpen, setIsHowItWorksModalOpen] = useState(false);
+    const [appError, setAppError] = useState<string | null>(null);
     
     const handleLoginClick = useCallback(async () => {
         try {
@@ -51,7 +52,7 @@ export default function App() {
             }
         } catch (error: any) {
             console.error("Failed to get Discord auth URL", error);
-            alert(`Login Error: ${error.message}`);
+            setAppError(`Login Error: ${error.message}`);
         }
     }, []);
 
@@ -79,11 +80,11 @@ export default function App() {
                         setIsAuthenticated(true);
                     } else {
                         const errorData = await response.json();
-                        alert(`Authentication failed: ${errorData.message}`);
+                        setAppError(`Authentication failed: ${errorData.message}`);
                     }
                 } catch (error) {
                     console.error('Authentication error:', error);
-                    alert('An error occurred during authentication.');
+                    setAppError('An error occurred during authentication.');
                 } finally {
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
@@ -95,23 +96,31 @@ export default function App() {
     const handleSelectHistoryItem = useCallback((item: HistoryItem) => {
         if ('categoria' in item) { // It's a GeneratedItem
             setSelectedItem(item as GeneratedItem);
+            setSelectedAlchemyItem(null);
             setActiveView('forge');
+        } else { // It's an AlchemyHistoryItem
+            setSelectedAlchemyItem(item as AlchemyHistoryItem);
+            setSelectedItem(null);
+            setActiveView('alchemist');
         }
         setIsHistoryModalOpen(false);
-    }, [setSelectedItem, setActiveView]);
+    }, [setSelectedItem, setActiveView, setSelectedAlchemyItem]);
 
     const handleSelectFavoriteItem = useCallback((item: FavoriteItem) => {
         if ('categoria' in item) { // It's a GeneratedItem
             setSelectedItem(item as GeneratedItem);
             setActiveView('forge');
+        } else { // It's an AlchemyHistoryItem
+            setSelectedAlchemyItem(item as AlchemyHistoryItem);
+            setActiveView('alchemist');
         }
         setIsFavoritesModalOpen(false);
-    }, [setSelectedItem, setActiveView]);
+    }, [setSelectedItem, setActiveView, setSelectedAlchemyItem]);
     
     return (
-        <>
-            <div className={`app-background ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}></div>
-            <div className="flex flex-col h-screen text-white font-sans overflow-hidden">
+        <div className={`app-container h-screen overflow-hidden ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
+            <AnimatedThemedBackground view={activeView} />
+            <div className="relative z-10 flex flex-col h-full">
                 <Header 
                     activeView={activeView}
                     onViewChange={setActiveView}
@@ -124,7 +133,7 @@ export default function App() {
                     favoritesCount={forgeFavorites.length + alchemyFavorites.length}
                 />
 
-                <main className="flex-grow p-2 overflow-hidden relative">
+                <main className="flex-grow p-2 overflow-hidden relative backdrop-blur-[2px]">
                     {activeView === 'forge' ? (
                         <ForgeInterface 
                             isAuthenticated={isAuthenticated}
@@ -145,6 +154,7 @@ export default function App() {
                              setHistory={setAlchemyHistory}
                              favorites={alchemyFavorites}
                              setFavorites={setAlchemyFavorites}
+                             selectedItem={selectedAlchemyItem}
                         />
                     )}
                 </main>
@@ -181,7 +191,8 @@ export default function App() {
                     }}
                     activeView={activeView}
                 />
+                <ErrorDisplay message={appError} onDismiss={() => setAppError(null)} />
             </div>
-        </>
+        </div>
     );
 }

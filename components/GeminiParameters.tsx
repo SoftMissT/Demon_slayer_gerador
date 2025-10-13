@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { GeminiParameters } from '../types';
 import { Card } from './ui/Card';
@@ -21,9 +22,7 @@ export const GeminiParametersComponent: React.FC<GeminiParametersProps> = ({ par
   const detailLevels = ["Detailed", "Hyper-detailed", "Minimalist", "Stylized"];
 
   return (
-    <Card className="!p-4 model-gemini">
-      <h3 className="text-lg font-bold text-white font-gangofthree mb-4">Parâmetros de Alquimia (Gemini)</h3>
-      <div className="space-y-4">
+    <div className="space-y-4">
         <Select label="Estilo de Arte" value={params.artStyle} onChange={(e) => handleParamChange('artStyle', e.target.value)}>
           {artStyles.map(s => <option key={s} value={s}>{s}</option>)}
         </Select>
@@ -40,6 +39,5 @@ export const GeminiParametersComponent: React.FC<GeminiParametersProps> = ({ par
           {detailLevels.map(d => <option key={d} value={d}>{d}</option>)}
         </Select>
       </div>
-    </Card>
   );
 };

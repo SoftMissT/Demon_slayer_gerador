@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { PromptGenerationResult, AlchemyHistoryItem } from '../types';
 import { PromptCard } from './PromptCard';
@@ -8,21 +9,18 @@ import { StarIcon } from './icons/StarIcon';
 interface PromptResultDisplayProps {
     results: PromptGenerationResult;
     inputs: AlchemyHistoryItem['inputs'];
+    historyItem: AlchemyHistoryItem; // Pass the whole item
     onRegenerate: () => void;
     onFavorite: (item: AlchemyHistoryItem) => void;
     isFavorited: boolean;
 }
 
-export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ results, inputs, onRegenerate, onFavorite, isFavorited }) => {
+export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ results, inputs, onRegenerate, onFavorite, isFavorited, historyItem }) => {
     
     const handleFavoriteClick = () => {
-        const item: AlchemyHistoryItem = {
-            id: `alchemy_${Date.now()}`,
-            createdAt: new Date().toISOString(),
-            inputs,
-            outputs: results,
-        };
-        onFavorite(item);
+        if (historyItem) {
+            onFavorite(historyItem);
+        }
     };
 
     return (
@@ -33,7 +31,7 @@ export const PromptResultDisplay: React.FC<PromptResultDisplayProps> = ({ result
                     <Button variant="ghost" size="sm" onClick={onRegenerate}>
                         <RefreshIcon className="w-4 h-4"/> Regenerar
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={handleFavoriteClick}>
+                    <Button variant="ghost" size="sm" onClick={handleFavoriteClick} disabled={!historyItem}>
                         <StarIcon className="w-4 h-4" filled={isFavorited}/> {isFavorited ? 'Salvo' : 'Salvar'}
                     </Button>
                 </div>

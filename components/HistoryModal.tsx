@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
@@ -26,7 +27,7 @@ const HistoryListItem: React.FC<{ item: HistoryItem, onSelect: (item: HistoryIte
     };
 
     const title = isForgeItem ? (item as GeneratedItem).nome : `Alquimia de Prompt`;
-    const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs.basePrompt;
+    const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs?.basePrompt || '[Entrada de histórico antiga]';
     const Icon = isForgeItem ? KatanaIcon : MagicWandIcon;
 
     return (

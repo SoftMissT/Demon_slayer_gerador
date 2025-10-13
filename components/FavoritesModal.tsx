@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Modal } from './ui/Modal';
 import { StarIcon } from './icons/StarIcon';
@@ -26,7 +27,7 @@ const FavoriteListItem: React.FC<{ item: FavoriteItem, onSelect: (item: Favorite
     };
 
     const title = isForgeItem ? (item as GeneratedItem).nome : `Alquimia de Prompt`;
-    const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs.basePrompt;
+    const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs?.basePrompt || '[Favorito antigo]';
     const Icon = isForgeItem ? KatanaIcon : MagicWandIcon;
 
     return (

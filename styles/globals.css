@@ -1,341 +1,240 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=M+PLUS+1p:wght@400;700&family=Sawarabi+Mincho&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600&family=Philosopher:wght@400;700&family=Poppins:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Brand Colors from logo */
-  --brand-primary: #C7433A;   /* vermelho/escuro do logo */
-  --brand-secondary: #FF8E5E; /* laranja quente */
-  --brand-accent: #9B6BFF;    /* roxo, usado em Alquimia */
-
-  /* Base Palette */
-  --text-primary: #F0EDEB;
-  --text-secondary: #98A4B2;
-  --text-muted: #6b7280;
-
-  /* Font Stacks */
-  --font-sans: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
-  --font-kimetsu: 'Sawarabi Mincho', serif;
-  --font-gangofthree: 'M PLUS 1p', 'Sawarabi Mincho', serif;
-}
-
-/* Base Styles */
-html, body {
-  font-family: var(--font-sans);
-  color: var(--text-primary);
-  background-color: #0c0d10; /* A dark default background */
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-gangofthree);
-  color: var(--text-primary);
+  --font-inter: 'Inter', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+  --font-cinzel: 'Cinzel Decorative', serif;
+  --font-philosopher: 'Philosopher', serif;
 }
 
 /* Theming System */
 .theme-forge {
-    --bg: #1a1a1a;
-    --panel-bg: rgba(18, 18, 22, 0.7);
-    --border-color: rgba(255, 142, 94, 0.2);
-    --accent: var(--brand-secondary);
-    --accent-weak: rgba(255, 142, 94, 0.12);
+    --bg-dark: #0F0A07;
+    --bg-gradient: linear-gradient(180deg, #1E0D0A 0%, #3C1A0E 100%);
+    --accent: #FF4500;
+    --accent-light: #FF8C00;
+    --accent-glow: rgba(255, 69, 0, 0.6);
+    --text-primary: #FFD9B3;
+    --text-secondary: #B36B00;
+    --title-font: var(--font-cinzel);
+    --body-font: var(--font-inter);
+    --border-color: rgba(255, 69, 0, 0.3);
+    --panel-bg: rgba(15, 10, 7, 0.5);
+    --input-bg: rgba(15, 10, 7, 0.7);
 }
 .theme-alchemist {
-    --bg: #100f1a;
-    --panel-bg: rgba(22, 19, 36, 0.7);
-    --border-color: rgba(155, 107, 255, 0.3);
-    --accent: #9B6BFF;    /* roxo */
-    --accent-secondary: #23c5d6; /* ciano mistico */
-    --accent-tertiary: #ff69b4;  /* rosa magico */
-    --accent-weak: rgba(155, 107, 255, 0.15);
+    --bg-dark: #0B0A15;
+    --bg-gradient: linear-gradient(180deg, #0D0A1A 0%, #24113B 100%);
+    --accent: #8A2BE2;
+    --accent-alt: #00FFB2;
+    --accent-glow: rgba(180, 80, 255, 0.5);
+    --text-primary: #D6D6FF;
+    --text-secondary: #9FE8C4;
+    --title-font: var(--font-philosopher);
+    --body-font: var(--font-poppins);
+    --border-color: rgba(138, 43, 226, 0.4);
+    --panel-bg: rgba(11, 10, 21, 0.4);
+    --input-bg: rgba(11, 10, 21, 0.6);
 }
 
-/* Themed Background Pattern */
+/* Base Styles */
+html, body {
+  background-color: #0c0d10;
+}
+
+.app-container {
+    font-family: var(--body-font);
+    color: var(--text-primary);
+    background: var(--bg-dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--title-font);
+    color: var(--text-primary);
+}
+
+/* Animated Background */
 .app-background {
   position: fixed;
   inset: 0;
-  z-index: -10;
-  opacity: 0.5;
+  z-index: 0;
+  background: var(--bg-gradient);
   transition: background 0.5s ease-in-out;
-}
-.theme-forge .app-background {
-  background: radial-gradient(circle farthest-side at 0% 50%, #282828 23.5%, rgba(255, 170, 0, 0) 0) 21px 30px,
-              radial-gradient(circle farthest-side at 0% 50%, #a1000e 24%, rgba(240, 166, 17, 0) 0) 19px 30px,
-              linear-gradient(#282828 14%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 85%, #282828 0) 0 0,
-              linear-gradient(150deg, #282828 24%, #a1000e 0, #a1000e 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, #a1000e 0, #a1000e 76%, #282828 0) 0 0,
-              linear-gradient(30deg, #282828 24%, #a1000e 0, #a1000e 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, #a1000e 0, #a1000e 76%, #282828 0) 0 0,
-              linear-gradient(90deg, #a1000e 2%, #282828 0, #282828 98%, #a1000e 0%) 0 0 #282828;
-  background-size: 40px 60px;
-}
-.theme-alchemist .app-background {
-  background: radial-gradient(circle at 100% 50%, rgba(155, 107, 255, 0.12), transparent 40%),
-              radial-gradient(circle at 0% 50%, rgba(35, 197, 214, 0.1), transparent 40%);
-  background-color: #0c0d14;
+  overflow: hidden;
 }
 
-/* Header Gradient Title */
-.title-gradient {
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  letter-spacing: 0.8px;
+/* Forge Sparks Animation */
+.spark {
+    position: absolute;
+    bottom: -10px;
+    background-color: var(--accent-light);
+    border-radius: 50%;
+    animation: rise-spark linear infinite;
+    opacity: 0;
 }
-.theme-forge .title-gradient {
-  background-image: linear-gradient(90deg, #FFD700, var(--brand-secondary), var(--brand-primary));
+@keyframes rise-spark {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) scale(0.5);
+        opacity: 0;
+    }
 }
-.theme-alchemist .title-gradient {
-  background-image: linear-gradient(90deg, #a7f0fb, var(--brand-accent), #6b3bff);
+
+/* Alchemist Smoke Animation */
+.smoke-puff {
+    position: absolute;
+    bottom: -50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    animation: rise-smoke ease-in-out infinite;
+    opacity: 0;
 }
+@keyframes rise-smoke {
+    0% {
+        transform: translateY(0) scale(0.8) translateX(0);
+        opacity: 0;
+    }
+    10%, 90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-90vh) scale(1.5) translateX(calc(var(--x-drift) * 1px));
+        opacity: 0;
+    }
+}
+
 
 /* Custom Scrollbar */
-.inner-scroll::-webkit-scrollbar {
-  width: 8px;
+.inner-scroll::-webkit-scrollbar { width: 8px; }
+.inner-scroll::-webkit-scrollbar-track { background: transparent; }
+.inner-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+.inner-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Header */
+.theme-forge .header-title-wrapper h1 {
+  font-family: var(--title-font);
+  color: var(--accent-light);
+  text-shadow: 0 0 8px var(--accent-glow), 0 0 16px var(--accent-glow);
 }
-.inner-scroll::-webkit-scrollbar-track {
-  background: transparent;
+.theme-alchemist .header-title-wrapper h1 {
+  font-family: var(--title-font);
+  color: var(--text-primary);
+  text-shadow: 0 0 8px var(--accent-glow), 0 0 16px var(--accent-glow);
 }
-.inner-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+.header-title-wrapper p { color: var(--text-secondary); }
+
+/* Buttons */
+.theme-forge .forge-button {
+  background: linear-gradient(45deg, var(--accent-light), var(--accent));
+  border: 1px solid var(--accent);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transition: all 0.2s ease-out;
 }
-.inner-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+.theme-forge .forge-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 30px var(--accent-glow);
+  filter: brightness(1.1);
+}
+.theme-alchemist .alchemist-button {
+  background: linear-gradient(45deg, var(--accent-alt), var(--accent));
+  border: 1px solid var(--accent);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transition: all 0.25s ease-in-out;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+  50% { box-shadow: 0 0 35px var(--accent-glow); }
+}
+.theme-alchemist .alchemist-button:hover {
+  animation: pulse-glow 2s infinite;
+  transform: scale(1.03);
 }
 
-/* Component: Switch */
-.switch {
-  font-size: 17px;
-  position: relative;
-  display: inline-block;
-  width: 3.5em;
-  height: 2em;
-}
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  border: 2px solid #414141;
-  border-radius: 50px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1.4em;
-  width: 1.4em;
-  left: 0.2em;
-  bottom: 0.2em;
-  background-color: white;
-  border-radius: inherit;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-}
-.switch input:checked + .slider {
-  box-shadow: 0 0 15px var(--accent-weak);
-  border: 2px solid var(--accent);
-}
-.switch input:checked + .slider:before {
-  transform: translateX(1.5em);
-}
+/* Cards & Panels */
+.bg-gray-900\/50 { background-color: var(--panel-bg); }
+.border-gray-700, .border-gray-700\/50, .border-gray-800 { border-color: var(--border-color); }
+.result-card { transition: all 0.2s ease-out; }
 
-/* Component: Themed Buttons */
-.forge-button {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 8px 24px var(--accent-weak);
-}
-.alchemist-button {
-  background-image: linear-gradient(45deg, var(--accent-secondary), var(--accent), var(--accent-tertiary));
-  color: white;
-  box-shadow: 0 8px 24px var(--accent-weak);
-}
-.forge-button:hover, .alchemist-button:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-}
-
-/* Result Card Styles */
-.result-card:hover {
-    border-color: var(--border-color);
-}
-.selected-card {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 15px var(--accent-weak);
+.theme-forge .result-card:hover {
+  transform: scale(1.03);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 15px var(--accent-glow), 0 0 15px var(--accent-glow);
 }
 .theme-forge .selected-card {
-    background: linear-gradient(135deg, rgba(199, 67, 58, 0.1), rgba(255, 142, 94, 0.05));
+  border-color: var(--accent) !important;
+  box-shadow: inset 0 0 20px var(--accent-glow), 0 0 20px var(--accent-glow);
+}
+
+.theme-alchemist .result-card { border-color: transparent; background-color: transparent; position: relative; }
+.theme-alchemist .result-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem; 
+  border: 1px solid transparent;
+  background: var(--panel-bg) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: all 0.25s ease-in-out;
+}
+.theme-alchemist .result-card:hover::before, .theme-alchemist .selected-card::before {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
 }
 .theme-alchemist .selected-card {
-     background: linear-gradient(135deg, rgba(155, 107, 255, 0.1), rgba(35, 197, 214, 0.05));
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
-/* Accordion Styles */
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
-  opacity: 0;
-  padding: 0 0.5rem;
+/* Inputs, Selects, TextAreas */
+.bg-gray-700, .bg-gray-800\/50 {
+    background-color: var(--input-bg) !important;
+    border-color: var(--border-color) !important;
 }
-.accordion-content.open {
-  opacity: 1;
-  padding: 1rem 0.5rem;
+.select-button:focus, textarea:focus, input:focus {
+    --tw-ring-color: var(--accent) !important;
+    border-color: var(--accent) !important;
 }
-.accordion-chevron {
-  transition: transform 0.3s ease-in-out;
+.accent-indigo-500, .form-checkbox:checked {
+    accent-color: var(--accent) !important;
 }
-.accordion-chevron.open {
-  transform: rotate(180deg);
+.text-indigo-600, .bg-indigo-600 {
+  color: var(--text-primary) !important;
+  background-color: var(--accent) !important;
 }
+.text-indigo-400 { color: var(--accent-light, var(--accent-alt)) !important; }
 
-/* Typing Loader */
-.typing-cursor {
-  animation: blink 1s step-end infinite;
+/* Alchemist Specific Styles */
+.theme-alchemist .ingredient-flask {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px 20px 8px 8px;
+    padding: 1.75rem 1rem 1rem;
+    margin-top: 1rem;
+    position: relative;
+    transition: all 0.3s ease;
 }
-@keyframes blink {
-  from, to { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* Animation utilities */
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out forwards;
-}
-@keyframes fade-in-fast {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.animate-fade-in-fast {
-    animation: fade-in-fast 0.15s ease-in forwards;
-}
-@keyframes pulse-slow {
-    50% { opacity: .7; }
-}
-.animate-pulse-slow {
-    animation: pulse-slow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-@keyframes float {
-	0% { transform: translatey(0px); }
-	50% { transform: translatey(-10px); }
-	100% { transform: translatey(0px); }
-}
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-@keyframes rise {
-  0% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  100% {
-    transform: translateY(-100vh);
-    opacity: 0;
-  }
-}
-@keyframes magic-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* About Modal Action Buttons */
-.crunchyroll-button {
-    --color: #f47521;
-    background-color: transparent !important;
-    border-color: var(--color) !important;
-    color: var(--color) !important;
-}
-.crunchyroll-button:hover {
-    background-color: rgba(244, 117, 33, 0.1) !important;
-    color: #ff9a59 !important;
-}
-.discord-button {
-    --color: #5865f2;
-    background-color: transparent !important;
-    border-color: var(--color) !important;
-    color: var(--color) !important;
-}
-.discord-button:hover {
-    background-color: rgba(88, 101, 242, 0.1) !important;
-    color: #8a94ff !important;
-}
-.panini-button {
-    --color: #e62429;
-    background-color: transparent !important;
-    border-color: var(--color) !important;
-    color: var(--color) !important;
-}
-.panini-button:hover {
-     background-color: rgba(230, 36, 41, 0.1) !important;
-    color: #ff5c61 !important;
-}
-
-/* === ALCHEMIST THEME OVERHAUL === */
-.bubbles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: -5;
-  pointer-events: none;
-}
-.bubble {
-  position: absolute;
-  bottom: -50px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--accent-secondary), transparent);
-  opacity: 0.1;
-  animation-name: rise;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-.alchemist-panel-header {
-  text-align: center;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  position: relative;
-}
-.alchemist-panel-header .magic-flow {
-  position: absolute;
-  bottom: 0;
-  left: 25%;
-  width: 50%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-secondary), var(--accent), var(--accent-tertiary), transparent);
-  background-size: 200% 100%;
-  animation: magic-flow 4s linear infinite;
-}
-
-.ingredient-flask {
-  background: rgba(155, 107, 255, 0.05);
-  border: 1px solid var(--border-color);
-  border-radius: 20px 20px 8px 8px;
-  padding: 1.75rem 1rem 1rem;
-  margin-top: 1rem;
-  position: relative;
-  transition: all 0.3s ease;
-}
-.ingredient-flask:hover {
-    box-shadow: 0 0 15px var(--accent-weak);
+.theme-alchemist .ingredient-flask:hover {
+    box-shadow: 0 0 15px var(--accent-glow);
     border-color: var(--accent);
 }
-.ingredient-flask::before { /* Cork stopper */
+.theme-alchemist .ingredient-flask::before { /* Cork stopper */
   content: '';
   position: absolute;
   top: -8px;
@@ -347,50 +246,13 @@ h1, h2, h3, h4, h5, h6 {
   border: 2px solid #3b281c;
   border-radius: 4px 4px 2px 2px;
 }
-.ingredient-flask .card, .ingredient-flask .card:hover {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-.cauldron-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 250px;
-  padding: 2rem;
-  position: relative;
-}
-
-.alchemy-loader .cauldron-bubbles {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-}
-.alchemy-loader .cauldron-bubbles span {
-    display: inline-block;
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-    position: absolute;
-    animation: bubble-up 1s ease-in-out infinite;
-    box-shadow: 0 0 5px var(--accent);
-}
-.alchemy-loader .cauldron-bubbles span:nth-child(1) { left: 45%; animation-duration: 1.2s; }
-.alchemy-loader .cauldron-bubbles span:nth-child(2) { left: 55%; animation-delay: .5s; }
-.alchemy-loader .cauldron-bubbles span:nth-child(3) { left: 40%; animation-duration: 1.5s; animation-delay: .8s; }
-.alchemy-loader .cauldron-bubbles span:nth-child(4) { left: 60%; animation-delay: 1s; }
-@keyframes bubble-up {
-    0% { bottom: 20%; opacity: 1; transform: scale(0.5); }
-    100% { bottom: 80%; opacity: 0; transform: scale(1.5); }
-}
 
 .theme-alchemist .prompt-card {
     border-radius: 40px 40px 8px 8px;
     border: 1px solid var(--border-color);
     position: relative;
     padding-top: 1.5rem;
-    box-shadow: 0 0 10px var(--accent-weak);
+    box-shadow: 0 0 10px var(--accent-glow);
 }
 .theme-alchemist .prompt-card::before {
     content: '';
@@ -409,21 +271,11 @@ h1, h2, h3, h4, h5, h6 {
 .theme-alchemist .model-gemini { background-image: linear-gradient(to top, rgba(181, 23, 158, 0.3), rgba(247, 37, 133, 0.1)); }
 
 
-/* === HEADER TITLE === */
-.header-title-wrapper h1 {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.3s ease;
-}
-.header-title-wrapper p {
-  letter-spacing: 0.02em;
-  color: var(--text-secondary);
-}
-.theme-forge .header-title-wrapper h1 {
-  color: #D94D3F; /* Fiery red */
-  text-shadow: 0 0 6px rgba(255, 142, 94, 0.5), 0 0 16px rgba(212, 76, 63, 0.4);
-}
-.theme-alchemist .header-title-wrapper h1 {
-  color: #B28DFF; /* Mystical purple */
-  text-shadow: 0 0 8px rgba(155, 107, 255, 0.6), 0 0 18px rgba(35, 197, 214, 0.4);
-}
+/* Generic Cleanup */
+.font-gangofthree { font-family: var(--title-font); }
+.text-white { color: var(--text-primary); }
+.text-gray-400 { color: var(--text-secondary); }
+.bg-gray-800 { background-color: var(--panel-bg); }
+.bg-gray-900\/90 { background-color: var(--bg-dark) !important; opacity: 0.9; }
+.backdrop-blur-md { backdrop-filter: blur(8px); }
+.theme-alchemist .backdrop-blur-sm { backdrop-filter: blur(4px); }

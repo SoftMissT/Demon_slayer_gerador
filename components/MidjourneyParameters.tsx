@@ -1,5 +1,5 @@
+
 import React from 'react';
-// FIX: Aliased the MidjourneyParameters type import to avoid name collision with the component.
 import type { MidjourneyParameters as MidjourneyParametersType, MidjourneyParam } from '../types';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
@@ -18,7 +18,6 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
     setParams(prev => ({
       ...prev,
       [key]: {
-        // FIX: Ensure previous state for the parameter is spread to avoid losing other fields
         ...(prev[key] || {}),
         [field]: value,
       }
@@ -28,8 +27,6 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
   const versions = ['6', '5.2', '5.1', 'Niji 6', 'Niji 5'];
 
   return (
-    <Card className="!p-4 model-midjourney">
-      <h3 className="text-lg font-bold text-white font-gangofthree mb-4">Parâmetros Técnicos (Midjourney)</h3>
       <div className="space-y-4">
         {/* Toggle + TextInput for Aspect Ratio */}
         <div className="flex items-end gap-2">
@@ -85,6 +82,5 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
             <Switch label="" checked={params.stylize.active} onChange={e => handleParamChange('stylize', 'active', e.target.checked)} />
         </div>
       </div>
-    </Card>
   );
 };

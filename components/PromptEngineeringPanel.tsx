@@ -1,5 +1,6 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { 
     AlchemyHistoryItem, 
     FavoriteItem,
@@ -14,7 +15,7 @@ import { TextArea } from './ui/TextArea';
 import { Button } from './ui/Button';
 import { MagicWandIcon } from './icons/MagicWandIcon';
 import { CauldronIcon } from './icons/CauldronIcon';
-import { Checkbox } from './ui/Checkbox';
+import { Switch } from './ui/Switch';
 import { MidjourneyParameters as MidjourneyParametersComponent } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
 import { GeminiParametersComponent } from './GeminiParameters';
@@ -23,7 +24,7 @@ import { PromptResultDisplay } from './PromptResultDisplay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
 import { generatePrompts } from '../lib/client/orchestrationService';
-import { Bubbles } from './Bubbles';
+import { CollapsibleSection } from './ui/CollapsibleSection';
 
 // Initial state for parameters
 const INITIAL_MJ_PARAMS: MidjourneyParameters = {
@@ -50,6 +51,7 @@ interface PromptEngineeringPanelProps {
     setHistory: React.Dispatch<React.SetStateAction<AlchemyHistoryItem[]>>;
     favorites: AlchemyHistoryItem[];
     setFavorites: React.Dispatch<React.SetStateAction<AlchemyHistoryItem[]>>;
+    selectedItem: AlchemyHistoryItem | null;
 }
 
 export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
@@ -58,7 +60,8 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     history,
     setHistory,
     favorites,
-    setFavorites
+    setFavorites,
+    selectedItem,
 }) => {
     // Input state
     const [basePrompt, setBasePrompt] = useState('');
@@ -78,6 +81,20 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
         gpt: true,
         gemini: true
     });
+    
+    // Effect to load state from a selected history item
+    useEffect(() => {
+        if (selectedItem && selectedItem.inputs) {
+            const { inputs } = selectedItem;
+            setBasePrompt(inputs.basePrompt);
+            setNegativePrompt(inputs.negativePrompt || '');
+            setMjParams(inputs.mjParams || INITIAL_MJ_PARAMS);
+            setGptParams(inputs.gptParams || INITIAL_GPT_PARAMS);
+            setGeminiParams(inputs.geminiParams || INITIAL_GEMINI_PARAMS);
+            setResults(selectedItem.outputs); // also show results
+        }
+    }, [selectedItem]);
+
 
     const handleGenerate = useCallback(async () => {
         if (!isAuthenticated) {
@@ -133,25 +150,26 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     }, [setFavorites]);
 
     const isCurrentResultFavorited = useMemo(() => {
-        if (!results) return false;
-        // A simple check; more robust would be to check content
-        return history.length > 0 && favorites.some(fav => fav.id === history[0].id);
+        if (!results || !history.length) return false;
+        // Check if the latest history item (which corresponds to the current result) is in favorites
+        const currentHistoryItem = history[0];
+        return favorites.some(fav => fav.id === currentHistoryItem.id);
     }, [results, favorites, history]);
 
     return (
         <div className="h-full relative p-2">
-            <Bubbles />
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} />}
             <div className={`h-full grid grid-cols-1 lg:grid-cols-2 gap-4 ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 
                 {/* Left Column: Inputs */}
                 <div className="flex flex-col gap-2 overflow-y-auto inner-scroll pr-1 pb-4">
                     <div className="alchemist-panel-header">
-                        <h2 className="text-xl font-bold font-gangofthree text-white">Laboratório de Alquimia</h2>
+                        <h2 className="text-xl font-bold font-gangofthree">Laboratório de Alquimia</h2>
                         <div className="magic-flow"></div>
                     </div>
-
+                    
                     <div className="ingredient-flask">
+                         <h3 className="text-lg font-bold text-center mb-2">Caldeirão Principal</h3>
                         <TextArea
                             label="Ingrediente Principal (Prompt Base)"
                             value={basePrompt}
@@ -169,17 +187,17 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                     </div>
                     
                     <div className="ingredient-flask">
-                         <div className="flex items-center gap-4 p-3">
-                            <p className="text-sm font-medium text-gray-300">Destilar para:</p>
-                            <Checkbox label="Midjourney" checked={generateFor.midjourney} onChange={e => setGenerateFor(f => ({ ...f, midjourney: e.target.checked }))} />
-                            <Checkbox label="GPT / DALL-E" checked={generateFor.gpt} onChange={e => setGenerateFor(f => ({ ...f, gpt: e.target.checked }))} />
-                            <Checkbox label="Gemini" checked={generateFor.gemini} onChange={e => setGenerateFor(f => ({ ...f, gemini: e.target.checked }))} />
+                         <div className="flex items-center justify-around gap-4 p-3 flex-wrap">
+                            <p className="text-sm font-medium flex-shrink-0">Destilar para:</p>
+                            <Switch label="Midjourney" checked={generateFor.midjourney} onChange={e => setGenerateFor(f => ({ ...f, midjourney: e.target.checked }))} />
+                            <Switch label="GPT / DALL-E" checked={generateFor.gpt} onChange={e => setGenerateFor(f => ({ ...f, gpt: e.target.checked }))} />
+                            <Switch label="Gemini" checked={generateFor.gemini} onChange={e => setGenerateFor(f => ({ ...f, gemini: e.target.checked }))} />
                         </div>
                     </div>
 
-                    {generateFor.midjourney && <div className="ingredient-flask"><MidjourneyParametersComponent params={mjParams} setParams={setMjParams} /></div>}
-                    {generateFor.gpt && <div className="ingredient-flask"><GptStructuredBuilder params={gptParams} setParams={setGptParams} /></div>}
-                    {generateFor.gemini && <div className="ingredient-flask"><GeminiParametersComponent params={geminiParams} setParams={setGeminiParams} /></div>}
+                    {generateFor.midjourney && <CollapsibleSection title="Caldeirão Midjourney"><MidjourneyParametersComponent params={mjParams} setParams={setMjParams} /></CollapsibleSection>}
+                    {generateFor.gpt && <CollapsibleSection title="Caldeirão GPT"><GptStructuredBuilder params={gptParams} setParams={setGptParams} /></CollapsibleSection>}
+                    {generateFor.gemini && <CollapsibleSection title="Caldeirão Gemini"><GeminiParametersComponent params={geminiParams} setParams={setGeminiParams} /></CollapsibleSection>}
                 </div>
 
                 {/* Right Column: Outputs */}
@@ -205,14 +223,15 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                     {results ? (
                         <PromptResultDisplay 
                             results={results}
-                            inputs={{ basePrompt, negativePrompt, mjParams, gptParams, geminiParams }}
+                            inputs={history[0]?.inputs} // Pass latest history inputs for favoriting
                             onRegenerate={handleGenerate}
                             onFavorite={handleToggleFavorite}
                             isFavorited={isCurrentResultFavorited}
+                            historyItem={history[0]}
                         />
                     ) : !isLoading && (
                          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-8">
-                            <h2 className="text-2xl font-bold font-gangofthree text-white">Caldeirão Vazio</h2>
+                            <h2 className="text-2xl font-bold">Caldeirão Vazio</h2>
                             <p className="mt-2 max-w-md">Adicione seus ingredientes, ajuste os catalisadores e clique em "Destilar" para criar poções de prompt otimizadas.</p>
                         </div>
                     )}

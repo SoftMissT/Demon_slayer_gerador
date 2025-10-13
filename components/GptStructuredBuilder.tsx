@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { GptParameters } from '../types';
 import { Card } from './ui/Card';
@@ -19,9 +20,7 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
   const compositions = ["Dynamic Angle", "Close-up Shot", "Wide Angle", "Symmetrical", "Rule of Thirds"];
 
   return (
-    <Card className="!p-4 model-gpt">
-      <h3 className="text-lg font-bold text-white font-gangofthree mb-4">Parâmetros Estruturados (GPT/DALL-E)</h3>
-      <div className="space-y-4">
+     <div className="space-y-4">
         <Select label="Tom / Atmosfera" value={params.tone} onChange={(e) => handleParamChange('tone', e.target.value)}>
           {tones.map(t => <option key={t} value={t}>{t}</option>)}
         </Select>
@@ -32,6 +31,5 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
           {compositions.map(c => <option key={c} value={c}>{c}</option>)}
         </Select>
       </div>
-    </Card>
   );
 };

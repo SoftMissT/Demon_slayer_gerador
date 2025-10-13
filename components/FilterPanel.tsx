@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, Fragment } from 'react';
 
 import type { FilterState, AIFlags, Category, Tematica } from '../types';
@@ -10,6 +11,7 @@ import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
 import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 import { WEAPON_TYPES } from '../lib/weaponData';
 import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -23,6 +25,8 @@ import { HammerIcon } from './icons/HammerIcon';
 import { RefreshIcon } from './icons/RefreshIcon';
 import { ExpandIcon } from './icons/ExpandIcon';
 import { CollapseIcon } from './icons/CollapseIcon';
+import { SaveIcon } from './icons/SaveIcon';
+import { TrashIcon } from './icons/TrashIcon';
 
 interface FilterPanelProps {
   onGenerate: (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => void;
@@ -37,20 +41,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
     const [promptModifier, setPromptModifier] = useState('');
     const [aiFlags, setAiFlags] = useState<AIFlags>({ useDeepSeek: true, useGemini: true, useGpt: true });
     const [showAdvanced, setShowAdvanced] = useState(false);
-
-    // Mapped constants for selects
-    const breathingStyles = useMemo(() => ['Aleatória', 'Nenhuma', ...BREATHING_STYLES_DATA.map(b => b.nome)], []);
-    const weaponTypes = useMemo(() => WEAPON_TYPES.map(w => w.name), []);
-    const hunterArchetypes = useMemo(() => ['Aleatória', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))], []);
-    const demonBloodArts = useMemo(() => DEMON_BLOOD_ARTS, []);
     
-    const npcProfessions = useMemo(() => {
-        const tematicaKey = filters.npcTematica as keyof typeof PROFESSIONS_BY_TEMATICA;
-        if (tematicaKey && PROFESSIONS_BY_TEMATICA[tematicaKey]) {
-            return PROFESSIONS_BY_TEMATICA[tematicaKey];
-        }
-        return (PROFESSIONS_BY_TEMATICA as any).all || [];
-    }, [filters.npcTematica]);
+    // Preset State
+    const [presets, setPresets] = useLocalStorage<Record<string, FilterState>>('kimetsu-forge-presets', {});
+    const [selectedPreset, setSelectedPreset] = useState<string>('');
 
     // Handlers
     const handleFilterChange = useCallback((field: keyof FilterState, value: any) => {
@@ -78,7 +72,35 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             aiFocusGpt: prev.aiFocusGpt,
             aiFocusDeepSeek: prev.aiFocusDeepSeek,
         }));
+        setSelectedPreset('');
     }, []);
+
+    const handleSavePreset = () => {
+        const presetName = prompt("Digite um nome para este preset:", `Preset de ${filters.category || 'Geral'}`);
+        if (presetName && presetName.trim()) {
+            setPresets(prev => ({ ...prev, [presetName.trim()]: filters }));
+            setSelectedPreset(presetName.trim());
+        }
+    };
+
+    const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const presetName = e.target.value;
+        if (presetName && presets[presetName]) {
+            setFilters(presets[presetName]);
+            setSelectedPreset(presetName);
+        } else {
+            setSelectedPreset('');
+        }
+    };
+
+    const handleDeletePreset = () => {
+        if (selectedPreset && window.confirm(`Tem certeza que deseja apagar o preset "${selectedPreset}"?`)) {
+            const newPresets = { ...presets };
+            delete newPresets[selectedPreset];
+            setPresets(newPresets);
+            setSelectedPreset('');
+        }
+    };
 
     const handleGenerateClick = useCallback(() => {
         if (!isAuthenticated) {
@@ -91,6 +113,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
         }
         onGenerate(filters, generationCount, promptModifier, aiFlags);
     }, [isAuthenticated, onLoginClick, onGenerate, filters, generationCount, promptModifier, aiFlags]);
+    
+    // Mapped constants for selects
+    const breathingStyles = useMemo(() => ['Aleatória', 'Nenhuma', ...BREATHING_STYLES_DATA.map(b => b.nome)], []);
+    const weaponTypes = useMemo(() => WEAPON_TYPES.map(w => w.name), []);
+    const hunterArchetypes = useMemo(() => ['Aleatória', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))], []);
+    const demonBloodArts = useMemo(() => DEMON_BLOOD_ARTS, []);
+    
+    const npcProfessions = useMemo(() => {
+        const tematicaKey = filters.npcTematica as keyof typeof PROFESSIONS_BY_TEMATICA;
+        if (tematicaKey && PROFESSIONS_BY_TEMATICA[tematicaKey]) {
+            return PROFESSIONS_BY_TEMATICA[tematicaKey];
+        }
+        return (PROFESSIONS_BY_TEMATICA as any).all || [];
+    }, [filters.npcTematica]);
 
     // Render logic
     const renderCategoryFilters = () => {
@@ -351,6 +387,24 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             
             <div className="flex-grow overflow-y-auto inner-scroll pr-2 -mr-2">
                 <div className="space-y-4">
+                     <div className="p-3 bg-gray-800/50 rounded-lg">
+                        <h3 className="text-sm font-semibold text-gray-300 mb-2">Gerenciar Presets</h3>
+                        <div className="flex gap-2">
+                            <div className="flex-grow">
+                                <Select label="" value={selectedPreset} onChange={handleLoadPreset}>
+                                    <option value="">Carregar preset...</option>
+                                    {Object.keys(presets).map(name => <option key={name} value={name}>{name}</option>)}
+                                </Select>
+                            </div>
+                            <Button variant="secondary" size="sm" onClick={handleSavePreset} title="Salvar preset atual">
+                                <SaveIcon className="w-4 h-4" />
+                            </Button>
+                            <Button variant="danger" size="sm" onClick={handleDeletePreset} disabled={!selectedPreset} title="Apagar preset selecionado">
+                                <TrashIcon className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </div>
+                    
                     <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
                         <option value="" disabled>Selecione uma categoria...</option>
                         {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
