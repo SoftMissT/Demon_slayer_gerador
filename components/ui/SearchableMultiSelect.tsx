@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { InfoTooltip } from './InfoTooltip';
 
@@ -23,33 +24,51 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [position, setPosition] = useState<'down' | 'up'>('down');
+  const [style, setStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  const calculatePosition = () => {
+    if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropdownHeight = 240; // max-h-60
+
+        const newStyle: React.CSSProperties = {
+            position: 'fixed',
+            left: `${rect.left}px`,
+            width: `${rect.width}px`,
+            zIndex: 50,
+        };
+
+        if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+            newStyle.bottom = `${window.innerHeight - rect.top}px`;
+        } else {
+            newStyle.top = `${rect.bottom}px`;
+        }
+        setStyle(newStyle);
+    }
+  };
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
+    if (!isOpen) return;
+    const parentScroller = ref.current?.closest('.inner-scroll');
+    const handleClose = () => setIsOpen(false);
+    
+    window.addEventListener('resize', handleClose);
+    window.addEventListener('scroll', handleClose, true);
+    parentScroller?.addEventListener('scroll', handleClose);
+
+    return () => {
+      window.removeEventListener('resize', handleClose);
+      window.removeEventListener('scroll', handleClose, true);
+      parentScroller?.removeEventListener('scroll', handleClose);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   const handleToggleOpen = () => {
     if (!isOpen) {
-        if (buttonRef.current) {
-            const rect = buttonRef.current.getBoundingClientRect();
-            // max-h-60 is 15rem which is 240px. Add some buffer.
-            const dropdownHeight = 250; 
-            const spaceBelow = window.innerHeight - rect.bottom;
-            if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-                setPosition('up');
-            } else {
-                setPosition('down');
-            }
-        }
+      calculatePosition();
     }
     setIsOpen(!isOpen);
   };
@@ -71,9 +90,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  const dropdownClasses = `absolute z-20 w-full custom-dropdown border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto ${
-    position === 'up' ? 'bottom-full mb-1' : 'mt-1'
-  }`;
+  const dropdownClasses = `custom-dropdown border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col`;
 
   return (
     <div ref={ref} className="relative">
@@ -93,14 +110,14 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
         <svg className={`w-4 h-4 ml-2 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </button>
       <AnimatePresence>
-      {isOpen && (
+      {isOpen && document.body && createPortal(
         <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: position === 'up' ? 10 : -10 }}
+            initial={{ opacity: 0, scale: 0.98, y: -5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: position === 'up' ? 10 : -10 }}
-            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+            exit={{ opacity: 0, scale: 0.98, y: -5 }}
+            transition={{ duration: 0.2, ease: "circOut" }}
             className={dropdownClasses}
-            style={{ originY: position === 'up' ? '100%' : '0%' }}
+            style={style}
         >
           <div className="p-2">
             <input
@@ -109,9 +126,10 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
               className="w-full bg-gray-900 border border-gray-700 rounded-md py-1 px-2 text-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
             />
           </div>
-          <ul>
+          <ul className="overflow-y-auto">
             {filteredOptions.map((option) => {
               const isSelected = selected.includes(option);
               const isDisabled = !!(!isSelected && isMaxSelected);
@@ -119,7 +137,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
                 <li
                   key={option}
                   onClick={() => !isDisabled && toggleOption(option)}
-                  className={`px-3 py-2 flex items-center ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-700'}`}
+                  className={`px-3 py-2 flex items-center dropdown-option ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
                 >
                   <input
                     type="checkbox"
@@ -133,7 +151,8 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
               );
             })}
           </ul>
-        </motion.div>
+        </motion.div>,
+        document.body
       )}
       </AnimatePresence>
     </div>

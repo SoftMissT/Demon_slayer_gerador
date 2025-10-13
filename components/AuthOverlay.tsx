@@ -18,7 +18,7 @@ export const AuthOverlay: React.FC<AuthOverlayProps> = ({ onLoginClick, view }) 
             <Button 
                 onClick={onLoginClick} 
                 size="lg"
-                className={`w-auto ${buttonClass}`}
+                className={buttonClass}
             >
                 <DiscordIcon className="w-6 h-6" />
                 Entrar com Discord

@@ -98,10 +98,10 @@ export const Header: React.FC<HeaderProps> = ({
                     <AnimatePresence>
                     {settingsOpen && (
                         <motion.div 
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            initial={{ opacity: 0, scale: 0.98, y: -5 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            exit={{ opacity: 0, scale: 0.98, y: -5 }}
+                            transition={{ duration: 0.2, ease: "circOut" }}
                             className="absolute top-full right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20 py-1 origin-top-right"
                             onMouseLeave={() => setSettingsOpen(false)}
                         >
@@ -122,6 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
                             <img src={user.avatar} alt={user.username} className="w-8 h-8 rounded-full"/>
                             <div className="hidden lg:block">
                                 <p className="text-sm font-semibold text-white truncate">{user.username}</p>
+
                                 <button onClick={onLogout} className="text-xs text-gray-400 hover:text-red-400">Sair</button>
                             </div>
                         </div>
@@ -129,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <Button 
                             onClick={onLoginClick}
                             size="sm"
-                            className={`${buttonClass}`}
+                            className={buttonClass}
                         >
                             <DiscordIcon className="w-5 h-5" />
                             <span className="hidden md:inline">Entrar</span>

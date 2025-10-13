@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDownIcon } from '../icons/ChevronDownIcon';
@@ -7,13 +6,16 @@ interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  wrapperClassName?: string;
 }
 
-export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, defaultOpen = false }) => {
+export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, defaultOpen = false, wrapperClassName }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  const finalWrapperClass = wrapperClassName ?? 'ingredient-flask !p-0 overflow-hidden';
+
   return (
-    <div className="ingredient-flask !p-0 overflow-hidden">
+    <div className={finalWrapperClass}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center p-4 text-left"

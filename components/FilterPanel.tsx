@@ -25,6 +25,7 @@ import { SaveIcon } from './icons/SaveIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { NumberInput } from './ui/NumberInput';
 import { Switch } from './ui/Switch';
+import { CollapsibleSection } from './ui/CollapsibleSection';
 
 interface FilterPanelProps {
   onGenerate: (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => void;
@@ -32,6 +33,10 @@ interface FilterPanelProps {
   isAuthenticated: boolean;
   onLoginClick: () => void;
 }
+
+const SubHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <h4 className="filter-subheader">{children}</h4>
+);
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading, isAuthenticated, onLoginClick }) => {
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
@@ -143,6 +148,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Identidade e Background</SubHeader>
                         <Select label="Temática" value={filters.hunterTematica} onChange={e => handleFilterChange('hunterTematica', e.target.value)}>
                             {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
                         </Select>
@@ -152,11 +158,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         <SearchableSelect label="Origem/Background" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>
                             {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
                         </SearchableSelect>
-                        <Select label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>
-                            {hunterArchetypes.map(a => <option key={a} value={a}>{a}</option>)}
-                        </Select>
                         <Select label="Personalidade" value={filters.hunterPersonality} onChange={e => handleFilterChange('hunterPersonality', e.target.value)}>
                             {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
+                        </Select>
+                        <SubHeader>Estilo de Combate</SubHeader>
+                        <Select label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>
+                            {hunterArchetypes.map(a => <option key={a} value={a}>{a}</option>)}
                         </Select>
                         <SearchableSelect label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>
                             {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
@@ -171,6 +178,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                  return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Identidade e Poder</SubHeader>
                          <Select label="Temática" value={filters.oniTematica} onChange={e => handleFilterChange('oniTematica', e.target.value)}>
                             {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
                         </Select>
@@ -183,6 +191,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         <Select label="Personalidade" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>
                             {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
                         </Select>
+                        <SubHeader>Habilidades de Combate</SubHeader>
                         <SearchableSelect label="Arma (Opcional)" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>
                             {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
                         </SearchableSelect>
@@ -193,6 +202,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                  return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Background e Identidade</SubHeader>
                         <Select label="Temática" value={filters.npcTematica} onChange={e => handleFilterChange('npcTematica', e.target.value)}>
                             {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
                         </Select>
@@ -217,6 +227,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                  return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Atributos Principais</SubHeader>
                         <Select label="Raridade" value={filters.weaponRarity} onChange={e => handleFilterChange('weaponRarity', e.target.value)}>
                             {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
                         </Select>
@@ -226,6 +237,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         <SearchableSelect label="País de Origem" value={filters.weaponCountry} onChange={e => handleFilterChange('weaponCountry', e.target.value)}>
                             {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                         </SearchableSelect>
+                        <SubHeader>Mecânicas de Combate</SubHeader>
                         <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>
                             {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
                         </SearchableSelect>
@@ -241,12 +253,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Atributos Principais</SubHeader>
                         <Select label="Raridade" value={filters.accessoryRarity} onChange={e => handleFilterChange('accessoryRarity', e.target.value)}>
                             {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
                         </Select>
                         <Select label="Temática" value={filters.accessoryTematica} onChange={e => handleFilterChange('accessoryTematica', e.target.value)}>
                             {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
                         </Select>
+                        <SubHeader>Origem e Manufatura</SubHeader>
                          <SearchableSelect label="Origem Cultural" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}>
                             {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
                         </SearchableSelect>
@@ -259,6 +273,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Criação e Estilo</SubHeader>
                          <SearchableMultiSelect label="Respirações Base" selected={filters.baseBreathingStyles} onChange={val => handleFilterChange('baseBreathingStyles', val)} options={breathingStyles.filter(b => !['Nenhuma', 'Aleatória'].includes(b))} maxSelection={2} />
                         <Select label="Temática" value={filters.breathingFormTematica} onChange={e => handleFilterChange('breathingFormTematica', e.target.value)}>
                             {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
@@ -275,6 +290,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Origem e Poder</SubHeader>
                         <Select label="Temática" value={filters.kekkijutsuTematica} onChange={e => handleFilterChange('kekkijutsuTematica', e.target.value)}>
                             {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
                         </Select>
@@ -290,6 +306,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                  return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Atmosfera e Definição</SubHeader>
                         <Select label="Tom" value={filters.locationTone} onChange={e => handleFilterChange('locationTone', e.target.value)}>
                             {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                         </Select>
@@ -308,6 +325,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Escopo e Tom</SubHeader>
                         <Select label="Tom da Missão" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value)}>
                             {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                         </Select>
@@ -327,6 +345,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                  return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Tema e Conflito</SubHeader>
                         <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value)}>
                             {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                         </Select>
@@ -348,6 +367,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                  return (
                     <Fragment>
                         {commonFields}
+                        <SubHeader>Natureza do Evento</SubHeader>
                         <Select label="Tom" value={filters.eventTone} onChange={e => handleFilterChange('eventTone', e.target.value)}>
                             {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
                         </Select>
@@ -389,7 +409,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         <div className="flex gap-2">
                             <div className="flex-grow">
                                 <Select label="" value={selectedPreset} onChange={handleLoadPreset}>
-                                    <option value="">Carregar preset...</option>
+                                    <option value="" disabled>Carregar preset...</option>
                                     {Object.keys(presets).map(name => <option key={name} value={name}>{name}</option>)}
                                 </Select>
                             </div>
@@ -412,35 +432,40 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             </div>
 
             <div className="flex-shrink-0 pt-3 mt-3 border-t border-gray-700/50">
-                 <div className="space-y-4 mb-4 p-3 bg-gray-800/50 rounded-lg">
-                    <TextArea 
-                        label="Modificador de Prompt (Prioridade Máxima)" 
-                        value={promptModifier}
-                        onChange={e => setPromptModifier(e.target.value)}
-                        placeholder="Ex: 'Crie algo com um tom mais sombrio', 'Foco em um design biomecânico'"
-                        rows={2}
-                        tooltip="Uma instrução direta para a IA que sobrepõe outros filtros."
-                    />
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <Select label="Foco Gemini" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)} tooltip="Define a principal tarefa do Gemini na criação.">
-                            {AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}
-                        </Select>
-                        <Select label="Foco GPT" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)} tooltip="Define como o GPT-4o irá refinar o texto.">
-                            {AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}
-                        </Select>
-                        <Select label="Foco DeepSeek" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)} tooltip="Define a tarefa do DeepSeek na criação de mecânicas.">
-                            {AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}
-                        </Select>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-400 mb-2">Modelos a Utilizar</p>
-                        <div className="flex items-center gap-4">
-                            <Switch label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({ ...f, useDeepSeek: e.target.checked }))} />
-                            <Switch label="Gemini" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({ ...f, useGemini: e.target.checked }))} />
-                            <Switch label="GPT-4o" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({ ...f, useGpt: e.target.checked }))} />
+                 <CollapsibleSection
+                    title="Opções Avançadas de IA"
+                    wrapperClassName="bg-gray-800/50 rounded-lg overflow-hidden mb-4"
+                 >
+                    <div className="space-y-4">
+                        <TextArea 
+                            label="Modificador de Prompt (Prioridade Máxima)" 
+                            value={promptModifier}
+                            onChange={e => setPromptModifier(e.target.value)}
+                            placeholder="Ex: 'Crie algo com um tom mais sombrio', 'Foco em um design biomecânico'"
+                            rows={2}
+                            tooltip="Uma instrução direta para a IA que sobrepõe outros filtros."
+                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <Select label="Foco Gemini" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)} tooltip="Define a principal tarefa do Gemini na criação.">
+                                {AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}
+                            </Select>
+                            <Select label="Foco GPT" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)} tooltip="Define como o GPT-4o irá refinar o texto.">
+                                {AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}
+                            </Select>
+                            <Select label="Foco DeepSeek" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)} tooltip="Define a tarefa do DeepSeek na criação de mecânicas.">
+                                {AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}
+                            </Select>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-400 mb-2">Modelos a Utilizar</p>
+                            <div className="flex items-center gap-4">
+                                <Switch label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({ ...f, useDeepSeek: e.target.checked }))} />
+                                <Switch label="Gemini" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({ ...f, useGemini: e.target.checked }))} />
+                                <Switch label="GPT-4o" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({ ...f, useGpt: e.target.checked }))} />
+                            </div>
                         </div>
                     </div>
-                </div>
+                 </CollapsibleSection>
 
                 <div className="flex items-end gap-3">
                     <div className="w-28">
