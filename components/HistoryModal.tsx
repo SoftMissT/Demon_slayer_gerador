@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Modal } from './ui/Modal';
 import type { HistoryItem, GeneratedItem, AlchemyHistoryItem } from '../types';
@@ -26,6 +25,22 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
 }) => {
     const renderHistoryItem = (item: HistoryItem) => {
         const isForgeItem = 'categoria' in item;
+
+        // Defensive check for malformed AlchemyHistoryItem from older localStorage data
+        if (!isForgeItem && !(item as AlchemyHistoryItem).inputs) {
+            return (
+                <li key={item.id} className="flex items-center justify-between p-3 bg-red-900/50 rounded-lg group">
+                    <div className="text-left flex-grow min-w-0">
+                        <p className="font-semibold text-red-300 truncate">Item de Histórico Inválido</p>
+                        <p className="text-sm text-red-400 truncate mt-1">Este item pode estar corrompido.</p>
+                    </div>
+                    <Button variant="ghost" onClick={() => onDelete(item.id)} className="!p-2 flex-shrink-0 ml-4 opacity-100">
+                        <TrashIcon className="w-5 h-5 text-red-500" />
+                    </Button>
+                </li>
+            );
+        }
+
         const name = isForgeItem ? (item as GeneratedItem).nome : `Prompt de ${new Date((item as AlchemyHistoryItem).createdAt).toLocaleTimeString()}`;
         const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs.basePrompt;
 
