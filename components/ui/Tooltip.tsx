@@ -11,7 +11,8 @@ interface TooltipProps {
 
 export const Tooltip: React.FC<TooltipProps> = ({ children, text, position = 'bottom', className = '' }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // FIX: Replaced `NodeJS.Timeout` with `ReturnType<typeof setTimeout>` to use the correct browser-compatible type for the `setTimeout` return value, resolving the "Cannot find namespace 'NodeJS'" error.
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
     timeoutRef.current = setTimeout(() => {

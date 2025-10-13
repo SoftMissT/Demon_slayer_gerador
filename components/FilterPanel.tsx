@@ -170,7 +170,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                             {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
                         </SearchableSelect>
                          <SearchableSelect label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>
-                            {npcProfessions.map(p => <option key={p} value={p}>{p}</option>)}
+                            {npcProfessions.map((p: string) => <option key={p} value={p}>{p}</option>)}
                         </SearchableSelect>
                         <Select label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}>
                             {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
@@ -283,7 +283,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         </Select>
                         <SearchableSelect label="País" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>
                             {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </Select>
+                        </SearchableSelect>
                         <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>
                             {THREAT_SCALES.map(s => <option key={s} value={s}>{s}</option>)}
                         </Select>
