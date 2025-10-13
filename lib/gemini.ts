@@ -8,7 +8,7 @@ import { GoogleGenAI } from "@google/genai";
  * @param apiKeyOverride - An optional API key to use instead of the one from environment variables.
  */
 export const getAiClient = (apiKeyOverride?: string): GoogleGenAI | null => {
-    const apiKey = apiKeyOverride || process.env.API_KEY;
+    const apiKey = apiKeyOverride || process.env.DEV_GEMINI_KEY;
 
     if (!apiKey) {
         console.error("Nenhuma chave de API do Gemini foi encontrada no ambiente do servidor.");

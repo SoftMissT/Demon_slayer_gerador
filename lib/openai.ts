@@ -8,7 +8,7 @@ import OpenAI from 'openai';
  * @param apiKeyOverride - An optional API key to use instead of the one from environment variables.
  */
 export const getOpenAiClient = (apiKeyOverride?: string): OpenAI | null => {
-    const apiKey = apiKeyOverride || process.env.OPENAI_API_KEY;
+    const apiKey = apiKeyOverride || process.env.DEV_OPENAI_KEY;
 
     if (!apiKey) {
         console.warn("Nenhuma chave de API da OpenAI foi encontrada no ambiente do servidor. A etapa de polimento será ignorada.");

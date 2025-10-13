@@ -12,7 +12,7 @@ interface DeepSeekMessage {
  * @param userApiKey An optional API key provided by the user.
  */
 export const callDeepSeekAPI = async (messages: DeepSeekMessage[], userApiKey?: string): Promise<any> => {
-    const apiKey = userApiKey || process.env.DEEPSEEK_API_KEY;
+    const apiKey = userApiKey || process.env.DEV_DEEPSEEK_KEY;
     if (!apiKey) {
         throw new Error('Nenhuma chave de API da DeepSeek foi encontrada no ambiente do servidor.');
     }

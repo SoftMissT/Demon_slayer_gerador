@@ -59,11 +59,11 @@ DISCORD_REDIRECT_URI="http://localhost:3000" # Em produção, use a URL do seu s
 
 # Chaves de API para os modelos de IA
 # Chave para Google Gemini (https://aistudio.google.com/app/apikey)
-API_KEY="SUA_CHAVE_GEMINI_AQUI"
+DEV_GEMINI_KEY="SUA_CHAVE_GEMINI_AQUI"
 # Chave para OpenAI (https://platform.openai.com/api-keys)
-OPENAI_API_KEY="SUA_CHAVE_OPENAI_AQUI"
+DEV_OPENAI_KEY="SUA_CHAVE_OPENAI_AQUI"
 # Chave para DeepSeek (https://platform.deepseek.com/api_keys)
-DEEPSEEK_API_KEY="SUA_CHAVE_DEEPSEEK_AQUI"
+DEV_DEEPSEEK_KEY="SUA_CHAVE_DEEPSEEK_AQUI"
 ```
 *   **`GOOGLE_PRIVATE_KEY`**: Copie o valor da `private_key` do arquivo JSON. Na Vercel, você pode colar o valor de múltiplas linhas diretamente no campo.
 *   **`DISCORD_REDIRECT_URI`**: Para rodar localmente, use `http://localhost:3000`. Quando for para produção, mude para a URL do seu site na Vercel.

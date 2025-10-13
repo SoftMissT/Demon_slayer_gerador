@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -9,7 +8,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { Spinner } from './components/ui/Spinner';
-import type { User } from './types';
+import type { User, GeneratedItem, AlchemyHistoryItem, HistoryItem, FavoriteItem } from './types';
+import useLocalStorage from './hooks/useLocalStorage';
+import { HistoryModal } from './components/HistoryModal';
+import { FavoritesModal } from './components/FavoritesModal';
 
 const App: React.FC = () => {
     const [activeView, setActiveView] = useState<'forge' | 'prompt'>('forge');
@@ -19,11 +21,20 @@ const App: React.FC = () => {
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [theme, setTheme] = useState('forge-theme');
-    const [favoritesCount, setFavoritesCount] = useState(0);
 
     const [user, setUser] = useState<User | null>(null);
     const [authError, setAuthError] = useState<string | null>(null);
     const [isAuthenticating, setIsAuthenticating] = useState(true);
+
+    // State for Forge
+    const [forgeHistory, setForgeHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
+    const [forgeFavorites, setForgeFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
+    const [selectedForgeItem, setSelectedForgeItem] = useState<GeneratedItem | null>(null);
+
+    // State for Alquimia
+    const [alchemyHistory, setAlchemyHistory] = useLocalStorage<AlchemyHistoryItem[]>('kimetsu-alchemy-history', []);
+    const [alchemyFavorites, setAlchemyFavorites] = useLocalStorage<AlchemyHistoryItem[]>('kimetsu-alchemy-favorites', []);
+    const [itemToLoadInAlchemy, setItemToLoadInAlchemy] = useState<AlchemyHistoryItem | null>(null);
     
     // Handles both localStorage session check and Discord OAuth callback on initial load
     useEffect(() => {
@@ -104,6 +115,30 @@ const App: React.FC = () => {
         setUser(null);
         localStorage.removeItem('kimetsu-forge-user');
     };
+
+    const handleToggleFavorite = useCallback((itemToToggle: FavoriteItem) => {
+        if (activeView === 'forge') {
+            setForgeFavorites(prev => {
+                const isFav = prev.some(item => item.id === itemToToggle.id);
+                return isFav ? prev.filter(item => item.id !== itemToToggle.id) : [itemToToggle as GeneratedItem, ...prev];
+            });
+        } else {
+            setAlchemyFavorites(prev => {
+                const isFav = prev.some(item => item.id === itemToToggle.id);
+                return isFav ? prev.filter(item => item.id !== itemToToggle.id) : [itemToToggle as AlchemyHistoryItem, ...prev];
+            });
+        }
+    }, [activeView, setForgeFavorites, setAlchemyFavorites]);
+
+    const handleSelectFromModal = useCallback((item: HistoryItem | FavoriteItem) => {
+        if (activeView === 'forge') {
+            setSelectedForgeItem(item as GeneratedItem);
+        } else {
+            setItemToLoadInAlchemy(item as AlchemyHistoryItem);
+        }
+        setIsHistoryOpen(false);
+        setIsFavoritesOpen(false);
+    }, [activeView]);
     
     if (isAuthenticating) {
         return (
@@ -113,6 +148,9 @@ const App: React.FC = () => {
             </div>
         );
     }
+    
+    const activeFavorites = activeView === 'forge' ? forgeFavorites : alchemyFavorites;
+    const activeHistory = activeView === 'forge' ? forgeHistory : alchemyHistory;
 
     return (
         <>
@@ -127,7 +165,7 @@ const App: React.FC = () => {
                     user={user}
                     onLoginClick={handleLogin}
                     onLogoutClick={handleLogout}
-                    favoritesCount={favoritesCount}
+                    favoritesCount={activeFavorites.length}
                 />
                 <main className="flex-grow flex flex-col w-full max-w-screen-2xl mx-auto px-4 md:px-6 overflow-hidden">
                     <AnimatePresence mode="wait">
@@ -141,18 +179,25 @@ const App: React.FC = () => {
                         >
                             {activeView === 'forge' ? (
                                 <ForgeInterface
-                                    isFavoritesOpen={isFavoritesOpen}
-                                    onFavoritesClose={() => setIsFavoritesOpen(false)}
-                                    isHistoryOpen={isHistoryOpen}
-                                    onHistoryClose={() => setIsHistoryOpen(false)}
-                                    onFavoritesCountChange={setFavoritesCount}
                                     isAuthenticated={!!user}
                                     onLoginClick={handleLogin}
+                                    history={forgeHistory}
+                                    setHistory={setForgeHistory}
+                                    favorites={forgeFavorites}
+                                    setFavorites={setForgeFavorites}
+                                    selectedItem={selectedForgeItem}
+                                    setSelectedItem={setSelectedForgeItem}
                                 />
                             ) : (
                                 <PromptEngineeringPanel 
                                     isAuthenticated={!!user}
                                     onLoginClick={handleLogin}
+                                    history={alchemyHistory}
+                                    setHistory={setAlchemyHistory}
+                                    favorites={alchemyFavorites}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    itemToLoad={itemToLoadInAlchemy}
+                                    onItemLoaded={() => setItemToLoadInAlchemy(null)}
                                 />
                             )}
                         </motion.div>
@@ -162,6 +207,24 @@ const App: React.FC = () => {
                 <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
                 <HowItWorksModal isOpen={isHowItWorksOpen} onClose={() => setIsHowItWorksOpen(false)} />
                 <ErrorDisplay message={authError} onDismiss={() => setAuthError(null)} />
+                
+                <HistoryModal 
+                    isOpen={isHistoryOpen} 
+                    onClose={() => setIsHistoryOpen(false)} 
+                    history={activeHistory} 
+                    onSelect={handleSelectFromModal}
+                    onDelete={(id) => activeView === 'forge' ? setForgeHistory(h => h.filter(i => i.id !== id)) : setAlchemyHistory(h => h.filter(i => i.id !== id))}
+                    onClear={() => activeView === 'forge' ? setForgeHistory([]) : setAlchemyHistory([])}
+                    activeView={activeView}
+                />
+                 <FavoritesModal 
+                    isOpen={isFavoritesOpen} 
+                    onClose={() => setIsFavoritesOpen(false)} 
+                    favorites={activeFavorites}
+                    onSelect={handleSelectFromModal}
+                    onToggleFavorite={handleToggleFavorite}
+                    activeView={activeView}
+                />
             </div>
         </>
     );

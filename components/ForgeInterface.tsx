@@ -1,11 +1,7 @@
-
-
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FilterPanel } from './FilterPanel';
 import { ResultsPanel } from './ResultsPanel';
-import { FavoritesModal } from './FavoritesModal';
-import { HistoryModal } from './HistoryModal';
 import { DetailModal } from './DetailModal';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
@@ -13,19 +9,19 @@ import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
 import type { FilterState, GeneratedItem } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
-import useLocalStorage from '../hooks/useLocalStorage';
 import { DiscordIcon } from './icons/DiscordIcon';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
 import { ChevronRightIcon } from './icons/ChevronRightIcon';
 
 interface ForgeInterfaceProps {
-    isFavoritesOpen: boolean;
-    onFavoritesClose: () => void;
-    isHistoryOpen: boolean;
-    onHistoryClose: () => void;
-    onFavoritesCountChange: (count: number) => void;
     isAuthenticated: boolean;
     onLoginClick: () => void;
+    history: GeneratedItem[];
+    setHistory: React.Dispatch<React.SetStateAction<GeneratedItem[]>>;
+    favorites: GeneratedItem[];
+    setFavorites: React.Dispatch<React.SetStateAction<GeneratedItem[]>>;
+    selectedItem: GeneratedItem | null;
+    setSelectedItem: React.Dispatch<React.SetStateAction<GeneratedItem | null>>;
 }
 
 const useWindowSize = () => {
@@ -55,18 +51,15 @@ const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) =
 
 
 export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ 
-    isFavoritesOpen, onFavoritesClose, 
-    isHistoryOpen, onHistoryClose, 
-    onFavoritesCountChange, 
     isAuthenticated, onLoginClick,
+    history, setHistory,
+    favorites, setFavorites,
+    selectedItem, setSelectedItem,
 }) => {
-    const [favorites, setFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
-    const [history, setHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
     const { width } = useWindowSize();
     const isDesktop = useMemo(() => (width || 0) >= 1024, [width]);
 
     const [items, setItems] = useState<GeneratedItem[]>([]);
-    const [selectedItem, setSelectedItem] = useState<GeneratedItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentAiFocus, setCurrentAiFocus] = useState<Record<string, string> | null>(null);
@@ -77,8 +70,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const [isFilterPanelCollapsed, setIsFilterPanelCollapsed] = useState(false);
 
     useEffect(() => {
-        onFavoritesCountChange(favorites.length);
-    }, [favorites, onFavoritesCountChange]);
+      if (selectedItem && !isDetailModalOpen) {
+          setIsDetailModalOpen(true);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedItem]);
 
     const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier?: string) => {
         if (!isAuthenticated) {
@@ -110,7 +106,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             setItems(prev => [...newItems, ...prev]);
             if (newItems.length > 0) {
                 setSelectedItem(newItems[0]);
-                if (!isDesktop) setIsDetailModalOpen(true);
                 setHistory(prev => [...newItems, ...prev].slice(0, 100));
             }
         } catch (err: any) {
@@ -119,12 +114,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             setIsLoading(false);
             setCurrentAiFocus(null);
         }
-    }, [isDesktop, setHistory, isAuthenticated, onLoginClick]);
+    }, [isDesktop, setHistory, isAuthenticated, onLoginClick, setSelectedItem]);
 
     const handleSelectItem = useCallback((item: GeneratedItem) => {
         setSelectedItem(item);
-        setIsDetailModalOpen(true);
-    }, []);
+    }, [setSelectedItem]);
 
     const handleToggleFavorite = useCallback((itemToToggle: GeneratedItem) => {
         setFavorites(prev => {
@@ -145,7 +139,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
-    }, [selectedItem, setFavorites, setHistory]);
+    }, [selectedItem, setFavorites, setHistory, setSelectedItem]);
 
     const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
         if (!isAuthenticated) {
@@ -163,8 +157,9 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
         
         setIsLoading(true);
-        setError(null);
+setError(null);
         if (isDetailModalOpen) setIsDetailModalOpen(false);
+        setSelectedItem(null);
 
         try {
             const variant = await orchestrateGeneration(filters as FilterState, modifier);
@@ -173,29 +168,19 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             setItems(prev => [variant, ...prev]);
             setSelectedItem(variant);
             setHistory(prev => [variant, ...prev]);
-            setIsDetailModalOpen(true);
 
         } catch (err: any) {
             setError(err.message || 'Falha ao gerar variante.');
         } finally {
             setIsLoading(false);
         }
-    }, [setHistory, isDetailModalOpen, isAuthenticated, onLoginClick]);
-
-    const handleDeleteFromHistory = useCallback((itemId: string) => {
-        setHistory(prev => prev.filter(item => item.id !== itemId));
-    }, [setHistory]);
-
-    const handleClearHistory = useCallback(() => {
-        setHistory([]);
-        onHistoryClose();
-    }, [setHistory, onHistoryClose]);
+    }, [setHistory, isDetailModalOpen, isAuthenticated, onLoginClick, setSelectedItem]);
 
     const handleClearResults = useCallback(() => {
         setItems([]);
         setSelectedItem(null);
         setActiveFilters(null);
-    }, []);
+    }, [setSelectedItem]);
 
     const isFavorite = useMemo(() => {
         if (!selectedItem) return false;
@@ -279,15 +264,13 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
 
             <DetailModal
                 isOpen={isDetailModalOpen}
-                onClose={() => setIsDetailModalOpen(false)}
+                onClose={() => { setIsDetailModalOpen(false); setSelectedItem(null); }}
                 item={selectedItem}
                 onGenerateVariant={handleGenerateVariant}
                 isFavorite={isFavorite}
                 onToggleFavorite={handleToggleFavorite}
                 onUpdate={handleUpdateItem}
             />
-            <FavoritesModal isOpen={isFavoritesOpen} onClose={onFavoritesClose} favorites={favorites} onSelect={(item) => { handleSelectItem(item); onFavoritesClose(); }} onToggleFavorite={handleToggleFavorite} />
-            <HistoryModal isOpen={isHistoryOpen} onClose={onHistoryClose} history={history} onSelect={(item) => { handleSelectItem(item); onHistoryClose(); }} onDelete={handleDeleteFromHistory} onClear={handleClearHistory} />
             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
         </div>
     );

@@ -395,6 +395,25 @@ export interface PromptGenerationResult {
     geminiPrompt?: string;
 }
 
+export interface AlchemyHistoryItem {
+    id: string;
+    createdAt: string;
+    inputs: {
+        basePrompt: string;
+        negativePrompt: string;
+        mjParams: MidjourneyParameters;
+        gptParams: GptParameters;
+        geminiParams: GeminiParameters;
+        isMjEnabled: boolean;
+        isGptEnabled: boolean;
+        isGeminiEnabled: boolean;
+    };
+    result: PromptGenerationResult;
+}
+
+export type HistoryItem = GeneratedItem | AlchemyHistoryItem;
+export type FavoriteItem = GeneratedItem | AlchemyHistoryItem;
+
 // FIX: Added ApiKeys interface to provide a type for managing API keys for different AI services, resolving the import error in orchestrationService.ts.
 export interface ApiKeys {
   gemini: string;

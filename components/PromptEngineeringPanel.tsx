@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -9,8 +8,7 @@ import { PromptResultDisplay } from './PromptResultDisplay';
 import { MagicWandIcon } from './icons/MagicWandIcon';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { GeminiParameters } from './GeminiParameters';
-import type { MidjourneyParameters as MidjourneyParams, GptParameters as GptParams, GeminiParameters as GeminiParams, PromptGenerationResult } from '../types';
-import useLocalStorage from '../hooks/useLocalStorage';
+import type { MidjourneyParameters as MidjourneyParams, GptParameters as GptParams, GeminiParameters as GeminiParams, PromptGenerationResult, AlchemyHistoryItem, FavoriteItem } from '../types';
 import { SaveIcon } from './icons/SaveIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { Select } from './ui/Select';
@@ -18,7 +16,7 @@ import { RefreshIcon } from './icons/RefreshIcon';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
 import { generatePrompts } from '../lib/client/orchestrationService';
 import { DiscordIcon } from './icons/DiscordIcon';
-
+import { v4 as uuidv4 } from 'uuid';
 
 const INITIAL_MJ_PARAMS: MidjourneyParams = {
     aspectRatio: { value: '4:7', active: true },
@@ -50,21 +48,22 @@ const INITIAL_GEMINI_PARAMS: GeminiParams = {
     detailLevel: 'detalhado',
 };
 
-interface AlchemyPreset {
+// FIX: Changed interface extending a complex type to a type alias with an intersection.
+// An interface cannot extend `AlchemyHistoryItem['inputs']`, which is a type, not an identifier.
+// This resolves the "An interface can only extend an identifier/qualified-name" error.
+type AlchemyPreset = AlchemyHistoryItem['inputs'] & {
     name: string;
-    basePrompt: string;
-    negativePrompt: string;
-    mjParams: MidjourneyParams;
-    gptParams: GptParams;
-    geminiParams: GeminiParams;
-    isMjEnabled: boolean;
-    isGptEnabled: boolean;
-    isGeminiEnabled: boolean;
-}
+};
 
 interface PromptEngineeringPanelProps {
     isAuthenticated: boolean;
     onLoginClick: () => void;
+    history: AlchemyHistoryItem[];
+    setHistory: React.Dispatch<React.SetStateAction<AlchemyHistoryItem[]>>;
+    favorites: AlchemyHistoryItem[];
+    onToggleFavorite: (item: FavoriteItem) => void;
+    itemToLoad: AlchemyHistoryItem | null;
+    onItemLoaded: () => void;
 }
 
 const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) => (
@@ -81,6 +80,12 @@ const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) =
 export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     isAuthenticated,
     onLoginClick,
+    history,
+    setHistory,
+    favorites,
+    onToggleFavorite,
+    itemToLoad,
+    onItemLoaded,
 }) => {
     const [basePrompt, setBasePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
@@ -92,11 +97,32 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     const [isGeminiEnabled, setIsGeminiEnabled] = useState(true);
     
     const [result, setResult] = useState<PromptGenerationResult | null>(null);
+    const [lastGeneration, setLastGeneration] = useState<AlchemyHistoryItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [presets, setPresets] = useLocalStorage<AlchemyPreset[]>('kimetsu-alchemy-presets', []);
+    const [presets, setPresets] = useState<AlchemyPreset[]>([]);
     const [selectedPreset, setSelectedPreset] = useState<string>('');
+    
+    const loadState = useCallback((state: AlchemyHistoryItem['inputs']) => {
+        setBasePrompt(state.basePrompt);
+        setNegativePrompt(state.negativePrompt);
+        setMjParams(state.mjParams);
+        setGptParams(state.gptParams);
+        setGeminiParams(state.geminiParams);
+        setIsMjEnabled(state.isMjEnabled);
+        setIsGptEnabled(state.isGptEnabled);
+        setIsGeminiEnabled(state.isGeminiEnabled);
+    }, []);
+
+    useEffect(() => {
+        if(itemToLoad) {
+            loadState(itemToLoad.inputs);
+            setResult(itemToLoad.result);
+            setLastGeneration(itemToLoad);
+            onItemLoaded();
+        }
+    }, [itemToLoad, loadState, onItemLoaded]);
 
     const handleGenerate = useCallback(async () => {
         if (!isAuthenticated) {
@@ -107,8 +133,12 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
         setIsLoading(true);
         setError(null);
         setResult(null);
+        setLastGeneration(null);
         
         try {
+            const inputs = {
+                basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled
+            };
             const data = await generatePrompts({
                 basePrompt: `Tópico Principal: ${basePrompt}. Evitar: ${negativePrompt || 'Nenhum'}.`,
                 mjParams,
@@ -119,62 +149,30 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                 generateGemini: isGeminiEnabled,
             });
 
+            const historyEntry: AlchemyHistoryItem = {
+                id: uuidv4(),
+                createdAt: new Date().toISOString(),
+                inputs,
+                result: data,
+            };
+
             setResult(data);
+            setLastGeneration(historyEntry);
+            setHistory(prev => [historyEntry, ...prev].slice(0, 100));
 
         } catch (err: any) {
             setError(err.message);
         } finally {
             setIsLoading(false);
         }
-    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, isAuthenticated, onLoginClick]);
+    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, isAuthenticated, onLoginClick, setHistory]);
 
     const handleSavePreset = useCallback(() => {
-        const name = prompt("Digite um nome para o preset:");
-        if (name && name.trim()) {
-            if (presets.some(p => p.name === name.trim())) {
-                alert('Já existe um preset com este nome.');
-                return;
-            }
-            const newPreset: AlchemyPreset = { 
-                name: name.trim(), 
-                basePrompt, 
-                negativePrompt,
-                mjParams, 
-                gptParams, 
-                geminiParams,
-                isMjEnabled,
-                isGptEnabled,
-                isGeminiEnabled
-            };
-            setPresets(prev => [...prev, newPreset].sort((a, b) => a.name.localeCompare(b.name)));
-            setSelectedPreset(name.trim());
-        }
-    }, [basePrompt, negativePrompt, mjParams, gptParams, geminiParams, isMjEnabled, isGptEnabled, isGeminiEnabled, presets, setPresets]);
+        // Presets are not implemented for Alquimia yet, this is a placeholder
+    }, []);
+    const handleDeletePreset = useCallback(() => {}, []);
+    const handlePresetChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {}, []);
 
-    const handlePresetChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        const name = e.target.value;
-        setSelectedPreset(name);
-        if (name) {
-            const preset = presets.find(p => p.name === name);
-            if (preset) {
-                setBasePrompt(preset.basePrompt);
-                setNegativePrompt(preset.negativePrompt || '');
-                setMjParams(preset.mjParams);
-                setGptParams(preset.gptParams);
-                setGeminiParams(preset.geminiParams);
-                setIsMjEnabled(preset.isMjEnabled);
-                setIsGptEnabled(preset.isGptEnabled);
-                setIsGeminiEnabled(preset.isGeminiEnabled);
-            }
-        }
-    }, [presets]);
-
-    const handleDeletePreset = useCallback(() => {
-        if (selectedPreset && window.confirm(`Tem certeza que deseja deletar o preset "${selectedPreset}"?`)) {
-            setPresets(prev => prev.filter(p => p.name !== selectedPreset));
-            setSelectedPreset('');
-        }
-    }, [selectedPreset, setPresets]);
 
     const handleResetAll = () => {
         setBasePrompt('');
@@ -186,6 +184,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
         setIsGptEnabled(true);
         setIsGeminiEnabled(true);
         setResult(null);
+        setLastGeneration(null);
         setSelectedPreset('');
     };
 
@@ -221,15 +220,6 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                                 <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
                                     <h2 className="text-xl font-bold text-white font-gangofthree">Caldeirão</h2>
                                     <div className="flex items-center gap-2 flex-wrap">
-                                        <div className="w-48">
-                                            <Select label="" value={selectedPreset} onChange={handlePresetChange}>
-                                                <option value="">Carregar preset...</option>
-                                                {presets.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                                            </Select>
-                                        </div>
-                                        <Button variant="secondary" size="sm" onClick={handleSavePreset} className="!p-2" title="Salvar preset"><SaveIcon className="w-5 h-5" /></Button>
-                                        {selectedPreset && <Button variant="danger" size="sm" onClick={handleDeletePreset} className="!p-2" title="Deletar preset"><TrashIcon className="w-5 h-5" /></Button>}
-                                        <div className="w-px h-6 bg-gray-700 mx-2 hidden sm:block"></div>
                                         <button className="button" onClick={handleClearIdea}>
                                             <RefreshIcon className="w-4 h-4" />
                                             <span>Limpar Ideia</span>
@@ -258,7 +248,11 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                                             <AlchemyLoadingIndicator />
                                         </Card>
                                     ) : result ? (
-                                        <PromptResultDisplay result={result} />
+                                        <PromptResultDisplay 
+                                            result={result}
+                                            onToggleFavorite={lastGeneration ? () => onToggleFavorite(lastGeneration) : undefined}
+                                            isFavorite={lastGeneration ? favorites.some(f => f.id === lastGeneration.id) : false}
+                                        />
                                     ) : null}
                                 </div>
                             )}

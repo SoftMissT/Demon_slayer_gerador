@@ -12,22 +12,23 @@ const ErrorDetails: React.FC<{ message: string }> = ({ message }) => {
     let title = "Ocorreu um Erro Inesperado";
     let suggestion = "Por favor, tente novamente. Se o problema persistir, tente ajustar seus filtros ou recarregar a página.";
     let details = message;
+    const lowerMessage = message.toLowerCase();
 
-    if (message.toLowerCase().includes('quota exceeded')) {
+    if (lowerMessage.includes('quota exceeded')) {
         title = "Cota de Geração Excedida";
-        suggestion = "O limite de gerações de imagem gratuitas foi atingido por enquanto. Por favor, aguarde e tente novamente mais tarde.";
-        details = "A API do Google informou que a cota de uso foi excedida (erro de rate limit).";
-    } else if (message.toLowerCase().includes('api key not valid')) {
-        title = "Erro de Chave de API";
-        suggestion = "A chave de API configurada para o Gemini é inválida. Verifique a variável de ambiente GEMINI_API_KEY nas configurações do seu projeto.";
-        details = "A API do Google retornou um erro de autenticação.";
-    } else if (message.toLowerCase().includes('servidor') || message.toLowerCase().includes('http error') || message.toLowerCase().includes('networkerror')) {
+        suggestion = "O limite de gerações gratuitas foi atingido. Por favor, aguarde e tente novamente mais tarde.";
+        details = "A API informou que a cota de uso foi excedida (rate limit).";
+    } else if (lowerMessage.includes('api key not valid') || lowerMessage.includes('chave de api')) {
+        title = "Falha na Configuração da API";
+        suggestion = "Uma chave de API necessária não está configurada corretamente no servidor. Por favor, entre em contato com o administrador do sistema para resolver o problema.";
+        details = message;
+    } else if (lowerMessage.includes('servidor') || lowerMessage.includes('http error') || lowerMessage.includes('networkerror')) {
         title = "Falha na Comunicação com a API";
         suggestion = "Não foi possível conectar com o servidor de geração. Verifique sua conexão com a internet ou tente novamente mais tarde.";
-    } else if (message.toLowerCase().includes('prompt') || message.toLowerCase().includes('filtros') || message.toLowerCase().includes('bad request')) {
+    } else if (lowerMessage.includes('prompt') || lowerMessage.includes('filtros') || lowerMessage.includes('bad request')) {
         title = "Erro na Configuração da Geração";
         suggestion = "A combinação de filtros atual pode ter causado um problema. Tente simplificar a sua seleção ou alterar o tipo de geração.";
-    } else if (message.toLowerCase().includes('imagem')) {
+    } else if (lowerMessage.includes('imagem')) {
         title = "Falha ao Gerar Imagem";
         suggestion = "Houve um problema ao criar a imagem. Isso pode ser temporário. Tente gerar a imagem novamente.";
     }
