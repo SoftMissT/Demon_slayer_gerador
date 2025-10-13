@@ -1,8 +1,6 @@
 import React from 'react';
 import { Modal } from './ui/Modal';
-// FIX: Corrected import path for DetailPanel component.
 import { DetailPanel } from './DetailPanel';
-// FIX: Corrected import path for types.
 import type { GeneratedItem } from '../types';
 
 interface DetailModalProps {
@@ -24,8 +22,8 @@ const DetailModalComponent: React.FC<DetailModalProps> = ({
   if (!item) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="" panelClassName="!max-w-4xl w-full">
-        <div className="max-h-[85vh] -m-6">
+    <Modal isOpen={isOpen} onClose={onClose} title="" panelClassName="!max-w-4xl w-full !bg-transparent !border-0 !p-0">
+        <div className="max-h-[85vh]">
             <DetailPanel item={item} {...props} />
         </div>
     </Modal>

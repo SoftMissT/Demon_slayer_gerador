@@ -2,17 +2,16 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FilterPanel } from './FilterPanel';
 import { ResultsPanel } from './ResultsPanel';
+import { DetailPanel } from './DetailPanel';
 import { DetailModal } from './DetailModal';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
-// FIX: Corrected import path after creating types.ts
 import type { FilterState, GeneratedItem, User, AIFlags, Rarity } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
-import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
-import { ChevronRightIcon } from './icons/ChevronRightIcon';
 import { AuthOverlay } from './AuthOverlay';
+import { KatanaIcon } from './icons/KatanaIcon';
 
 interface ForgeInterfaceProps {
     isAuthenticated: boolean;
@@ -40,6 +39,14 @@ const useWindowSize = () => {
     return size;
 };
 
+const DetailPlaceholder: React.FC = () => (
+    <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-gray-900/50 rounded-lg border border-gray-700/50">
+        <KatanaIcon className="w-24 h-24 mb-6 opacity-20 text-gray-500" />
+        <h2 className="text-2xl font-bold font-gangofthree text-white">Vitrine</h2>
+        <p className="text-gray-400 mt-2 max-w-md">Selecione um item forjado para ver seus detalhes aqui.</p>
+    </div>
+);
+
 export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ 
     isAuthenticated, onLoginClick,
     history, setHistory,
@@ -55,17 +62,17 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [currentAiFocus, setCurrentAiFocus] = useState<Record<string, string> | null>(null);
     const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
-
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-    const [isFilterPanelCollapsed, setIsFilterPanelCollapsed] = useState(false);
 
     useEffect(() => {
-      if (selectedItem && !isDetailModalOpen) {
-          setIsDetailModalOpen(true);
-      }
+        // This effect will select the first item when a new list is generated
+        if (items.length > 0 && !selectedItem && !isLoading) {
+             setSelectedItem(items[0]);
+        }
+    // This dependency array ensures it runs only when items list changes or loading stops.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedItem]);
+    }, [items, isLoading]);
+
 
     const handleGenerate = useCallback(async (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => {
         if (!isAuthenticated) {
@@ -82,9 +89,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             aiFocusDeepSeek: filters.aiFocusDeepSeek,
         });
 
-        if (count === 1) {
-            setItems([]);
-        }
+        setItems([]);
         setSelectedItem(null);
         if (!isDesktop) setIsFilterPanelOpen(false);
 
@@ -94,7 +99,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             );
             const newItems = await Promise.all(promises);
             
-            setItems(prev => [...newItems, ...prev]);
+            setItems(newItems);
             if (newItems.length > 0) {
                 setSelectedItem(newItems[0]);
                 setHistory(prev => [...newItems, ...prev].slice(0, 100));
@@ -142,20 +147,13 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         
         const filters: Partial<FilterState> = { category: item.categoria };
         if (item.categoria === 'Arma') {
-            // FIX: Cast `item.raridade` to `Rarity | ''` to resolve a type mismatch.
-            // The `GeneratedItem` type allows `raridade` to be a generic string,
-            // while `FilterState` requires a more specific rarity type.
             filters.weaponRarity = item.raridade as Rarity | '';
         } else if (item.categoria === 'Acessório') {
-            // FIX: Cast `item.raridade` to `Rarity | ''` to resolve a type mismatch.
-            // The `GeneratedItem` type allows `raridade` to be a generic string,
-            // while `FilterState` requires a more specific rarity type.
             filters.accessoryRarity = item.raridade as Rarity | '';
         }
         
         setIsLoading(true);
         setError(null);
-        if (isDetailModalOpen) setIsDetailModalOpen(false);
         setSelectedItem(null);
 
         try {
@@ -171,7 +169,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         } finally {
             setIsLoading(false);
         }
-    }, [setHistory, isDetailModalOpen, isAuthenticated, onLoginClick, setSelectedItem, user]);
+    }, [setHistory, isAuthenticated, onLoginClick, setSelectedItem, user]);
 
     const handleClearResults = useCallback(() => {
         setItems([]);
@@ -184,90 +182,94 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         return favorites.some(fav => fav.id === selectedItem.id);
     }, [selectedItem, favorites]);
 
-    const resultsPanelContent = (
-        <ResultsPanel
-            items={items}
-            isLoading={isLoading && items.length === 0}
-            selectedItem={selectedItem}
-            onSelectItem={handleSelectItem}
-            favorites={favorites}
-            onToggleFavorite={handleToggleFavorite}
-            onGenerateVariant={handleGenerateVariant}
-            onClearResults={handleClearResults}
-            aiFocus={currentAiFocus}
-            activeFilters={activeFilters}
-        />
-    );
-    const filterPanelContent = (
-        <FilterPanel 
-            onGenerate={handleGenerate} 
-            isLoading={isLoading}
-            isAuthenticated={isAuthenticated}
-            onLoginClick={onLoginClick}
-        />
-    );
-
-
     return (
         <div className="forge-interface h-full relative">
-             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} />}
+             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="forge" />}
             <div className={`h-full ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
                 {isDesktop ? (
-                    <div className="flex h-full gap-2">
-                        <motion.div
-                            animate={{ 
-                                width: isFilterPanelCollapsed ? 0 : 'clamp(480px, 33vw, 620px)',
-                                marginRight: isFilterPanelCollapsed ? 0 : -8 // to hide the gap
-                            }}
-                            transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="flex-shrink-0 h-full overflow-hidden"
-                        >
-                            <div style={{ width: 'clamp(480px, 33vw, 620px)' }} className="h-full">
-                                {filterPanelContent}
-                            </div>
-                        </motion.div>
-                        
-                        <div className="flex-grow flex min-w-0 h-full">
-                             <Button
-                                variant="secondary"
-                                onClick={() => setIsFilterPanelCollapsed(!isFilterPanelCollapsed)}
-                                className="!p-2 h-12 self-center -ml-3 z-20"
-                                title={isFilterPanelCollapsed ? "Mostrar Filtros" : "Ocultar Filtros"}
-                                aria-expanded={!isFilterPanelCollapsed}
-                            >
-                                {isFilterPanelCollapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
-                            </Button>
-                            <div className="flex-grow min-w-0 h-full overflow-y-auto ml-2">
-                                {resultsPanelContent}
-                            </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
+                        {/* Column 1: Bigorna */}
+                        <div className="h-full">
+                            <FilterPanel 
+                                onGenerate={handleGenerate} 
+                                isLoading={isLoading}
+                                isAuthenticated={isAuthenticated}
+                                onLoginClick={onLoginClick}
+                            />
+                        </div>
+                        {/* Column 2: Forjando */}
+                        <div className="h-full">
+                             <ResultsPanel
+                                items={items}
+                                isLoading={isLoading && items.length === 0}
+                                selectedItem={selectedItem}
+                                onSelectItem={handleSelectItem}
+                                favorites={favorites}
+                                onToggleFavorite={handleToggleFavorite}
+                                onGenerateVariant={handleGenerateVariant}
+                                onClearResults={handleClearResults}
+                                aiFocus={currentAiFocus}
+                                activeFilters={activeFilters}
+                            />
+                        </div>
+                        {/* Column 3: Vitrine */}
+                        <div className="h-full">
+                            {selectedItem ? (
+                                <DetailPanel
+                                    item={selectedItem}
+                                    onGenerateVariant={handleGenerateVariant}
+                                    isFavorite={isFavorite}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    onUpdate={handleUpdateItem}
+                                />
+                            ) : (
+                                <DetailPlaceholder />
+                            )}
                         </div>
                     </div>
                 ) : (
                     <>
                         <div className="h-full overflow-y-auto">
-                            {resultsPanelContent}
+                            <ResultsPanel
+                                items={items}
+                                isLoading={isLoading && items.length === 0}
+                                selectedItem={selectedItem}
+                                onSelectItem={(item) => {
+                                    setSelectedItem(item);
+                                }}
+                                favorites={favorites}
+                                onToggleFavorite={handleToggleFavorite}
+                                onGenerateVariant={handleGenerateVariant}
+                                onClearResults={handleClearResults}
+                                aiFocus={currentAiFocus}
+                                activeFilters={activeFilters}
+                            />
                         </div>
                         <Button onClick={() => setIsFilterPanelOpen(true)} className="fixed bottom-4 right-4 z-30 !rounded-full !p-4 shadow-lg" aria-label="Abrir Filtros">
                             <FilterIcon className="w-6 h-6" />
                         </Button>
                         <Modal isOpen={isFilterPanelOpen} onClose={() => setIsFilterPanelOpen(false)} variant="drawer-left" title="BIGORNA">
                            <div className="p-4 h-full">
-                               {filterPanelContent}
+                               <FilterPanel 
+                                    onGenerate={handleGenerate} 
+                                    isLoading={isLoading}
+                                    isAuthenticated={isAuthenticated}
+                                    onLoginClick={onLoginClick}
+                                />
                             </div>
                         </Modal>
+                        <DetailModal
+                            isOpen={!!selectedItem}
+                            onClose={() => setSelectedItem(null)}
+                            item={selectedItem}
+                            onGenerateVariant={handleGenerateVariant}
+                            isFavorite={isFavorite}
+                            onToggleFavorite={handleToggleFavorite}
+                            onUpdate={handleUpdateItem}
+                        />
                     </>
                 )}
             </div>
-
-            <DetailModal
-                isOpen={isDetailModalOpen}
-                onClose={() => { setIsDetailModalOpen(false); setSelectedItem(null); }}
-                item={selectedItem}
-                onGenerateVariant={handleGenerateVariant}
-                isFavorite={isFavorite}
-                onToggleFavorite={handleToggleFavorite}
-                onUpdate={handleUpdateItem}
-            />
             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
         </div>
     );

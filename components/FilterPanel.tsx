@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, Fragment } from 'react';
 
 import type { FilterState, AIFlags, Category, Tematica } from '../types';
@@ -20,13 +19,12 @@ import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { TextInput } from './ui/TextInput';
 import { TextArea } from './ui/TextArea';
 import { Slider } from './ui/Slider';
-import { Checkbox } from './ui/Checkbox';
 import { HammerIcon } from './icons/HammerIcon';
 import { RefreshIcon } from './icons/RefreshIcon';
-import { ExpandIcon } from './icons/ExpandIcon';
-import { CollapseIcon } from './icons/CollapseIcon';
 import { SaveIcon } from './icons/SaveIcon';
 import { TrashIcon } from './icons/TrashIcon';
+import { NumberInput } from './ui/NumberInput';
+import { Switch } from './ui/Switch';
 
 interface FilterPanelProps {
   onGenerate: (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => void;
@@ -40,7 +38,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
     const [generationCount, setGenerationCount] = useState(1);
     const [promptModifier, setPromptModifier] = useState('');
     const [aiFlags, setAiFlags] = useState<AIFlags>({ useDeepSeek: true, useGemini: true, useGpt: true });
-    const [showAdvanced, setShowAdvanced] = useState(false);
     
     // Preset State
     const [presets, setPresets] = useLocalStorage<Record<string, FilterState>>('kimetsu-forge-presets', {});
@@ -405,64 +402,55 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         </div>
                     </div>
                     
-                    <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
+                    <SearchableSelect label="Categoria" value={filters.category} onChange={handleCategoryChange}>
                         <option value="" disabled>Selecione uma categoria...</option>
                         {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </Select>
+                    </SearchableSelect>
                     
                     {renderCategoryFilters()}
                 </div>
             </div>
 
             <div className="flex-shrink-0 pt-3 mt-3 border-t border-gray-700/50">
-                 <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-lg font-semibold font-gangofthree text-white">Opções de Geração</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setShowAdvanced(!showAdvanced)}>
-                        {showAdvanced ? <CollapseIcon className="w-4 h-4"/> : <ExpandIcon className="w-4 h-4" />}
-                        Avançado
-                    </Button>
-                </div>
-
-                {showAdvanced && (
-                    <div className="space-y-4 mb-4 p-3 bg-gray-800/50 rounded-lg">
-                        <TextArea 
-                            label="Modificador de Prompt (Prioridade Máxima)" 
-                            value={promptModifier}
-                            onChange={e => setPromptModifier(e.target.value)}
-                            placeholder="Ex: 'Crie algo com um tom mais sombrio', 'Foco em um design biomecânico'"
-                            rows={2}
-                            tooltip="Uma instrução direta para a IA que sobrepõe outros filtros."
-                        />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <Select label="Foco Gemini" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)} tooltip="Define a principal tarefa do Gemini na criação.">
-                                {AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}
-                            </Select>
-                            <Select label="Foco GPT" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)} tooltip="Define como o GPT-4o irá refinar o texto.">
-                                {AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}
-                            </Select>
-                            <Select label="Foco DeepSeek" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)} tooltip="Define a tarefa do DeepSeek na criação de mecânicas.">
-                                {AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}
-                            </Select>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-gray-400 mb-1">Modelos a Utilizar</p>
-                            <div className="flex items-center gap-4">
-                                <Checkbox label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({ ...f, useDeepSeek: e.target.checked }))} />
-                                <Checkbox label="Gemini" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({ ...f, useGemini: e.target.checked }))} />
-                                <Checkbox label="GPT-4o" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({ ...f, useGpt: e.target.checked }))} />
-                            </div>
+                 <div className="space-y-4 mb-4 p-3 bg-gray-800/50 rounded-lg">
+                    <TextArea 
+                        label="Modificador de Prompt (Prioridade Máxima)" 
+                        value={promptModifier}
+                        onChange={e => setPromptModifier(e.target.value)}
+                        placeholder="Ex: 'Crie algo com um tom mais sombrio', 'Foco em um design biomecânico'"
+                        rows={2}
+                        tooltip="Uma instrução direta para a IA que sobrepõe outros filtros."
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <Select label="Foco Gemini" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)} tooltip="Define a principal tarefa do Gemini na criação.">
+                            {AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}
+                        </Select>
+                        <Select label="Foco GPT" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)} tooltip="Define como o GPT-4o irá refinar o texto.">
+                            {AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}
+                        </Select>
+                        <Select label="Foco DeepSeek" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)} tooltip="Define a tarefa do DeepSeek na criação de mecânicas.">
+                            {AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}
+                        </Select>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-400 mb-2">Modelos a Utilizar</p>
+                        <div className="flex items-center gap-4">
+                            <Switch label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({ ...f, useDeepSeek: e.target.checked }))} />
+                            <Switch label="Gemini" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({ ...f, useGemini: e.target.checked }))} />
+                            <Switch label="GPT-4o" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({ ...f, useGpt: e.target.checked }))} />
                         </div>
                     </div>
-                )}
+                </div>
 
                 <div className="flex items-end gap-3">
-                    <div className="w-24">
-                        <TextInput 
-                            label="Quantidade" 
-                            type="number" 
-                            min="1" max="5" 
+                    <div className="w-28">
+                        <NumberInput
+                            label="Quantidade"
                             value={generationCount}
-                            onChange={e => setGenerationCount(Math.max(1, Math.min(5, parseInt(e.target.value, 10) || 1)))}
+                            onChange={setGenerationCount}
+                            min={1}
+                            max={5}
+                            step={1}
                         />
                     </div>
                     <div className="flex-grow">

@@ -6,7 +6,6 @@ import { ForgeLoadingIndicator } from './ForgeLoadingIndicator';
 import { Button } from './ui/Button';
 import { TrashIcon } from './icons/TrashIcon';
 import { KatanaIcon } from './icons/KatanaIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
 
 interface ResultsPanelProps {
   items: GeneratedItem[];
@@ -52,34 +51,25 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   aiFocus,
   activeFilters
 }) => {
-  if (isLoading) {
-    return <ForgeLoadingIndicator aiFocus={aiFocus} activeFilters={activeFilters} />;
-  }
+  
+  const PanelContent = () => {
+    if (isLoading) {
+      return <ForgeLoadingIndicator aiFocus={aiFocus} activeFilters={activeFilters} />;
+    }
 
-  if (items.length === 0) {
+    if (items.length === 0) {
+      return (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+              <KatanaIcon className="w-24 h-24 mb-6 opacity-20 text-gray-500" />
+              <h2 className="text-2xl font-bold font-gangofthree text-white">Bigorna Pronta</h2>
+              <p className="text-gray-400 mt-2 max-w-md">Selecione seus filtros e clique em "Forjar" para começar a criar seus itens, personagens e histórias.</p>
+          </div>
+      );
+    }
+    
     return (
-        <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <KatanaIcon className="w-24 h-24 mb-6 opacity-20 text-gray-500" />
-            <h2 className="text-2xl font-bold font-gangofthree text-white">Bigorna Pronta</h2>
-            <p className="text-gray-400 mt-2 max-w-md">Selecione seus filtros e clique em "Forjar" para começar a criar seus itens, personagens e histórias.</p>
-        </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full p-2">
-        <header className="flex justify-between items-center p-2 mb-2 flex-shrink-0">
-            <h2 className="text-xl font-bold font-gangofthree text-white flex items-center gap-2">
-                <SparklesIcon className="w-6 h-6 text-indigo-400" />
-                Resultados da Forja
-            </h2>
-            <Button variant="ghost" size="sm" onClick={onClearResults}>
-                <TrashIcon className="w-4 h-4"/> Limpar
-            </Button>
-        </header>
-
         <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 overflow-y-auto flex-grow inner-scroll"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-2 gap-3 p-1"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -99,6 +89,23 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
             ))}
             </AnimatePresence>
         </motion.div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-gray-900/50 rounded-lg border border-gray-700/50">
+        <header className="flex justify-between items-center p-3 border-b border-gray-700/50 flex-shrink-0">
+            <h2 className="text-xl font-bold font-gangofthree text-white">Forjando</h2>
+            {items.length > 0 && !isLoading && (
+              <Button variant="ghost" size="sm" onClick={onClearResults}>
+                  <TrashIcon className="w-4 h-4"/> Limpar
+              </Button>
+            )}
+        </header>
+
+        <div className="flex-grow overflow-y-auto inner-scroll">
+            <PanelContent />
+        </div>
     </div>
   );
 };

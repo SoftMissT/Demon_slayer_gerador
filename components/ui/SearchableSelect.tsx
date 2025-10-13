@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { InfoTooltip } from './InfoTooltip';
@@ -70,7 +69,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, child
   const selectedLabel = selectedOption?.label || placeholder;
   const isPlaceholder = !selectedOption || !value;
   
-  const dropdownClasses = `absolute z-20 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col ${
+  const dropdownClasses = `absolute z-20 w-full custom-dropdown border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col ${
     position === 'up' ? 'bottom-full mb-1' : 'mt-1'
   }`;
 
@@ -96,10 +95,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, child
       <AnimatePresence>
       {isOpen && (
         <motion.div 
-            initial={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: position === 'up' ? 5 : -5 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.98, y: position === 'up' ? 5 : -5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98, y: position === 'up' ? 5 : -5 }}
+            transition={{ duration: 0.2, ease: "circOut" }}
             className={dropdownClasses}
             style={{ originY: position === 'up' ? '100%' : '0%' }}
         >

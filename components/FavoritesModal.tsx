@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Modal } from './ui/Modal';
 import { StarIcon } from './icons/StarIcon';
@@ -26,26 +25,44 @@ const FavoriteListItem: React.FC<{ item: FavoriteItem, onSelect: (item: Favorite
         onToggleFavorite(item);
     };
 
-    const title = isForgeItem ? (item as GeneratedItem).nome : `Alquimia de Prompt`;
-    const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs?.basePrompt || '[Favorito antigo]';
+    let title = 'Favorito';
+    let description = '[Favorito antigo]';
+    let details = '';
     const Icon = isForgeItem ? KatanaIcon : MagicWandIcon;
+
+    if (isForgeItem) {
+        const forgeItem = item as GeneratedItem;
+        title = forgeItem.nome;
+        description = forgeItem.descricao_curta;
+        details = `${forgeItem.categoria} • ${forgeItem.tematica || 'Geral'}`;
+    } else {
+        const alchemyItem = item as AlchemyHistoryItem;
+        title = `Alquimia de Prompt`;
+        description = alchemyItem.inputs?.basePrompt;
+        details = `Gerou ${Object.keys(alchemyItem.outputs).length} prompt(s)`;
+    }
 
     return (
         <li
             onClick={handleClick}
-            className="flex items-center gap-4 p-3 hover:bg-gray-700/50 rounded-lg cursor-pointer transition-colors group"
+            className="flex items-start gap-4 p-3 hover:bg-gray-700/50 rounded-lg cursor-pointer transition-colors group"
         >
-            <div className="flex-shrink-0 w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+            <div className="flex-shrink-0 w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center mt-1">
                 <Icon className="w-6 h-6 text-gray-400" />
             </div>
             <div className="flex-grow min-w-0">
-                <p className="font-semibold text-white truncate">{title}</p>
-                <p className="text-sm text-gray-400 truncate">{description}</p>
-                 <p className="text-xs text-gray-500 mt-1">{new Date(item.createdAt).toLocaleString()}</p>
+                 <div className="flex justify-between items-start">
+                    <div>
+                        <p className="font-semibold text-white truncate">{title}</p>
+                        <p className="text-xs text-indigo-400">{details}</p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="!p-1 -mr-1" onClick={handleToggle}>
+                        <StarIcon className="w-5 h-5 text-yellow-400" filled={true} />
+                    </Button>
+                </div>
+                <p className="text-sm text-gray-400 truncate mt-1">{description}</p>
+                <p className="text-xs text-gray-500 mt-1">{new Date(item.createdAt).toLocaleString()}</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleToggle}>
-                <StarIcon className="w-5 h-5 text-yellow-400" filled={true} />
-            </Button>
         </li>
     );
 };
@@ -61,9 +78,9 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Itens Favoritos" panelClassName="!max-w-2xl">
       <div className="flex flex-col h-[70vh]">
-        <div className="flex-grow overflow-y-auto px-4 py-2">
+        <div className="flex-grow overflow-y-auto p-2">
           {favorites.length > 0 ? (
-             <ul className="space-y-2">
+             <ul className="space-y-1">
                 {favorites.map(item => (
                     <FavoriteListItem key={item.id} item={item} onSelect={onSelect} onToggleFavorite={onToggleFavorite} />
                 ))}

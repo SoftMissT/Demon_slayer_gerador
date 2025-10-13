@@ -1,22 +1,17 @@
-import React, { useState, useCallback, useMemo } from 'react';
-// FIX: Corrected import path after implementing types.ts.
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { GeneratedItem, HunterItem, OniItem, NpcItem, WeaponItem, AccessoryItem, KekkijutsuItem, BreathingFormItem, MissionItemDetails, WorldBuildingItem, EventItem } from '../types';
-// FIX: Corrected import path after implementing AccordionSection.tsx.
 import { AccordionSection } from './AccordionSection';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
 import { HammerIcon } from './icons/HammerIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { PencilIcon } from './icons/PencilIcon';
 import { SaveIcon } from './icons/SaveIcon';
 import { CopyIcon } from './icons/CopyIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { buildPlainTextForItem } from '../lib/textFormatters';
-import { DotsVerticalIcon } from './icons/DotsVerticalIcon';
 import { Tooltip } from './ui/Tooltip';
-import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
-import { ErrorDisplay } from './ui/ErrorDisplay';
 
 interface DetailPanelProps {
   item: GeneratedItem;
@@ -25,67 +20,6 @@ interface DetailPanelProps {
   onToggleFavorite: (item: GeneratedItem) => void;
   onUpdate: (item: GeneratedItem) => void;
 }
-
-const ImageGenerator: React.FC<{ item: GeneratedItem }> = ({ item }) => {
-  const [imageData, setImageData] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const handleGenerateImage = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/generateImage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: item.imagePromptDescription }),
-      });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || 'Falha ao gerar imagem.');
-      }
-      const data = await response.json();
-      setImageData(data.base64Image);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const prompt = item.imagePromptDescription || `Uma representação artística de ${item.nome}, ${item.descricao_curta}`;
-
-  return (
-    <div className="bg-gray-900/50 p-4 rounded-lg">
-      <div className="flex items-center justify-center h-48 bg-gray-800/50 rounded-md overflow-hidden relative">
-        {isLoading ? (
-            <AlchemyLoadingIndicator />
-        ) : imageData ? (
-          <>
-            <img src={`data:image/jpeg;base64,${imageData}`} alt={`Imagem de ${item.nome}`} className="object-contain w-full h-full" />
-            <Tooltip text="Baixar Imagem">
-              <a href={`data:image/jpeg;base64,${imageData}`} download={`${item.nome.replace(/\s+/g, '_')}.jpg`} className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
-                <DownloadIcon className="w-5 h-5" />
-              </a>
-            </Tooltip>
-          </>
-        ) : (
-          <div className="text-center text-gray-500">
-            <SparklesIcon className="w-10 h-10 mx-auto mb-2" />
-            <p className="text-sm">Gere uma imagem para este item</p>
-          </div>
-        )}
-      </div>
-      <p className="text-xs text-gray-400 mt-3 font-mono break-words">{prompt}</p>
-      <Button onClick={handleGenerateImage} disabled={isLoading} className="w-full mt-3">
-        <SparklesIcon className="w-5 h-5" />
-        {isLoading ? 'Gerando...' : 'Gerar Imagem'}
-      </Button>
-      {error && <ErrorDisplay message={error} onDismiss={() => setError(null)} />}
-    </div>
-  );
-};
-
 
 const DetailField: React.FC<{ label: string, value?: string | number | string[] | null }> = ({ label, value }) => {
     if (!value || (Array.isArray(value) && value.length === 0)) return null;
@@ -109,6 +43,13 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     const [editedDescription, setEditedDescription] = useState(item.descricao);
     const [variantMenuOpen, setVariantMenuOpen] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+
+    // Ensure state is updated when the selected item changes
+    useEffect(() => {
+        setEditedDescription(item.descricao);
+        setIsEditing(false); // Reset editing state
+    }, [item]);
+
 
     const handleSave = () => {
         onUpdate({ ...item, descricao: editedDescription });
@@ -172,11 +113,11 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     const currentName = ('title' in item && item.title) || item.nome;
 
     return (
-    <div className="bg-gray-800 text-white h-full flex flex-col">
-      <header className="p-4 flex justify-between items-start border-b border-gray-700 flex-shrink-0">
+    <div className="bg-gray-900/50 text-white h-full flex flex-col rounded-lg border border-gray-700/50">
+      <header className="p-3 flex justify-between items-start border-b border-gray-700/50 flex-shrink-0">
         <div className="flex-grow min-w-0 pr-4">
-          <h2 className="text-2xl font-bold font-gangofthree text-white truncate">{currentName}</h2>
-          <div className="flex items-center gap-3 text-sm text-gray-400 mt-1">
+          <h2 className="text-xl font-bold font-gangofthree text-white truncate" title={currentName}>{currentName}</h2>
+          <div className="flex items-center gap-3 text-sm text-gray-400 mt-1 flex-wrap">
             <span>{item.categoria}</span>
             <span className="text-gray-600">•</span>
             <span>{item.raridade}</span>
@@ -184,7 +125,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
             <span>Nível {item.nivel_sugerido}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
             <Tooltip text={copySuccess ? "Copiado!" : "Copiar como Texto"}>
                 <Button variant="ghost" className="!p-2" onClick={handleCopyText}>
                     {copySuccess ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5" />}
@@ -213,9 +154,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
       </header>
 
       <div className="flex-grow overflow-y-auto p-4 inner-scroll">
-            <ImageGenerator item={item} />
-            
-            <div className="mt-4 prose prose-sm prose-invert max-w-none prose-p:my-2">
+            <div className="prose prose-sm prose-invert max-w-none prose-p:my-2">
                 <p className="text-indigo-300 italic">{item.descricao_curta}</p>
                 
                 {isEditing ? (
