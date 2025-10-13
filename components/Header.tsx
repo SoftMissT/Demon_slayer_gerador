@@ -5,6 +5,8 @@ import { StarIcon } from './icons/StarIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
 import { Tooltip } from './ui/Tooltip';
 import { DotsVerticalIcon } from './icons/DotsVerticalIcon';
+import { KatanaIcon } from './icons/KatanaIcon';
+import { CrystalIcon } from './icons/CrystalIcon';
 
 interface HeaderProps {
   onAboutClick: () => void;
@@ -20,8 +22,8 @@ interface HeaderProps {
 }
 
 const TABS = [
-    { id: 'forge', label: 'Forja' },
-    { id: 'prompt', label: 'Alquimia' },
+    { id: 'forge', label: 'Forja', icon: <KatanaIcon className="w-5 h-5" /> },
+    { id: 'prompt', label: 'Alquimia', icon: <CrystalIcon className="w-5 h-5" /> },
 ];
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -62,10 +64,12 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3">
           <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-12 h-12 rounded-full" />
           <div className="header-logo-title">
-              <h1 className={`font-bold font-kimetsu tracking-wider ${activeView === 'forge' ? 'kimetsu-title-forge' : 'kimetsu-title-alchemy'}`}>
+              <h1 className="title-gradient font-kimetsu">
                   KIMETSU FORGE
               </h1>
-              <p className="subtitle">Forjando Lendas em Aço e Magia</p>
+              <p className="subtitle">
+                {activeView === 'forge' ? 'Martelo, faísca e tradição.' : 'Pele de porcelana. Segredos cristalizados.'}
+              </p>
           </div>
       </div>
       
@@ -78,6 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onViewChange(tab.id as 'forge' | 'prompt')} 
                 className={`tab-switcher-button ${activeView === tab.id ? 'active' : ''}`}
             >
+              {tab.icon}
               <span className="relative z-10">{tab.label}</span>
             </button>
           ))}
