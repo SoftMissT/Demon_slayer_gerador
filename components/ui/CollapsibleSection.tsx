@@ -1,48 +1,48 @@
-import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDownIcon } from '../icons/ChevronDownIcon';
 
 interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
-  defaultOpen?: boolean;
   wrapperClassName?: string;
   forceOpen?: boolean;
 }
 
-export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, defaultOpen = false, wrapperClassName, forceOpen }) => {
-  const [isLocallyOpen, setIsLocallyOpen] = useState(defaultOpen);
+export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, wrapperClassName = '', forceOpen }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-  const isOpen = forceOpen !== undefined ? forceOpen : isLocallyOpen;
-
-  const finalWrapperClass = wrapperClassName ?? 'ingredient-flask !p-0 overflow-hidden';
+  useEffect(() => {
+    if (forceOpen !== undefined) {
+      setIsOpen(forceOpen);
+    }
+  }, [forceOpen]);
 
   return (
-    <div className={finalWrapperClass}>
-      <button
-        onClick={() => setIsLocallyOpen(!isLocallyOpen)}
-        className="w-full flex justify-between items-center p-4 text-left"
+    <div className={`collapsible-section ${wrapperClassName} ${isOpen ? 'open' : ''}`}>
+      <button 
+        className="collapsible-header"
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={forceOpen}
         aria-expanded={isOpen}
       >
-        <h3 className="text-lg font-bold text-white font-gangofthree">{title}</h3>
-        <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <h3 className="text-md font-semibold text-white">{title}</h3>
+        {!forceOpen && <ChevronDownIcon className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />}
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            key="content"
             initial="collapsed"
             animate="open"
             exit="collapsed"
             variants={{
-              open: { opacity: 1, height: 'auto' },
-              collapsed: { opacity: 0, height: 0 },
+              open: { opacity: 1, height: 'auto', marginTop: '1rem' },
+              collapsed: { opacity: 0, height: 0, marginTop: 0 }
             }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
+            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            <div className="px-4 pb-4">
-              {children}
-            </div>
+            {children}
           </motion.div>
         )}
       </AnimatePresence>

@@ -18,7 +18,9 @@ interface FavoritesModalProps {
 const FavoriteListItem: React.FC<{ item: FavoriteItem; onSelect: (item: FavoriteItem) => void; onToggleFavorite: (item: FavoriteItem) => void; }> = ({ item, onSelect, onToggleFavorite }) => {
     const isForgeItem = 'categoria' in item;
     const alchemyItem = item as AlchemyHistoryItem;
-    const name = isForgeItem ? (item as GeneratedItem).nome || (item as GeneratedItem).title : alchemyItem.inputs.basePrompt;
+    const name = isForgeItem 
+        ? (item as GeneratedItem).nome || (item as GeneratedItem).title 
+        : (alchemyItem.inputs ? alchemyItem.inputs.basePrompt : 'Item de Alquimia Antigo');
     // FIX: Added defensive check for alchemyItem.outputs to prevent crashes with old localStorage data.
     const description = isForgeItem 
         ? (item as GeneratedItem).descricao_curta 

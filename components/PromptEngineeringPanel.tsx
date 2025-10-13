@@ -58,7 +58,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     const [results, setResults] = useState<PromptGenerationResult | null>(null);
 
     useEffect(() => {
-        if (selectedItem) {
+        if (selectedItem && selectedItem.inputs) {
             setBasePrompt(selectedItem.inputs.basePrompt);
             setNegativePrompt(selectedItem.inputs.negativePrompt || '');
             setMjParams(selectedItem.inputs.mjParams);
@@ -156,7 +156,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                     </Card>
                 )}
             </div>
-             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+             <ErrorDisplay message={error} onDismiss={() => setError(null)} activeView="alchemist"/>
         </div>
     );
 };
