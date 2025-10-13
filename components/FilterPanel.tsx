@@ -50,6 +50,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   };
 
   const isWeaponOrAccessory = filters.category === 'Arma' || filters.category === 'Acessório';
+  const isHunter = filters.category === 'Caçador';
 
   return (
     <Card className="h-full flex flex-col bg-gray-800/30">
@@ -59,12 +60,18 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </div>
       <div className="flex-grow p-4 overflow-y-auto space-y-4 inner-scroll">
         <SearchableSelect label="Categoria" options={CATEGORY_OPTIONS} value={filters.category} onChange={handleCategoryChange} />
+        
         {isWeaponOrAccessory && (
             <SearchableSelect label="Tipo de Arma" options={WEAPON_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
         )}
-        {filters.category === 'Caçador' && (
-             <SearchableSelect label="Estilo de Empunhadura" options={GRIP_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
+        
+        {isHunter && (
+          <>
+            <SearchableSelect label="Arma Principal" options={WEAPON_TYPE_OPTIONS} value={filters.hunterWeapon} onChange={(v) => onFilterChange('hunterWeapon', v)} />
+            <SearchableSelect label="Estilo de Empunhadura" options={GRIP_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
+          </>
         )}
+
         <NumberInput label="Quantidade" value={filters.quantity} onChange={(v) => onFilterChange('quantity', v)} min={1} max={5} />
         
         <CollapsibleSection title="Detalhes da Criação">
@@ -76,13 +83,23 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 {/* FIX: Removed incorrect .map() on RARITY_OPTIONS which was already formatted, and corrected the type assertion in onChange to use the Rarity type. */}
                 <SearchableSelect label="Raridade" options={RARITY_OPTIONS} value={filters.rarity} onChange={(v) => onFilterChange('rarity', v as Rarity)} />
                 <Slider label="Nível/Poder Sugerido" value={filters.level} onChange={(e) => onFilterChange('level', parseInt(e.target.value, 10))} min={1} max={20} step={1} />
+                {isWeaponOrAccessory && (
+                    <Slider 
+                        label="Preço Sugerido (ryo)" 
+                        value={filters.suggestedPrice} 
+                        onChange={(e) => onFilterChange('suggestedPrice', parseInt(e.target.value, 10))} 
+                        min={1} 
+                        max={10000} 
+                        step={50} 
+                        tooltip="Influencia a qualidade dos materiais e a raridade percebida."
+                    />
+                )}
             </div>
         </CollapsibleSection>
         
         <CollapsibleSection title="Diretivas Avançadas de IA">
             <div className="space-y-4 pt-2">
                 <TextArea label="Modificador de Prompt" placeholder="Ex: 'Com foco em furtividade' ou 'inspirado em mitologia nórdica'" rows={3} value={filters.promptModifier} onChange={(e) => onFilterChange('promptModifier', e.target.value)} />
-                <TextArea label="Referências de Estilo Visual" placeholder="Ex: 'arte de Yoshitaka Amano, Ufotable, dark fantasy'" rows={2} value={filters.styleReferences} onChange={(e) => onFilterChange('styleReferences', e.target.value)} />
                 <div className="p-2 bg-gray-900/50 rounded-md space-y-3">
                     <h4 className="text-sm font-semibold text-gray-300">Motores de IA</h4>
                     <Switch label="Gemini (Enriquecimento)" checked={aiFlags.useGemini} onChange={e => onAIFlagChange('useGemini', e.target.checked)} />

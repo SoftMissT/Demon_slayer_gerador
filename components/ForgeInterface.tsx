@@ -11,6 +11,7 @@ import { DetailModal } from './DetailModal';
 const INITIAL_FILTERS: FilterState = {
     category: 'Aleatório',
     subCategory: 'Aleatório',
+    hunterWeapon: 'Aleatório',
     quantity: 1,
     tematica: 'Aleatória',
     origins: [],
@@ -18,8 +19,8 @@ const INITIAL_FILTERS: FilterState = {
     professions: [],
     rarity: 'Aleatória',
     level: 10,
+    suggestedPrice: 500,
     promptModifier: '',
-    styleReferences: '',
     aiFocusGemini: '',
     aiFocusGpt: '',
     aiFocusDeepSeek: '',

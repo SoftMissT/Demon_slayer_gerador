@@ -1,10 +1,9 @@
 import React from 'react';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
-import type { FavoriteItem, GeneratedItem, AlchemyHistoryItem } from '../types';
+import type { FavoriteItem } from '../types';
 import { StarIcon } from './icons/StarIcon';
 import { ForgeIcon } from './icons/ForgeIcon';
-import { MagicWandIcon } from './icons/MagicWandIcon';
 
 interface FavoritesModalProps {
     isOpen: boolean;
@@ -12,26 +11,17 @@ interface FavoritesModalProps {
     favorites: FavoriteItem[];
     onSelect: (item: FavoriteItem) => void;
     onToggleFavorite: (item: FavoriteItem) => void;
-    activeView: 'forge' | 'alchemist';
 }
 
 const FavoriteListItem: React.FC<{ item: FavoriteItem; onSelect: (item: FavoriteItem) => void; onToggleFavorite: (item: FavoriteItem) => void; }> = ({ item, onSelect, onToggleFavorite }) => {
-    const isForgeItem = 'categoria' in item;
-    const alchemyItem = item as AlchemyHistoryItem;
-    const name = isForgeItem 
-        ? (item as GeneratedItem).nome || (item as GeneratedItem).title 
-        : (alchemyItem.inputs ? alchemyItem.inputs.basePrompt : 'Item de Alquimia Antigo');
-    // FIX: Added defensive check for alchemyItem.outputs to prevent crashes with old localStorage data.
-    const description = isForgeItem 
-        ? (item as GeneratedItem).descricao_curta 
-        : (alchemyItem.outputs ? Object.values(alchemyItem.outputs).filter(Boolean).join(' | ') : 'Prompt não gerado');
-
+    const name = item.nome || item.title;
+    const description = item.descricao_curta;
 
     return (
         <li className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg transition-colors">
             <button onClick={() => onSelect(item)} className="flex-grow text-left flex items-start gap-4 min-w-0">
                 <div className="flex-shrink-0 mt-1">
-                    {isForgeItem ? <ForgeIcon className="w-5 h-5 text-indigo-400"/> : <MagicWandIcon className="w-5 h-5 text-purple-400"/>}
+                    <ForgeIcon className="w-5 h-5 text-indigo-400"/>
                 </div>
                 <div className="min-w-0">
                     <p className="font-semibold text-white truncate">{name}</p>

@@ -9,6 +9,7 @@ export const buildPlainTextForItem = (item: GeneratedItem): string => {
     text += `Categoria: ${item.categoria}\n`;
     text += `Raridade: ${item.raridade}\n`;
     if(item.nivel_sugerido) text += `Nível Sugerido: ${item.nivel_sugerido}\n`;
+    if(item.preco_sugerido) text += `Preço Sugerido: ${item.preco_sugerido} ryo\n`;
     
     text += `\n--- DESCRIÇÃO ---\n`;
     text += `${item.descricao_curta}\n\n`;

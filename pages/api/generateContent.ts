@@ -101,12 +101,10 @@ export default async function handler(
                         categoria: accumulatedData.categoria,
                         descricao: accumulatedData.descricao,
                         ganchos_narrativos: accumulatedData.ganchos_narrativos,
-                        imagePromptProto: accumulatedData.imagePromptDescription,
                     };
-                    const polishPrompt = `Você é um mestre de narrativa e um especialista em prompts visuais. Sua tarefa é fazer o polimento final no item a seguir.
-                    1.  **gameText**: Reescreva a 'descricao' e os 'ganchos_narrativos' para ter um tom de roleplay mais forte.
-                    2.  **imagePromptDescription**: Refine o 'imagePromptProto' em um prompt final e conciso para um gerador de imagens. Incorpore as seguintes referências de estilo: "${filters.styleReferences || 'nenhum'}".
-                    Retorne um objeto JSON com duas chaves: "gameText" e "imagePromptDescription".
+                    const polishPrompt = `Você é um mestre de narrativa. Sua tarefa é fazer o polimento final no texto do item de RPG a seguir.
+                    Reescreva a 'descricao' e os 'ganchos_narrativos' para ter um tom de roleplay mais forte, fundindo-os em um único texto coeso e evocativo para o campo 'descricao' final.
+                    Retorne um objeto JSON com uma chave: "gameText".
                     Item para polir: ${JSON.stringify(itemForPolish)}`;
                     
                     const response = await openAiClient.chat.completions.create({
@@ -116,8 +114,8 @@ export default async function handler(
                     });
                     const polishedData = safeJsonParse(response.choices[0].message.content);
 
-                    if (polishedData && polishedData.gameText && polishedData.imagePromptDescription) {
-                        accumulatedData = { ...accumulatedData, descricao: polishedData.gameText, imagePromptDescription: polishedData.imagePromptDescription };
+                    if (polishedData && polishedData.gameText) {
+                        accumulatedData = { ...accumulatedData, descricao: polishedData.gameText };
                         allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'success' });
                     } else {
                         allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Invalid data' });

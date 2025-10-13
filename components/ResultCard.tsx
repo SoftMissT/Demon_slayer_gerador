@@ -43,7 +43,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       setMenuOpen(false);
   };
   
-  // FIX: Corrected category name from 'Missão/Cenário' to 'Missões' to align with the defined types and fix a type error.
   const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento' && item.categoria !== 'Local/Cenário';
 
   return (
@@ -81,7 +80,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
             </span>
             <div className="relative" ref={menuRef}>
                 {canGenerateVariant && (
-                    <Tooltip text="Gerar Variação">
+                    <Tooltip text="Mais Opções">
                         <Button 
                             variant="ghost" 
                             className="!p-1 h-7 w-7" 
@@ -95,17 +94,21 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                     </Tooltip>
                 )}
                 <AnimatePresence>
-                {menuOpen && canGenerateVariant && (
+                {menuOpen && (
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute bottom-full right-0 mb-2 w-36 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 py-1 origin-bottom-right"
+                        className="absolute bottom-full right-0 mb-2 w-40 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 py-1 origin-bottom-right"
                     >
-                        <button onClick={(e) => {e.stopPropagation(); handleVariantClick('agressiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Agressiva</button>
-                        <button onClick={(e) => {e.stopPropagation(); handleVariantClick('técnica')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Técnica</button>
-                        <button onClick={(e) => {e.stopPropagation(); handleVariantClick('defensiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Defensiva</button>
+                        {canGenerateVariant && (
+                            <>
+                                <button onClick={(e) => {e.stopPropagation(); handleVariantClick('agressiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Variação: Agressiva</button>
+                                <button onClick={(e) => {e.stopPropagation(); handleVariantClick('técnica')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Variação: Técnica</button>
+                                <button onClick={(e) => {e.stopPropagation(); handleVariantClick('defensiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Variação: Defensiva</button>
+                            </>
+                        )}
                     </motion.div>
                 )}
                 </AnimatePresence>

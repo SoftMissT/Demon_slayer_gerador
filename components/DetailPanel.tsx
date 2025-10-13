@@ -13,8 +13,6 @@ import { TagIcon } from './icons/TagIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { TextArea } from './ui/TextArea';
 import { TextInput } from './ui/TextInput';
-// FIX: Imported ClipboardIcon to resolve reference error.
-import { ClipboardIcon } from './icons/ClipboardIcon';
 import { KatanaIcon } from './icons/KatanaIcon';
 
 interface DetailPanelProps {
@@ -52,7 +50,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     const [isEditing, setIsEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
     const [copied, setCopied] = useState(false);
-    const [copiedPrompt, setCopiedPrompt] = useState(false);
 
     useEffect(() => {
         setEditableItem(item);
@@ -102,14 +99,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleCopyPrompt = () => {
-        if (item.imagePromptDescription) {
-            navigator.clipboard.writeText(item.imagePromptDescription);
-            setCopiedPrompt(true);
-            setTimeout(() => setCopiedPrompt(false), 2000);
-        }
-    }
-
     const currentName = ('title' in editableItem && editableItem.title) || editableItem.nome;
     
     return (
@@ -126,6 +115,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                         <span>{item.categoria}</span>
                         {item.raridade && <><span>•</span><span>{item.raridade}</span></>}
                         {item.nivel_sugerido && <><span>•</span><span>Nível {item.nivel_sugerido}</span></>}
+                        {item.preco_sugerido && <><span>•</span><span>{new Intl.NumberFormat('pt-BR').format(item.preco_sugerido)} ryo</span></>}
                     </div>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
@@ -173,17 +163,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 )}
             </div>
              <footer className="p-4 border-t border-gray-700 flex-shrink-0">
-                {item.imagePromptDescription && (
-                    <div className="mb-4">
-                        <label className="text-xs font-semibold text-gray-400 uppercase">PROMPT DE IMAGEM</label>
-                        <div className="relative">
-                             <p className="text-sm font-mono p-2 pr-10 bg-gray-900 rounded text-gray-300 mt-1">{item.imagePromptDescription}</p>
-                             <Button variant="ghost" className="!p-1.5 absolute top-1/2 right-1.5 -translate-y-1/2" onClick={handleCopyPrompt}>
-                                {copiedPrompt ? <ClipboardCheckIcon className="w-4 h-4 text-green-400" /> : <ClipboardIcon className="w-4 h-4" />}
-                             </Button>
-                        </div>
-                    </div>
-                )}
                 <div className="flex justify-end items-center gap-2">
                     <Button variant="secondary" onClick={handleDownload}><DownloadIcon className="w-5 h-5"/> Baixar TXT</Button>
                     <Button variant="secondary" onClick={handleCopy}>

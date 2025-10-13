@@ -11,7 +11,6 @@ export const buildResponseSchema = (filters: FilterState, step: number) => {
         descricao_curta: { type: Type.STRING, description: "Uma descrição de 2-3 frases que captura a essência." },
         descricao: { type: Type.STRING, description: "Descrição detalhada, incluindo aparência, história e poderes." },
         nivel_sugerido: { type: Type.INTEGER, description: "Nível de poder ou desafio sugerido para um RPG." },
-        imagePromptDescription: { type: Type.STRING, description: "Descrição visual detalhada para um gerador de imagens. Ex: 'dynamic angle, cinematic lighting, a demon slayer with a fox mask, bamboo forest, epic, detailed'." },
         ganchos_narrativos: {
             type: Type.ARRAY,
             items: { type: Type.STRING },
@@ -57,6 +56,7 @@ export const buildResponseSchema = (filters: FilterState, step: number) => {
                 type: Type.OBJECT,
                 properties: {
                     ...baseProperties,
+                    preco_sugerido: { type: Type.INTEGER, description: "O preço sugerido do item em 'ryo', baseado em sua raridade, materiais e no filtro de preço fornecido." },
                     dano: { type: Type.STRING },
                     dados: { type: Type.STRING },
                     tipo_de_dano: { type: Type.STRING },
@@ -75,15 +75,16 @@ Sua tarefa é gerar os detalhes para a categoria: "${filters.category}".
 
 **Contexto dos Filtros:**
 ${Object.entries(filters)
-    .filter(([, value]) => value && (!Array.isArray(value) || value.length > 0))
+    .filter(([, value]) => value && value !== 'Aleatório' && value !== 'Aleatória' && (!Array.isArray(value) || value.length > 0))
     .map(([key, value]) => `- ${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
     .join('\n')}
 
 **Instruções Adicionais:**
 ${promptModifier ? `- Prioridade: ${promptModifier}\n` : ''}
+${(filters.category === 'Arma' || filters.category === 'Acessório') ? `- Considere o 'suggestedPrice' (${filters.suggestedPrice} ryo) ao descrever os materiais, a qualidade e a raridade geral do item. Um preço mais alto deve refletir materiais mais raros, artesanato superior e uma história mais rica.\n` : ''}
+${(filters.category === 'Caçador' && filters.hunterWeapon && filters.hunterWeapon !== 'Aleatório') ? `- O caçador deve ser proficiente com sua Arma Principal: '${filters.hunterWeapon}'. Sua história, aparência e estilo de combate devem refletir o uso desta arma.\n` : ''}
 - Seja criativo, detalhado e fiel ao tom sombrio e épico de Demon Slayer.
 - Forneça uma resposta rica em lore e com ganchos para aventuras.
-- O 'imagePromptDescription' deve ser em inglês, focado em detalhes visuais.
 
 **Contexto da Etapa Anterior (se houver):**
 ${context ? JSON.stringify(context, null, 2) : 'Nenhum. Comece do zero.'}

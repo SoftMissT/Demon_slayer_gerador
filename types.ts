@@ -1,7 +1,5 @@
 // types.ts
 
-export type AppView = 'forge' | 'alchemist';
-
 export interface User {
   id: string;
   username: string;
@@ -51,6 +49,7 @@ export type Tematica =
 export interface FilterState {
   category: Category;
   subCategory: string;
+  hunterWeapon: string;
   quantity: number;
   tematica: string;
   origins: string[];
@@ -58,8 +57,8 @@ export interface FilterState {
   professions: string[];
   rarity: Rarity;
   level: number;
+  suggestedPrice: number;
   promptModifier: string;
-  styleReferences: string;
   aiFocusGemini: string;
   aiFocusGpt: string;
   aiFocusDeepSeek: string;
@@ -94,8 +93,8 @@ interface BaseGeneratedItem {
   descricao: string;
   raridade: string;
   nivel_sugerido: number;
+  preco_sugerido?: number;
   ganchos_narrativos: string[] | string;
-  imagePromptDescription?: string;
   provenance: ProvenanceEntry[];
 }
 
@@ -124,11 +123,13 @@ export interface GeneratedOni extends BaseGeneratedItem {
 
 export type GeneratedItem = BaseGeneratedItem | GeneratedWeapon | GeneratedHunter | GeneratedOni;
 
+// FIX: Added missing type definitions for the Prompt Alchemist feature.
+// Alchemist / Prompt Engineering Types
 export interface MidjourneyParam {
     active: boolean;
     value: string | number;
 }
-  
+
 export interface MidjourneyParameters {
     aspectRatio: MidjourneyParam;
     chaos: MidjourneyParam;
@@ -182,5 +183,6 @@ export interface AlchemyHistoryItem {
     outputs: PromptGenerationResult;
 }
 
-export type HistoryItem = GeneratedItem | AlchemyHistoryItem;
-export type FavoriteItem = GeneratedItem | AlchemyHistoryItem;
+
+export type HistoryItem = GeneratedItem;
+export type FavoriteItem = GeneratedItem;

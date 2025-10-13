@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600;700&family=Philosopher:wght@400;700&family=Poppins:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600;700&family=Poppins:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,8 +7,6 @@
 :root {
   --font-body-forge: 'Inter', sans-serif;
   --font-title-forge: 'Cinzel Decorative', serif;
-  --font-body-alchemist: 'Poppins', sans-serif;
-  --font-title-alchemist: 'Philosopher', serif;
 }
 
 body {
@@ -33,22 +31,6 @@ body {
   --dropdown-bg: #1E0D0A;
   --font-body: var(--font-body-forge);
   --font-title: var(--font-title-forge);
-}
-
-/* --- THEME: ALCHEMIST --- */
-.theme-alchemist {
-  --bg-dark: #0B0A15;
-  --bg-gradient: linear-gradient(180deg, #0D0A1A 0%, #24113B 100%);
-  --accent-primary: #8A2BE2;
-  --accent-secondary: #00FFB2;
-  --accent-glow: rgba(180, 80, 255, 0.5);
-  --text-primary: #D6D6FF;
-  --text-secondary: #9FE8C4;
-  --border-color: rgba(138, 43, 226, 0.4);
-  --card-bg: rgba(11, 10, 21, 0.7);
-  --dropdown-bg: #0D0A1A;
-  --font-body: var(--font-body-alchemist);
-  --font-title: var(--font-title-alchemist);
 }
 
 .app-container {
@@ -89,18 +71,6 @@ body, .font-sans {
   box-shadow: 0 0 15px var(--accent-glow);
 }
 
-.alchemist-button {
-  background: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
-  color: var(--bg-dark);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 0 10px var(--accent-glow);
-  transition: all 0.2s ease-in-out;
-}
-.alchemist-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 15px var(--accent-glow);
-}
-
 /* Custom Select Dropdowns */
 .custom-select-trigger {
     @apply w-full flex items-center justify-between text-left bg-gray-700/50 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50;
@@ -129,9 +99,6 @@ body, .font-sans {
 .dropdown-option:hover, .dropdown-option.selected {
     background-color: var(--accent-primary);
     color: white;
-}
-.theme-alchemist .dropdown-option:hover, .theme-alchemist .dropdown-option.selected {
-    color: var(--bg-dark);
 }
 .dropdown-option.disabled {
     @apply opacity-50 cursor-not-allowed;
@@ -171,33 +138,6 @@ body, .font-sans {
   border-color: var(--accent-primary) !important;
 }
 
-/* Prompt Card Specifics */
-.theme-alchemist .prompt-card.model-midjourney { --accent-primary: #DAA520; }
-.theme-alchemist .prompt-card.model-gpt { --accent-primary: #74AA9C; }
-.theme-alchemist .prompt-card.model-gemini { --accent-primary: #4285F4; }
-
-/* Ingredient Flask style for collapsible sections */
-.ingredient-flask {
-    background: rgba(10, 10, 15, 0.5);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    position: relative;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
-}
-.ingredient-flask::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 12px;
-    background: #6b4f3a;
-    border-radius: 4px 4px 0 0;
-    border: 1px solid #4a3728;
-}
-
 /* Number Input Buttons */
 .number-input-button {
   @apply w-10 h-10 flex items-center justify-center rounded-md font-bold text-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
@@ -209,20 +149,12 @@ body, .font-sans {
   background-color: var(--accent-primary);
   color: white;
 }
-.theme-alchemist .number-input-button:not(:disabled):hover {
-    color: var(--bg-dark);
-}
 
 /* Error Display */
 .error-display-forge {
   background-color: rgba(123, 29, 29, 0.8);
   border: 1px solid #ff4500;
   box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
-}
-.error-display-alchemist {
-    background-color: rgba(76, 17, 126, 0.8);
-    border: 1px solid #8a2be2;
-    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
 }
 
 /* --- ANIMATED BACKGROUNDS --- */
@@ -237,7 +169,7 @@ body, .font-sans {
 .spark {
     position: absolute;
     bottom: -10px;
-    background-color: var(--spark);
+    background-color: var(--accent-primary);
     border-radius: 50%;
     opacity: 0;
     animation: rise 8s infinite linear;
@@ -246,28 +178,6 @@ body, .font-sans {
     0% { transform: translateY(0); opacity: 1; }
     50% { transform: translateY(-50vh) translateX(20px); opacity: 0.8; }
     100% { transform: translateY(-100vh) translateX(-20px); opacity: 0; }
-}
-
-/* Smoke (Alchemist) */
-.smoke-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-.smoke-puff {
-    position: absolute;
-    bottom: -150px;
-    background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, rgba(11, 10, 21, 0) 70%);
-    border-radius: 50%;
-    opacity: 0;
-    animation: drift 25s infinite linear;
-    --x-drift: 0;
-}
-@keyframes drift {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    20%, 80% { opacity: 1; }
-    100% { transform: translateY(-110vh) translateX(calc(var(--x-drift) * 1px)); opacity: 0; }
 }
 
 /* About Modal Buttons */

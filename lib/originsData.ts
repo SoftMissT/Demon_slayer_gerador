@@ -99,5 +99,40 @@ export const ORIGINS_DATA: OriginData[] = [
     "tracos_tipicos": "inteligência afiada, isolamento social, vício em adrenalina digital.",
     "ganchos_narrativos": "encontrou um segredo corporativo que pode derrubar governos, é assombrado por uma IA renegada, precisa invadir o servidor mais protegido do mundo.",
     "tematicas": ["Cyberpunk", "Futurista (Sci-Fi)", "Neon-Noir Megacidade", "💠 DA INFOCRACIA", "🤖 DA SINGULARIDADE (PÓS-HUMANA)"]
+  },
+  {
+    "nome": "Nômade do Deserto Eterno",
+    "descricao": "Nascido sob um sol implacável, este indivíduo conhece os segredos da areia e do vento. Sua cultura valoriza a resiliência, a comunidade e a sabedoria ancestral para sobreviver onde nada mais sobrevive.",
+    "tracos_tipicos": "resistência ao calor, navegação estelar, desconfiança de forasteiros.",
+    "ganchos_narrativos": "proteger o último oásis, guiar uma caravana por território demoníaco, buscar uma relíquia perdida em uma cidade de areia.",
+    "tematicas": ["🏜️ DO SAARA ETERNO", "Pós-apocalíptico", "Medieval Fantasia"]
+  },
+  {
+    "nome": "Corsário dos Impérios Flutuantes",
+    "descricao": "A vida nos céus é a única que conheceu. Criado a bordo de um navio aéreo, este personagem é um mestre da navegação, do combate em conveses instáveis e do comércio... ou da pilhagem.",
+    "tracos_tipicos": "agilidade acrobática, carisma ousado, lealdade à tripulação.",
+    "ganchos_narrativos": "caçar um navio fantasma, participar de uma corrida de dirigíveis lendária, motim a bordo.",
+    "tematicas": ["🏴‍☠️ DOS IMPÉRIOS FLUTUANTES", "Steampunk", "Futurista (Sci-Fi)"]
+  },
+  {
+    "nome": "Guardião das Selvas de Mythpunk",
+    "descricao": "Vindo de uma civilização escondida na vastidão da selva amazônica, este guardião combina tecnologia antiga com a sabedoria da natureza. Seu corpo e armas são simbióticos com a flora e fauna locais.",
+    "tracos_tipicos": "comunicação com a natureza, furtividade, conhecimento de venenos e curas.",
+    "ganchos_narrativos": "defender a árvore-mãe de uma corporação invasora, buscar a cura para uma praga mística, guiar exploradores perdidos.",
+    "tematicas": ["Mythpunk Amazônico", "Biopunk", "🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)"]
+  },
+  {
+    "nome": "Herdeiro de um Deus Caído",
+    "descricao": "O sangue de uma divindade morta corre em suas veias. Este poder latente é tanto uma bênção quanto uma maldição, atraindo seguidores e caçadores em igual medida.",
+    "tracos_tipicos": "poder latente, conflito interno, senso de destino.",
+    "ganchos_narrativos": "reunir os artefatos de seu ancestral divino, ser caçado por um culto que deseja seu poder, decidir se aceita ou rejeita seu legado.",
+    "tematicas": ["⚔️ DOS DEUSES CAÍDOS", "Medieval Fantasia", "🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)"]
+  },
+  {
+    "nome": "Detetive do Oculto",
+    "descricao": "Em uma cidade de jazz e sombras, onde o sobrenatural é apenas mais um segredo sujo, este detetive resolve casos que a polícia não ousa tocar. Viu coisas que não deveriam existir e vive para expô-las à luz... ou enterrá-las mais fundo.",
+    "tracos_tipicos": "percepção aguçada, ceticismo endurecido, nervos de aço.",
+    "ganchos_narrativos": "investigar um assassinato ritualístico, ser contratado por uma femme fatale vampira, impedir que um artefato amaldiçoado caia nas mãos erradas.",
+    "tematicas": ["🕵️‍♂️ DO JAZZ & OCULTISMO", "Moderno", "DOS CAÇADORES DE SOMBRAS", "🌃 DO SUBMUNDO NOTURNO"]
   }
 ];

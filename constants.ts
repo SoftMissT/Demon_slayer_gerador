@@ -4,15 +4,14 @@ import { PROFESSIONS_BY_TEMATICA } from './lib/professionsData';
 import { ORIGINS_DATA } from './lib/originsData';
 import { BREATHING_STYLES_DATA } from './lib/breathingStylesData';
 import { WEAPON_TYPES, GRIP_TYPES } from './lib/weaponData';
+import { TEMATICAS_DATA } from './lib/tematicasData';
 
 export const APP_NAME = 'Kimetsu Forge';
 
 export const CATEGORY_OPTIONS = CATEGORIES.map(c => ({ value: c, label: c }));
 export const RARITY_OPTIONS = RARITIES.map(r => ({ value: r, label: r }));
 
-export const THEME_OPTIONS = Object.keys(PROFESSIONS_BY_TEMATICA)
-    .filter(t => t !== 'all')
-    .map(t => ({ value: t, label: t }));
+export const THEME_OPTIONS = TEMATICAS_DATA;
 
 export const ORIGIN_OPTIONS = ORIGINS_DATA.map(o => ({ value: o.nome, label: o.nome }));
 export const BREATHING_STYLE_OPTIONS = BREATHING_STYLES_DATA.map(b => ({ value: b.nome, label: b.nome }));
