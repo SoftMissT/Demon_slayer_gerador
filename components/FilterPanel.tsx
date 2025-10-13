@@ -1,142 +1,107 @@
 import React from 'react';
-import type { FilterState, AIFlags, Category, Rarity, Tematica } from '../types';
+// FIX: Added Rarity to type imports to be used in the onChange handler type assertion.
+import type { FilterState, Category, Rarity } from '../types';
+import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { NumberInput } from './ui/NumberInput';
+import { TextArea } from './ui/TextArea';
 import { SearchableSelect } from './ui/SearchableSelect';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
-import { TextArea } from './ui/TextArea';
+import { NumberInput } from './ui/NumberInput';
+import { Slider } from './ui/Slider';
 import { Switch } from './ui/Switch';
-import { HammerIcon } from './icons/HammerIcon';
+import { CollapsibleSection } from './ui/CollapsibleSection';
 import { RefreshIcon } from './icons/RefreshIcon';
-import { CATEGORY_OPTIONS, RARITY_OPTIONS, THEME_OPTIONS, ORIGIN_OPTIONS, BREATHING_STYLE_OPTIONS, PROFESSION_OPTIONS } from '../constants';
-import { AccordionSection } from './AccordionSection';
+import { SparklesIcon } from './icons/SparklesIcon';
+import { HammerIcon } from './icons/HammerIcon';
+import {
+    CATEGORY_OPTIONS,
+    THEME_OPTIONS,
+    ORIGIN_OPTIONS,
+    BREATHING_STYLE_OPTIONS,
+    PROFESSION_OPTIONS,
+    WEAPON_TYPE_OPTIONS,
+    GRIP_TYPE_OPTIONS,
+    RARITY_OPTIONS
+} from '../constants';
+import { AIFlags } from '../types';
 
 interface FilterPanelProps {
-    filters: FilterState;
-    onFilterChange: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
-    onGenerate: () => void;
-    onReset: () => void;
-    isLoading: boolean;
-    aiFlags: AIFlags;
-    onAIFlagChange: (key: keyof AIFlags, value: boolean) => void;
+  filters: FilterState;
+  onFilterChange: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
+  onGenerate: () => void;
+  onReset: () => void;
+  isLoading: boolean;
+  aiFlags: AIFlags;
+  onAIFlagChange: (key: keyof AIFlags, value: boolean) => void;
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({
-    filters,
-    onFilterChange,
-    onGenerate,
-    onReset,
-    isLoading,
-    aiFlags,
-    onAIFlagChange
+  filters,
+  onFilterChange,
+  onGenerate,
+  onReset,
+  isLoading,
+  aiFlags,
+  onAIFlagChange,
 }) => {
-    return (
-        <div className="h-full flex flex-col bg-gray-800/30 rounded-lg">
-            <div className="p-4 border-b border-gray-700 flex-shrink-0">
-                <h2 className="text-lg font-bold text-white font-gangofthree">Painel de Forja</h2>
-                <p className="text-sm text-gray-400">Ajuste os filtros para sua criação.</p>
-            </div>
-            
-            <div className="flex-grow overflow-y-auto p-4 space-y-4 inner-scroll">
-                 <SearchableSelect
-                    label="Categoria Principal"
-                    options={CATEGORY_OPTIONS}
-                    value={filters.category}
-                    onChange={(value) => onFilterChange('category', value as Category)}
-                />
-                
-                <AccordionSection title="Detalhes do Personagem/Item">
-                    <div className="space-y-4 pt-4">
-                        <SearchableSelect
-                            label="Temática / Era"
-                            options={THEME_OPTIONS}
-                            value={filters.tematica}
-                            onChange={(value) => onFilterChange('tematica', value as Tematica)}
-                        />
-                        <SearchableMultiSelect
-                            label="Origens"
-                            options={ORIGIN_OPTIONS}
-                            selected={filters.origins}
-                            onChange={(value) => onFilterChange('origins', value)}
-                        />
-                        <SearchableMultiSelect
-                            label="Estilos de Respiração"
-                            options={BREATHING_STYLE_OPTIONS}
-                            selected={filters.breathingStyles}
-                            onChange={(value) => onFilterChange('breathingStyles', value)}
-                        />
-                        <SearchableMultiSelect
-                            label="Profissões"
-                            options={PROFESSION_OPTIONS}
-                            selected={filters.professions}
-                            onChange={(value) => onFilterChange('professions', value)}
-                        />
-                        <SearchableSelect
-                            label="Raridade Desejada"
-                            options={RARITY_OPTIONS}
-                            value={filters.rarity}
-                            onChange={(value) => onFilterChange('rarity', value as Rarity)}
-                        />
-                    </div>
-                </AccordionSection>
-                
-                <AccordionSection title="Instruções para IA">
-                     <div className="space-y-4 pt-4">
-                        <TextArea
-                            label="Modificador de Prompt"
-                            placeholder="Ex: 'Com foco em furtividade' ou 'com um toque cômico'"
-                            value={filters.promptModifier}
-                            onChange={(e) => onFilterChange('promptModifier', e.target.value)}
-                        />
-                         <TextArea
-                            label="Referências de Estilo Visual"
-                            placeholder="Ex: 'estilo de arte de Genshin Impact, iluminação cinematográfica, paleta de cores sombria'"
-                            value={filters.styleReferences}
-                            onChange={(e) => onFilterChange('styleReferences', e.target.value)}
-                            rows={3}
-                        />
-                    </div>
-                </AccordionSection>
+  const handleCategoryChange = (value: string) => {
+    onFilterChange('category', value as Category);
+    onFilterChange('subCategory', ''); // Reset subcategory on category change
+  };
 
-                <AccordionSection title="Configuração de Geração">
-                    <div className="space-y-4 pt-4">
-                        <NumberInput
-                            label="Quantidade a Gerar"
-                            value={filters.quantity}
-                            onChange={(value) => onFilterChange('quantity', value)}
-                            min={1}
-                            max={5}
-                        />
-                         <div className="space-y-2 pt-2">
-                             <p className="text-sm font-medium text-gray-400">Modelos de IA a Utilizar:</p>
-                            <Switch label="DeepSeek (Conceito)" checked={aiFlags.useDeepSeek} onChange={(e) => onAIFlagChange('useDeepSeek', e.target.checked)} />
-                            <Switch label="Gemini (Estrutura)" checked={aiFlags.useGemini} onChange={(e) => onAIFlagChange('useGemini', e.target.checked)} />
-                            <Switch label="GPT-4o (Polimento)" checked={aiFlags.useGpt} onChange={(e) => onAIFlagChange('useGpt', e.target.checked)} />
-                        </div>
-                    </div>
-                </AccordionSection>
-            </div>
+  const isWeaponOrAccessory = filters.category === 'Arma' || filters.category === 'Acessório';
 
-            <div className="p-4 border-t border-gray-700 flex-shrink-0 space-y-2">
-                <Button 
-                    onClick={onGenerate} 
-                    disabled={isLoading}
-                    className="w-full forge-button"
-                    size="lg"
-                >
-                    <HammerIcon className="w-5 h-5" />
-                    {isLoading ? 'Forjando...' : 'Forjar Item'}
-                </Button>
-                <Button 
-                    onClick={onReset} 
-                    disabled={isLoading} 
-                    variant="secondary" 
-                    className="w-full"
-                >
-                     <RefreshIcon className="w-5 h-5" />
-                    Resetar Filtros
-                </Button>
+  return (
+    <Card className="h-full flex flex-col bg-gray-800/30">
+      <div className="p-4 border-b border-gray-700 flex-shrink-0">
+        <h2 className="text-lg font-bold text-white font-gangofthree">Filtros da Forja</h2>
+        <p className="text-sm text-gray-400">Molde sua criação com precisão.</p>
+      </div>
+      <div className="flex-grow p-4 overflow-y-auto space-y-4 inner-scroll">
+        <SearchableSelect label="Categoria" options={CATEGORY_OPTIONS} value={filters.category} onChange={handleCategoryChange} />
+        {isWeaponOrAccessory && (
+            <SearchableSelect label="Tipo de Arma" options={WEAPON_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
+        )}
+        {filters.category === 'Caçador' && (
+             <SearchableSelect label="Estilo de Empunhadura" options={GRIP_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
+        )}
+        <NumberInput label="Quantidade" value={filters.quantity} onChange={(v) => onFilterChange('quantity', v)} min={1} max={5} />
+        
+        <CollapsibleSection title="Detalhes da Criação">
+            <div className="space-y-4 pt-2">
+                <SearchableSelect label="Temática / Era" options={THEME_OPTIONS} value={filters.tematica} onChange={(v) => onFilterChange('tematica', v)} />
+                <SearchableMultiSelect label="Origens" options={ORIGIN_OPTIONS} selected={filters.origins} onChange={(v) => onFilterChange('origins', v)} />
+                <SearchableMultiSelect label="Respirações" options={BREATHING_STYLE_OPTIONS} selected={filters.breathingStyles} onChange={(v) => onFilterChange('breathingStyles', v)} />
+                <SearchableMultiSelect label="Profissões" options={PROFESSION_OPTIONS} selected={filters.professions} onChange={(v) => onFilterChange('professions', v)} />
+                {/* FIX: Removed incorrect .map() on RARITY_OPTIONS which was already formatted, and corrected the type assertion in onChange to use the Rarity type. */}
+                <SearchableSelect label="Raridade" options={RARITY_OPTIONS} value={filters.rarity} onChange={(v) => onFilterChange('rarity', v as Rarity)} />
+                <Slider label="Nível/Poder Sugerido" value={filters.level} onChange={(e) => onFilterChange('level', parseInt(e.target.value, 10))} min={1} max={20} step={1} />
             </div>
-        </div>
-    );
+        </CollapsibleSection>
+        
+        <CollapsibleSection title="Diretivas Avançadas de IA">
+            <div className="space-y-4 pt-2">
+                <TextArea label="Modificador de Prompt" placeholder="Ex: 'Com foco em furtividade' ou 'inspirado em mitologia nórdica'" rows={3} value={filters.promptModifier} onChange={(e) => onFilterChange('promptModifier', e.target.value)} />
+                <TextArea label="Referências de Estilo Visual" placeholder="Ex: 'arte de Yoshitaka Amano, Ufotable, dark fantasy'" rows={2} value={filters.styleReferences} onChange={(e) => onFilterChange('styleReferences', e.target.value)} />
+                <div className="p-2 bg-gray-900/50 rounded-md space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-300">Motores de IA</h4>
+                    <Switch label="Gemini (Enriquecimento)" checked={aiFlags.useGemini} onChange={e => onAIFlagChange('useGemini', e.target.checked)} />
+                    <Switch label="GPT-4o (Polimento)" checked={aiFlags.useGpt} onChange={e => onAIFlagChange('useGpt', e.target.checked)} />
+                    <Switch label="DeepSeek (Conceito)" checked={aiFlags.useDeepSeek} onChange={e => onAIFlagChange('useDeepSeek', e.target.checked)} />
+                </div>
+            </div>
+        </CollapsibleSection>
+      </div>
+      <div className="p-4 border-t border-gray-700 flex-shrink-0 space-y-2">
+        <Button onClick={onGenerate} disabled={isLoading} className="w-full forge-button">
+            {isLoading ? <SparklesIcon className="w-5 h-5 animate-pulse" /> : <HammerIcon className="w-5 h-5" />}
+            {isLoading ? 'Forjando...' : 'Forjar'}
+        </Button>
+        <Button variant="secondary" onClick={onReset} disabled={isLoading} className="w-full">
+            <RefreshIcon className="w-5 h-5" />
+            Resetar Filtros
+        </Button>
+      </div>
+    </Card>
+  );
 };

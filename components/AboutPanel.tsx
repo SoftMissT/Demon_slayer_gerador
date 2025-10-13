@@ -5,11 +5,6 @@ import { Button } from './ui/Button';
 import { PlayIcon } from './icons/PlayIcon';
 import { DiscordIcon } from './icons/DiscordIcon';
 import { BookIcon } from './icons/BookIcon';
-import { AnvilIcon } from './icons/AnvilIcon';
-import { MagicWandIcon } from './icons/MagicWandIcon';
-import { BrainIcon } from './icons/BrainIcon';
-import { LightbulbIcon } from './icons/LightbulbIcon';
-import { UsersIcon } from './icons/UsersIcon';
 
 interface AboutPanelProps {
   onClose: () => void;
@@ -25,9 +20,9 @@ const ActionButton: React.FC<{ href: string; className?: string; children: React
 
 export const AboutPanel: React.FC<AboutPanelProps> = ({ onClose }) => {
   return (
-    <div className="about-panel bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-lg shadow-2xl max-w-3xl w-full mx-auto">
+    <div className="about-panel bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full mx-auto">
       <header className="flex justify-between items-center p-4 border-b border-gray-700">
-        <h2 className="text-xl font-bold font-gangofthree text-white">Sobre & Como Funciona</h2>
+        <h2 className="text-xl font-bold font-gangofthree text-white">Sobre o Kimetsu Forge</h2>
         <button onClick={onClose} className="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
       </header>
       <div className="p-6 max-h-[70vh] overflow-y-auto inner-scroll">
@@ -41,52 +36,10 @@ export const AboutPanel: React.FC<AboutPanelProps> = ({ onClose }) => {
               <li>Aceleração do processo de criação de histórias com conteúdo gerado por uma colaboração de IAs.</li>
             </ul>
 
-             <h3>Como Funciona</h3>
-            <div className="not-prose space-y-4 my-4">
-                 <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                    <h4 className="flex items-center gap-2 font-bold text-white text-lg mb-2">
-                    <AnvilIcon className="w-6 h-6 text-indigo-400" />
-                    Modo Forja
-                    </h4>
-                    <p className="text-sm">
-                    Use a Bigorna para gerar itens, personagens e mais. Selecione uma categoria, ajuste os filtros e clique em "Forjar".
-                    </p>
-                </div>
-                
-                <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                    <h4 className="flex items-center gap-2 font-bold text-white text-lg mb-2">
-                    <MagicWandIcon className="w-6 h-6 text-purple-400" />
-                    Modo Alquimia
-                    </h4>
-                    <p className="text-sm">
-                    O Alquimista de Prompts ajuda a criar descrições perfeitas para IAs de imagem. Escreva uma ideia base e a IA irá gerar prompts otimizados.
-                    </p>
-                </div>
-                <h4 className="font-bold text-white text-lg pt-2 text-center">O Processo Criativo da IA</h4>
-                 <ol className="relative border-l border-gray-700 ml-4">                  
-                    <li className="mb-6 ml-6">            
-                    <span className="absolute flex items-center justify-center w-8 h-8 bg-indigo-900 rounded-full -left-4 ring-4 ring-gray-800">
-                        <LightbulbIcon className="w-5 h-5 text-indigo-300" />
-                    </span>
-                    <h5 className="font-semibold text-white">1. Conceito (DeepSeek)</h5>
-                    <p className="text-sm text-gray-400">Uma IA gera a ideia inicial, a faísca da criação.</p>
-                    </li>
-                    <li className="mb-6 ml-6">
-                    <span className="absolute flex items-center justify-center w-8 h-8 bg-indigo-900 rounded-full -left-4 ring-4 ring-gray-800">
-                        <BrainIcon className="w-5 h-5 text-indigo-300" />
-                    </span>
-                    <h5 className="font-semibold text-white">2. Estrutura (Gemini)</h5>
-                    <p className="text-sm text-gray-400">O Gemini expande o conceito, adicionando lore e detalhes.</p>
-                    </li>
-                    <li className="ml-6">
-                    <span className="absolute flex items-center justify-center w-8 h-8 bg-indigo-900 rounded-full -left-4 ring-4 ring-gray-800">
-                        <UsersIcon className="w-5 h-5 text-indigo-300" />
-                    </span>
-                    <h5 className="font-semibold text-white">3. Polimento (GPT-4o)</h5>
-                    <p className="text-sm text-gray-400">O GPT-4o refina a narrativa e otimiza a descrição para geração de imagem.</p>
-                    </li>
-                </ol>
-            </div>
+            <h3>Como Funciona</h3>
+            <p><strong>DeepSeek (O Conceitualizador):</strong> A primeira IA gera a ideia base.</p>
+            <p><strong>Google Gemini (O Arquiteto):</strong> O Gemini enriquece o conceito com lore e mecânicas.</p>
+            <p><strong>OpenAI GPT-4o (O Artista Final):</strong> O GPT-4o realiza o polimento final da narrativa.</p>
             
             <h3>Aviso Legal</h3>
             <p>Este é um projeto de fã não oficial. Demon Slayer: Kimetsu no Yaiba é uma propriedade de Koyoharu Gotouge, Shueisha e Ufotable.</p>

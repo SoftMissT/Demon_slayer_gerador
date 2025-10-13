@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
-// FIX: Added Variants to fix a type error with the ease property in Framer Motion transitions.
-import { AnimatePresence, motion, Variants } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Header } from './components/Header';
 import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
 import { HistoryModal } from './components/HistoryModal';
 import { FavoritesModal } from './components/FavoritesModal';
+import { HowItWorksModal } from './components/HowItWorksModal';
 import useLocalStorage from './hooks/useLocalStorage';
 import type { User, GeneratedItem, AlchemyHistoryItem, HistoryItem, FavoriteItem } from './types';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
@@ -35,6 +35,7 @@ export default function App() {
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
+    const [isHowItWorksModalOpen, setIsHowItWorksModalOpen] = useState(false);
     const [appError, setAppError] = useState<string | null>(null);
     
     const handleLoginClick = useCallback(async () => {
@@ -115,9 +116,9 @@ export default function App() {
         setIsFavoritesModalOpen(false);
     }, [setSelectedItem, setActiveView, setSelectedAlchemyItem]);
     
-    const viewVariants: Variants = {
-        hidden: { opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } },
-        visible: { opacity: 1, transition: { duration: 0.4, ease: 'easeInOut' } },
+    const viewVariants = {
+        hidden: { opacity: 0, transition: { duration: 0.2 } },
+        visible: { opacity: 1, transition: { duration: 0.3 } },
     };
 
     return (
@@ -130,6 +131,7 @@ export default function App() {
                     onOpenAbout={() => setIsAboutModalOpen(true)}
                     onOpenHistory={() => setIsHistoryModalOpen(true)}
                     onOpenFavorites={() => setIsFavoritesModalOpen(true)}
+                    onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
                     user={user}
                     onLoginClick={handleLoginClick}
                     onLogout={handleLogout}
@@ -174,6 +176,7 @@ export default function App() {
                 </main>
                 
                 <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+                <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
 
                 <HistoryModal
                     isOpen={isHistoryModalOpen}
