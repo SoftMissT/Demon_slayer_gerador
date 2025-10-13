@@ -100,7 +100,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     
     // Effect to load state from a selected history item
     useEffect(() => {
-        if (selectedItem && selectedItem.inputs) {
+        if (selectedItem && selectedItem.inputs && selectedItem.outputs) {
             const historyInputs = selectedItem.inputs;
             setInputs({
                 ...INITIAL_INPUTS,
@@ -220,76 +220,79 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     return (
         <div className="h-full relative p-2">
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="alchemist" />}
-            <div className={`h-full overflow-y-auto inner-scroll pr-1 pb-4 max-w-4xl mx-auto ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
-                <div className="flex flex-col gap-2">
-                    
-                    <div className="ingredient-flask">
-                         <h3 className="text-lg font-bold text-center mb-2">Caldeirão Principal</h3>
-                        <TextArea
-                            label="Ingrediente Principal (Prompt Base)"
-                            value={inputs.basePrompt}
-                            onChange={(e) => setInputs(i => ({...i, basePrompt: e.target.value}))}
-                            placeholder="Descreva a cena, personagem ou ideia principal..."
-                            rows={4}
-                        />
-                        <TextArea
-                            label="Catalisador Negativo (Opcional)"
-                            value={inputs.negativePrompt}
-                            onChange={(e) => setInputs(i => ({...i, negativePrompt: e.target.value}))}
-                            placeholder="O que você quer evitar na imagem? Ex: texto, mãos feias, baixa qualidade..."
-                            rows={2}
-                        />
-                        <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
-                            <h3 className="text-sm font-semibold text-gray-300 mb-2">Gerenciar Presets de Alquimia</h3>
-                            <div className="flex gap-2">
-                                <div className="flex-grow">
-                                    <Select label="" value={selectedPreset} onChange={handleLoadPreset}>
-                                        <option value="">Carregar preset...</option>
-                                        {Object.keys(presets).map(name => <option key={name} value={name}>{name}</option>)}
-                                    </Select>
+            <div className={`grid md:grid-cols-2 gap-4 h-full ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
+                
+                {/* --- Left Column: Inputs --- */}
+                <div className="h-full flex flex-col">
+                    <div className="flex-grow overflow-y-auto inner-scroll pr-2">
+                         <div className="flex flex-col gap-2">
+                            <div className="ingredient-flask">
+                                <h3 className="text-lg font-bold text-center mb-2">Caldeirão Principal</h3>
+                                <TextArea
+                                    label="Ingrediente Principal (Prompt Base)"
+                                    value={inputs.basePrompt}
+                                    onChange={(e) => setInputs(i => ({...i, basePrompt: e.target.value}))}
+                                    placeholder="Descreva a cena, personagem ou ideia principal..."
+                                    rows={4}
+                                />
+                                <TextArea
+                                    label="Catalisador Negativo (Opcional)"
+                                    value={inputs.negativePrompt}
+                                    onChange={(e) => setInputs(i => ({...i, negativePrompt: e.target.value}))}
+                                    placeholder="O que você quer evitar na imagem? Ex: texto, mãos feias..."
+                                    rows={2}
+                                />
+                                <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
+                                    <h3 className="text-sm font-semibold text-gray-300 mb-2">Gerenciar Presets de Alquimia</h3>
+                                    <div className="flex gap-2">
+                                        <div className="flex-grow">
+                                            <Select label="" value={selectedPreset} onChange={handleLoadPreset}>
+                                                <option value="">Carregar preset...</option>
+                                                {Object.keys(presets).map(name => <option key={name} value={name}>{name}</option>)}
+                                            </Select>
+                                        </div>
+                                        <Button variant="secondary" size="sm" onClick={handleSavePreset} title="Salvar preset atual">
+                                            <SaveIcon className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="danger" size="sm" onClick={handleDeletePreset} disabled={!selectedPreset} title="Apagar preset selecionado">
+                                            <TrashIcon className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                                <Button variant="secondary" size="sm" onClick={handleSavePreset} title="Salvar preset atual">
-                                    <SaveIcon className="w-4 h-4" />
-                                </Button>
-                                <Button variant="danger" size="sm" onClick={handleDeletePreset} disabled={!selectedPreset} title="Apagar preset selecionado">
-                                    <TrashIcon className="w-4 h-4" />
-                                </Button>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div className="ingredient-flask">
-                         <div className="flex items-center justify-around gap-4 p-3 flex-wrap">
-                            <p className="text-sm font-medium flex-shrink-0">Destilar para:</p>
-                            <Switch label="Midjourney" checked={inputs.generateFor.midjourney} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, midjourney: e.target.checked}}))} />
-                            <Switch label="GPT / DALL-E" checked={inputs.generateFor.gpt} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, gpt: e.target.checked}}))} />
-                            <Switch label="Gemini" checked={inputs.generateFor.gemini} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, gemini: e.target.checked}}))} />
-                        </div>
-                    </div>
+                            
+                            <div className="ingredient-flask">
+                                <div className="flex items-center justify-around gap-4 p-3 flex-wrap">
+                                    <p className="text-sm font-medium flex-shrink-0">Destilar para:</p>
+                                    <Switch label="Midjourney" checked={inputs.generateFor.midjourney} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, midjourney: e.target.checked}}))} />
+                                    <Switch label="GPT / DALL-E" checked={inputs.generateFor.gpt} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, gpt: e.target.checked}}))} />
+                                    <Switch label="Gemini" checked={inputs.generateFor.gemini} onChange={e => setInputs(i => ({...i, generateFor: {...i.generateFor, gemini: e.target.checked}}))} />
+                                </div>
+                            </div>
 
-                    {inputs.generateFor.midjourney && <CollapsibleSection title="Caldeirão Midjourney"><MidjourneyParametersComponent params={inputs.mjParams} setParams={p => setInputs(i => ({...i, mjParams: typeof p === 'function' ? p(i.mjParams) : p }))} /></CollapsibleSection>}
-                    {inputs.generateFor.gpt && <CollapsibleSection title="Caldeirão GPT"><GptStructuredBuilder params={inputs.gptParams} setParams={p => setInputs(i => ({...i, gptParams: typeof p === 'function' ? p(i.gptParams) : p }))} /></CollapsibleSection>}
-                    {inputs.generateFor.gemini && <CollapsibleSection title="Caldeirão Gemini"><GeminiParametersComponent params={inputs.geminiParams} setParams={p => setInputs(i => ({...i, geminiParams: typeof p === 'function' ? p(i.geminiParams) : p }))} /></CollapsibleSection>}
-                    
-                    <div className="cauldron-container my-4">
-                        {isLoading ? (
-                            <AlchemyLoadingIndicator />
-                        ) : (
-                            <>
-                            <CauldronIcon className="w-24 h-24 text-gray-400 mb-4 animate-float" />
-                            <Button 
-                                onClick={handleGenerate} 
-                                disabled={!inputs.basePrompt.trim()} 
-                                className="w-full max-w-xs alchemist-button"
-                            >
-                                <MagicWandIcon className="w-5 h-5"/>
-                                Destilar Prompts
-                            </Button>
-                            </>
-                        )}
+                            {inputs.generateFor.midjourney && <CollapsibleSection title="Caldeirão Midjourney"><MidjourneyParametersComponent params={inputs.mjParams} setParams={p => setInputs(i => ({...i, mjParams: typeof p === 'function' ? p(i.mjParams) : p }))} /></CollapsibleSection>}
+                            {inputs.generateFor.gpt && <CollapsibleSection title="Caldeirão GPT"><GptStructuredBuilder params={inputs.gptParams} setParams={p => setInputs(i => ({...i, gptParams: typeof p === 'function' ? p(i.gptParams) : p }))} /></CollapsibleSection>}
+                            {inputs.generateFor.gemini && <CollapsibleSection title="Caldeirão Gemini"><GeminiParametersComponent params={inputs.geminiParams} setParams={p => setInputs(i => ({...i, geminiParams: typeof p === 'function' ? p(i.geminiParams) : p }))} /></CollapsibleSection>}
+                        </div>
                     </div>
-                    
-                    {results ? (
+                     <div className="flex-shrink-0 pt-4 mt-auto border-t border-gray-700/50">
+                        <Button 
+                            onClick={handleGenerate} 
+                            disabled={isLoading || !inputs.basePrompt.trim()} 
+                            className="w-full alchemist-button"
+                            size="lg"
+                        >
+                            <MagicWandIcon className="w-5 h-5"/>
+                            {isLoading ? 'Destilando...' : 'Destilar Prompts'}
+                        </Button>
+                    </div>
+                </div>
+
+                {/* --- Right Column: Outputs --- */}
+                <div className="h-full flex flex-col">
+                    {isLoading ? (
+                        <AlchemyLoadingIndicator />
+                    ) : results ? (
                         <PromptResultDisplay 
                             results={results}
                             inputs={history[0]?.inputs}
@@ -298,10 +301,11 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                             isFavorited={isCurrentResultFavorited}
                             historyItem={history[0]}
                         />
-                    ) : !isLoading && (
-                         <div className="flex flex-col items-center justify-center text-center text-gray-500 p-8">
-                            <h2 className="text-2xl font-bold">Caldeirão Vazio</h2>
-                            <p className="mt-2 max-w-md">Adicione seus ingredientes, ajuste os catalisadores e clique em "Destilar" para criar poções de prompt otimizadas.</p>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-8 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                            <CauldronIcon className="w-24 h-24 mb-6 opacity-20" />
+                            <h2 className="text-2xl font-bold font-gangofthree text-white">Poções de Prompt</h2>
+                            <p className="mt-2 max-w-md">Os prompts destilados aparecerão aqui, prontos para serem usados.</p>
                         </div>
                     )}
                 </div>

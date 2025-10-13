@@ -47,7 +47,15 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
     if (!response.ok) {
         const errorData = await response.json();
         console.error('Discord token exchange failed:', errorData);
-        throw new Error('Falha ao trocar o código de autorização do Discord.');
+        
+        let userFacingError = 'Falha ao trocar o código de autorização do Discord.';
+        if (errorData.error === 'invalid_client') {
+            userFacingError = 'Falha na autenticação: Client ID ou Client Secret do Discord inválido. O administrador precisa verificar as variáveis de ambiente no servidor.';
+        } else if (errorData.error === 'invalid_grant') {
+            userFacingError = 'Falha na autenticação: O código de autorização é inválido ou expirou. Por favor, tente fazer o login novamente.';
+        }
+        
+        throw new Error(userFacingError);
     }
 
     return response.json();

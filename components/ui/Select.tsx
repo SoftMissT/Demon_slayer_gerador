@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { InfoTooltip } from './InfoTooltip';
@@ -95,15 +96,18 @@ export const Select: React.FC<SelectProps> = ({ label, children, value, onChange
             style={{ originY: position === 'up' ? '100%' : '0%' }}
         >
           <ul>
-            {options.map(option => (
-              <li
-                key={option.value}
-                onClick={() => handleOptionClick(option.value)}
-                className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-700 ${String(value) === option.value ? 'bg-indigo-600 text-white' : 'text-gray-300'}`}
-              >
-                {option.label}
-              </li>
-            ))}
+            {options.map(option => {
+                const isSelected = String(value) === option.value;
+                return (
+                    <li
+                        key={option.value}
+                        onClick={() => handleOptionClick(option.value)}
+                        className={`dropdown-option ${isSelected ? 'selected' : ''}`}
+                    >
+                        {option.label}
+                    </li>
+                );
+            })}
           </ul>
         </motion.div>
       )}

@@ -1,10 +1,12 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
-function useLocalStorage<T,>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] {
+// FIX: Rewrote the hook to prevent hydration errors.
+// It now initializes with a default value and updates from localStorage in an effect,
+// ensuring server and client initial renders match.
+function useLocalStorage<T>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // On component mount, read from localStorage and set initialized flag.
+  // We only want to run this effect on the client, after the initial render.
   useEffect(() => {
     try {
       const item = window.localStorage.getItem(key);
@@ -12,22 +14,17 @@ function useLocalStorage<T,>(key: string, initialValue: T): [T, Dispatch<SetStat
         setStoredValue(JSON.parse(item));
       }
     } catch (error) {
-      console.error(`Error reading from localStorage: ${error}`);
-    } finally {
-      setIsInitialized(true);
+      console.error(`Error reading localStorage key “${key}”:`, error);
     }
   }, [key]);
 
-  // When storedValue changes, update localStorage, but only after initialization.
   useEffect(() => {
-    if (isInitialized) {
-      try {
-        window.localStorage.setItem(key, JSON.stringify(storedValue));
-      } catch (error) {
-        console.error(`Error writing to localStorage: ${error}`);
-      }
+    try {
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
+    } catch (error) {
+      console.error(`Error setting localStorage key “${key}”:`, error);
     }
-  }, [key, storedValue, isInitialized]);
+  }, [key, storedValue]);
 
   return [storedValue, setStoredValue];
 }

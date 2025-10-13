@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600&family=Philosopher:wght@400;700&family=Poppins:wght@400;600&display=swap');
 
 @tailwind base;
@@ -218,6 +219,38 @@ h1, h2, h3, h4, h5, h6 {
 .number-input-button {
   @apply w-10 h-10 flex items-center justify-center bg-gray-700 border border-gray-600 rounded-md text-white font-bold text-lg;
   @apply hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+/* Dropdown Customizations */
+.custom-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-dropdown::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 6px;
+}
+.custom-dropdown::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent);
+}
+
+.dropdown-option {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem; /* text-sm */
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  color: var(--text-secondary);
+}
+.dropdown-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+.dropdown-option.selected {
+  background-color: var(--accent);
+  color: #FFFFFF; /* Use pure white for max contrast on accent colors */
+  font-weight: 600;
 }
 
 
