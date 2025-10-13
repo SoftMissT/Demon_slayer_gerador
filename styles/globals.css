@@ -828,6 +828,8 @@ body {
   justify-content: center;
   width: 100%;
   position: relative;
+  border-radius: 12px;
+  overflow: hidden;
 }
 .poda-container .white,
 .poda-container .border,
