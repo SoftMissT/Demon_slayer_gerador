@@ -1,28 +1,145 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600;700&family=M+PLUS+1p:wght@400;700&family=Philosopher:wght@400;700&family=Poppins:wght@400;600&family=Sawarabi+Mincho&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600;700&family=Philosopher:wght@400;700&family=Poppins:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-inter: 'Inter', sans-serif;
-  --font-cinzel: 'Cinzel Decorative', serif;
-  --font-philosopher: 'Philosopher', serif;
-  --font-poppins: 'Poppins', sans-serif;
-  --font-kimetsu: '"Sawarabi Mincho"', serif;
-  --font-gangofthree: '"M PLUS 1p"', '"Sawarabi Mincho"', serif;
+  --font-body-forge: 'Inter', sans-serif;
+  --font-title-forge: 'Cinzel Decorative', serif;
+  --font-body-alchemist: 'Poppins', sans-serif;
+  --font-title-alchemist: 'Philosopher', serif;
 }
 
-/* Base styles */
 body {
-  @apply bg-gray-900 text-gray-200 font-sans overflow-hidden;
+  @apply bg-gray-900 text-gray-200 antialiased;
 }
 
 .app-container {
-    transition: background-color 0.5s ease-in-out;
+  transition: background-color 0.5s ease-in-out;
 }
 
-/* Scrollbar styles */
+/* --- THEME: FORGE --- */
+.theme-forge {
+  --bg-dark: #0F0A07;
+  --bg-gradient: linear-gradient(180deg, #1E0D0A 0%, #3C1A0E 100%);
+  --accent-primary: #FF4500;
+  --accent-secondary: #FF8C00;
+  --accent-glow: rgba(255, 85, 0, 0.6);
+  --text-primary: #FFD9B3;
+  --text-secondary: #B36B00;
+  --border-color: rgba(255, 140, 0, 0.3);
+  --card-bg: rgba(15, 10, 7, 0.7);
+  --dropdown-bg: #1E0D0A;
+  --font-body: var(--font-body-forge);
+  --font-title: var(--font-title-forge);
+}
+
+/* --- THEME: ALCHEMIST --- */
+.theme-alchemist {
+  --bg-dark: #0B0A15;
+  --bg-gradient: linear-gradient(180deg, #0D0A1A 0%, #24113B 100%);
+  --accent-primary: #8A2BE2;
+  --accent-secondary: #00FFB2;
+  --accent-glow: rgba(180, 80, 255, 0.5);
+  --text-primary: #D6D6FF;
+  --text-secondary: #9FE8C4;
+  --border-color: rgba(138, 43, 226, 0.4);
+  --card-bg: rgba(11, 10, 21, 0.7);
+  --dropdown-bg: #0D0A1A;
+  --font-body: var(--font-body-alchemist);
+  --font-title: var(--font-title-alchemist);
+}
+
+.app-container {
+  background-color: var(--bg-dark);
+}
+
+.app-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--bg-gradient);
+    overflow: hidden;
+}
+
+/* General component styles using theme variables */
+.font-gangofthree {
+  font-family: var(--font-title);
+}
+
+body, .font-sans {
+  font-family: var(--font-body);
+}
+
+/* Buttons */
+.forge-button {
+  background: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
+  color: white;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: all 0.2s ease-in-out;
+}
+.forge-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.alchemist-button {
+  background: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
+  color: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: all 0.2s ease-in-out;
+}
+.alchemist-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Custom Select Dropdowns */
+.custom-select-trigger {
+    @apply w-full flex items-center justify-between text-left bg-gray-700/50 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50;
+    border-color: var(--border-color);
+    background-color: var(--card-bg);
+}
+.custom-select-trigger:hover {
+    border-color: var(--accent-primary);
+}
+
+.custom-dropdown {
+    @apply mt-1 rounded-md shadow-lg overflow-hidden;
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+}
+
+.dropdown-search-input {
+    @apply w-full bg-gray-900/50 border border-gray-700 rounded-md py-1.5 px-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500;
+}
+
+.dropdown-option {
+    @apply px-3 py-2 text-sm cursor-pointer whitespace-nowrap;
+    color: var(--text-primary);
+}
+.dropdown-option:hover, .dropdown-option.selected {
+    background-color: var(--accent-primary);
+    color: white;
+}
+.theme-alchemist .dropdown-option:hover, .theme-alchemist .dropdown-option.selected {
+    color: var(--bg-dark);
+}
+.dropdown-option.disabled {
+    @apply opacity-50 cursor-not-allowed;
+    color: var(--text-secondary);
+}
+
+
+/* Inner Scrollbar */
 .inner-scroll::-webkit-scrollbar {
   width: 6px;
 }
@@ -31,80 +148,86 @@ body {
 }
 .inner-scroll::-webkit-scrollbar-thumb {
   background-color: rgba(128, 128, 128, 0.4);
-  border-radius: 10px;
-  border: 3px solid transparent;
+  border-radius: 3px;
 }
 .inner-scroll::-webkit-scrollbar-thumb:hover {
   background-color: rgba(128, 128, 128, 0.6);
 }
 
-
-/* #region THEME: FORGE HASHIRA */
-.theme-forge {
-    --bg-dark: #0F0A07;
-    --bg-gradient: linear-gradient(180deg, #1E0D0A 0%, #3C1A0E 100%);
-    --accent: #FF4500;
-    --accent-light: #FF8C00;
-    --accent-glow: rgba(255, 85, 0, 0.6);
-    --text-primary: #FFD9B3;
-    --text-secondary: #B36B00;
-    --title-font: 'Cinzel Decorative', serif;
-    --body-font: 'Inter', sans-serif;
-
-    --dropdown-bg: #1E0D0A;
-    --border-color: rgba(255, 140, 0, 0.2);
-    --border-color-hover: var(--accent-light);
-    --button-bg: var(--accent);
-    --button-text: white;
-    --error-bg: rgba(127, 29, 29, 0.8);
-    --error-border: #ef4444;
+/* Result Card */
+.result-card {
+  border-color: var(--border-color) !important;
+  background-color: var(--card-bg) !important;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
-/* #endregion */
-
-/* #region THEME: OFICINA ARCANA */
-.theme-alchemist {
-    --bg-dark: #0B0A15;
-    --bg-gradient: linear-gradient(180deg, #0D0A1A 0%, #24113B 100%);
-    --accent: #8A2BE2;
-    --accent-alt: #00FFB2;
-    --accent-glow: rgba(180, 80, 255, 0.5);
-    --text-primary: #D6D6FF;
-    --text-secondary: #9FE8C4;
-    --title-font: 'Philosopher', serif;
-    --body-font: 'Poppins', sans-serif;
-
-    --dropdown-bg: #0D0A1A;
-    --border-color: rgba(138, 43, 226, 0.2);
-    --border-color-hover: var(--accent);
-    --button-bg: var(--accent);
-    --button-text: white;
-    --error-bg: rgba(59, 10, 102, 0.8);
-    --error-border: #a855f7;
+.result-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 0 15px var(--accent-glow);
+  border-color: var(--accent-primary) !important;
 }
-/* #endregion */
-
-.app-container {
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    font-family: var(--body-font);
-}
-.app-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    background: var(--bg-gradient);
-    overflow: hidden;
+.result-card.selected-card {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 0 2px var(--accent-primary);
+  border-color: var(--accent-primary) !important;
 }
 
-h1, h2, h3, h4, .font-gangofthree {
-    font-family: var(--title-font);
-    font-weight: 700;
+/* Prompt Card Specifics */
+.theme-alchemist .prompt-card.model-midjourney { --accent-primary: #DAA520; }
+.theme-alchemist .prompt-card.model-gpt { --accent-primary: #74AA9C; }
+.theme-alchemist .prompt-card.model-gemini { --accent-primary: #4285F4; }
+
+/* Ingredient Flask style for collapsible sections */
+.ingredient-flask {
+    background: rgba(10, 10, 15, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    position: relative;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+}
+.ingredient-flask::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 12px;
+    background: #6b4f3a;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid #4a3728;
 }
 
-/* #region ANIMATED BACKGROUNDS */
+/* Number Input Buttons */
+.number-input-button {
+  @apply w-10 h-10 flex items-center justify-center rounded-md font-bold text-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+.number-input-button:not(:disabled):hover {
+  background-color: var(--accent-primary);
+  color: white;
+}
+.theme-alchemist .number-input-button:not(:disabled):hover {
+    color: var(--bg-dark);
+}
+
+/* Error Display */
+.error-display-forge {
+  background-color: rgba(123, 29, 29, 0.8);
+  border: 1px solid #ff4500;
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
+}
+.error-display-alchemist {
+    background-color: rgba(76, 17, 126, 0.8);
+    border: 1px solid #8a2be2;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+}
+
+/* --- ANIMATED BACKGROUNDS --- */
+
+/* Sparks (Forge) */
 .sparks-container {
     position: absolute;
     width: 100%;
@@ -114,17 +237,18 @@ h1, h2, h3, h4, .font-gangofthree {
 .spark {
     position: absolute;
     bottom: -10px;
-    background: var(--accent-light);
+    background-color: var(--spark);
     border-radius: 50%;
     opacity: 0;
-    animation: spark-rise linear infinite;
+    animation: rise 8s infinite linear;
 }
-@keyframes spark-rise {
-    0% { transform: translateY(0); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+@keyframes rise {
+    0% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-50vh) translateX(20px); opacity: 0.8; }
+    100% { transform: translateY(-100vh) translateX(-20px); opacity: 0; }
 }
 
+/* Smoke (Alchemist) */
 .smoke-container {
     position: absolute;
     width: 100%;
@@ -133,230 +257,26 @@ h1, h2, h3, h4, .font-gangofthree {
 }
 .smoke-puff {
     position: absolute;
-    bottom: -200px;
-    background: var(--accent-glow);
+    bottom: -150px;
+    background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, rgba(11, 10, 21, 0) 70%);
     border-radius: 50%;
     opacity: 0;
-    animation: smoke-drift linear infinite;
-    filter: blur(50px);
+    animation: drift 25s infinite linear;
+    --x-drift: 0;
 }
-@keyframes smoke-drift {
+@keyframes drift {
     0% { transform: translateY(0) translateX(0); opacity: 0; }
-    20% { opacity: 0.5; }
-    80% { opacity: 0.2; }
-    100% { transform: translateY(-120vh) translateX(calc(var(--x-drift, 0) * 1px)); opacity: 0; }
-}
-/* #endregion */
-
-/* #region THEMED BUTTONS */
-.forge-button {
-    background-image: linear-gradient(to right, var(--accent), var(--accent-light));
-    border: 1px solid var(--accent-light);
-    color: white;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    box-shadow: 0 0 10px var(--accent-glow), inset 0 0 5px rgba(255, 255, 255, 0.3);
-}
-.forge-button:hover {
-    filter: brightness(1.2);
-}
-.alchemist-button {
-    background-image: linear-gradient(to right, var(--accent), var(--accent-alt));
-    border: 1px solid var(--accent-alt);
-    color: var(--bg-dark);
-    font-weight: bold;
-    text-shadow: 0 0 5px rgba(255,255,255,0.5);
-    box-shadow: 0 0 10px var(--accent-glow), inset 0 0 5px rgba(255, 255, 255, 0.3);
-}
-.alchemist-button:hover {
-    filter: brightness(1.2);
+    20%, 80% { opacity: 1; }
+    100% { transform: translateY(-110vh) translateX(calc(var(--x-drift) * 1px)); opacity: 0; }
 }
 
-.crunchyroll-button { @apply bg-[#f47521] text-white hover:bg-[#ff8c00]; }
-.discord-button { @apply bg-[#5865f2] text-white hover:bg-[#7289da]; }
-.panini-button { @apply bg-[#e53935] text-white hover:bg-[#f44336]; }
-/* #endregion */
+/* About Modal Buttons */
+.crunchyroll-button { background: #f47521; color: white; }
+.discord-button { background: #5865f2; color: white; }
+.panini-button { background: #e62429; color: white; }
 
-/* #region CUSTOM COMPONENTS */
-
-/* Cards */
-.result-card, .prompt-card {
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease-in-out;
-}
-.result-card:hover {
-    transform: scale(1.03);
-    border-color: var(--border-color-hover);
-    box-shadow: 0 0 15px var(--accent-glow);
-}
-.selected-card {
-    border-color: var(--border-color-hover);
-    box-shadow: 0 0 15px var(--accent-glow);
-    transform: scale(1.02);
-}
-
-/* Custom Select / Dropdowns */
-.custom-select-trigger {
-    @apply w-full flex items-center justify-between text-left bg-gray-900/50 border rounded-md py-2 px-3;
-    border-color: var(--border-color);
-    color: var(--text-primary);
-    transition: border-color 0.2s;
-}
-.custom-select-trigger:hover, .custom-select-trigger:focus {
-    border-color: var(--border-color-hover);
-}
-.custom-select-trigger:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.custom-dropdown {
-    @apply bg-gray-900 border rounded-md shadow-lg overflow-hidden;
-    background-color: var(--dropdown-bg);
-    border-color: var(--border-color-hover);
-}
-.dropdown-search-input {
-    @apply w-full bg-gray-800 border border-gray-700 rounded-md py-1.5 px-2 text-white placeholder-gray-500;
-}
-.dropdown-option {
-    @apply px-3 py-2 cursor-pointer text-sm;
-    color: var(--text-primary);
-}
-.dropdown-option:hover {
-    background-color: var(--accent);
-    color: var(--button-text);
-}
-.dropdown-option.selected {
-    background-color: var(--accent);
-    color: var(--button-text);
-    font-weight: bold;
-}
-.dropdown-option.disabled {
-    @apply opacity-50 cursor-not-allowed;
-}
-
-/* Custom Scrollbar for Dropdowns */
-.custom-dropdown ::-webkit-scrollbar {
-  width: 5px;
-}
-.custom-dropdown ::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-dropdown ::-webkit-scrollbar-thumb {
-  background-color: var(--accent);
-  border-radius: 10px;
-}
-
-/* Alchemist Specific */
-.ingredient-flask {
-    @apply bg-gray-900/30 border rounded-lg;
-    border-color: var(--border-color);
-    position: relative;
-    padding: 1rem;
-}
-
-/* Switches */
-.form-checkbox {
-    accent-color: var(--accent);
-}
-
-/* Number Input */
-.number-input-button {
-    @apply w-8 h-8 flex items-center justify-center font-bold text-lg rounded-md;
-    background-color: var(--accent);
-    color: white;
-    transition: background-color 0.2s;
-}
-.number-input-button:hover:not(:disabled) {
-    filter: brightness(1.2);
-}
-.number-input-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-/* Error Display */
-.error-display-wrapper {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    z-index: 100;
-    max-width: 24rem;
-    width: 100%;
-}
-.error-display {
-    @apply backdrop-blur-md border text-white p-4 rounded-lg shadow-lg flex items-start gap-3;
-    background-color: var(--error-bg);
-    border-color: var(--error-border);
-}
-
-/* Filter Subheader */
+/* Filter Panel Subheader */
 .filter-subheader {
-    @apply text-xs font-semibold uppercase tracking-wider mt-4 pt-2 border-t;
+    @apply text-xs font-bold uppercase tracking-wider mb-2 mt-6 first:mt-0;
     color: var(--text-secondary);
-    border-color: var(--border-color);
 }
-
-/* #endregion */
-
-
-/* #region ANIMATIONS & KEYFRAMES */
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out forwards;
-}
-@keyframes fade-in-fast {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-fade-in-fast {
-  animation: fade-in-fast 0.15s ease-out forwards;
-}
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
-}
-.animate-pulse-slow {
-  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Typing loader */
-.typing-cursor {
-  animation: blink 0.7s infinite;
-}
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-/* Alchemy Loader */
-.alchemy-loader .cauldron-bubbles {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  width: 60%;
-  transform: translateX(-50%);
-}
-.alchemy-loader .cauldron-bubbles span {
-    width: 8px;
-    height: 8px;
-    background: var(--accent-alt);
-    border-radius: 50%;
-    position: absolute;
-    bottom: 0;
-    opacity: 0;
-    animation: bubble-rise 2s ease-in-out infinite;
-}
-@keyframes bubble-rise {
-    0% { transform: translateY(0); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: translateY(-30px); opacity: 0; }
-}
-.alchemy-loader .cauldron-bubbles span:nth-child(1) { left: 10%; animation-delay: 0.6s; }
-.alchemy-loader .cauldron-bubbles span:nth-child(2) { left: 30%; animation-delay: 0.2s; animation-duration: 2.5s; }
-.alchemy-loader .cauldron-bubbles span:nth-child(3) { left: 60%; animation-delay: 1.2s; }
-.alchemy-loader .cauldron-bubbles span:nth-child(4) { left: 85%; animation-delay: 0.8s; animation-duration: 3s; }
-
-/* #endregion */

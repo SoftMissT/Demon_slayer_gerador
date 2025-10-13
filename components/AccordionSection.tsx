@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 interface AccordionSectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  // FIX: Added `forceOpen` prop to allow parent component to control the open state.
+  forceOpen?: boolean;
 }
 
-export const AccordionSection: React.FC<AccordionSectionProps> = ({ title, children, defaultOpen = false }) => {
+export const AccordionSection: React.FC<AccordionSectionProps> = ({ title, children, defaultOpen = false, forceOpen }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  // FIX: Added useEffect to synchronize the internal state with the `forceOpen` prop when it changes.
+  useEffect(() => {
+    if (forceOpen !== undefined) {
+        setIsOpen(forceOpen);
+    }
+  }, [forceOpen]);
 
   return (
     <div className="border-b border-gray-700 last:border-b-0">

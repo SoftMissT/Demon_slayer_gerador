@@ -3,7 +3,8 @@ import React from 'react';
 import { InfoTooltip } from './InfoTooltip';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label: string;
+  // FIX: Made label optional to allow usage without a visible label, resolving type errors.
+  label?: string;
   tooltip?: string;
 }
 

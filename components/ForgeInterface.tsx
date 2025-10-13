@@ -1,12 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { FilterPanel } from './FilterPanel';
 import { ResultsPanel } from './ResultsPanel';
 import { DetailPanel } from './DetailPanel';
 import { AuthOverlay } from './AuthOverlay';
-import { INITIAL_FILTERS } from '../constants';
+import { Button } from './ui/Button';
+import { HammerIcon } from './icons/HammerIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
+import { Checkbox } from './ui/Checkbox';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
-import type { User, GeneratedItem, FilterState } from '../types';
+import type { User, GeneratedItem, FilterState, AIFlags } from '../types';
+import { INITIAL_FILTERS } from '../constants';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 
 interface ForgeInterfaceProps {
@@ -32,114 +35,94 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     setSelectedItem,
     user,
 }) => {
-    const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS as FilterState);
     const [promptModifier, setPromptModifier] = useState('');
-    const [aiFlags, setAiFlags] = useState({ useDeepSeek: true, useGemini: true, useGpt: true });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [aiFlags, setAiFlags] = useState<AIFlags>({ useGemini: true, useGpt: true, useDeepSeek: false });
+
+    const handleUpdateItem = (updatedItem: GeneratedItem) => {
+        setHistory(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
+        if (selectedItem?.id === updatedItem.id) {
+            setSelectedItem(updatedItem);
+        }
+        setFavorites(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
+    };
     
-    const handleGenerate = useCallback(async () => {
-        if (!isAuthenticated) {
-            onLoginClick();
+    const handleToggleFavorite = useCallback((item: GeneratedItem) => {
+        setFavorites(prev => {
+            const isFav = prev.some(fav => fav.id === item.id);
+            if (isFav) {
+                return prev.filter(fav => fav.id !== item.id);
+            } else {
+                return [item, ...prev];
+            }
+        });
+    }, [setFavorites]);
+
+    const handleForgeClick = async () => {
+        if (!filters.category) {
+            setError('Por favor, selecione uma categoria para forjar.');
             return;
         }
-        setIsGenerating(true);
+        setIsLoading(true);
         setError(null);
         try {
             const newItem = await orchestrateGeneration(filters, promptModifier, aiFlags, user);
             setHistory(prev => [newItem, ...prev]);
-            setSelectedItem(newItem); // Select the new item automatically
+            setSelectedItem(newItem);
         } catch (err: any) {
             setError(err.message);
         } finally {
-            setIsGenerating(false);
+            setIsLoading(false);
         }
-    }, [filters, promptModifier, user, setHistory, setSelectedItem, aiFlags, isAuthenticated, onLoginClick]);
-
-    const handleToggleFavorite = useCallback((item: GeneratedItem) => {
-        setFavorites(prev =>
-            prev.some(fav => fav.id === item.id)
-                ? prev.filter(fav => fav.id !== item.id)
-                : [item, ...prev]
-        );
-    }, [setFavorites]);
+    };
     
-    const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
-        const updateList = (list: GeneratedItem[]) => list.map(item => item.id === updatedItem.id ? updatedItem : item);
-        setHistory(updateList);
-        if (favorites.some(fav => fav.id === updatedItem.id)) {
-            setFavorites(updateList);
-        }
-        if (selectedItem?.id === updatedItem.id) {
-            setSelectedItem(updatedItem);
-        }
-    }, [setHistory, setFavorites, favorites, selectedItem, setSelectedItem]);
-
-    const handleGenerateVariant = (item: GeneratedItem, variantType: string) => {
-        console.log(`Generating ${variantType} variant for ${item.nome}`);
-    };
-
-    const handleClearResults = () => {
-        // For now, this just clears the selection
-        setSelectedItem(null);
-    };
-
-    if (!isAuthenticated) {
-        return <AuthOverlay onLoginClick={onLoginClick} view="forge" />;
-    }
-
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 h-full">
-            <div className="lg:col-span-3 h-full">
-                <FilterPanel 
-                    filters={filters} 
-                    setFilters={setFilters} 
-                    onGenerate={handleGenerate} 
-                    isGenerating={isGenerating}
-                    aiFlags={aiFlags}
-                    setAiFlags={setAiFlags}
-                />
+        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] xl:grid-cols-[380px_1fr_420px] gap-4 h-full relative">
+            {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="forge" />}
+
+            {/* Filter Panel */}
+            <div className="hidden lg:flex flex-col h-full">
+                <FilterPanel filters={filters} setFilters={setFilters} />
+                <div className="p-4 border-t border-gray-700 space-y-3 flex-shrink-0 bg-gray-800">
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                        <Checkbox label="Gemini" checked={aiFlags.useGemini} onChange={(e) => setAiFlags(f => ({...f, useGemini: e.target.checked}))} />
+                        <Checkbox label="GPT-4o" checked={aiFlags.useGpt} onChange={(e) => setAiFlags(f => ({...f, useGpt: e.target.checked}))} />
+                        <Checkbox label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={(e) => setAiFlags(f => ({...f, useDeepSeek: e.target.checked}))} />
+                    </div>
+                    <Button onClick={handleForgeClick} disabled={isLoading || !filters.category} className="w-full forge-button">
+                        <HammerIcon className="w-5 h-5" />
+                        {isLoading ? 'Forjando...' : 'Forjar'}
+                    </Button>
+                </div>
             </div>
-            <div className="lg:col-span-4 h-full">
-                 <ResultsPanel
-                    items={history}
-                    isLoading={isGenerating}
+
+            {/* Results Panel */}
+            <div className="h-full">
+                <ResultsPanel
+                    history={history}
                     selectedItem={selectedItem}
-                    onSelectItem={setSelectedItem}
+                    onSelect={setSelectedItem}
                     favorites={favorites}
                     onToggleFavorite={handleToggleFavorite}
-                    onGenerateVariant={handleGenerateVariant}
-                    onClearResults={handleClearResults}
-                    aiFocus={{
-                        aiFocusDeepSeek: filters.aiFocusDeepSeek,
-                        aiFocusGemini: filters.aiFocusGemini,
-                        aiFocusGpt: filters.aiFocusGpt
-                    }}
+                    onGenerateVariant={() => {}} // Placeholder
+                    isLoading={isLoading}
                     activeFilters={filters}
                 />
             </div>
-            <div className="lg:col-span-5 h-full">
-                 <AnimatePresence>
-                    {selectedItem && (
-                        <motion.div
-                            key={selectedItem.id}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            transition={{ duration: 0.3 }}
-                            className="h-full"
-                        >
-                            <DetailPanel
-                                item={selectedItem}
-                                onGenerateVariant={handleGenerateVariant}
-                                isFavorite={favorites.some(fav => fav.id === selectedItem.id)}
-                                onToggleFavorite={handleToggleFavorite}
-                                onUpdate={handleUpdateItem}
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+
+            {/* Detail Panel */}
+            <div className="hidden xl:block h-full">
+                <DetailPanel
+                    item={selectedItem}
+                    onGenerateVariant={() => {}} // Placeholder
+                    isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
+                    onToggleFavorite={handleToggleFavorite}
+                    onUpdate={handleUpdateItem}
+                />
             </div>
+
             <ErrorDisplay message={error} onDismiss={() => setError(null)} />
         </div>
     );

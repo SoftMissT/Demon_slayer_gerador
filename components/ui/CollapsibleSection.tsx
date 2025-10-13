@@ -7,17 +7,20 @@ interface CollapsibleSectionProps {
   children: React.ReactNode;
   defaultOpen?: boolean;
   wrapperClassName?: string;
+  forceOpen?: boolean;
 }
 
-export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, defaultOpen = false, wrapperClassName }) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, defaultOpen = false, wrapperClassName, forceOpen }) => {
+  const [isLocallyOpen, setIsLocallyOpen] = useState(defaultOpen);
+
+  const isOpen = forceOpen !== undefined ? forceOpen : isLocallyOpen;
 
   const finalWrapperClass = wrapperClassName ?? 'ingredient-flask !p-0 overflow-hidden';
 
   return (
     <div className={finalWrapperClass}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsLocallyOpen(!isLocallyOpen)}
         className="w-full flex justify-between items-center p-4 text-left"
         aria-expanded={isOpen}
       >

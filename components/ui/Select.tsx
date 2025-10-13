@@ -29,11 +29,11 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
-        if (selectRef.current) {
+        if (isOpen && selectRef.current) {
             const currentTheme = selectRef.current.closest('.theme-forge') ? 'theme-forge' : 'theme-alchemist';
             setTheme(currentTheme);
         }
-    }, []);
+    }, [isOpen]);
 
     useEffect(() => {
         const updatePosition = () => {
@@ -73,10 +73,10 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
 
     const DropdownMenu = () => (
         <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: 'circOut' }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: 'circOut' }}
             className="custom-dropdown"
             style={{
                 position: 'absolute',

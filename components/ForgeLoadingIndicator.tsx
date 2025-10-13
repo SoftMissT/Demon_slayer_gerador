@@ -25,7 +25,7 @@ export const ForgeLoadingIndicator: React.FC<ForgeLoadingIndicatorProps> = ({ ai
     useEffect(() => {
         const intervalId = setInterval(() => {
             setMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
-        }, 2500);
+        }, 3000);
 
         return () => clearInterval(intervalId);
     }, []);

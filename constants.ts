@@ -320,7 +320,8 @@ export const AI_FOCUS_DEEPSEEK: string[] = ['Refinamento de Mecânicas (Padrão)
 // FIX: Added ORIGINS export by deriving it from ORIGINS_DATA to resolve import error.
 export const ORIGINS: string[] = ['Aleatória', ...ORIGINS_DATA.map(o => o.nome)];
 
-export const INITIAL_FILTERS: FilterState = {
+// FIX: Used `as const` to enforce literal types and satisfy the `FilterState` type, resolving type errors in consuming components.
+export const INITIAL_FILTERS: Omit<FilterState, 'intensity'> & { intensity: number } = {
     category: '',
     styleReferences: '',
     // Hunter

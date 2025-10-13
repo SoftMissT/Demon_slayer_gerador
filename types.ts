@@ -1,53 +1,166 @@
-// types.ts
+// FIX: Populated with full type definitions to resolve module and type errors across the application.
+import { CATEGORIES, RARITIES, TEMATICAS, TONES, HUNTER_RANKS, ONI_POWER_LEVELS } from './constants';
 
-import { CATEGORIES, RARITIES, TEMATICAS, TONES } from './constants';
+// General types
+export type AppView = 'forge' | 'alchemist';
 
-// Basic Types from Constants
-export type Category = typeof CATEGORIES[number];
-export type Rarity = typeof RARITIES[number];
-export type Tematica = typeof TEMATICAS[number];
-export type Tone = typeof TONES[number];
-
-// User & Auth
 export interface User {
   id: string;
   username: string;
   avatar: string;
 }
 
-export interface ApiKeys {
-  gemini: string;
-  openai: string;
-  deepseek: string;
-}
-
-// AI Generation Flags
+// AI Generation related types
 export interface AIFlags {
     useDeepSeek: boolean;
     useGemini: boolean;
     useGpt: boolean;
 }
 
-// Forge Item Generation
+export interface ProvenanceEntry {
+    step: string;
+    model: string;
+    status: 'success' | 'failed' | 'skipped';
+    error?: string;
+    reason?: string;
+}
+
+// Type Aliases from constants for better type safety
+export type Category = typeof CATEGORIES[number];
+export type Rarity = typeof RARITIES[number];
+export type Tematica = typeof TEMATICAS[number];
+export type Tone = typeof TONES[number];
+export type HunterRank = typeof HUNTER_RANKS[number];
+export type OniPowerLevel = typeof ONI_POWER_LEVELS[number];
+
+// Base for all generated items
+interface BaseGeneratedItem {
+    id: string;
+    createdAt: string;
+    nome: string;
+    title?: string; // Some items use title instead of nome
+    categoria: Category;
+    tematica?: Tematica | string;
+    raridade?: Rarity | string;
+    descricao_curta: string;
+    descricao?: string;
+    nivel_sugerido?: number;
+    imagePromptDescription?: string;
+    ganchos_narrativos?: string[] | string;
+    provenance?: ProvenanceEntry[];
+}
+
+// Category-specific generated items
+export interface GeneratedHunter extends BaseGeneratedItem {
+    categoria: 'Caçador';
+    classe?: string;
+    personalidade?: string;
+    background?: string;
+}
+
+export interface Kekkijutsu {
+    nome: string;
+    descricao: string;
+}
+export interface GeneratedOni extends BaseGeneratedItem {
+    categoria: 'Inimigo/Oni';
+    power_level?: OniPowerLevel | string;
+    kekkijutsu?: Kekkijutsu;
+    comportamento_combate?: string[];
+}
+export interface GeneratedNpc extends BaseGeneratedItem {
+    categoria: 'NPC';
+    personalidade?: string;
+    profissao?: string;
+}
+
+export interface GeneratedWeapon extends BaseGeneratedItem {
+    categoria: 'Arma';
+    dano?: string;
+    dados?: string;
+    tipo_de_dano?: string;
+    status_aplicado?: string;
+    efeitos_secundarios?: string;
+}
+
+export interface GeneratedAccessory extends BaseGeneratedItem {
+    categoria: 'Acessório';
+    dano?: string;
+    dados?: string;
+    tipo_de_dano?: string;
+    status_aplicado?: string;
+    efeitos_secundarios?: string;
+}
+
+export interface GeneratedBreathingForm extends BaseGeneratedItem {
+    categoria: 'Forma de Respiração';
+    // Add specific fields if any
+}
+
+export interface GeneratedKekkijutsu extends BaseGeneratedItem {
+    categoria: 'Kekkijutsu';
+    dano?: string;
+    dados?: string;
+    tipo_de_dano?: string;
+    status_aplicado?: string;
+    efeitos_secundarios?: string;
+}
+
+export interface GeneratedLocation extends BaseGeneratedItem {
+    categoria: 'Local/Cenário';
+    // Add specific fields if any
+}
+
+export interface GeneratedMission extends BaseGeneratedItem {
+    categoria: 'Missões';
+    // Add specific fields if any
+}
+
+export interface GeneratedWorldBuilding extends BaseGeneratedItem {
+    categoria: 'World Building';
+     // Add specific fields if any
+}
+export interface GeneratedEvent extends BaseGeneratedItem {
+    categoria: 'Evento';
+     // Add specific fields if any
+}
+
+// Union type for any generated item
+export type GeneratedItem =
+    | GeneratedHunter
+    | GeneratedOni
+    | GeneratedNpc
+    | GeneratedWeapon
+    | GeneratedAccessory
+    | GeneratedBreathingForm
+    | GeneratedKekkijutsu
+    | GeneratedLocation
+    | GeneratedMission
+    | GeneratedWorldBuilding
+    | GeneratedEvent;
+
+
+// Forge Filter State
 export interface FilterState {
     category: Category | '';
     styleReferences: string;
     // Hunter
     hunterTematica: Tematica | '';
     hunterCountry: string;
-
     hunterOrigin: string;
     hunterArchetype: string;
     hunterPersonality: string;
     hunterWeapon: string;
-    hunterBreathingStyles: string[];
+    // FIX: Changed array types to readonly to allow `as const` on INITIAL_FILTERS for precise type inference.
+    hunterBreathingStyles: readonly string[];
     hunterAccessory: string;
-    hunterRank: string;
+    hunterRank: HunterRank | '';
     // Oni
-    oniPowerLevel: string;
+    oniPowerLevel: OniPowerLevel | '';
     oniCountry: string;
     oniWeapon: string;
-    oniInspirationKekkijutsu: string[];
+    // FIX: Changed array types to readonly to allow `as const` on INITIAL_FILTERS for precise type inference.
+    oniInspirationKekkijutsu: readonly string[];
     oniInspirationBreathing: string;
     oniPersonality: string;
     oniTematica: Tematica | '';
@@ -76,11 +189,12 @@ export interface FilterState {
     accessoryKekkijutsuInspiration: string;
     accessoryWeaponInspiration: string;
     // Breathing Form
-    baseBreathingStyles: string[];
+    // FIX: Changed array types to readonly to allow `as const` on INITIAL_FILTERS for precise type inference.
+    baseBreathingStyles: readonly string[];
     breathingFormTematica: Tematica | '';
     breathingFormCountry: string;
     breathingFormOrigin: string;
-    breathingFormTone: Tone;
+    breathingFormTone: Tone | 'épico';
     breathingFormWeapon: string;
     breathingFormArchetype: string;
     // Kekkijutsu
@@ -91,13 +205,13 @@ export interface FilterState {
     kekkijutsuWeaponInspiration: string;
     kekkijutsuAccessoryInspiration: string;
     // Location
-    locationTone: Tone;
+    locationTone: Tone | 'misterioso';
     locationTematica: Tematica | '';
     locationCountry: string;
     locationTerrain: string;
     locationTerrainCustom: string;
     // Mission
-    missionTone: Tone;
+    missionTone: Tone | 'sombrio';
     intensity: number;
     missionScale: string;
     protagonist: string;
@@ -108,13 +222,13 @@ export interface FilterState {
     missionThreatScale: string;
     missionEventType: string;
     // World Building
-    wbTone: Tone;
+    wbTone: Tone | 'épico';
     wbTematica: Tematica | '';
     wbCountry: string;
     wbThreatScale: string;
     wbLocation: string;
     // Event
-    eventTone: Tone;
+    eventTone: 'misterioso';
     eventTematica: Tematica | '';
     eventCountry: string;
     eventLevel: string;
@@ -126,131 +240,11 @@ export interface FilterState {
     aiFocusDeepSeek: string;
 }
 
-// Base type for generated items
-interface BaseGeneratedItem {
-    id: string;
-    createdAt: string;
-    nome: string;
-    categoria: Category;
-    tematica: string;
-    descricao_curta: string;
-    descricao: string;
-    imagePromptDescription?: string;
-    raridade: string;
-    nivel_sugerido: number;
-    ganchos_narrativos?: string | string[];
-    provenance?: Array<{
-        step: string;
-        model: string;
-        status: 'success' | 'failed' | 'skipped';
-        error?: string;
-        reason?: string;
-    }>;
-}
-
-// Specific item types extending the base
-export interface WeaponItem extends BaseGeneratedItem {
-    categoria: 'Arma';
-    dano: string;
-    dados: string;
-    tipo_de_dano: string;
-    status_aplicado: string;
-    efeitos_secundarios: string;
-}
-
-export interface AccessoryItem extends BaseGeneratedItem {
-    categoria: 'Acessório';
-    efeitos_passivos: string;
-    efeitos_ativos: string;
-    condicao_ativacao: string;
-}
-
-export interface HunterItem extends BaseGeneratedItem {
-    categoria: 'Caçador';
-    classe: string;
-    personalidade: string;
-    background: string;
-}
-
-export interface OniItem extends BaseGeneratedItem {
-    categoria: 'Inimigo/Oni';
-    power_level: string;
-    comportamento_combate: string[];
-    fraquezas_unicas: string[];
-    kekkijutsu?: { nome: string; descricao: string };
-}
-
-export interface NpcItem extends BaseGeneratedItem {
-    categoria: 'NPC';
-    origem: string;
-    motivation: string;
-    secret: string;
-}
-
-export interface BreathingFormItem extends BaseGeneratedItem {
-    categoria: 'Forma de Respiração';
-    // Add specific fields if any
-}
-
-export interface KekkijutsuItem extends BaseGeneratedItem {
-    categoria: 'Kekkijutsu';
-    dano: string;
-    dados: string;
-    tipo_de_dano: string;
-    status_aplicado: string;
-    efeitos_secundarios: string;
-}
-
-export interface LocationItem extends BaseGeneratedItem {
-    categoria: 'Local/Cenário';
-}
-
-export interface MissionItemDetails {
-    title: string;
-    logline: string;
-    summary: string;
-    objectives: string[];
-    complications: string[];
-    failure_states: string[];
-    rewards: string[];
-    numberOfSessions: number;
-}
-
-export interface MissionItem extends BaseGeneratedItem, MissionItemDetails {
-    categoria: 'Missões';
-}
-
-export interface WorldBuildingItem extends BaseGeneratedItem {
-    categoria: 'World Building';
-    // Add specific fields if any
-}
-
-export interface EventItem extends BaseGeneratedItem {
-    categoria: 'Evento';
-    // Add specific fields if any
-}
-
-
-// A union of all possible generated item types
-export type GeneratedItem = 
-    | WeaponItem
-    | AccessoryItem
-    | HunterItem
-    | OniItem
-    | NpcItem
-    | BreathingFormItem
-    | KekkijutsuItem
-    | LocationItem
-    | MissionItem
-    | WorldBuildingItem
-    | EventItem;
-
-// Prompt Engineering Types
+// Prompt Engineering / Alchemist types
 export interface MidjourneyParam {
-  active: boolean;
-  value: string | number;
+    active: boolean;
+    value: string | number;
 }
-
 export interface MidjourneyParameters {
     aspectRatio: MidjourneyParam;
     chaos: MidjourneyParam;
@@ -259,7 +253,6 @@ export interface MidjourneyParameters {
     stylize: MidjourneyParam;
     version: MidjourneyParam;
     weird: MidjourneyParam;
-    // Descriptive params
     artStyle?: MidjourneyParam;
     lighting?: MidjourneyParam;
     colorPalette?: MidjourneyParam;
@@ -287,21 +280,26 @@ export interface PromptGenerationResult {
     geminiPrompt?: string;
 }
 
-// History & Favorites
 export interface AlchemyHistoryItem {
     id: string;
     createdAt: string;
     inputs: {
         basePrompt: string;
-        negativePrompt?: string;
-        mjParams?: MidjourneyParameters;
+        negativePrompt: string;
+        mjParams: MidjourneyParameters;
         gptParams: GptParameters;
         geminiParams: GeminiParameters;
+        // FIX: Added 'generateFor' to the type to align with the application's state, resolving a type error when loading history items.
+        generateFor?: {
+            midjourney: boolean;
+            gpt: boolean;
+            gemini: boolean;
+        };
     };
     outputs: PromptGenerationResult;
 }
 
+
+// History & Favorites
 export type HistoryItem = GeneratedItem | AlchemyHistoryItem;
 export type FavoriteItem = GeneratedItem | AlchemyHistoryItem;
-
-export type AppView = 'forge' | 'alchemist';

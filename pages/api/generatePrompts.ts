@@ -1,6 +1,3 @@
-
-
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 // FIX: Corrected import path for types.
@@ -32,7 +29,8 @@ const buildMidjourneyPrompt = (base: string, negativePrompt?: string, params?: M
     const technicalParams = activeParams.filter(([key]) => !['artStyle', 'lighting', 'colorPalette', 'composition', 'detailLevel'].includes(key));
     if (technicalParams.length > 0) {
         prompt += ' ';
-        technicalParams.forEach(([key, param]) => {
+        // FIX: Explicitly typed the destructured `param` to resolve type errors.
+        technicalParams.forEach(([key, param]: [string, MidjourneyParam]) => {
             const paramKey = key === 'aspectRatio' ? 'ar' : key === 'version' ? 'v' : key === 'style' ? 'style' : key === 'stylize' ? 's' : key === 'chaos' ? 'c' : key === 'quality' ? 'q' : 'w';
             if (paramKey === 'v' && param.value.toString().startsWith('Niji')) {
                  prompt += `--niji ${param.value.toString().split(' ')[1]} `;
@@ -83,6 +81,7 @@ export default async function handler(
                 const descriptiveParams = [{ label: 'Estilo de Arte', param: mjParams.artStyle }, { label: 'Iluminação', param: mjParams.lighting }, { label: 'Paleta de Cores', param: mjParams.colorPalette }, { label: 'Composição', param: mjParams.composition }, { label: 'Nível de Detalhe', param: mjParams.detailLevel }].filter(({ param }) => param?.active);
                 if (descriptiveParams.length > 0) {
                     userPrompt += `**Parâmetros Descritivos (para Midjourney):**\n`;
+                    // FIX: Explicitly typed the destructured `param` to resolve type errors.
                     descriptiveParams.forEach(({ label, param }: {label: string, param: MidjourneyParam | undefined}) => { if(param) userPrompt += `- ${label}: ${param.value}\n`; });
                     userPrompt += '\n';
                 }
