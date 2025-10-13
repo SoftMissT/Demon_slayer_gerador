@@ -152,11 +152,11 @@ export async function isUserWhitelisted(userId: string): Promise<boolean> {
 }
 
 export async function logGenerationToSheet(item: GeneratedItem, user?: User | null): Promise<void> {
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const logSheetName = process.env.GOOGLE_SHEET_LOG_NAME;
+    const sheetId = process.env.GOOGLE_SHEET_LOG_NAME; // Use this var for the Sheet ID as per user's env var setup.
+    const logSheetName = 'log'; // The user's screenshot shows the tab is named 'log'.
 
-    if (!sheetId || !logSheetName) {
-        console.error('GOOGLE_SHEET_ID or GOOGLE_SHEET_LOG_NAME is not set. Skipping sheet logging.');
+    if (!sheetId) {
+        console.error('GOOGLE_SHEET_LOG_NAME (containing the Sheet ID) is not set. Skipping sheet logging.');
         return;
     }
 

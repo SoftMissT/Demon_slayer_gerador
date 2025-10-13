@@ -1,10 +1,13 @@
 
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys } from '../../types';
 
 interface GeneratePromptsRequest {
     basePrompt: string;
+    // FIX: Added 'negativePrompt' to handle negative prompt inputs from the client.
+    negativePrompt?: string;
     mjParams?: MidjourneyParameters;
     gptParams: GptParameters;
     geminiParams: GeminiParameters;
@@ -43,7 +46,8 @@ export default async function handler(
 
     try {
         const request = req.body as GeneratePromptsRequest;
-        const { basePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini, apiKeys } = request;
+        // FIX: Destructured 'negativePrompt' from the request body to use in prompt construction.
+        const { basePrompt, negativePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini, apiKeys } = request;
 
         const geminiClient = getAiClient(apiKeys?.gemini);
         if (!geminiClient) {
@@ -58,6 +62,11 @@ export default async function handler(
         
         let systemInstruction = `Você é um especialista em engenharia de prompts para IAs generativas de imagem. Sua tarefa é expandir um prompt base do usuário em prompts otimizados para os modelos solicitados. O resultado deve ser um objeto JSON contendo APENAS as seguintes chaves: ${requestedPrompts.join(', ')}.\n\n`;
         let userPrompt = `**Prompt Base do Usuário:**\n"${basePrompt}"\n\n`;
+        
+        // FIX: Included the negative prompt in the user prompt sent to the AI to refine the generated prompts.
+        if (negativePrompt) {
+            userPrompt += `**Prompt Negativo (o que evitar):**\n"${negativePrompt}"\n\n`;
+        }
         
         if (generateMidjourney) {
             systemInstruction += `Para "midjourneyPrompt":\n- Crie um prompt conciso e visual em INGLÊS. Use palavras-chave e frases curtas separadas por vírgulas.\n- Incorpore elementos de estilo como "cinematic lighting", "ultra detailed", "8k", "photorealistic".\n\n`;

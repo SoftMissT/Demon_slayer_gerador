@@ -30,6 +30,8 @@ export const orchestrateGeneration = async (filters: FilterState, promptModifier
 // Client-side prompt generation request
 interface GeneratePromptsRequest {
     basePrompt: string;
+    // FIX: Added 'negativePrompt' to the interface to match the data being passed from the component.
+    negativePrompt?: string;
     mjParams?: MidjourneyParameters;
     gptParams: GptParameters;
     geminiParams: GeminiParameters;
