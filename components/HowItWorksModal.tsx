@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Modal } from './ui/Modal';
 import { DiscordIcon } from './icons/DiscordIcon';
@@ -50,7 +51,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
                   <li><strong>Referências de Estilo:</strong> Guie o estilo visual da imagem que será gerada. Use nomes de animes, artistas ou jogos (Ex: <em>Studio Ghibli, Dark Souls, Yoshitaka Amano</em>).</li>
                   <li><strong>Modificador de Prompt:</strong> Uma instrução direta e de alta prioridade para a IA. Ótimo para testes rápidos ou para forçar uma ideia específica (Ex: <em>"Crie algo com um toque de terror cósmico"</em>).</li>
               </ul>
-              <p className="text-xs text-gray-400 italic mt-2">Nosso processo de geração em 3 etapas (Conceito > Estrutura > Polimento) garante que cada item seja único, detalhado e com uma narrativa envolvente.</p>
+              <p className="text-xs text-gray-400 italic mt-2">Nosso processo de geração em 3 etapas (Conceito &gt; Estrutura &gt; Polimento) garante que cada item seja único, detalhado e com uma narrativa envolvente.</p>
           </Section>
           
           <Section title="Alquimia: Destilando Prompts de Imagem" icon={<MagicWandIcon className="w-5 h-5 text-purple-400" />}>
