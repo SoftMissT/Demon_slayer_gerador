@@ -23,21 +23,12 @@ export const GeminiParametersComponent: React.FC<GeminiParametersProps> = ({ par
 
   return (
     <div className="space-y-4">
-        <Select label="Estilo de Arte" value={params.artStyle} onChange={(e) => handleParamChange('artStyle', e.target.value)}>
-          {artStyles.map(s => <option key={s} value={s}>{s}</option>)}
-        </Select>
-        <Select label="Iluminação" value={params.lighting} onChange={(e) => handleParamChange('lighting', e.target.value)}>
-          {lightings.map(l => <option key={l} value={l}>{l}</option>)}
-        </Select>
-        <Select label="Paleta de Cores" value={params.colorPalette} onChange={(e) => handleParamChange('colorPalette', e.target.value)}>
-          {colorPalettes.map(c => <option key={c} value={c}>{c}</option>)}
-        </Select>
-        <Select label="Composição" value={params.composition} onChange={(e) => handleParamChange('composition', e.target.value)}>
-          {compositions.map(c => <option key={c} value={c}>{c}</option>)}
-        </Select>
-        <Select label="Nível de Detalhe" value={params.detailLevel} onChange={(e) => handleParamChange('detailLevel', e.target.value)}>
-          {detailLevels.map(d => <option key={d} value={d}>{d}</option>)}
-        </Select>
+        {/* FIX: Refactored Select components to use the options prop and correct onChange handler */}
+        <Select label="Estilo de Arte" options={artStyles} value={params.artStyle} onChange={(value) => handleParamChange('artStyle', value)} />
+        <Select label="Iluminação" options={lightings} value={params.lighting} onChange={(value) => handleParamChange('lighting', value)} />
+        <Select label="Paleta de Cores" options={colorPalettes} value={params.colorPalette} onChange={(value) => handleParamChange('colorPalette', value)} />
+        <Select label="Composição" options={compositions} value={params.composition} onChange={(value) => handleParamChange('composition', value)} />
+        <Select label="Nível de Detalhe" options={detailLevels} value={params.detailLevel} onChange={(value) => handleParamChange('detailLevel', value)} />
       </div>
   );
 };

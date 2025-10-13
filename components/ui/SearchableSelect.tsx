@@ -1,154 +1,119 @@
-import React, { useState, useRef, useEffect, Children, isValidElement } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDownIcon } from '../icons/ChevronDownIcon';
 import { InfoTooltip } from './InfoTooltip';
 
-interface SearchableSelectProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'children'> {
+interface SearchableSelectProps {
   label: string;
+  options: string[];
   value: string;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  children: React.ReactNode;
+  onChange: (value: string) => void;
   placeholder?: string;
   tooltip?: string;
 }
 
-export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, children, value, onChange, placeholder = "Selecione...", tooltip, ...props }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [style, setStyle] = useState<React.CSSProperties>({});
-  const ref = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, options, value, onChange, placeholder, tooltip }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [position, setPosition] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
 
-  const calculatePosition = () => {
-    if (buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 240; // max-h-60
 
-        const newStyle: React.CSSProperties = {
-            position: 'fixed',
-            left: `${rect.left}px`,
-            width: `${rect.width}px`,
-            zIndex: 50,
-        };
-
-        if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-            newStyle.bottom = `${window.innerHeight - rect.top}px`;
-        } else {
-            newStyle.top = `${rect.bottom}px`;
+    const handleToggle = () => {
+        if (!isOpen && triggerRef.current) {
+          const rect = triggerRef.current.getBoundingClientRect();
+          setPosition({
+            top: rect.bottom + 4,
+            left: rect.left,
+            width: rect.width,
+          });
         }
-        setStyle(newStyle);
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const parentScroller = ref.current?.closest('.inner-scroll');
-    const handleClose = () => setIsOpen(false);
-    
-    window.addEventListener('resize', handleClose);
-    window.addEventListener('scroll', handleClose, true);
-    parentScroller?.addEventListener('scroll', handleClose);
-
-    return () => {
-      window.removeEventListener('resize', handleClose);
-      window.removeEventListener('scroll', handleClose, true);
-      parentScroller?.removeEventListener('scroll', handleClose);
+        setIsOpen(!isOpen);
     };
-  }, [isOpen]);
+    
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                isOpen &&
+                triggerRef.current && !triggerRef.current.contains(event.target as Node) &&
+                dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsOpen(false);
+                setSearchTerm('');
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
 
-  const handleToggleOpen = () => {
-    if (!isOpen) {
-      calculatePosition();
-    }
-    setIsOpen(!isOpen);
-    if(isOpen) {
-        setSearchTerm("");
-    }
-  };
+    const filteredOptions = useMemo(() => 
+        options.filter(option => option.toLowerCase().includes(searchTerm.toLowerCase())),
+    [options, searchTerm]);
 
-  const handleOptionClick = (optionValue: string) => {
-    const event = {
-      target: { value: optionValue },
-    } as React.ChangeEvent<HTMLSelectElement>;
-    onChange(event);
-    setIsOpen(false);
-    setSearchTerm("");
-  };
+    const handleSelect = (option: string) => {
+        onChange(option);
+        setSearchTerm('');
+        setIsOpen(false);
+    };
 
-  const options = Children.toArray(children).filter(isValidElement).map(child => ({
-      value: (child.props as any).value as string,
-      label: (child.props as any).children as React.ReactNode,
-      disabled: (child.props as any).disabled as boolean,
-  }));
-  
-  const filteredOptions = options.filter(option =>
-    !option.disabled && typeof option.label === 'string' && option.label.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const selectedOption = options.find(opt => opt.value === value);
-  const selectedLabel = selectedOption?.label || placeholder;
-  const isPlaceholder = !selectedOption || !value;
-  
-  const dropdownClasses = `custom-dropdown border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col`;
-
-  return (
-    <div ref={ref} className="relative">
-      {label && (
-        <div className="flex items-center gap-1.5 mb-1">
-          <span className="text-sm font-medium text-gray-400">{label}</span>
-          {tooltip && <InfoTooltip text={tooltip} />}
+    const displayValue = value || placeholder || 'Selecione...';
+    
+    return (
+        <div>
+            <div className="flex items-center gap-1.5 mb-1">
+                <label className="block text-sm font-medium text-gray-400">{label}</label>
+                {tooltip && <InfoTooltip text={tooltip} />}
+            </div>
+            <button
+                ref={triggerRef}
+                type="button"
+                onClick={handleToggle}
+                className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex justify-between items-center text-left select-button min-h-[42px]"
+            >
+                <span className={`truncate ${value ? 'text-white' : 'text-gray-400'}`}>{displayValue}</span>
+                <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isOpen && createPortal(
+                <motion.div
+                    ref={dropdownRef}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "circOut" }}
+                    style={{
+                        position: 'fixed',
+                        top: position.top,
+                        left: position.left,
+                        width: position.width,
+                    }}
+                    className="z-[100] custom-dropdown border border-gray-600 rounded-md shadow-lg"
+                >
+                    <div className="p-2 border-b border-gray-700">
+                        <input
+                            type="text"
+                            className="w-full bg-gray-900 border-gray-700 rounded-md py-1.5 px-2 text-white text-sm"
+                            placeholder="Buscar..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            autoFocus
+                        />
+                    </div>
+                    <ul className="max-h-60 overflow-auto inner-scroll custom-dropdown">
+                        {filteredOptions.map(option => (
+                            <li key={option}
+                                onClick={() => handleSelect(option)}
+                                className={`dropdown-option ${option === value ? 'selected' : ''}`}
+                            >
+                                {option}
+                            </li>
+                        ))}
+                    </ul>
+                </motion.div>,
+                document.body
+            )}
         </div>
-      )}
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={handleToggleOpen}
-        className="select-button w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        {...props}
-      >
-        <span className={`truncate ${isPlaceholder ? 'text-gray-400' : 'text-white'}`}>{selectedLabel}</span>
-        <svg className={`w-4 h-4 ml-2 transform transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-      </button>
-
-      <AnimatePresence>
-      {isOpen && document.body && createPortal(
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.98, y: -5 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: -5 }}
-            transition={{ duration: 0.2, ease: "circOut" }}
-            className={dropdownClasses}
-            style={style}
-        >
-          <div className="p-2 flex-shrink-0">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="w-full bg-gray-900 border border-gray-700 rounded-md py-1 px-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <ul className="overflow-auto flex-grow">
-            {filteredOptions.map(option => {
-              const isSelected = String(value) === option.value;
-              return (
-                  <li
-                      key={option.value}
-                      onClick={() => handleOptionClick(option.value)}
-                      className={`dropdown-option ${isSelected ? 'selected' : ''}`}
-                  >
-                      {option.label}
-                  </li>
-              );
-            })}
-          </ul>
-        </motion.div>,
-        document.body
-      )}
-      </AnimatePresence>
-    </div>
-  );
+    );
 };

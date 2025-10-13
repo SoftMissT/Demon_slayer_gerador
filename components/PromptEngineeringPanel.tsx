@@ -100,22 +100,25 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     
     // Effect to load state from a selected history item
     useEffect(() => {
-        if (selectedItem && selectedItem.inputs && selectedItem.outputs) {
-            const historyInputs = selectedItem.inputs;
-            setInputs({
+        if (selectedItem && selectedItem.inputs) { // Added outputs check to prevent crash on old data
+            const mergedInputs = {
                 ...INITIAL_INPUTS,
-                ...historyInputs,
-                // Deep merge nested parameter objects for safety against partial/old data
-                mjParams: { ...INITIAL_MJ_PARAMS, ...(historyInputs.mjParams || {}) },
-                gptParams: { ...INITIAL_GPT_PARAMS, ...(historyInputs.gptParams || {}) },
-                geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(historyInputs.geminiParams || {}) },
-                generateFor: { 
+                ...selectedItem.inputs,
+                mjParams: { ...INITIAL_MJ_PARAMS, ...(selectedItem.inputs.mjParams || {}) },
+                gptParams: { ...INITIAL_GPT_PARAMS, ...(selectedItem.inputs.gptParams || {}) },
+                geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(selectedItem.inputs.geminiParams || {}) },
+                generateFor: selectedItem.outputs ? { 
                     midjourney: !!selectedItem.outputs.midjourneyPrompt,
                     gpt: !!selectedItem.outputs.gptPrompt,
                     gemini: !!selectedItem.outputs.geminiPrompt 
-                }
-            });
-            setResults(selectedItem.outputs);
+                } : INITIAL_INPUTS.generateFor
+            };
+            setInputs(mergedInputs);
+            if (selectedItem.outputs) {
+                setResults(selectedItem.outputs);
+            } else {
+                setResults(null);
+            }
         }
     }, [selectedItem]);
 
@@ -191,14 +194,12 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
             setSelectedPreset(presetName.trim());
         }
     };
-    const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const presetName = e.target.value;
+    const handleLoadPreset = (presetName: string) => {
         if (presetName && presets[presetName]) {
             const loadedPreset = presets[presetName];
             setInputs({
                 ...INITIAL_INPUTS,
                 ...loadedPreset,
-                // Deep merge nested parameter objects to ensure all properties exist
                 mjParams: { ...INITIAL_MJ_PARAMS, ...(loadedPreset.mjParams || {}) },
                 gptParams: { ...INITIAL_GPT_PARAMS, ...(loadedPreset.gptParams || {}) },
                 geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(loadedPreset.geminiParams || {}) },
@@ -216,6 +217,11 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
             setSelectedPreset('');
         }
     };
+    
+    const presetOptions = useMemo(() => ([
+        { value: '', label: 'Carregar preset...', disabled: true },
+        ...Object.keys(presets).map(name => ({ value: name, label: name }))
+    ]), [presets]);
 
     return (
         <div className="h-full relative p-2">
@@ -246,10 +252,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                                     <h3 className="text-sm font-semibold text-gray-300 mb-2">Gerenciar Presets de Alquimia</h3>
                                     <div className="flex gap-2">
                                         <div className="flex-grow">
-                                            <Select label="" value={selectedPreset} onChange={handleLoadPreset}>
-                                                <option value="">Carregar preset...</option>
-                                                {Object.keys(presets).map(name => <option key={name} value={name}>{name}</option>)}
-                                            </Select>
+                                            <Select label="" options={presetOptions} value={selectedPreset} onChange={handleLoadPreset} placeholder="Carregar preset..." />
                                         </div>
                                         <Button variant="secondary" size="sm" onClick={handleSavePreset} title="Salvar preset atual">
                                             <SaveIcon className="w-4 h-4" />

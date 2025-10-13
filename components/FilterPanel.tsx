@@ -1,16 +1,14 @@
-import React, { useState, useCallback, useMemo, Fragment } from 'react';
-
-import type { FilterState, AIFlags, Category, Tematica } from '../types';
+import React, { useState, useCallback, useMemo } from 'react';
+import type { FilterState, AIFlags, Category, Rarity, Tematica, Tone } from '../types';
 import {
-    CATEGORIES, RARITIES, TEMATICAS, TONES, PERSONALITIES, METAL_COLORS, COUNTRIES, TERRAINS,
-    DAMAGE_TYPES, THREAT_SCALES, ONI_POWER_LEVELS, HUNTER_RANKS, EVENT_LEVELS, EVENT_THREAT_LEVELS,
-    EVENT_TYPES, AI_FOCUS_GEMINI, AI_FOCUS_GPT, AI_FOCUS_DEEPSEEK, ORIGINS, INITIAL_FILTERS, DEMON_BLOOD_ARTS
+    CATEGORIES, RARITIES, TEMATICAS, TONES, DEMON_BLOOD_ARTS, PERSONALITIES, METAL_COLORS,
+    COUNTRIES, TERRAINS, DAMAGE_TYPES, THREAT_SCALES, ONI_POWER_LEVELS, HUNTER_RANKS, EVENT_LEVELS,
+    EVENT_THREAT_LEVELS, EVENT_TYPES, AI_FOCUS_GEMINI, AI_FOCUS_GPT, AI_FOCUS_DEEPSEEK, INITIAL_FILTERS, ORIGINS
 } from '../constants';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
-import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
-import { WEAPON_TYPES } from '../lib/weaponData';
 import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
-import useLocalStorage from '../hooks/useLocalStorage';
+import { WEAPON_TYPES } from '../lib/weaponData';
+import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -18,478 +16,185 @@ import { SearchableSelect } from './ui/SearchableSelect';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { TextInput } from './ui/TextInput';
 import { TextArea } from './ui/TextArea';
-import { Slider } from './ui/Slider';
-import { HammerIcon } from './icons/HammerIcon';
-import { RefreshIcon } from './icons/RefreshIcon';
-import { SaveIcon } from './icons/SaveIcon';
-import { TrashIcon } from './icons/TrashIcon';
-import { NumberInput } from './ui/NumberInput';
 import { Switch } from './ui/Switch';
+import { Slider } from './ui/Slider';
+import { NumberInput } from './ui/NumberInput';
 import { CollapsibleSection } from './ui/CollapsibleSection';
+import { SparklesIcon } from './icons/SparklesIcon';
+import { AnvilIcon } from './icons/AnvilIcon';
 
 interface FilterPanelProps {
-  onGenerate: (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => void;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  onLoginClick: () => void;
+    onGenerate: (filters: FilterState, count: number, promptModifier: string, aiFlags: AIFlags) => void;
+    isLoading: boolean;
+    isAuthenticated: boolean;
+    onLoginClick: () => void;
 }
 
-const SubHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <h4 className="filter-subheader">{children}</h4>
-);
+const breathingStyleOptions = BREATHING_STYLES_DATA.map(style => ({
+    value: style.nome,
+    label: style.nome
+}));
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading, isAuthenticated, onLoginClick }) => {
+const archetypesOptions = [
+    { value: '', label: 'Aleatório' },
+    ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => ({ value: s.nome, label: `${s.nome} (${a.arquétipo})` })))
+];
+
+export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading }) => {
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
-    const [generationCount, setGenerationCount] = useState(1);
+    const [count, setCount] = useState(1);
     const [promptModifier, setPromptModifier] = useState('');
     const [aiFlags, setAiFlags] = useState<AIFlags>({ useDeepSeek: true, useGemini: true, useGpt: true });
-    
-    // Preset State
-    const [presets, setPresets] = useLocalStorage<Record<string, FilterState>>('kimetsu-forge-presets', {});
-    const [selectedPreset, setSelectedPreset] = useState<string>('');
 
-    // Handlers
     const handleFilterChange = useCallback((field: keyof FilterState, value: any) => {
         setFilters(prev => ({ ...prev, [field]: value }));
     }, []);
 
-    const handleCategoryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newCategory = e.target.value as Category | '';
-        setFilters(prev => ({
-            ...INITIAL_FILTERS,
-            category: newCategory,
-            styleReferences: prev.styleReferences,
-            aiFocusGemini: prev.aiFocusGemini,
-            aiFocusGpt: prev.aiFocusGpt,
-            aiFocusDeepSeek: prev.aiFocusDeepSeek,
-        }));
-    }, []);
-
-    const handleReset = useCallback(() => {
-        setFilters(prev => ({
-            ...INITIAL_FILTERS,
-            category: prev.category,
-            styleReferences: prev.styleReferences,
-            aiFocusGemini: prev.aiFocusGemini,
-            aiFocusGpt: prev.aiFocusGpt,
-            aiFocusDeepSeek: prev.aiFocusDeepSeek,
-        }));
-        setSelectedPreset('');
-    }, []);
-
-    const handleSavePreset = () => {
-        const presetName = prompt("Digite um nome para este preset:", `Preset de ${filters.category || 'Geral'}`);
-        if (presetName && presetName.trim()) {
-            setPresets(prev => ({ ...prev, [presetName.trim()]: filters }));
-            setSelectedPreset(presetName.trim());
-        }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onGenerate(filters, count, promptModifier, aiFlags);
     };
 
-    const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const presetName = e.target.value;
-        if (presetName && presets[presetName]) {
-            setFilters(presets[presetName]);
-            setSelectedPreset(presetName);
-        } else {
-            setSelectedPreset('');
-        }
-    };
+    const isGenerateDisabled = isLoading || !filters.category || (!aiFlags.useDeepSeek && !aiFlags.useGemini && !aiFlags.useGpt);
 
-    const handleDeletePreset = () => {
-        if (selectedPreset && window.confirm(`Tem certeza que deseja apagar o preset "${selectedPreset}"?`)) {
-            const newPresets = { ...presets };
-            delete newPresets[selectedPreset];
-            setPresets(newPresets);
-            setSelectedPreset('');
-        }
-    };
+    const tematicaKey = useMemo(() => {
+        if (!filters.category) return null;
+        const categoryToKeyMap: Partial<Record<Category, keyof FilterState>> = {
+            'Caçador': 'hunterTematica', 'Inimigo/Oni': 'oniTematica', 'NPC': 'npcTematica',
+            'Arma': 'weaponTematica', 'Acessório': 'accessoryTematica', 'Forma de Respiração': 'breathingFormTematica',
+            'Kekkijutsu': 'kekkijutsuTematica', 'Local/Cenário': 'locationTematica', 'Missões': 'missionTematica',
+            'World Building': 'wbTematica', 'Evento': 'eventTematica',
+        };
+        return categoryToKeyMap[filters.category] || null;
+    }, [filters.category]);
 
-    const handleGenerateClick = useCallback(() => {
-        if (!isAuthenticated) {
-            onLoginClick();
-            return;
-        }
-        if (!filters.category) {
-            alert("Por favor, selecione uma categoria para forjar.");
-            return;
-        }
-        onGenerate(filters, generationCount, promptModifier, aiFlags);
-    }, [isAuthenticated, onLoginClick, onGenerate, filters, generationCount, promptModifier, aiFlags]);
-    
-    // Mapped constants for selects
-    const breathingStyles = useMemo(() => ['Aleatória', 'Nenhuma', ...BREATHING_STYLES_DATA.map(b => b.nome)], []);
-    const weaponTypes = useMemo(() => WEAPON_TYPES.map(w => w.name), []);
-    const hunterArchetypes = useMemo(() => ['Aleatória', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))], []);
-    const demonBloodArts = useMemo(() => DEMON_BLOOD_ARTS, []);
-    
-    const npcProfessions = useMemo(() => {
-        const tematicaKey = filters.npcTematica as keyof typeof PROFESSIONS_BY_TEMATICA;
-        if (tematicaKey && PROFESSIONS_BY_TEMATICA[tematicaKey]) {
-            return PROFESSIONS_BY_TEMATICA[tematicaKey];
-        }
-        return (PROFESSIONS_BY_TEMATICA as any).all || [];
-    }, [filters.npcTematica]);
-
-    // Render logic
-    const renderCategoryFilters = () => {
-        const commonFields = (
-             <TextArea
-                label="Referências de Estilo Visual"
-                value={filters.styleReferences}
-                onChange={e => handleFilterChange('styleReferences', e.target.value)}
-                placeholder="Ex: Ukiyo-e, Art Nouveau, Steampunk, Ghibli..."
-                rows={2}
-                tooltip="Influências visuais para a IA considerar ao gerar a descrição para imagem."
-            />
-        );
-
+    const renderCategorySpecificFilters = () => {
         switch (filters.category) {
             case 'Caçador':
                 return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Identidade e Background</SubHeader>
-                        <Select label="Temática" value={filters.hunterTematica} onChange={e => handleFilterChange('hunterTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País de Origem" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <SearchableSelect label="Origem/Background" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>
-                            {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-                        </SearchableSelect>
-                        <Select label="Personalidade" value={filters.hunterPersonality} onChange={e => handleFilterChange('hunterPersonality', e.target.value)}>
-                            {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                        </Select>
-                        <SubHeader>Estilo de Combate</SubHeader>
-                        <Select label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>
-                            {hunterArchetypes.map(a => <option key={a} value={a}>{a}</option>)}
-                        </Select>
-                        <SearchableSelect label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>
-                            {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
-                        </SearchableSelect>
-                        <SearchableMultiSelect label="Estilos de Respiração" selected={filters.hunterBreathingStyles} onChange={val => handleFilterChange('hunterBreathingStyles', val)} options={breathingStyles.filter(b => b !== 'Nenhuma')} maxSelection={2} />
-                        <Select label="Rank" value={filters.hunterRank} onChange={e => handleFilterChange('hunterRank', e.target.value)}>
-                            {HUNTER_RANKS.map(r => <option key={r} value={r}>{r}</option>)}
-                        </Select>
-                    </Fragment>
+                    <>
+                        <p className="filter-subheader">Identidade</p>
+                        <SearchableSelect label="País de Origem" options={COUNTRIES} value={filters.hunterCountry} onChange={v => handleFilterChange('hunterCountry', v)} />
+                        <SearchableSelect label="Origem (Background)" options={ORIGINS} value={filters.hunterOrigin} onChange={v => handleFilterChange('hunterOrigin', v)} />
+                        <Select label="Personalidade" options={PERSONALITIES} value={filters.hunterPersonality} onChange={v => handleFilterChange('hunterPersonality', v)} />
+                        
+                        <p className="filter-subheader">Estilo de Combate</p>
+                        <Select label="Arquétipo" options={archetypesOptions} value={filters.hunterArchetype} onChange={v => handleFilterChange('hunterArchetype', v)} />
+                        <SearchableMultiSelect label="Respirações (Base)" options={breathingStyleOptions} selected={filters.hunterBreathingStyles} onChange={v => handleFilterChange('hunterBreathingStyles', v)} />
+                        <Select label="Rank" options={HUNTER_RANKS} value={filters.hunterRank} onChange={v => handleFilterChange('hunterRank', v)} />
+                    </>
                 );
-            case 'Inimigo/Oni':
-                 return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Identidade e Poder</SubHeader>
-                         <Select label="Temática" value={filters.oniTematica} onChange={e => handleFilterChange('oniTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País de Origem" value={filters.oniCountry} onChange={e => handleFilterChange('oniCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <Select label="Nível de Poder" value={filters.oniPowerLevel} onChange={e => handleFilterChange('oniPowerLevel', e.target.value)}>
-                            {ONI_POWER_LEVELS.map(p => <option key={p} value={p}>{p}</option>)}
-                        </Select>
-                        <Select label="Personalidade" value={filters.oniPersonality} onChange={e => handleFilterChange('oniPersonality', e.target.value)}>
-                            {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                        </Select>
-                        <SubHeader>Habilidades de Combate</SubHeader>
-                        <SearchableSelect label="Arma (Opcional)" value={filters.oniWeapon} onChange={e => handleFilterChange('oniWeapon', e.target.value)}>
-                            {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
-                        </SearchableSelect>
-                        <SearchableMultiSelect label="Inspiração de Kekkijutsu" selected={filters.oniInspirationKekkijutsu} onChange={val => handleFilterChange('oniInspirationKekkijutsu', val)} options={demonBloodArts} maxSelection={3} />
-                    </Fragment>
+             case 'Inimigo/Oni':
+                return (
+                    <>
+                         <p className="filter-subheader">Poder</p>
+                        <Select label="Nível de Poder" options={ONI_POWER_LEVELS} value={filters.oniPowerLevel} onChange={v => handleFilterChange('oniPowerLevel', v)} />
+                        
+                        <p className="filter-subheader">Origem e Inspiração</p>
+                        <SearchableSelect label="País de Origem" options={COUNTRIES} value={filters.oniCountry} onChange={v => handleFilterChange('oniCountry', v)} />
+                        <Select label="Inspiração (Respiração)" options={['Nenhuma', ...breathingStyleOptions.map(b => b.value)]} value={filters.oniInspirationBreathing} onChange={v => handleFilterChange('oniInspirationBreathing', v)} />
+                    </>
                 );
             case 'NPC':
-                 return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Background e Identidade</SubHeader>
-                        <Select label="Temática" value={filters.npcTematica} onChange={e => handleFilterChange('npcTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País de Origem" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                         <SearchableSelect label="Origem/Background" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>
-                            {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-                        </SearchableSelect>
-                         <SearchableSelect label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>
-                            {npcProfessions.map((p: string) => <option key={p} value={p}>{p}</option>)}
-                        </SearchableSelect>
-                        <Select label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}>
-                            {PERSONALITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                        </Select>
-                        <SearchableSelect label="Arma (Opcional)" value={filters.npcWeapon} onChange={e => handleFilterChange('npcWeapon', e.target.value)}>
-                            {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
-                        </SearchableSelect>
-                    </Fragment>
+                return (
+                    <>
+                        <p className="filter-subheader">Identidade</p>
+                        <SearchableSelect label="País de Origem" options={COUNTRIES} value={filters.npcCountry} onChange={v => handleFilterChange('npcCountry', v)} />
+                        <SearchableSelect label="Origem (Background)" options={ORIGINS} value={filters.npcOrigin} onChange={v => handleFilterChange('npcOrigin', v)} />
+                    </>
                 );
             case 'Arma':
                  return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Atributos Principais</SubHeader>
-                        <Select label="Raridade" value={filters.weaponRarity} onChange={e => handleFilterChange('weaponRarity', e.target.value)}>
-                            {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
-                        </Select>
-                        <Select label="Temática" value={filters.weaponTematica} onChange={e => handleFilterChange('weaponTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País de Origem" value={filters.weaponCountry} onChange={e => handleFilterChange('weaponCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <SubHeader>Mecânicas de Combate</SubHeader>
-                        <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>
-                            {weaponTypes.map(w => <option key={w} value={w}>{w}</option>)}
-                        </SearchableSelect>
-                         <Select label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}>
-                            {METAL_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
-                        </Select>
-                         <Select label="Tipo de Dano" value={filters.weaponDamageType} onChange={e => handleFilterChange('weaponDamageType', e.target.value)}>
-                            {DAMAGE_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
-                        </Select>
-                    </Fragment>
+                    <>
+                        <p className="filter-subheader">Atributos Principais</p>
+                        {/* FIX: Spread the readonly RARITIES array to make it mutable for the options prop. */}
+                        <Select label="Raridade" options={[...RARITIES]} value={filters.weaponRarity} onChange={v => handleFilterChange('weaponRarity', v)} />
+                        <SearchableSelect label="Tipo de Arma" options={WEAPON_TYPES.map(w => w.name)} value={filters.weaponType} onChange={v => handleFilterChange('weaponType', v)} />
+                        
+                        <p className="filter-subheader">Origem e Manufatura</p>
+                        <Select label="Cor do Metal (Nichirin)" options={METAL_COLORS} value={filters.weaponMetalColor} onChange={v => handleFilterChange('weaponMetalColor', v)} />
+                    </>
                 );
             case 'Acessório':
                 return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Atributos Principais</SubHeader>
-                        <Select label="Raridade" value={filters.accessoryRarity} onChange={e => handleFilterChange('accessoryRarity', e.target.value)}>
-                            {RARITIES.map(r => <option key={r} value={r}>{r}</option>)}
-                        </Select>
-                        <Select label="Temática" value={filters.accessoryTematica} onChange={e => handleFilterChange('accessoryTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SubHeader>Origem e Manufatura</SubHeader>
-                         <SearchableSelect label="Origem Cultural" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}>
-                            {ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}
-                        </SearchableSelect>
-                        <SearchableSelect label="País de Origem" value={filters.accessoryCountry} onChange={e => handleFilterChange('accessoryCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                    </Fragment>
+                     // FIX: Spread the readonly RARITIES array to make it mutable for the options prop.
+                     <Select label="Raridade" options={[...RARITIES]} value={filters.accessoryRarity} onChange={v => handleFilterChange('accessoryRarity', v)} />
                 );
-             case 'Forma de Respiração':
-                return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Criação e Estilo</SubHeader>
-                         <SearchableMultiSelect label="Respirações Base" selected={filters.baseBreathingStyles} onChange={val => handleFilterChange('baseBreathingStyles', val)} options={breathingStyles.filter(b => !['Nenhuma', 'Aleatória'].includes(b))} maxSelection={2} />
-                        <Select label="Temática" value={filters.breathingFormTematica} onChange={e => handleFilterChange('breathingFormTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País de Origem" value={filters.breathingFormCountry} onChange={e => handleFilterChange('breathingFormCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <Select label="Tom" value={filters.breathingFormTone} onChange={e => handleFilterChange('breathingFormTone', e.target.value)}>
-                            {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-                        </Select>
-                    </Fragment>
-                );
-            case 'Kekkijutsu':
-                return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Origem e Poder</SubHeader>
-                        <Select label="Temática" value={filters.kekkijutsuTematica} onChange={e => handleFilterChange('kekkijutsuTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País de Origem" value={filters.kekkijutsuCountry} onChange={e => handleFilterChange('kekkijutsuCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <Select label="Inspiração Principal" value={filters.kekkijutsuKekkijutsuInspiration} onChange={e => handleFilterChange('kekkijutsuKekkijutsuInspiration', e.target.value)}>
-                            {demonBloodArts.map(k => <option key={k} value={k}>{k}</option>)}
-                        </Select>
-                    </Fragment>
-                );
-            case 'Local/Cenário':
+            case 'Forma de Respiração':
                  return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Atmosfera e Definição</SubHeader>
-                        <Select label="Tom" value={filters.locationTone} onChange={e => handleFilterChange('locationTone', e.target.value)}>
-                            {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-                        </Select>
-                         <Select label="Temática" value={filters.locationTematica} onChange={e => handleFilterChange('locationTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País" value={filters.locationCountry} onChange={e => handleFilterChange('locationCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                         <SearchableSelect label="Terreno" value={filters.locationTerrain} onChange={e => handleFilterChange('locationTerrain', e.target.value)}>
-                            {TERRAINS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </SearchableSelect>
-                    </Fragment>
-                );
-             case 'Missões':
-                return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Escopo e Tom</SubHeader>
-                        <Select label="Tom da Missão" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value)}>
-                            {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-                        </Select>
-                        <Select label="Temática" value={filters.missionTematica} onChange={e => handleFilterChange('missionTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>
-                            {THREAT_SCALES.map(s => <option key={s} value={s}>{s}</option>)}
-                        </Select>
-                         <Slider label="Intensidade" min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value, 10))} />
-                    </Fragment>
-                );
-            case 'World Building':
-                 return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Tema e Conflito</SubHeader>
-                        <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value)}>
-                            {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-                        </Select>
-                         <Select label="Temática" value={filters.wbTematica} onChange={e => handleFilterChange('wbTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País Foco" value={filters.wbCountry} onChange={e => handleFilterChange('wbCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                         <SearchableSelect label="Local Principal" value={filters.wbLocation} onChange={e => handleFilterChange('wbLocation', e.target.value)}>
-                            {TERRAINS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </SearchableSelect>
-                        <Select label="Escala da Ameaça" value={filters.wbThreatScale} onChange={e => handleFilterChange('wbThreatScale', e.target.value)}>
-                            {THREAT_SCALES.map(s => <option key={s} value={s}>{s}</option>)}
-                        </Select>
-                    </Fragment>
-                );
-            case 'Evento':
-                 return (
-                    <Fragment>
-                        {commonFields}
-                        <SubHeader>Natureza do Evento</SubHeader>
-                        <Select label="Tom" value={filters.eventTone} onChange={e => handleFilterChange('eventTone', e.target.value)}>
-                            {TONES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
-                        </Select>
-                         <Select label="Temática" value={filters.eventTematica} onChange={e => handleFilterChange('eventTematica', e.target.value)}>
-                            {TEMATICAS.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <SearchableSelect label="País" value={filters.eventCountry} onChange={e => handleFilterChange('eventCountry', e.target.value)}>
-                            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </SearchableSelect>
-                        <Select label="Escala do Evento" value={filters.eventLevel} onChange={e => handleFilterChange('eventLevel', e.target.value)}>
-                            {EVENT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                        </Select>
-                        <Select label="Nível de Ameaça" value={filters.eventThreatLevel} onChange={e => handleFilterChange('eventThreatLevel', e.target.value)}>
-                            {EVENT_THREAT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                        </Select>
-                         <Select label="Tipo de Evento" value={filters.eventType} onChange={e => handleFilterChange('eventType', e.target.value)}>
-                            {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                    </Fragment>
+                    <>
+                        <SearchableMultiSelect label="Respirações (Base)" options={breathingStyleOptions} selected={filters.baseBreathingStyles} onChange={v => handleFilterChange('baseBreathingStyles', v)} />
+                        {/* FIX: Spread the readonly TONES array to make it mutable for the options prop. */}
+                        <Select label="Tom" options={[...TONES]} value={filters.breathingFormTone} onChange={v => handleFilterChange('breathingFormTone', v as Tone)} />
+                    </>
                 );
             default:
-                return <p className="text-gray-500 text-center p-4">Selecione uma categoria para ver as opções de forja.</p>;
+                return null;
         }
-    }
+    };
 
     return (
-        <div className="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 h-full flex flex-col">
-            <header className="flex justify-between items-center pb-2 mb-2 border-b border-gray-700/50 flex-shrink-0">
-                <h2 className="text-xl font-bold font-gangofthree text-white">Bigorna</h2>
-                <Button variant="ghost" size="sm" onClick={handleReset} disabled={!filters.category}>
-                    <RefreshIcon className="w-4 h-4" /> Resetar Filtros
-                </Button>
+        <div className="flex flex-col h-full bg-gray-900/50 rounded-lg border border-gray-700/50">
+            <header className="flex justify-between items-center p-3 border-b border-gray-700/50 flex-shrink-0">
+                <h2 className="text-xl font-bold font-gangofthree text-white flex items-center gap-2"><AnvilIcon className="w-6 h-6"/> Bigorna</h2>
+                 <Button variant="ghost" size="sm" onClick={() => setFilters(INITIAL_FILTERS)}>Limpar Filtros</Button>
             </header>
+
+            <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto inner-scroll p-3 space-y-4">
+                <SearchableSelect
+                    label="Categoria"
+                    options={[...CATEGORIES]}
+                    value={filters.category}
+                    onChange={v => handleFilterChange('category', v as Category)}
+                    placeholder="Selecione uma categoria..."
+                />
+
+                {filters.category && (
+                    <>
+                        <Select
+                            label="Temática Principal"
+                            options={[...TEMATICAS]}
+                            value={tematicaKey ? filters[tematicaKey as keyof FilterState] as string : ''}
+                            onChange={v => {
+                                if (tematicaKey) {
+                                    handleFilterChange(tematicaKey, v as Tematica);
+                                }
+                            }}
+                            placeholder="Aleatória"
+                            disabled={!tematicaKey}
+                        />
+                        {renderCategorySpecificFilters()}
+                    </>
+                )}
+
+                 <CollapsibleSection title="Opções Avançadas de IA" wrapperClassName='border-t border-gray-700/50 pt-2 mt-4'>
+                    <div className="space-y-4 p-2">
+                        <TextArea label="Modificador de Prompt (Prioridade Máxima)" value={promptModifier} onChange={e => setPromptModifier(e.target.value)} rows={2} placeholder="Ex: 'Crie algo com um tom mais sombrio', 'Foco em um design biomecânico'"/>
+                        <div className='grid grid-cols-1 md:grid-cols-3 gap-2'>
+                            <Select label="Foco Gemini" tooltip="Define a abordagem principal do Gemini na criação." options={AI_FOCUS_GEMINI} value={filters.aiFocusGemini} onChange={v => handleFilterChange('aiFocusGemini', v)} />
+                            <Select label="Foco GPT" tooltip="Define a abordagem do GPT no polimento do texto." options={AI_FOCUS_GPT} value={filters.aiFocusGpt} onChange={v => handleFilterChange('aiFocusGpt', v)} />
+                            <Select label="Foco DeepSeek" tooltip="Define a abordagem do Deepseek na ideação." options={AI_FOCUS_DEEPSEEK} value={filters.aiFocusDeepSeek} onChange={v => handleFilterChange('aiFocusDeepSeek', v)} />
+                        </div>
+                    </div>
+                </CollapsibleSection>
+
+                 <div className="pt-4 border-t border-gray-700/50">
+                    <p className="text-sm font-semibold mb-2 text-gray-300">Modelos a Utilizar:</p>
+                    <div className="flex items-center justify-around gap-2">
+                        <Switch label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({ ...f, useDeepSeek: e.target.checked }))}/>
+                        <Switch label="Gemini" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({ ...f, useGemini: e.target.checked }))} />
+                        <Switch label="GPT-4o" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({ ...f, useGpt: e.target.checked }))} />
+                    </div>
+                </div>
+            </form>
             
-            <div className="flex-grow overflow-y-auto inner-scroll pr-2 -mr-2">
-                <div className="space-y-4">
-                     <div className="p-3 bg-gray-800/50 rounded-lg">
-                        <h3 className="text-sm font-semibold text-gray-300 mb-2">Gerenciar Presets</h3>
-                        <div className="flex gap-2">
-                            <div className="flex-grow">
-                                <Select label="" value={selectedPreset} onChange={handleLoadPreset}>
-                                    <option value="" disabled>Carregar preset...</option>
-                                    {Object.keys(presets).map(name => <option key={name} value={name}>{name}</option>)}
-                                </Select>
-                            </div>
-                            <Button variant="secondary" size="sm" onClick={handleSavePreset} title="Salvar preset atual">
-                                <SaveIcon className="w-4 h-4" />
-                            </Button>
-                            <Button variant="danger" size="sm" onClick={handleDeletePreset} disabled={!selectedPreset} title="Apagar preset selecionado">
-                                <TrashIcon className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </div>
-                    
-                    <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
-                        <option value="" disabled>Selecione uma categoria...</option>
-                        {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </Select>
-                    
-                    {renderCategoryFilters()}
-                </div>
-            </div>
-
-            <div className="flex-shrink-0 pt-3 mt-3 border-t border-gray-700/50">
-                 <CollapsibleSection
-                    title="Opções Avançadas de IA"
-                    wrapperClassName="bg-gray-800/50 rounded-lg overflow-hidden mb-4"
-                 >
-                    <div className="space-y-4">
-                        <TextArea 
-                            label="Modificador de Prompt (Prioridade Máxima)" 
-                            value={promptModifier}
-                            onChange={e => setPromptModifier(e.target.value)}
-                            placeholder="Ex: 'Crie algo com um tom mais sombrio', 'Foco em um design biomecânico'"
-                            rows={2}
-                            tooltip="Uma instrução direta para a IA que sobrepõe outros filtros."
-                        />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <Select label="Foco Gemini" value={filters.aiFocusGemini} onChange={e => handleFilterChange('aiFocusGemini', e.target.value)} tooltip="Define a principal tarefa do Gemini na criação.">
-                                {AI_FOCUS_GEMINI.map(f => <option key={f} value={f}>{f}</option>)}
-                            </Select>
-                            <Select label="Foco GPT" value={filters.aiFocusGpt} onChange={e => handleFilterChange('aiFocusGpt', e.target.value)} tooltip="Define como o GPT-4o irá refinar o texto.">
-                                {AI_FOCUS_GPT.map(f => <option key={f} value={f}>{f}</option>)}
-                            </Select>
-                            <Select label="Foco DeepSeek" value={filters.aiFocusDeepSeek} onChange={e => handleFilterChange('aiFocusDeepSeek', e.target.value)} tooltip="Define a tarefa do DeepSeek na criação de mecânicas.">
-                                {AI_FOCUS_DEEPSEEK.map(f => <option key={f} value={f}>{f}</option>)}
-                            </Select>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-gray-400 mb-2">Modelos a Utilizar</p>
-                            <div className="flex items-center gap-4">
-                                <Switch label="DeepSeek" checked={aiFlags.useDeepSeek} onChange={e => setAiFlags(f => ({ ...f, useDeepSeek: e.target.checked }))} />
-                                <Switch label="Gemini" checked={aiFlags.useGemini} onChange={e => setAiFlags(f => ({ ...f, useGemini: e.target.checked }))} />
-                                <Switch label="GPT-4o" checked={aiFlags.useGpt} onChange={e => setAiFlags(f => ({ ...f, useGpt: e.target.checked }))} />
-                            </div>
-                        </div>
-                    </div>
-                 </CollapsibleSection>
-
-                <div className="flex items-end gap-3">
-                    <div className="w-28">
-                        <NumberInput
-                            label="Quantidade"
-                            value={generationCount}
-                            onChange={setGenerationCount}
-                            min={1}
-                            max={5}
-                            step={1}
-                        />
-                    </div>
-                    <div className="flex-grow">
-                         <Button 
-                            onClick={handleGenerateClick} 
-                            disabled={isLoading || !filters.category} 
-                            className="w-full forge-button"
-                        >
-                            <HammerIcon className="w-5 h-5"/>
-                            {isLoading ? 'Forjando...' : (generationCount > 1 ? `Forjar ${generationCount} Itens` : 'Forjar Item')}
-                        </Button>
-                    </div>
-                </div>
-            </div>
+            <footer className="p-3 border-t border-gray-700/50 flex-shrink-0 space-y-3">
+                 <NumberInput label="Quantidade" value={count} onChange={setCount} min={1} max={5} />
+                <Button type="submit" onClick={handleSubmit} disabled={isGenerateDisabled} className="w-full forge-button" size="lg">
+                    <SparklesIcon className="w-5 h-5"/>
+                    {isLoading ? 'Forjando...' : 'Forjar'}
+                </Button>
+            </footer>
         </div>
     );
 };

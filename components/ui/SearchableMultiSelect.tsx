@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDownIcon } from '../icons/ChevronDownIcon';
 import { InfoTooltip } from './InfoTooltip';
 
 interface SearchableMultiSelectProps {
   label: string;
-  options: string[];
+  options: { value: string; label: string }[];
   selected: string[];
   onChange: (selected: string[]) => void;
   placeholder?: string;
-  maxSelection?: number;
   tooltip?: string;
 }
 
@@ -18,143 +18,130 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   options,
   selected,
   onChange,
-  placeholder = "Selecione...",
-  maxSelection,
-  tooltip,
+  placeholder = 'Selecione...',
+  tooltip
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [style, setStyle] = useState<React.CSSProperties>({});
-  const ref = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
 
-  const calculatePosition = () => {
-    if (buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 240; // max-h-60
-
-        const newStyle: React.CSSProperties = {
-            position: 'fixed',
-            left: `${rect.left}px`,
-            width: `${rect.width}px`,
-            zIndex: 50,
-        };
-
-        if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-            newStyle.bottom = `${window.innerHeight - rect.top}px`;
-        } else {
-            newStyle.top = `${rect.bottom}px`;
-        }
-        setStyle(newStyle);
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const parentScroller = ref.current?.closest('.inner-scroll');
-    const handleClose = () => setIsOpen(false);
-    
-    window.addEventListener('resize', handleClose);
-    window.addEventListener('scroll', handleClose, true);
-    parentScroller?.addEventListener('scroll', handleClose);
-
-    return () => {
-      window.removeEventListener('resize', handleClose);
-      window.removeEventListener('scroll', handleClose, true);
-      parentScroller?.removeEventListener('scroll', handleClose);
-    };
-  }, [isOpen]);
-
-  const handleToggleOpen = () => {
-    if (!isOpen) {
-      calculatePosition();
+  const handleToggle = () => {
+    if (!isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
     }
     setIsOpen(!isOpen);
   };
 
-  const toggleOption = (option: string) => {
-    if (selected.includes(option)) {
-      onChange(selected.filter((item) => item !== option));
-    } else {
-      if (maxSelection && selected.length >= maxSelection) {
-        return; 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        triggerRef.current && !triggerRef.current.contains(event.target as Node) &&
+        dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setSearchTerm('');
       }
-      onChange([...selected, option]);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  const handleToggleOption = (value: string) => {
+    if (selected.includes(value)) {
+      onChange(selected.filter((item) => item !== value));
+    } else {
+      onChange([...selected, value]);
     }
   };
-  
-  const isMaxSelected = maxSelection && selected.length >= maxSelection;
 
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOptions = useMemo(() =>
+    options.filter(
+      (option) =>
+        option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    [options, searchTerm]
   );
-  
-  const dropdownClasses = `custom-dropdown border border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col`;
 
   return (
-    <div ref={ref} className="relative">
+    <div>
       <div className="flex items-center gap-1.5 mb-1">
-        <span className="text-sm font-medium text-gray-400">{label}</span>
+        <label className="block text-sm font-medium text-gray-400">{label}</label>
         {tooltip && <InfoTooltip text={tooltip} />}
       </div>
       <button
-        ref={buttonRef}
+        ref={triggerRef}
         type="button"
-        onClick={handleToggleOpen}
-        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left flex justify-between items-center"
+        onClick={handleToggle}
+        className="flex items-center justify-between w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left min-h-[42px] select-button"
       >
-        <span className="truncate">
-          {selected.length > 0 ? selected.join(', ') : placeholder}
-        </span>
-        <svg className={`w-4 h-4 ml-2 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+        <div className="flex flex-wrap gap-1 flex-grow">
+          {selected.length === 0 ? <span className="text-gray-400">{placeholder}</span> : 
+            selected.map(value => {
+                const option = options.find(o => o.value === value);
+                return (
+                    <span key={value} className="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center">
+                        {option?.label || value}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleToggleOption(value); }}
+                            className="ml-1.5 text-indigo-200 hover:text-white"
+                        >
+                            &times;
+                        </button>
+                    </span>
+                );
+            })
+          }
+        </div>
+        <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      <AnimatePresence>
-      {isOpen && document.body && createPortal(
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.98, y: -5 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: -5 }}
+
+      {isOpen && createPortal(
+          <motion.div
+            ref={dropdownRef}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2, ease: "circOut" }}
-            className={dropdownClasses}
-            style={style}
-        >
-          <div className="p-2">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="w-full bg-gray-900 border border-gray-700 rounded-md py-1 px-2 text-white"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <ul className="overflow-y-auto">
-            {filteredOptions.map((option) => {
-              const isSelected = selected.includes(option);
-              const isDisabled = !!(!isSelected && isMaxSelected);
-              return (
+            style={{
+              position: 'fixed',
+              top: position.top,
+              left: position.left,
+              width: position.width,
+            }}
+            className="z-[100] custom-dropdown border border-gray-600 rounded-md shadow-lg"
+          >
+            <div className="p-2 border-b border-gray-700">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2 text-white text-sm"
+                autoFocus
+              />
+            </div>
+            <ul className="max-h-60 overflow-auto inner-scroll custom-dropdown">
+              {filteredOptions.map((option) => (
                 <li
-                  key={option}
-                  onClick={() => !isDisabled && toggleOption(option)}
-                  className={`px-3 py-2 flex items-center dropdown-option ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
+                  key={option.value}
+                  onClick={() => handleToggleOption(option.value)}
+                  className={`dropdown-option ${selected.includes(option.value) ? 'selected' : ''}`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    readOnly
-                    disabled={isDisabled}
-                    className="mr-2 accent-indigo-500"
-                  />
-                  <span className={`text-sm ${isSelected ? 'text-white' : 'text-gray-300'}`}>{option}</span>
+                  {option.label}
                 </li>
-              );
-            })}
-          </ul>
-        </motion.div>,
-        document.body
-      )}
-      </AnimatePresence>
+              ))}
+            </ul>
+          </motion.div>,
+          document.body
+        )}
     </div>
   );
 };

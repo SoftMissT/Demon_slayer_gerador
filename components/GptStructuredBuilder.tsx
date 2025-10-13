@@ -21,15 +21,10 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
 
   return (
      <div className="space-y-4">
-        <Select label="Tom / Atmosfera" value={params.tone} onChange={(e) => handleParamChange('tone', e.target.value)}>
-          {tones.map(t => <option key={t} value={t}>{t}</option>)}
-        </Select>
-        <Select label="Estilo de Arte" value={params.style} onChange={(e) => handleParamChange('style', e.target.value)}>
-          {styles.map(s => <option key={s} value={s}>{s}</option>)}
-        </Select>
-        <Select label="Composição / Ângulo" value={params.composition} onChange={(e) => handleParamChange('composition', e.target.value)}>
-          {compositions.map(c => <option key={c} value={c}>{c}</option>)}
-        </Select>
+        {/* FIX: Refactored Select components to use the options prop and correct onChange handler */}
+        <Select label="Tom / Atmosfera" options={tones} value={params.tone} onChange={(value) => handleParamChange('tone', value)} />
+        <Select label="Estilo de Arte" options={styles} value={params.style} onChange={(value) => handleParamChange('style', value)} />
+        <Select label="Composição / Ângulo" options={compositions} value={params.composition} onChange={(value) => handleParamChange('composition', value)} />
       </div>
   );
 };

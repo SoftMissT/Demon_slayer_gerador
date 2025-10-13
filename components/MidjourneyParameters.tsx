@@ -45,9 +45,14 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
         {/* Toggle + Select for Version */}
         <div className="flex items-end gap-2">
             <div className="flex-grow">
-                <Select label="Versão" value={params.version.value as string} onChange={e => handleParamChange('version', 'value', e.target.value)} disabled={!params.version.active}>
-                    {versions.map(v => <option key={v} value={v}>{v}</option>)}
-                </Select>
+                {/* FIX: Refactored Select to use options prop and correct onChange handler */}
+                <Select
+                    label="Versão"
+                    options={versions}
+                    value={params.version.value as string}
+                    onChange={value => handleParamChange('version', 'value', value)}
+                    disabled={!params.version.active}
+                />
             </div>
             <Switch label="" checked={params.version.active} onChange={e => handleParamChange('version', 'active', e.target.checked)} />
         </div>
