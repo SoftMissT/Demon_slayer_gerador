@@ -7,7 +7,6 @@ import { getOpenAiClient } from '../../lib/openai';
 import { callDeepSeekAPI } from '../../lib/deepseek';
 import { buildGenerationPrompt, buildResponseSchema } from '../../lib/promptBuilder';
 import type { FilterState, GeneratedItem, Category, User } from '../../types';
-import { logGenerationToSheet } from '../../lib/googleSheets';
 
 // Helper to safely parse JSON from AI responses
 const safeJsonParse = (jsonString: string | null | undefined): any | null => {
@@ -127,10 +126,6 @@ export default async function handler(
             id: `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
             createdAt: new Date().toISOString(),
         };
-
-        // Non-blocking call to log the result to the sheet.
-        // Errors are handled inside the function itself.
-        logGenerationToSheet(result, user);
 
         res.status(200).json(result);
 

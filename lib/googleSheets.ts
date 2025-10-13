@@ -25,7 +25,6 @@ const getSheetsClient = () => {
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const WHITELIST_SHEET_NAME = 'Whitelist'; // Assuming a sheet name
-const LOG_SHEET_NAME = 'GenerationLog';   // Assuming a sheet name
 
 /**
  * Checks if a user's Discord ID is in the whitelist spreadsheet.
@@ -57,48 +56,5 @@ export const isUserWhitelisted = async (userId: string): Promise<boolean> => {
         console.error('Error checking whitelist:', error);
         // Propagate a more user-friendly error message
         throw new Error(`Ocorreu um erro ao verificar a permissão de acesso. Detalhes: ${error.message}`);
-    }
-};
-
-/**
- * Logs a generated item to a Google Sheet.
- * This is a non-blocking, fire-and-forget function. Errors are logged to the console.
- * @param item - The generated item to log.
- * @param user - The user who generated the item (optional).
- */
-export const logGenerationToSheet = async (item: GeneratedItem, user?: User | null): Promise<void> => {
-    try {
-        const sheets = getSheetsClient();
-         if (!sheets || !SPREADSHEET_ID) {
-            console.error('Google Sheets client or Spreadsheet ID is not configured for logging.');
-            return;
-        }
-
-        const timestamp = new Date().toISOString();
-        const userId = user?.id || 'N/A';
-        const username = user?.username || 'N/A';
-        
-        // Prepare a row with key information for logging.
-        const row = [
-            timestamp,
-            item.id,
-            userId,
-            username,
-            item.categoria,
-            ('title' in item && item.title) || item.nome,
-            item.descricao_curta,
-            JSON.stringify(item.provenance || []), // Log the AI pipeline
-        ];
-
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: SPREADSHEET_ID,
-            range: `${LOG_SHEET_NAME}!A1`,
-            valueInputOption: 'USER_ENTERED',
-            requestBody: {
-                values: [row],
-            },
-        });
-    } catch (error) {
-        console.error('Error logging generation to Google Sheet:', error);
     }
 };

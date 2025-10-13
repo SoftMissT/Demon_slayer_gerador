@@ -1,62 +1,103 @@
-export const ORIGINS_DATA = [
+import type { Tematica } from '../types';
+
+interface OriginData {
+    nome: string;
+    descricao: string;
+    tracos_tipicos: string;
+    ganchos_narrativos: string;
+    tematicas: Tematica[];
+}
+
+export const ORIGINS_DATA: OriginData[] = [
   {
-    "nome": "Tsuguko (Discípulo de um Hashira)",
-    "descricao": "Treinado sob o olhar de um Pilar, o Tsuguko é o herdeiro espiritual de uma Respiração lendária. Carrega o peso de continuar um legado e a pressão de estar à altura de seu mestre. Vive entre o orgulho e o medo de decepcionar.",
+    "nome": "Tsuguko (Discípulo de Hashira)",
+    "descricao": "Treinado sob o olhar de um Pilar, o Tsuguko é o herdeiro espiritual de uma Respiração lendária. Carrega o peso de continuar um legado e a pressão de estar à altura de seu mestre.",
     "tracos_tipicos": "disciplina rígida, instinto tático, lealdade inabalável.",
-    "ganchos_narrativos": "rivalidade com outros discípulos, busca por suceder o Hashira, dilema entre seguir o próprio caminho ou o do mestre."
+    "ganchos_narrativos": "rivalidade com outros discípulos, busca por suceder o Hashira, dilema entre seguir o próprio caminho ou o do mestre.",
+    "tematicas": ["Período Edo (Japão Feudal)"]
   },
   {
     "nome": "Samurai",
     "descricao": "Descendente da antiga casta guerreira, o Samurai vive segundo o bushidō mesmo num mundo onde a honra se tornou relíquia. A lâmina é sua alma, e a morte em combate, sua oração.",
     "tracos_tipicos": "coragem fria, respeito pelas tradições, austeridade.",
-    "ganchos_narrativos": "juramento quebrado, senhor caído, busca por redenção ou vingança."
+    "ganchos_narrativos": "juramento quebrado, senhor caído, busca por redenção ou vingança.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Medieval Fantasia", "Shogunato Cibernético", "🎭 DOS CINCO REINOS (WUXIA/XIANXIA)"]
   },
   {
     "nome": "Ninja",
     "descricao": "Sombra e silêncio. O Ninja é o fantasma entre o bambuzal, mestre da infiltração, da emboscada e da informação. Serve quem paga… ou quem merece.",
     "tracos_tipicos": "agilidade, inteligência prática, instinto de sobrevivência.",
-    "ganchos_narrativos": "traição dentro do clã, missão secreta, passado apagado."
+    "ganchos_narrativos": "traição dentro do clã, missão secreta, passado apagado.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Cyberpunk", "Shogunato Cibernético", "Neon-Noir Megacidade", "🌃 DO SUBMUNDO NOTURNO"]
   },
   {
-    "nome": "Isolado",
+    "nome": "Isolado da Natureza",
     "descricao": "Vivendo afastado da civilização, o Isolado aprendeu com a natureza o que o homem esqueceu. O vento é seu mestre, a montanha, seu templo.",
     "tracos_tipicos": "intuição afiada, resiliência, desapego.",
-    "ganchos_narrativos": "retorna ao mundo após anos, guarda um segredo antigo, é o último de sua vila extinta."
+    "ganchos_narrativos": "retorna ao mundo após anos, guarda um segredo antigo, é o último de sua vila extinta.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Medieval Fantasia", "Pós-apocalíptico", "Mythpunk Amazônico", "Ártico Steampunk", "🧙 DA ALVORADA ANCESTRAL", "🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)"]
   },
   {
-    "nome": "Civilizado",
-    "descricao": "Criado entre cidades, nobres e mercados, o Civilizado conhece a lógica do convívio e da política. Sabe falar, negociar e enganar com a mesma destreza com que outros empunham espadas.",
+    "nome": "Aristocrata Urbano",
+    "descricao": "Criado entre cidades, nobres e mercados, o Aristocrata conhece a lógica do convívio e da política. Sabe falar, negociar e enganar com a mesma destreza com que outros empunham espadas.",
     "tracos_tipicos": "sociabilidade, senso estético, pragmatismo.",
-    "ganchos_narrativos": "envolvimento com guildas ou aristocratas, dívida de sangue, segredo de família."
+    "ganchos_narrativos": "envolvimento com guildas ou aristocratas, dívida de sangue, segredo de família.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Medieval Fantasia", "Steampunk", "Cyberpunk", "Tempos Atuais", "Futurista (Sci-Fi)", "Neon-Noir Megacidade", "💠 DA INFOCRACIA", "🌃 DO RENASCIMENTO SOMBRIO"]
   },
   {
-    "nome": "Descendente Perdido",
+    "nome": "Descendente de Linhagem Esquecida",
     "descricao": "Carrega um sangue antigo, esquecido pelos registros, talvez um clã caído, um demônio selado ou uma linhagem amaldiçoada. O passado o chama, mesmo que ele não saiba de onde.",
     "tracos_tipicos": "sonhos recorrentes, poder adormecido, destino trágico.",
-    "ganchos_narrativos": "busca pela própria origem, memórias fragmentadas, despertar de um poder perigoso."
+    "ganchos_narrativos": "busca pela própria origem, memórias fragmentadas, despertar de um poder perigoso.",
+    "tematicas": ["Medieval Fantasia", "DOS CAÇADORES DE SOMBRAS", "⚔️ DOS DEUSES CAÍDOS", "🕵️‍♂️ DO JAZZ & OCULTISMO", "⚗️ DA REVOLUÇÃO INDUSTRIAL OCULTA"]
   },
   {
-    "nome": "Estrangeiro",
+    "nome": "Viajante Exótico",
     "descricao": "Veio de terras distantes, além dos mares ou desertos. Sua cultura, língua e costumes contrastam com os do Japão, tornando-o tanto admirado quanto suspeito.",
     "tracos_tipicos": "curiosidade, sotaque marcante, adaptabilidade.",
-    "ganchos_narrativos": "busca de um artefato ancestral, exílio forçado, promessa feita a um morto."
+    "ganchos_narrativos": "busca de um artefato ancestral, exílio forçado, promessa feita a um morto.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Medieval Fantasia", "Steampunk", "Cyberpunk", "Pós-apocalíptico", "Futurista (Sci-Fi)", "Biopunk", "🤠 VELHO OESTE SOLAR", "🏴‍☠️ DOS IMPÉRIOS FLUTUANTES", "🏜️ DO SAARA ETERNO"]
   },
   {
     "nome": "Monge",
     "descricao": "Devoto da fé, da meditação ou da iluminação. O Monge vê os demônios como manifestações do sofrimento humano. Treinou corpo e espírito até o limite da compreensão.",
     "tracos_tipicos": "serenidade, força interior, empatia.",
-    "ganchos_narrativos": "conflito entre fé e violência, visões proféticas, missão sagrada."
+    "ganchos_narrativos": "conflito entre fé e violência, visões proféticas, missão sagrada.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Medieval Fantasia", "🎭 DOS CINCO REINOS (WUXIA/XIANXIA)"]
   },
   {
-    "nome": "Criado por Ex-Hashira",
+    "nome": "Pupilo de Lenda Aposentada",
     "descricao": "Você cresceu sob a tutela de uma lenda aposentada, um guerreiro que já viu o inferno e escolheu viver à sombra. Herdou suas histórias, sua técnica… e talvez seus arrependimentos.",
     "tracos_tipicos": "espírito determinado, lealdade emocional, trauma herdado.",
-    "ganchos_narrativos": "legado quebrado, segredos do passado do mentor, reencontro com o velho Hashira."
+    "ganchos_narrativos": "legado quebrado, segredos do passado do mentor, reencontro com o velho Hashira.",
+    "tematicas": ["Período Edo (Japão Feudal)", "Medieval Fantasia"]
   },
   {
-    "nome": "Sobrevivente do Apocalipse",
+    "nome": "Sobrevivente do Ermo",
     "descricao": "Forjado nas ruínas de um mundo quebrado, o Sobrevivente não apenas resistiu, mas prosperou no caos. Aprendeu a transformar sucata em ferramentas e perigo em oportunidade, vendo o fim do mundo não como uma tragédia, mas como um recomeço brutal.",
     "tracos_tipicos": "resiliência extrema, pragmatismo implacável, improvisação genial.",
-    "ganchos_narrativos": "proteger um artefato raro da velha era, liderar uma comunidade de refugiados contra um grupo hostil, carregar a culpa ou o segredo do evento que causou o apocalipse."
+    "ganchos_narrativos": "proteger um artefato raro da velha era, liderar uma comunidade de refugiados contra um grupo hostil, carregar a culpa ou o segredo do evento que causou o apocalipse.",
+    "tematicas": ["Pós-apocalíptico", "🌌 DOS CINZÁRIOS (PÓS-APOCALÍPTICO MÍSTICO)", "🧟 DA QUEDA DOS REINOS"]
+  },
+  {
+    "nome": "Engenheiro de Autômatos",
+    "descricao": "Mestre das engrenagens e do vapor, este indivíduo cria vida a partir de metal e lógica. Seus companheiros são autômatos, e sua oficina é seu santuário.",
+    "tracos_tipicos": "mente analítica, paciência, afinidade com máquinas.",
+    "ganchos_narrativos": "sua maior criação se rebelou, busca por uma fonte de energia lendária, perseguição por uma corporação que cobiça sua tecnologia.",
+    "tematicas": ["Steampunk", "Shogunato Cibernético", "🤖 DA SINGULARIDADE (PÓS-HUMANA)"]
+  },
+  {
+    "nome": "Bio-Hacker",
+    "descricao": "Para este indivíduo, o corpo é apenas uma tela a ser pintada com o pincel da genética. Vive nas margens da sociedade, realizando modificações corporais ilegais e experimentando com a própria biologia.",
+    "tracos_tipicos": "curiosidade mórbida, desrespeito por limites éticos, busca pela perfeição biológica.",
+    "ganchos_narrativos": "uma modificação deu terrivelmente errado, busca por um código genético primordial, é caçado por um crime contra a natureza.",
+    "tematicas": ["Biopunk", "Cyberpunk", "🧬 DO JARDIM PROIBIDO (BIOPUNK ORGÂNICO)"]
+  },
+  {
+    "nome": "Netrunner",
+    "descricao": "Um fantasma na máquina, o Netrunner navega pelas redes de dados como um explorador em um novo continente. Informação é sua moeda, e firewalls, seus únicos inimigos.",
+    "tracos_tipicos": "inteligência afiada, isolamento social, vício em adrenalina digital.",
+    "ganchos_narrativos": "encontrou um segredo corporativo que pode derrubar governos, é assombrado por uma IA renegada, precisa invadir o servidor mais protegido do mundo.",
+    "tematicas": ["Cyberpunk", "Futurista (Sci-Fi)", "Neon-Noir Megacidade", "💠 DA INFOCRACIA", "🤖 DA SINGULARIDADE (PÓS-HUMANA)"]
   }
 ];

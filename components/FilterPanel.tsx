@@ -18,6 +18,7 @@ import {
 } from '../constants';
 import type { FilterState, Category, Tematica, Rarity, Tone, FilterPreset } from '../types';
 import { BREATHING_STYLES_DATA } from '../lib/breathingStylesData';
+import { ORIGINS_DATA } from '../lib/originsData';
 import { HUNTER_ARCHETYPES_DATA } from '../lib/hunterArchetypesData';
 import { WEAPON_TYPES } from '../lib/weaponData';
 import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
@@ -64,8 +65,46 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
     ], []);
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(field: K, value: FilterState[K]) => {
-        setFilters(prev => ({ ...prev, [field]: value }));
+        setFilters(prev => {
+            const newState = { ...prev, [field]: value };
+
+            // When a thematic filter is changed, reset the corresponding origin filter
+            // to ensure the user makes a valid selection from the new list.
+            if (field === 'hunterTematica') {
+                newState.hunterOrigin = '';
+            }
+            if (field === 'npcTematica') {
+                newState.npcOrigin = '';
+            }
+            if (field === 'accessoryTematica') {
+                newState.accessoryOrigin = '';
+            }
+
+            return newState;
+        });
     }, []);
+
+    const filteredOrigins = useMemo(() => {
+        let selectedTematica: Tematica | '' = '';
+        if (filters.category === 'Caçador') {
+            selectedTematica = filters.hunterTematica;
+        } else if (filters.category === 'NPC') {
+            selectedTematica = filters.npcTematica;
+        } else if (filters.category === 'Acessório') {
+            selectedTematica = filters.accessoryTematica;
+        }
+
+        // FIX: Removed redundant `selectedTematica === ''` check. The `!selectedTematica` already covers this case for strings, and the redundancy likely caused a TypeScript control-flow analysis error.
+        if (!selectedTematica || selectedTematica === 'Aleatória') {
+            return ORIGINS;
+        }
+        
+        const thematicallyFiltered = ORIGINS_DATA.filter(origin => 
+            origin.tematicas && origin.tematicas.includes(selectedTematica)
+        ).map(origin => origin.nome);
+
+        return ['Aleatória', ...thematicallyFiltered.sort()];
+    }, [filters.category, filters.hunterTematica, filters.npcTematica, filters.accessoryTematica]);
 
     const handleResetFilters = useCallback(() => {
         setFilters(INITIAL_FILTERS);
@@ -147,7 +186,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 <SearchableSelect label="Temática" value={filters.hunterTematica || ''} onChange={e => handleFilterChange('hunterTematica', e.target.value as Tematica)} tooltip="Define o universo temático para a criação do Caçador, influenciando sua aparência, background e equipamentos.">{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Rank" value={filters.hunterRank} onChange={e => handleFilterChange('hunterRank', e.target.value)}>{HUNTER_RANKS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País de Origem (Cultural)" value={filters.hunterCountry} onChange={e => handleFilterChange('hunterCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <SearchableSelect label="Origem (Background)" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Origem (Background)" value={filters.hunterOrigin} onChange={e => handleFilterChange('hunterOrigin', e.target.value)}>{filteredOrigins.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Arquétipo" value={filters.hunterArchetype} onChange={e => handleFilterChange('hunterArchetype', e.target.value)}>{hunterArchetypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Personalidade" value={filters.hunterPersonality} onChange={e => handleFilterChange('hunterPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Arma Principal" value={filters.hunterWeapon} onChange={e => handleFilterChange('hunterWeapon', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -173,7 +212,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             case 'NPC': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SearchableSelect label="Temática" value={filters.npcTematica || ''} onChange={e => handleFilterChange('npcTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.npcCountry} onChange={e => handleFilterChange('npcCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <SearchableSelect label="Origem (Background)" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Origem (Background)" value={filters.npcOrigin} onChange={e => handleFilterChange('npcOrigin', e.target.value)}>{filteredOrigins.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Profissão" value={filters.npcProfession} onChange={e => handleFilterChange('npcProfession', e.target.value)}>{professionOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Personalidade" value={filters.npcPersonality} onChange={e => handleFilterChange('npcPersonality', e.target.value)}>{PERSONALITIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Arma" value={filters.npcWeapon} onChange={e => handleFilterChange('npcWeapon', e.target.value)}>{['Nenhuma', ...weaponTypeOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
@@ -193,7 +232,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 <SearchableSelect label="País (Cultural)" value={filters.accessoryCountry} onChange={e => handleFilterChange('accessoryCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Respiração)" value={filters.accessoryBreathingInspiration} onChange={e => handleFilterChange('accessoryBreathingInspiration', e.target.value)}>{['Nenhuma', ...breathingStylesOptions].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Inspiração (Kekkijutsu)" value={filters.accessoryKekkijutsuInspiration} onChange={e => handleFilterChange('accessoryKekkijutsuInspiration', e.target.value)}>{['Nenhuma', ...DEMON_BLOOD_ARTS].map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                <SearchableSelect label="Origem (Background)" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}>{ORIGINS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <SearchableSelect label="Origem (Background)" value={filters.accessoryOrigin} onChange={e => handleFilterChange('accessoryOrigin', e.target.value)}>{filteredOrigins.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
             </div>);
             case 'Forma de Respiração': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
