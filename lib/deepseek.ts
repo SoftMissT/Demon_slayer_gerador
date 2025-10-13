@@ -9,10 +9,9 @@ interface DeepSeekMessage {
  * Throws an error if the API key is missing or if the API call fails.
  * Attempts to parse a JSON object from the response.
  * @param messages The messages to send to the DeepSeek API.
- * @param userApiKey An optional API key provided by the user.
  */
-export const callDeepSeekAPI = async (messages: DeepSeekMessage[], userApiKey?: string): Promise<any> => {
-    const apiKey = userApiKey || process.env.DEV_DEEPSEEK_KEY;
+export const callDeepSeekAPI = async (messages: DeepSeekMessage[]): Promise<any> => {
+    const apiKey = process.env.DEV_DEEPSEEK_KEY;
     if (!apiKey) {
         throw new Error('Nenhuma chave de API da DeepSeek foi encontrada no ambiente do servidor.');
     }

@@ -10,7 +10,6 @@ import { MidjourneyParameters } from './MidjourneyParameters';
 import { GptStructuredBuilder } from './GptStructuredBuilder';
 import { GeminiParameters } from './GeminiParameters';
 import { PromptResultDisplay } from './PromptResultDisplay';
-import { ImageGenerationPanel } from './ImageGenerationPanel';
 import { generatePrompts } from '../lib/client/orchestrationService';
 import useLocalStorage from '../hooks/useLocalStorage';
 import type { 
@@ -18,12 +17,9 @@ import type {
     PromptGenerationResult, 
     MidjourneyParameters as MidjourneyParams,
     GptParameters as GptParams,
-    GeminiParameters as GeminiParams,
-    ApiKeys
+    GeminiParameters as GeminiParams
 } from '../types';
 import { RefreshIcon } from './icons/RefreshIcon';
-import { SettingsIcon } from './icons/SettingsIcon';
-import { ApiKeysModal } from './ApiKeysModal';
 import { DiscordIcon } from './icons/DiscordIcon';
 
 
@@ -91,10 +87,6 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
 
     const [isGeminiEnabled, setIsGeminiEnabled] = useState(true);
     const [geminiParams, setGeminiParams] = useState<GeminiParams>(INITIAL_GEMINI_PARAMS);
-
-    const [apiKeys] = useLocalStorage<ApiKeys>('kimetsu-forge-api-keys', { gemini: '', openai: '', deepseek: '' });
-    const [isApiKeysModalOpen, setIsApiKeysModalOpen] = useState(false);
-
 
     // API call state
     const [isLoading, setIsLoading] = useState(false);
@@ -167,7 +159,6 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                 generateMidjourney: isMjEnabled,
                 generateGpt: isGptEnabled,
                 generateGemini: isGeminiEnabled,
-                apiKeys,
             });
 
             const newHistoryItem: AlchemyHistoryItem = {
@@ -198,12 +189,10 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     }, [
         basePrompt, negativePrompt, mjParams, gptParams, geminiParams, 
         isMjEnabled, isGptEnabled, isGeminiEnabled, 
-        setHistory, isAuthenticated, onLoginClick, apiKeys
+        setHistory, isAuthenticated, onLoginClick
     ]);
 
     const isGenerateDisabled = isLoading || !basePrompt.trim() || (!isMjEnabled && !isGptEnabled && !isGeminiEnabled);
-
-    const imageGenPrompt = result?.midjourneyPrompt || result?.gptPrompt || result?.geminiPrompt || '';
 
     return (
         <div className="h-full relative">
@@ -224,15 +213,10 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                     <Card className="forge-panel flex-grow flex flex-col p-4">
                          <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-bold text-white font-gangofthree">CALDEIRÃO DO ALQUIMISTA</h2>
-                            <div className="flex gap-2">
-                                <Button variant="secondary" size="sm" onClick={() => setIsApiKeysModalOpen(true)} title="Gerenciar Chaves de API">
-                                    <SettingsIcon className="w-4 h-4" />
-                                </Button>
-                                <Button variant="secondary" size="sm" onClick={handleReset} title="Limpar tudo">
-                                    <RefreshIcon className="w-4 h-4" />
-                                    Limpar
-                                </Button>
-                            </div>
+                            <Button variant="secondary" size="sm" onClick={handleReset} title="Limpar tudo">
+                                <RefreshIcon className="w-4 h-4" />
+                                Limpar
+                            </Button>
                         </div>
                         <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
                             <div className="space-y-4">
@@ -295,15 +279,8 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                             </div>
                         </Card>
                     </div>
-                    {imageGenPrompt && (
-                        <div className="flex-shrink-0">
-                           <ImageGenerationPanel initialPrompt={imageGenPrompt} mjParams={mjParams} gptParams={gptParams} />
-                        </div>
-                    )}
                 </div>
-
             </div>
-            <ApiKeysModal isOpen={isApiKeysModalOpen} onClose={() => setIsApiKeysModalOpen(false)} />
         </div>
     );
 };

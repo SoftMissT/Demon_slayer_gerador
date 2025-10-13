@@ -100,8 +100,9 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (!isDesktop) setIsFilterPanelOpen(false);
 
         try {
+            // FIX: Removed an extraneous 'undefined' argument from the 'orchestrateGeneration' call to match the function's signature, resolving a type error.
             const promises = Array.from({ length: count }).map(() => 
-                orchestrateGeneration(filters, promptModifier, undefined, user)
+                orchestrateGeneration(filters, promptModifier, user)
             );
             const newItems = await Promise.all(promises);
             
@@ -164,7 +165,8 @@ setError(null);
         setSelectedItem(null);
 
         try {
-            const variant = await orchestrateGeneration(filters as FilterState, modifier, undefined, user);
+            // FIX: Removed an extraneous 'undefined' argument from the 'orchestrateGeneration' call to match the function's signature, resolving a type error.
+            const variant = await orchestrateGeneration(filters as FilterState, modifier, user);
             variant.nome = `${item.nome} (Variante ${variantType})`;
             
             setItems(prev => [variant, ...prev]);

@@ -1,22 +1,20 @@
 
-
-import type { FilterState, GeneratedItem, MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys, User } from '../../types';
+import type { FilterState, GeneratedItem, MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, User } from '../../types';
 
 /**
  * Calls the backend API to orchestrate the generation of a new item.
  * @param filters - The current filter state.
  * @param promptModifier - An optional, high-priority instruction.
- * @param apiKeys - Optional user-provided API keys.
  * @param user - Optional user object for logging.
  * @returns A promise that resolves to the generated item.
  */
-export const orchestrateGeneration = async (filters: FilterState, promptModifier?: string, apiKeys?: ApiKeys, user?: User | null): Promise<GeneratedItem> => {
+export const orchestrateGeneration = async (filters: FilterState, promptModifier?: string, user?: User | null): Promise<GeneratedItem> => {
     const response = await fetch('/api/generateContent', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ filters, promptModifier, apiKeys, user }),
+        body: JSON.stringify({ filters, promptModifier, user }),
     });
 
     if (!response.ok) {
@@ -38,7 +36,6 @@ interface GeneratePromptsRequest {
     generateMidjourney: boolean;
     generateGpt: boolean;
     generateGemini: boolean;
-    apiKeys?: ApiKeys;
 }
 
 /**

@@ -1,8 +1,7 @@
 
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
-import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys } from '../../types';
+import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult } from '../../types';
 
 interface GeneratePromptsRequest {
     basePrompt: string;
@@ -14,7 +13,6 @@ interface GeneratePromptsRequest {
     generateMidjourney: boolean;
     generateGpt: boolean;
     generateGemini: boolean;
-    apiKeys?: ApiKeys;
 }
 
 const buildMidjourneyPrompt = (base: string, params?: MidjourneyParameters): string => {
@@ -47,9 +45,9 @@ export default async function handler(
     try {
         const request = req.body as GeneratePromptsRequest;
         // FIX: Destructured 'negativePrompt' from the request body to use in prompt construction.
-        const { basePrompt, negativePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini, apiKeys } = request;
+        const { basePrompt, negativePrompt, mjParams, gptParams, geminiParams, generateMidjourney, generateGpt, generateGemini } = request;
 
-        const geminiClient = getAiClient(apiKeys?.gemini);
+        const geminiClient = getAiClient();
         if (!geminiClient) {
             const errorMessage = "O Alquimista de Prompts usa o Gemini como motor principal, mas a chave de API do Gemini não está configurada corretamente no servidor. Entre em contato com o administrador.";
             return res.status(500).json({ message: errorMessage });

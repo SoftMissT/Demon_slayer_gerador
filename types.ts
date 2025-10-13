@@ -411,12 +411,12 @@ export interface AlchemyHistoryItem {
     result: PromptGenerationResult;
 }
 
+// FIX: Added ApiKeys type to support user-provided API keys from ApiKeysModal, resolving import errors in `pages/api/generateImage.ts` and `components/ApiKeysModal.tsx`.
+export interface ApiKeys {
+    gemini: string;
+    openai: string;
+    deepseek: string;
+}
+
 export type HistoryItem = GeneratedItem | AlchemyHistoryItem;
 export type FavoriteItem = GeneratedItem | AlchemyHistoryItem;
-
-// FIX: Added ApiKeys interface to provide a type for managing API keys for different AI services, resolving the import error in orchestrationService.ts.
-export interface ApiKeys {
-  gemini: string;
-  openai: string;
-  deepseek: string;
-}
