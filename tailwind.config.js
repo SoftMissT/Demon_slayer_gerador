@@ -7,9 +7,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Shippori Mincho B1"', 'serif', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
-        gangofthree: ['"Anton"', 'sans-serif'],
-        kimetsu: ['"Anton"', 'sans-serif'],
+        sans: ['Inter', '"Noto Sans JP"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+        gangofthree: ['"Sawarabi Mincho"', '"Noto Sans JP"', 'serif'],
+        kimetsu: ['"Sawarabi Mincho"', '"Noto Sans JP"', 'serif'],
       },
     },
   },

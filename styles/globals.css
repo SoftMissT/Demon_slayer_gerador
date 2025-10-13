@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Shippori+Mincho+B1:wght@400;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sawarabi+Mincho&family=Noto+Sans+JP:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -31,18 +31,20 @@
 
 /* Base font setup */
 body {
+  font-family: theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Font styles for custom fonts */
 .font-gangofthree { 
-  font-weight: 400; /* Anton is single-weight */
+  font-weight: 400; /* Sawarabi Mincho is single-weight */
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 .font-kimetsu {
-  font-weight: 400; /* Anton is single-weight */
+  font-weight: 400; /* Sawarabi Mincho is single-weight */
+  letter-spacing: 0.02em;
 }
 
 
@@ -141,8 +143,8 @@ body {
     margin-top: -4px;
     letter-spacing: 0.05em;
 }
-.kimetsu-title-forge { color: #f87171; /* red-400 */ text-shadow: 0 0 8px rgba(239, 68, 68, 0.7); letter-spacing: 0.1em; }
-.kimetsu-title-alchemy { color: #c084fc; /* purple-400 */ text-shadow: 0 0 8px rgba(192, 132, 252, 0.7); letter-spacing: 0.1em; }
+.kimetsu-title-forge { color: #f87171; /* red-400 */ text-shadow: 0 0 8px rgba(239, 68, 68, 0.7); letter-spacing: 0.075em; }
+.kimetsu-title-alchemy { color: #c084fc; /* purple-400 */ text-shadow: 0 0 8px rgba(192, 132, 252, 0.7); letter-spacing: 0.075em; }
 
 .header-action-button {
     padding: 6px 12px;
