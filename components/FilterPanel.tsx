@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card } from './ui/Card';
 import { Select } from './ui/Select';
@@ -26,6 +25,8 @@ import { RefreshIcon } from './icons/RefreshIcon';
 import { HowItWorksModal } from './HowItWorksModal';
 import { TextInput } from './ui/TextInput';
 import { TextArea } from './ui/TextArea';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 interface FilterPanelProps {
     onGenerate: (filters: FilterState, count: number, promptModifier?: string) => void;
@@ -40,6 +41,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
     const [promptModifier, setPromptModifier] = useState('');
     const [presets, setPresets] = useLocalStorage<FilterPreset[]>('kimetsu-forge-presets', []);
     const [selectedPreset, setSelectedPreset] = useState<string>('');
+    const [openMissionSection, setOpenMissionSection] = useState<'conceito' | 'tematica' | 'tom' | null>('conceito');
     
     const breathingStylesOptions = useMemo(() => BREATHING_STYLES_DATA.map(bs => bs.nome), []);
     const hunterArchetypeOptions = useMemo(() => ['Aleatório', ...HUNTER_ARCHETYPES_DATA.flatMap(a => a.subclasses.map(s => s.nome))], []);
@@ -219,29 +221,87 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                     <TextInput label="Ou Especifique um Terreno" value={filters.locationTerrainCustom} onChange={e => handleFilterChange('locationTerrainCustom', e.target.value)} placeholder="Ex: Cidade no esqueleto de um Titã"/>
                 </div>
             </div>);
-            case 'Missões': return (<>
-                <div className="flex justify-end -mb-2">
-                    <Button variant="ghost" size="sm" onClick={handleResetMissionFilters}>Limpar Filtros da Missão</Button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                    <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
-                    <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                    <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                    <div className="md:col-span-2">
-                        <SearchableSelect label="Tipo de Evento Central" value={filters.missionEventType} onChange={e => handleFilterChange('missionEventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
-                    </div>
-                    <div className="md:col-span-2">
-                        <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} tooltip="Controla a complexidade e o perigo da missão. Valores mais altos geram missões com mais reviravoltas, inimigos poderosos e consequências impactantes." />
-                    </div>
-                    <div className="md:col-span-2">
-                        <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
-                    </div>
-                    <div className="md:col-span-2">
-                        <TextInput label="Alvo Principal" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} placeholder="Ex: um oni que devora memórias, uma seita..."/>
-                    </div>
-                </div>
-            </>);
+            case 'Missões': 
+                const missionSections = {
+                    conceito: {
+                        title: 'Conceito Principal',
+                        content: (
+                            <div className="space-y-4">
+                                <TextInput label="Protagonista (Descrição)" value={filters.protagonist} onChange={e => handleFilterChange('protagonist', e.target.value)} placeholder="Ex: um caçador cego, um ferreiro amaldiçoado..."/>
+                                <TextInput label="Alvo Principal" value={filters.targets} onChange={e => handleFilterChange('targets', e.target.value)} placeholder="Ex: um oni que devora memórias, uma seita..."/>
+                            </div>
+                        )
+                    },
+                    tematica: {
+                        title: 'Temática e Cenário',
+                        content: (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                                <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                                <div className="md:col-span-2">
+                                    <SearchableSelect label="Tipo de Evento Central" value={filters.missionEventType} onChange={e => handleFilterChange('missionEventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                                </div>
+                            </div>
+                        )
+                    },
+                    tom: {
+                        title: 'Tom e Escala',
+                        content: (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                 <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                                <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                                <div className="md:col-span-2">
+                                    <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} tooltip="Controla a complexidade e o perigo da missão." />
+                                </div>
+                            </div>
+                        )
+                    }
+                };
+
+                return (
+                    <>
+                        <div className="flex justify-end mb-2">
+                            <Button variant="ghost" size="sm" onClick={handleResetMissionFilters}>Limpar Filtros da Missão</Button>
+                        </div>
+                        <div className="space-y-1">
+                            {Object.entries(missionSections).map(([key, { title, content }]) => {
+                                const isOpen = openMissionSection === key;
+                                return (
+                                    <div key={key} className="border-b border-gray-700/50 last:border-b-0">
+                                        <button
+                                            onClick={() => setOpenMissionSection(isOpen ? null : key as any)}
+                                            className="w-full flex justify-between items-center py-3 text-left"
+                                            aria-expanded={isOpen}
+                                        >
+                                            <h4 className="font-semibold text-gray-300">{title}</h4>
+                                            <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        <AnimatePresence initial={false}>
+                                            {isOpen && (
+                                                <motion.div
+                                                    key="content"
+                                                    initial="collapsed"
+                                                    animate="open"
+                                                    exit="collapsed"
+                                                    variants={{
+                                                        open: { opacity: 1, maxHeight: '500px' },
+                                                        collapsed: { opacity: 0, maxHeight: 0 }
+                                                    }}
+                                                    transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="pb-4">
+                                                        {content}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                );
             case 'World Building': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Tom" value={filters.wbTone} onChange={e => handleFilterChange('wbTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.wbTematica || ''} onChange={e => handleFilterChange('wbTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>

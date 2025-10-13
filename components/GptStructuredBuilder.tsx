@@ -43,7 +43,7 @@ export const GptStructuredBuilder: React.FC<GptStructuredBuilderProps> = ({ para
                             open: { opacity: 1, maxHeight: '500px', marginTop: '16px' },
                             collapsed: { opacity: 0, maxHeight: 0, marginTop: '0px' }
                         }}
-                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                         className="overflow-hidden"
                     >
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">

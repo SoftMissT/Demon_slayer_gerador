@@ -94,7 +94,7 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
                             open: { opacity: 1, maxHeight: '1500px' },
                             collapsed: { opacity: 0, maxHeight: 0 }
                         }}
-                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                         className="overflow-hidden"
                     >
                         <div className="border-b border-gray-700/50 pb-4 mb-4">

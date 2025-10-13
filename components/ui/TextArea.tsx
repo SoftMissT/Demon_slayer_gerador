@@ -1,7 +1,7 @@
+// FIX: Implemented the TextArea component to replace placeholder content, resolving multiple module and syntax errors across the application.
 import React from 'react';
 import { InfoTooltip } from './InfoTooltip';
 
-// FIX: Added an optional 'tooltip' prop to support info icons next to the label, resolving prop-related type errors in FilterPanel.
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   tooltip?: string;
@@ -10,22 +10,16 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 export const TextArea: React.FC<TextAreaProps> = ({ label, tooltip, ...props }) => {
   return (
     <div>
-      <div className="flex items-center gap-1.5 mb-1">
-        <label className="text-sm font-medium text-gray-400">{label}</label>
-        {tooltip && <InfoTooltip text={tooltip} />}
-      </div>
-       <div className="input-main-container">
-            <div className="poda-container">
-                <div className="glow"></div>
-                <div className="darkBorderBg"></div>
-                <div className="border"></div>
-                <div className="white"></div>
-                <textarea
-                  className="input-field textarea"
-                  {...props}
-                />
-            </div>
+      {label && (
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className="text-sm font-medium text-gray-400">{label}</span>
+          {tooltip && <InfoTooltip text={tooltip} />}
         </div>
+      )}
+      <textarea
+        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50 resize-y"
+        {...props}
+      />
     </div>
   );
 };
