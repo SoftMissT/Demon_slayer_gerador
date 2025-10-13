@@ -181,59 +181,6 @@ body {
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* --- FORGE LAYOUT --- */
-.forge-layout-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* 24px */
-    height: 100%;
-}
-
-.forge-column-filters, .forge-column-results {
-    width: 100%;
-}
-
-.forge-column-results {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* 24px */
-}
-
-@media (min-width: 1024px) { /* lg breakpoint */
-    .forge-layout-wrapper {
-        flex-direction: row;
-    }
-    
-    .forge-column-filters {
-        width: clamp(480px, 33vw, 620px);
-        flex-shrink: 0;
-        height: calc(100vh - 110px); /* Adjust based on header/footer height */
-    }
-
-    .forge-column-results {
-        flex: 1;
-        min-width: 0; /* Prevents flexbox overflow */
-        height: calc(100vh - 110px); /* Adjust based on header/footer height */
-        padding-right: 8px; /* Space for scrollbar */
-        overflow-y: auto; /* Make this entire column scrollable */
-    }
-
-    .forge-column-results::-webkit-scrollbar {
-      width: 8px;
-    }
-    .forge-column-results::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 4px;
-    }
-    .forge-column-results::-webkit-scrollbar-thumb {
-      background-color: #4f46e5;
-      border-radius: 4px;
-    }
-    .forge-column-results::-webkit-scrollbar-thumb:hover {
-      background-color: #6366f1;
-    }
-}
-
 /* Card styles */
 .result-card.selected-card {
   border-color: var(--forge-primary);

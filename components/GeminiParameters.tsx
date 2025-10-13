@@ -41,8 +41,8 @@ export const GeminiParameters: React.FC<GeminiParametersProps> = ({ params, onPa
                         animate="open"
                         exit="collapsed"
                         variants={{
-                            open: { opacity: 1, height: 'auto', marginTop: '16px' },
-                            collapsed: { opacity: 0, height: 0, marginTop: '0px' }
+                            open: { opacity: 1, maxHeight: '500px', marginTop: '16px' },
+                            collapsed: { opacity: 0, maxHeight: 0, marginTop: '0px' }
                         }}
                         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                         className="overflow-hidden"

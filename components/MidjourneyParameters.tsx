@@ -91,8 +91,8 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
                         animate="open"
                         exit="collapsed"
                         variants={{
-                            open: { opacity: 1, height: 'auto' },
-                            collapsed: { opacity: 0, height: 0 }
+                            open: { opacity: 1, maxHeight: '1500px' },
+                            collapsed: { opacity: 0, maxHeight: 0 }
                         }}
                         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                         className="overflow-hidden"
