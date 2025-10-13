@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { AlertTriangleIcon } from '../icons/AlertTriangleIcon';
 
@@ -22,6 +20,10 @@ const ErrorDetails: React.FC<{ message: string }> = ({ message }) => {
         title = "Falha na Configuração da API";
         suggestion = "Uma chave de API necessária não está configurada corretamente no servidor. Por favor, entre em contato com o administrador do sistema para resolver o problema.";
         details = message;
+    } else if (lowerMessage.includes('planilha do google') || lowerMessage.includes('google sheets')) {
+        title = "Erro na Configuração do Servidor";
+        suggestion = "O administrador do sistema precisa verificar se as variáveis de ambiente para a API do Google Sheets (ID da planilha, email da conta de serviço e chave privada) estão configuradas corretamente no painel de hospedagem.";
+        details = message;
     } else if (lowerMessage.includes('servidor') || lowerMessage.includes('http error') || lowerMessage.includes('networkerror')) {
         title = "Falha na Comunicação com a API";
         suggestion = "Não foi possível conectar com o servidor de geração. Verifique sua conexão com a internet ou tente novamente mais tarde.";
@@ -33,14 +35,20 @@ const ErrorDetails: React.FC<{ message: string }> = ({ message }) => {
         suggestion = "Houve um problema ao criar a imagem. Isso pode ser temporário. Tente gerar a imagem novamente.";
     }
 
-
     return (
         <>
-            <h3 className="font-bold text-lg">{title}</h3>
-            <p className="text-sm mt-1 text-red-300">{details}</p>
-            <div className="mt-3 border-t border-red-800 pt-2">
-                <p className="text-sm font-semibold">Sugestão:</p>
-                <p className="text-sm">{suggestion}</p>
+            <h3 className="font-bold text-lg text-red-100">{title}</h3>
+            <div className="mt-2 space-y-3 text-sm">
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-red-300 mb-1">Sugestão</p>
+                    <p className="text-red-200">{suggestion}</p>
+                </div>
+                {details && (
+                    <div className="border-t border-red-800/50 pt-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-red-300 mb-1">Detalhes Técnicos</p>
+                        <p className="font-mono bg-red-950 p-2 rounded-md text-xs text-red-300 break-words">{details}</p>
+                    </div>
+                )}
             </div>
         </>
     );

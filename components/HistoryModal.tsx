@@ -36,7 +36,7 @@ const ForgeHistoryItem: React.FC<{
     const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); onDelete(item.id); };
     const formattedDate = new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     return (
-        <div className="bg-gray-700 p-3 rounded-lg flex items-center justify-between gap-4 transition-colors hover:bg-gray-600 cursor-pointer" onClick={() => onSelect(item)}>
+        <div className="bg-gray-900/50 p-3 rounded-lg flex items-center justify-between gap-4 transition-all hover:bg-gray-800/70 border border-gray-700 hover:border-indigo-500 cursor-pointer" onClick={() => onSelect(item)}>
             <div className="flex-grow overflow-hidden">
                 <p className="font-bold truncate text-white">{('title' in item && item.title) || item.nome || 'Item Sem Nome'}</p>
                 <p className="text-xs text-indigo-400">{item.categoria} <span className="text-gray-500">• {formattedDate}</span></p>
@@ -57,7 +57,7 @@ const AlchemyHistoryItem: React.FC<{
     const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); onDelete(item.id); };
     const formattedDate = new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     return (
-        <div className="bg-gray-700 p-3 rounded-lg flex items-center justify-between gap-4 transition-colors hover:bg-gray-600 cursor-pointer" onClick={() => onSelect(item)}>
+        <div className="bg-gray-900/50 p-3 rounded-lg flex items-center justify-between gap-4 transition-all hover:bg-gray-800/70 border border-gray-700 hover:border-indigo-500 cursor-pointer" onClick={() => onSelect(item)}>
             <div className="flex-grow overflow-hidden">
                 <p className="font-bold truncate text-white">{item.inputs.basePrompt || 'Geração de Prompt Vazia'}</p>
                 <p className="text-xs text-purple-400">Alquimia <span className="text-gray-500">• {formattedDate}</span></p>

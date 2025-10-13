@@ -69,6 +69,7 @@ export interface FilterState {
     weaponType: string;
     weaponMetalColor: string;
     weaponDamageType: string;
+    weaponDetailedDescription: string;
     // Accessory
     accessoryRarity: Rarity | '';
     accessoryTematica: Tematica | '';

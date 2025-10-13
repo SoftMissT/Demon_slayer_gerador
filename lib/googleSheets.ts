@@ -5,17 +5,21 @@ import type { GeneratedItem, User } from '../types';
 
 // Function to get authenticated Google Sheets client
 const getSheetsClient = () => {
+    // FIX: Align environment variable names with README.md for consistency and to fix deployment configuration errors.
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+
     // Ensure environment variables are set
-    if (!process.env.GOOGLE_SHEETS_PRIVATE_KEY || !process.env.GOOGLE_SHEETS_CLIENT_EMAIL) {
+    if (!privateKey || !clientEmail) {
         console.error('Google Sheets API credentials are not set in environment variables.');
         return null;
     }
 
     const auth = new google.auth.GoogleAuth({
         credentials: {
-            client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+            client_email: clientEmail,
             // The private key needs to be parsed correctly as it's a string from env var
-            private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            private_key: privateKey.replace(/\\n/g, '\n'),
         },
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
@@ -24,7 +28,8 @@ const getSheetsClient = () => {
 };
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
-const WHITELIST_SHEET_NAME = 'Whitelist'; // Assuming a sheet name
+// FIX: Changed sheet name from 'Whitelist' to 'discord_id' and range from column A to B to match the setup instructions in README.md, ensuring the user whitelist is read correctly.
+const WHITELIST_SHEET_NAME = 'discord_id';
 
 /**
  * Checks if a user's Discord ID is in the whitelist spreadsheet.
@@ -42,18 +47,23 @@ export const isUserWhitelisted = async (userId: string): Promise<boolean> => {
 
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${WHITELIST_SHEET_NAME}!A:A`, // Assuming IDs are in column A
+            // FIX: Changed sheet name from 'Whitelist' to 'discord_id' and range from column A to B to match the setup instructions in README.md, ensuring the user whitelist is read correctly.
+            range: `${WHITELIST_SHEET_NAME}!B:B`,
         });
 
         const rows = response.data.values;
         if (rows) {
-            // Flatten array of arrays and check for inclusion
-            return rows.flat().includes(userId);
+            // Flatten array of arrays and check for inclusion, skipping the header row.
+            return rows.slice(1).flat().includes(userId);
         }
 
         return false;
     } catch (error: any) {
         console.error('Error checking whitelist:', error);
+        // FIX: Added specific error handling to provide a more helpful message if the sheet name is wrong, a common setup mistake.
+        if (error.message.includes('Unable to parse range')) {
+             throw new Error(`Ocorreu um erro ao verificar a permissão de acesso. Detalhes: A aba da planilha com o nome "${WHITELIST_SHEET_NAME}" não foi encontrada. Verifique se a planilha foi configurada conforme o README.`);
+        }
         // Propagate a more user-friendly error message
         throw new Error(`Ocorreu um erro ao verificar a permissão de acesso. Detalhes: ${error.message}`);
     }

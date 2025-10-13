@@ -110,6 +110,8 @@ export const MidjourneyParameters: React.FC<MidjourneyParametersProps> = ({ para
                                         <option value="3d_render">Render 3D</option>
                                         <option value="aquarela">Aquarela</option>
                                         <option value="pixel_art">Pixel Art</option>
+                                        <option value="sketch_style">Esboçado</option>
+                                        <option value="gothic_style">Estilo Gótico</option>
                                     </Select>
                                 </ParameterControl>
                                 <ParameterControl label="Iluminação" paramKey="lighting" {...{ params, onParamsChange, enabled }}>

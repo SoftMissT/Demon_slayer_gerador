@@ -225,6 +225,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                 <SearchableSelect label="Tipo de Arma" value={filters.weaponType} onChange={e => handleFilterChange('weaponType', e.target.value)}>{weaponTypeOptions.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Tipo de Dano" value={filters.weaponDamageType} onChange={e => handleFilterChange('weaponDamageType', e.target.value)}>{DAMAGE_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="Cor do Metal (Nichirin)" value={filters.weaponMetalColor} onChange={e => handleFilterChange('weaponMetalColor', e.target.value)}>{METAL_COLORS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <div className="md:col-span-2">
+                    <TextArea
+                        label="Descrição Detalhada (Opcional)"
+                        value={filters.weaponDetailedDescription}
+                        onChange={(e) => handleFilterChange('weaponDetailedDescription', e.target.value)}
+                        placeholder="Ex: uma lâmina forjada nas chamas de um dragão, com runas que brilham no escuro..."
+                        rows={3}
+                        disabled={isLoading}
+                        tooltip="Forneça detalhes específicos sobre a aparência, história ou poderes da arma para guiar a IA."
+                    />
+                </div>
             </div>);
             case 'Acessório': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Raridade" value={filters.accessoryRarity || ''} onChange={e => handleFilterChange('accessoryRarity', e.target.value as Rarity)}>{RARITIES.map(o => <option key={o} value={o}>{o}</option>)}</Select>

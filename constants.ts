@@ -355,6 +355,7 @@ export const INITIAL_FILTERS: FilterState = {
     weaponType: '',
     weaponMetalColor: '',
     weaponDamageType: '',
+    weaponDetailedDescription: '',
     // Accessory
     accessoryRarity: '',
     accessoryTematica: '',
