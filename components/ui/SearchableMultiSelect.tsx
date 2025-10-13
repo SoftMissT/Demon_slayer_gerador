@@ -95,10 +95,10 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
       <AnimatePresence>
       {isOpen && (
         <motion.div 
-            initial={{ opacity: 0, scale: 0.98, y: position === 'up' ? 5 : -5 }}
+            initial={{ opacity: 0, scale: 0.95, y: position === 'up' ? 10 : -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: position === 'up' ? 5 : -5 }}
-            transition={{ duration: 0.2, ease: "circOut" }}
+            exit={{ opacity: 0, scale: 0.95, y: position === 'up' ? 10 : -10 }}
+            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
             className={dropdownClasses}
             style={{ originY: position === 'up' ? '100%' : '0%' }}
         >

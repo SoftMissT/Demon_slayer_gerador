@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ForgeInterface } from './components/ForgeInterface';
@@ -129,6 +127,7 @@ export default function App() {
                     onOpenFavorites={() => setIsFavoritesModalOpen(true)}
                     onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
                     user={user}
+                    onLoginClick={handleLoginClick}
                     onLogout={handleLogout}
                     favoritesCount={forgeFavorites.length + alchemyFavorites.length}
                 />

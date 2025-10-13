@@ -101,14 +101,19 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     // Effect to load state from a selected history item
     useEffect(() => {
         if (selectedItem && selectedItem.inputs) {
-            const { inputs: historyInputs } = selectedItem;
+            const historyInputs = selectedItem.inputs;
             setInputs({
-                basePrompt: historyInputs.basePrompt,
-                negativePrompt: historyInputs.negativePrompt || '',
-                mjParams: historyInputs.mjParams || INITIAL_MJ_PARAMS,
-                gptParams: historyInputs.gptParams || INITIAL_GPT_PARAMS,
-                geminiParams: historyInputs.geminiParams || INITIAL_GEMINI_PARAMS,
-                generateFor: { midjourney: !!selectedItem.outputs.midjourneyPrompt, gpt: !!selectedItem.outputs.gptPrompt, gemini: !!selectedItem.outputs.geminiPrompt }
+                ...INITIAL_INPUTS,
+                ...historyInputs,
+                // Deep merge nested parameter objects for safety against partial/old data
+                mjParams: { ...INITIAL_MJ_PARAMS, ...(historyInputs.mjParams || {}) },
+                gptParams: { ...INITIAL_GPT_PARAMS, ...(historyInputs.gptParams || {}) },
+                geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(historyInputs.geminiParams || {}) },
+                generateFor: { 
+                    midjourney: !!selectedItem.outputs.midjourneyPrompt,
+                    gpt: !!selectedItem.outputs.gptPrompt,
+                    gemini: !!selectedItem.outputs.geminiPrompt 
+                }
             });
             setResults(selectedItem.outputs);
         }
@@ -189,7 +194,15 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const presetName = e.target.value;
         if (presetName && presets[presetName]) {
-            setInputs(presets[presetName]);
+            const loadedPreset = presets[presetName];
+            setInputs({
+                ...INITIAL_INPUTS,
+                ...loadedPreset,
+                // Deep merge nested parameter objects to ensure all properties exist
+                mjParams: { ...INITIAL_MJ_PARAMS, ...(loadedPreset.mjParams || {}) },
+                gptParams: { ...INITIAL_GPT_PARAMS, ...(loadedPreset.gptParams || {}) },
+                geminiParams: { ...INITIAL_GEMINI_PARAMS, ...(loadedPreset.geminiParams || {}) },
+            });
             setSelectedPreset(presetName);
         } else {
             setSelectedPreset('');
@@ -254,9 +267,9 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                         </div>
                     </div>
 
-                    {inputs.generateFor.midjourney && <CollapsibleSection title="Caldeirão Midjourney"><MidjourneyParametersComponent params={inputs.mjParams} setParams={p => setInputs(i => ({...i, mjParams: p}))} /></CollapsibleSection>}
-                    {inputs.generateFor.gpt && <CollapsibleSection title="Caldeirão GPT"><GptStructuredBuilder params={inputs.gptParams} setParams={p => setInputs(i => ({...i, gptParams: p}))} /></CollapsibleSection>}
-                    {inputs.generateFor.gemini && <CollapsibleSection title="Caldeirão Gemini"><GeminiParametersComponent params={inputs.geminiParams} setParams={p => setInputs(i => ({...i, geminiParams: p}))} /></CollapsibleSection>}
+                    {inputs.generateFor.midjourney && <CollapsibleSection title="Caldeirão Midjourney"><MidjourneyParametersComponent params={inputs.mjParams} setParams={p => setInputs(i => ({...i, mjParams: typeof p === 'function' ? p(i.mjParams) : p }))} /></CollapsibleSection>}
+                    {inputs.generateFor.gpt && <CollapsibleSection title="Caldeirão GPT"><GptStructuredBuilder params={inputs.gptParams} setParams={p => setInputs(i => ({...i, gptParams: typeof p === 'function' ? p(i.gptParams) : p }))} /></CollapsibleSection>}
+                    {inputs.generateFor.gemini && <CollapsibleSection title="Caldeirão Gemini"><GeminiParametersComponent params={inputs.geminiParams} setParams={p => setInputs(i => ({...i, geminiParams: typeof p === 'function' ? p(i.geminiParams) : p }))} /></CollapsibleSection>}
                     
                     <div className="cauldron-container my-4">
                         {isLoading ? (

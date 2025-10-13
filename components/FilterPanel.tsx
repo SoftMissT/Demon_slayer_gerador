@@ -402,10 +402,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
                         </div>
                     </div>
                     
-                    <SearchableSelect label="Categoria" value={filters.category} onChange={handleCategoryChange}>
+                    <Select label="Categoria" value={filters.category} onChange={handleCategoryChange}>
                         <option value="" disabled>Selecione uma categoria...</option>
                         {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </SearchableSelect>
+                    </Select>
                     
                     {renderCategoryFilters()}
                 </div>

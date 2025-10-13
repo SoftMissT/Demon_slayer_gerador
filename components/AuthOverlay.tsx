@@ -17,7 +17,8 @@ export const AuthOverlay: React.FC<AuthOverlayProps> = ({ onLoginClick, view }) 
             <p className="text-gray-300 mb-6 max-w-md">Esta área é exclusiva para membros autorizados. Por favor, entre com sua conta do Discord para verificar seu acesso.</p>
             <Button 
                 onClick={onLoginClick} 
-                className={`!w-auto !flex-row !gap-2 !px-6 !py-3 !text-base ${buttonClass}`}
+                size="lg"
+                className={`w-auto ${buttonClass}`}
             >
                 <DiscordIcon className="w-6 h-6" />
                 Entrar com Discord

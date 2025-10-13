@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { User } from '../types';
@@ -12,6 +11,7 @@ import { HelpIcon } from './icons/HelpIcon';
 import { BookIcon } from './icons/BookIcon';
 import { Tooltip } from './ui/Tooltip';
 import { Button } from './ui/Button';
+import { DiscordIcon } from './icons/DiscordIcon';
 
 type AppView = 'forge' | 'alchemist';
 
@@ -23,6 +23,7 @@ interface HeaderProps {
     onOpenFavorites: () => void;
     onOpenHowItWorks: () => void;
     user: User | null;
+    onLoginClick: () => void;
     onLogout: () => void;
     favoritesCount: number;
 }
@@ -52,9 +53,10 @@ const ViewToggleButton: React.FC<{ activeView: AppView, onViewChange: (view: App
 
 
 export const Header: React.FC<HeaderProps> = ({
-    activeView, onViewChange, onOpenAbout, onOpenHistory, onOpenFavorites, onOpenHowItWorks, user, onLogout, favoritesCount
+    activeView, onViewChange, onOpenAbout, onOpenHistory, onOpenFavorites, onOpenHowItWorks, user, onLoginClick, onLogout, favoritesCount
 }) => {
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const buttonClass = activeView === 'forge' ? 'forge-button' : 'alchemist-button';
 
     return (
         <header className="flex-shrink-0 flex items-center justify-between p-2 border-b border-gray-800">
@@ -114,15 +116,26 @@ export const Header: React.FC<HeaderProps> = ({
                     </AnimatePresence>
                 </div>
 
-                {user && (
-                    <div className="flex items-center gap-2 pl-2 border-l border-gray-700">
-                        <img src={user.avatar} alt={user.username} className="w-8 h-8 rounded-full"/>
-                        <div className="hidden lg:block">
-                            <p className="text-sm font-semibold text-white truncate">{user.username}</p>
-                            <button onClick={onLogout} className="text-xs text-gray-400 hover:text-red-400">Sair</button>
+                <div className="pl-2 border-l border-gray-700">
+                    {user ? (
+                        <div className="flex items-center gap-2">
+                            <img src={user.avatar} alt={user.username} className="w-8 h-8 rounded-full"/>
+                            <div className="hidden lg:block">
+                                <p className="text-sm font-semibold text-white truncate">{user.username}</p>
+                                <button onClick={onLogout} className="text-xs text-gray-400 hover:text-red-400">Sair</button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <Button 
+                            onClick={onLoginClick}
+                            size="sm"
+                            className={`${buttonClass}`}
+                        >
+                            <DiscordIcon className="w-5 h-5" />
+                            <span className="hidden md:inline">Entrar</span>
+                        </Button>
+                    )}
+                </div>
             </div>
         </header>
     );
