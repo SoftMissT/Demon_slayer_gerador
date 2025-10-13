@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useMemo } from 'react';
 import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, AlchemyHistoryItem, User } from '../types';
 import { AuthOverlay } from './AuthOverlay';
@@ -15,6 +16,8 @@ import { ErrorDisplay } from './ui/ErrorDisplay';
 import { PromptResultDisplay } from './PromptResultDisplay';
 import { ImageGenerationPanel } from './ImageGenerationPanel';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
+// FIX: Added missing import for the Card component.
+import { Card } from './ui/Card';
 
 interface PromptEngineeringPanelProps {
   isAuthenticated: boolean;

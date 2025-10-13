@@ -1,11 +1,16 @@
 
+
 import { CATEGORIES, RARITIES, TEMATICAS, TONES } from './constants';
 
 // Base types from constants
-export type Category = typeof CATEGORIES[number];
-export type Rarity = typeof RARITIES[number];
-export type Tematica = typeof TEMATICAS[number];
-export type Tone = typeof TONES[number];
+// FIX: Added parentheses for clarity and to ensure correct type inference from constant arrays.
+export type Category = (typeof CATEGORIES)[number];
+// FIX: Added parentheses for clarity and to ensure correct type inference from constant arrays.
+export type Rarity = (typeof RARITIES)[number];
+// FIX: Added parentheses for clarity and to ensure correct type inference from constant arrays.
+export type Tematica = (typeof TEMATICAS)[number];
+// FIX: Added parentheses for clarity and to ensure correct type inference from constant arrays.
+export type Tone = (typeof TONES)[number];
 
 // Filter State
 export interface FilterState {
@@ -192,6 +197,8 @@ export interface User {
   username: string;
   avatar: string;
 }
+
+export type AppView = 'forge' | 'alchemist';
 
 export interface AIFlags {
   useDeepSeek: boolean;

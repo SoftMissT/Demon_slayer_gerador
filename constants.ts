@@ -1,14 +1,15 @@
 // FIX: Populated with full constant definitions to resolve module errors.
-import type { Category, Rarity, Tematica, Tone, FilterState } from './types';
+// FIX: Removed circular type imports and used `as const` to define constants, allowing types to be inferred correctly and resolving circular dependency errors.
+import type { FilterState } from './types';
 import { ORIGINS_DATA } from './lib/originsData';
 
-export const CATEGORIES: Category[] = [
+export const CATEGORIES = [
     'Caçador', 'Inimigo/Oni', 'NPC', 'Arma', 'Acessório', 'Forma de Respiração', 'Kekkijutsu', 'Local/Cenário', 'Missões', 'World Building', 'Evento'
-];
+] as const;
 
-export const RARITIES: Rarity[] = ['Aleatória', 'Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'];
+export const RARITIES = ['Aleatória', 'Comum', 'Incomum', 'Raro', 'Épico', 'Lendário', 'Amaldiçoado'] as const;
 
-export const TEMATICAS: Tematica[] = [
+export const TEMATICAS = [
     'Aleatória',
     'Período Edo (Japão Feudal)',
     'Medieval Fantasia',
@@ -53,9 +54,9 @@ export const TEMATICAS: Tematica[] = [
     'Ártico Steampunk',
     'Paisagem dos Sonhos (Surreal)',
     'Tecno-Xamanismo'
-];
+] as const;
 
-export const TONES: Tone[] = ['épico', 'sombrio', 'misterioso', 'aventuresco', 'cômico', 'trágico', 'esperançoso'];
+export const TONES = ['épico', 'sombrio', 'misterioso', 'aventuresco', 'cômico', 'trágico', 'esperançoso'] as const;
 
 export const DEMON_BLOOD_ARTS: string[] = [
     'Aleatória', 'Manipulação de Sangue', 'Fios de Seda', 'Tambores de Impacto', 'Flechas Vetoriais', 'Teias de Aranha', 'Ilusões Mortais', 'Sonhos Manipulados', 'Absorção de Poder', 'Crioquinese', 'Pirocinese', 'Regeneração Acelerada', 'Clones de Carne', 'Manipulação de Esporos', 'Venenos e Toxinas'

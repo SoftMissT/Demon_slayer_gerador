@@ -1,88 +1,89 @@
 import React from 'react';
 import { Modal } from './ui/Modal';
-import type { HistoryItem, GeneratedItem, AlchemyHistoryItem } from '../types';
 import { Button } from './ui/Button';
 import { TrashIcon } from './icons/TrashIcon';
+import { KatanaIcon } from './icons/KatanaIcon';
+import { MagicWandIcon } from './icons/MagicWandIcon';
+import type { HistoryItem, GeneratedItem, AlchemyHistoryItem, AppView } from '../types';
 
 interface HistoryModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    history: HistoryItem[];
-    onSelect: (item: HistoryItem) => void;
-    onDelete: (id: string) => void;
-    onClear: () => void;
-    activeView: 'forge' | 'prompt';
+  isOpen: boolean;
+  onClose: () => void;
+  history: HistoryItem[];
+  onSelect: (item: HistoryItem) => void;
+  onDelete: (id: string) => void;
+  onClear: () => void;
+  activeView: AppView;
 }
 
-export const HistoryModal: React.FC<HistoryModalProps> = ({
-    isOpen,
-    onClose,
-    history,
-    onSelect,
-    onDelete,
-    onClear,
-    activeView
-}) => {
-    const renderHistoryItem = (item: HistoryItem) => {
-        const isForgeItem = 'categoria' in item;
+const HistoryListItem: React.FC<{ item: HistoryItem, onSelect: (item: HistoryItem) => void, onDelete: (id: string) => void }> = ({ item, onSelect, onDelete }) => {
+    const isForgeItem = 'categoria' in item;
 
-        // Defensive check for malformed AlchemyHistoryItem from older localStorage data
-        if (!isForgeItem && !(item as AlchemyHistoryItem).inputs) {
-            return (
-                <li key={item.id} className="flex items-center justify-between p-3 bg-red-900/50 rounded-lg group">
-                    <div className="text-left flex-grow min-w-0">
-                        <p className="font-semibold text-red-300 truncate">Item de Histórico Inválido</p>
-                        <p className="text-sm text-red-400 truncate mt-1">Este item pode estar corrompido.</p>
-                    </div>
-                    <Button variant="ghost" onClick={() => onDelete(item.id)} className="!p-2 flex-shrink-0 ml-4 opacity-100">
-                        <TrashIcon className="w-5 h-5 text-red-500" />
-                    </Button>
-                </li>
-            );
-        }
+    const handleClick = () => onSelect(item);
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete(item.id);
+    };
 
-        const name = isForgeItem ? (item as GeneratedItem).nome : `Prompt de ${new Date((item as AlchemyHistoryItem).createdAt).toLocaleTimeString()}`;
-        const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs.basePrompt;
+    const title = isForgeItem ? (item as GeneratedItem).nome : `Alquimia de Prompt`;
+    const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs.basePrompt;
+    const Icon = isForgeItem ? KatanaIcon : MagicWandIcon;
 
-        return (
-            <li key={item.id} className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg group">
-                <button onClick={() => onSelect(item)} className="text-left flex-grow min-w-0">
-                    <p className="font-semibold text-white truncate">{name}</p>
-                    <p className="text-sm text-gray-400 truncate mt-1">{description}</p>
-                </button>
-                <Button variant="ghost" onClick={() => onDelete(item.id)} className="!p-2 flex-shrink-0 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <TrashIcon className="w-5 h-5 text-red-500" />
-                </Button>
-            </li>
-        );
-    }
-    
     return (
-        <Modal 
-            isOpen={isOpen} 
-            onClose={onClose} 
-            title={`Histórico - ${activeView === 'forge' ? 'Forja' : 'Alquimia'}`}
-            variant="drawer-left"
+        <li
+            onClick={handleClick}
+            className="flex items-center gap-4 p-3 hover:bg-gray-700/50 rounded-lg cursor-pointer transition-colors group"
         >
-           <div className="p-4 h-full flex flex-col">
-                {history.length > 0 ? (
-                    <>
-                        <ul className="space-y-2 flex-grow overflow-y-auto pr-2 -mr-2">
-                            {history.map(renderHistoryItem)}
-                        </ul>
-                        <div className="mt-4 flex-shrink-0">
-                            <Button variant="danger" size="sm" onClick={onClear} className="w-full">
-                                Limpar Histórico
-                            </Button>
-                        </div>
-                    </>
-                ) : (
-                    <div className="flex-grow flex flex-col items-center justify-center text-center text-gray-500">
-                        <p className="font-semibold">Histórico vazio.</p>
-                        <p className="text-sm mt-1">Suas gerações recentes aparecerão aqui.</p>
-                    </div>
-                )}
-           </div>
-        </Modal>
+            <div className="flex-shrink-0 w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                <Icon className="w-6 h-6 text-gray-400" />
+            </div>
+            <div className="flex-grow min-w-0">
+                <p className="font-semibold text-white truncate">{title}</p>
+                <p className="text-sm text-gray-400 truncate">{description}</p>
+                <p className="text-xs text-gray-500 mt-1">{new Date(item.createdAt).toLocaleString()}</p>
+            </div>
+            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100" onClick={handleDelete}>
+                <TrashIcon className="w-4 h-4" />
+            </Button>
+        </li>
     );
+};
+
+
+export const HistoryModal: React.FC<HistoryModalProps> = ({
+  isOpen,
+  onClose,
+  history,
+  onSelect,
+  onDelete,
+  onClear,
+  activeView,
+}) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Histórico de Atividade" panelClassName="!max-w-2xl">
+      <div className="flex flex-col h-[70vh]">
+        <div className="p-4 flex-shrink-0">
+          {history.length > 0 && (
+            <Button onClick={onClear} variant="danger" size="sm">
+              <TrashIcon className="w-4 h-4" /> Limpar Histórico
+            </Button>
+          )}
+        </div>
+        <div className="flex-grow overflow-y-auto px-4">
+          {history.length > 0 ? (
+            <ul className="space-y-2">
+                {history.map(item => (
+                    <HistoryListItem key={item.id} item={item} onSelect={onSelect} onDelete={onDelete} />
+                ))}
+            </ul>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                <p className="text-lg">Seu histórico está vazio.</p>
+                <p className="mt-2">Itens gerados ou prompts destilados aparecerão aqui.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
 };

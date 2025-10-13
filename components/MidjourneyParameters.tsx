@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { MidjourneyParameters, MidjourneyParam } from '../types';
 import { Card } from './ui/Card';
@@ -83,7 +84,8 @@ export const MidjourneyParametersComponent: React.FC<MidjourneyParametersProps> 
             {descriptiveParams.map(key => (
                  <div key={key}>
                     <Switch 
-                        label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} 
+                        // FIX: Cast `key` to a string before calling `.replace()` to resolve a type error where `key` could be a number.
+                        label={String(key).replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} 
                         checked={params[key].active} 
                         onChange={e => handleParamChange(key, e.target.checked, 'active')} 
                     />
