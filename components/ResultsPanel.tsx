@@ -2,6 +2,7 @@ import React from 'react';
 import type { GeneratedItem, FilterState } from '../types';
 import { LazyResultCard } from './LazyResultCard';
 import { ForgeLoadingIndicator } from './ForgeLoadingIndicator';
+import { AnvilIcon } from './icons/AnvilIcon';
 
 interface ResultsPanelProps {
   history: GeneratedItem[];
@@ -45,7 +46,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
         ) : history.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center text-gray-500">
             <div>
-              <img src="https://i.imgur.com/yS52rE6.png" alt="Bigorna Vazia" className="w-24 h-24 mx-auto opacity-50" />
+              <AnvilIcon className="w-24 h-24 mx-auto opacity-50" />
               <p className="mt-4">A forja está fria.<br/>Use os filtros para criar algo novo.</p>
             </div>
           </div>

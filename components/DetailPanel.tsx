@@ -15,6 +15,7 @@ import { TextArea } from './ui/TextArea';
 import { TextInput } from './ui/TextInput';
 // FIX: Imported ClipboardIcon to resolve reference error.
 import { ClipboardIcon } from './icons/ClipboardIcon';
+import { KatanaIcon } from './icons/KatanaIcon';
 
 interface DetailPanelProps {
     item: GeneratedItem | null;
@@ -62,7 +63,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         return (
             <div className="flex items-center justify-center h-full text-center text-gray-500 bg-gray-800/30 rounded-lg">
                  <div>
-                    <img src="https://i.imgur.com/jGyL5aE.png" alt="Katana descansando" className="w-24 h-24 mx-auto opacity-50" />
+                    <KatanaIcon className="w-24 h-24 mx-auto opacity-50" />
                     <p className="mt-4">Selecione um item para ver seus segredos.</p>
                 </div>
             </div>

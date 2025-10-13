@@ -1,5 +1,6 @@
 import React from 'react';
-import type { FilterState, Category } from '../types';
+// FIX: Added Rarity to type imports to be used in the onChange handler type assertion.
+import type { FilterState, Category, Rarity } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { TextArea } from './ui/TextArea';
@@ -72,7 +73,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 <SearchableMultiSelect label="Origens" options={ORIGIN_OPTIONS} selected={filters.origins} onChange={(v) => onFilterChange('origins', v)} />
                 <SearchableMultiSelect label="Respirações" options={BREATHING_STYLE_OPTIONS} selected={filters.breathingStyles} onChange={(v) => onFilterChange('breathingStyles', v)} />
                 <SearchableMultiSelect label="Profissões" options={PROFESSION_OPTIONS} selected={filters.professions} onChange={(v) => onFilterChange('professions', v)} />
-                <SearchableSelect label="Raridade" options={RARITY_OPTIONS.map(o => ({ value: o, label: o }))} value={filters.rarity} onChange={(v) => onFilterChange('rarity', v as typeof RARITY_OPTIONS[number])} />
+                {/* FIX: Removed incorrect .map() on RARITY_OPTIONS which was already formatted, and corrected the type assertion in onChange to use the Rarity type. */}
+                <SearchableSelect label="Raridade" options={RARITY_OPTIONS} value={filters.rarity} onChange={(v) => onFilterChange('rarity', v as Rarity)} />
                 <Slider label="Nível/Poder Sugerido" value={filters.level} onChange={(e) => onFilterChange('level', parseInt(e.target.value, 10))} min={1} max={20} step={1} />
             </div>
         </CollapsibleSection>

@@ -14,6 +14,7 @@ import type { AlchemyHistoryItem, MidjourneyParameters as MJParams, GptParameter
 import { PotionIcon } from './icons/PotionIcon';
 import { AuthOverlay } from './AuthOverlay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
+import { CauldronIcon } from './icons/CauldronIcon';
 
 interface PromptEngineeringPanelProps {
     isAuthenticated: boolean;
@@ -150,7 +151,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                 ) : (
                     <Card className="flex-grow flex items-center justify-center text-center text-gray-500">
                         <div>
-                             <img src="https://i.imgur.com/uGn4EiY.png" alt="Caldeirão Vazio" className="w-24 h-24 mx-auto opacity-50" />
+                             <CauldronIcon className="w-24 h-24 mx-auto opacity-50" />
                             <p className="mt-4">Os prompts destilados aparecerão aqui.</p>
                         </div>
                     </Card>
