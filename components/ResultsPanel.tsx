@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { GeneratedItem, FilterState } from '../types';
 import { ResultCardSkeleton } from './ResultCardSkeleton';
@@ -84,6 +85,8 @@ const formatFilterKey = (key: string): string => {
         moodModifiers: 'Modificadores',
         missionTematica: 'Temática',
         missionCountry: 'País',
+        missionThreatScale: 'Escala da Ameaça',
+        missionEventType: 'Tipo de Evento',
         wbTone: 'Tom',
         wbTematica: 'Temática',
         wbCountry: 'País',

@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 import type { MidjourneyParameters, GptParameters, GeminiParameters, PromptGenerationResult, ApiKeys } from '../../types';
@@ -84,6 +83,11 @@ export default async function handler(
             contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
             config: { systemInstruction, responseMimeType: "application/json" },
         });
+        
+        if (!response.text) {
+            console.error("Gemini response text is empty or undefined");
+            throw new Error("A IA de Alquimia retornou uma resposta vazia. Tente novamente.");
+        }
 
         let result: PromptGenerationResult = {};
         try {

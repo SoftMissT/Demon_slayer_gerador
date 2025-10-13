@@ -221,29 +221,27 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                     <div className="flex flex-col gap-0 min-h-0 lg:col-span-3">
                         <div className="inner-scroll flex-grow pr-2 -mr-2 space-y-6">
                             <Card className="flex-grow flex flex-col p-4 md:p-6">
-                                <div className="flex justify-between items-center mb-4">
+                                <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
                                     <h2 className="text-xl font-bold text-white font-gangofthree">Caldeirão</h2>
-                                    <button className="alchemy-clear-button" onClick={handleClearIdea}>
-                                        <RefreshIcon className="w-4 h-4" />
-                                        <span>Limpar Tela</span>
-                                    </button>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <div className="w-48">
+                                            <Select label="" value={selectedPreset} onChange={handlePresetChange}>
+                                                <option value="">Carregar preset...</option>
+                                                {presets.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                                            </Select>
+                                        </div>
+                                        <Button variant="secondary" size="sm" onClick={handleSavePreset} className="!p-2" title="Salvar preset"><SaveIcon className="w-5 h-5" /></Button>
+                                        {selectedPreset && <Button variant="danger" size="sm" onClick={handleDeletePreset} className="!p-2" title="Deletar preset"><TrashIcon className="w-5 h-5" /></Button>}
+                                        <div className="w-px h-6 bg-gray-700 mx-2 hidden sm:block"></div>
+                                        <button className="alchemy-clear-button" onClick={handleClearIdea}>
+                                            <RefreshIcon className="w-4 h-4" />
+                                            <span>Limpar Ideia</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="space-y-4">
                                     <TextArea label="Tópico Principal / Ideia" value={basePrompt} onChange={(e) => setBasePrompt(e.target.value)} placeholder="Ex: um caçador de onis com uma máscara de raposa..." rows={5} disabled={isLoading}/>
                                     <TextArea label="Prompt Negativo (O que evitar)" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Ex: texto, blur, baixa qualidade, cartoon" rows={2} disabled={isLoading}/>
-                                </div>
-                            </Card>
-                            <Card className="p-4 md:p-6">
-                                <h3 className="text-lg font-bold text-white font-gangofthree mb-3">Presets da Alquimia</h3>
-                                <div className="flex items-center gap-2">
-                                    <div className="flex-grow">
-                                        <Select label="" value={selectedPreset} onChange={handlePresetChange}>
-                                            <option value="">Carregar preset...</option>
-                                            {presets.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                                        </Select>
-                                    </div>
-                                    <Button variant="secondary" size="sm" onClick={handleSavePreset} className="!p-2" title="Salvar filtros atuais como um preset"><SaveIcon className="w-5 h-5" /></Button>
-                                    {selectedPreset && <Button variant="danger" size="sm" onClick={handleDeletePreset} className="!p-2" title="Deletar preset selecionado"><TrashIcon className="w-5 h-5" /></Button>}
                                 </div>
                             </Card>
                             <Card className="p-4 md:p-6"><GptStructuredBuilder params={gptParams} onParamsChange={setGptParams} enabled={isGptEnabled} onEnabledChange={setIsGptEnabled} /></Card>
@@ -257,7 +255,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                             <Card className="p-4 md:p-6"><MidjourneyParameters params={mjParams} onParamsChange={setMjParams} enabled={isMjEnabled} onEnabledChange={setIsMjEnabled} /></Card>
                             
                             {(isLoading || result) && (
-                                <div className="results-container mt-6">
+                                <div className="results-container">
                                     {isLoading ? (
                                         <Card className="flex items-center justify-center p-6">
                                             <AlchemyLoadingIndicator />

@@ -106,6 +106,8 @@ export interface FilterState {
     moodModifiers: string;
     missionTematica: Tematica | '';
     missionCountry: string;
+    missionThreatScale: string;
+    missionEventType: string;
     // World Building
     wbTone: Tone;
     wbTematica: Tematica | '';

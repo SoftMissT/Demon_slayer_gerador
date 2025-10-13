@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { GeminiParameters as GeminiParametersType } from '../types';
 import { Select } from './ui/Select';
@@ -46,7 +47,7 @@ export const GeminiParameters: React.FC<GeminiParametersProps> = ({ params, onPa
                         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                         className="overflow-hidden"
                     >
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                             <Select
                                 label="Estilo de Arte"
                                 value={params.artStyle}

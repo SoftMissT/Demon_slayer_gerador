@@ -389,6 +389,8 @@ export const INITIAL_FILTERS: FilterState = {
     moodModifiers: '',
     missionTematica: '',
     missionCountry: '',
+    missionThreatScale: '',
+    missionEventType: '',
     // World Building
     wbTone: 'épico',
     wbTematica: '',

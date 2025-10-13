@@ -203,8 +203,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ onGenerate, isLoading,
             </div>);
             case 'Missões': return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Tom" value={filters.missionTone} onChange={e => handleFilterChange('missionTone', e.target.value as Tone)}>{TONES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
+                <Select label="Escala da Ameaça" value={filters.missionThreatScale} onChange={e => handleFilterChange('missionThreatScale', e.target.value)}>{THREAT_SCALES.map(o => <option key={o} value={o}>{o}</option>)}</Select>
                 <SearchableSelect label="Temática" value={filters.missionTematica || ''} onChange={e => handleFilterChange('missionTematica', e.target.value as Tematica)}>{TEMATICAS.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
                 <SearchableSelect label="País (Cultural)" value={filters.missionCountry} onChange={e => handleFilterChange('missionCountry', e.target.value)}>{COUNTRIES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                <div className="md:col-span-2">
+                    <SearchableSelect label="Tipo de Evento Central" value={filters.missionEventType} onChange={e => handleFilterChange('missionEventType', e.target.value)}>{EVENT_TYPES.map(o => <option key={o} value={o}>{o}</option>)}</SearchableSelect>
+                </div>
                 <div className="md:col-span-2">
                     <Slider label={`Intensidade: ${filters.intensity}`} min={1} max={5} step={1} value={filters.intensity} onChange={e => handleFilterChange('intensity', parseInt(e.target.value))} tooltip="Controla a complexidade e o perigo da missão. Valores mais altos geram missões com mais reviravoltas, inimigos poderosos e consequências impactantes." />
                 </div>
