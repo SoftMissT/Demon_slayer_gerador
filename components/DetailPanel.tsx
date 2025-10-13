@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
+// FIX: Corrected import path after implementing types.ts.
 import type { GeneratedItem, HunterItem, OniItem, NpcItem, WeaponItem, AccessoryItem, KekkijutsuItem, BreathingFormItem, MissionItemDetails, WorldBuildingItem, EventItem } from '../types';
+// FIX: Corrected import path after implementing AccordionSection.tsx.
 import { AccordionSection } from './AccordionSection';
 import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';

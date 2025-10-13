@@ -7,6 +7,7 @@ import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
+// FIX: Corrected import path after creating types.ts
 import type { FilterState, GeneratedItem, User, AIFlags, Rarity } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';

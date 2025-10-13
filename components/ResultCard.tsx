@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import type { GeneratedItem } from '../types';
 import { Card } from './ui/Card';
@@ -45,7 +46,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   };
   
   // FIX: Corrected category name from 'Missão/Cenário' to 'Missões' to align with the defined types and fix a type error.
-  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento';
+  const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento' && item.categoria !== 'Local/Cenário';
 
   return (
     <Card 

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -11,6 +12,7 @@ import { HistoryModal } from './components/HistoryModal';
 import { FavoritesModal } from './components/FavoritesModal';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import useLocalStorage from './hooks/useLocalStorage';
+// FIX: Corrected import path for types after creating the file.
 import type { User, GeneratedItem, AlchemyHistoryItem, HistoryItem, FavoriteItem } from './types';
 import { constructAvatarUrl } from './lib/discord';
 
@@ -98,7 +100,7 @@ export default function App() {
             setActiveView('forge');
         }
         setIsHistoryModalOpen(false);
-    }, [setSelectedItem]);
+    }, [setSelectedItem, setActiveView]);
 
     const handleSelectFavoriteItem = useCallback((item: FavoriteItem) => {
         if ('categoria' in item) { // It's a GeneratedItem
@@ -106,7 +108,7 @@ export default function App() {
             setActiveView('forge');
         }
         setIsFavoritesModalOpen(false);
-    }, [setSelectedItem]);
+    }, [setSelectedItem, setActiveView]);
     
     return (
         <>
@@ -176,9 +178,9 @@ export default function App() {
                     onSelect={handleSelectFavoriteItem}
                     onToggleFavorite={(item) => {
                          if ('categoria' in item) {
-                            setForgeFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item, ...f]);
+                            setForgeFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item as GeneratedItem, ...f]);
                         } else {
-                            setAlchemyFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item, ...f]);
+                            setAlchemyFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item as AlchemyHistoryItem, ...f]);
                         }
                     }}
                     activeView={activeView}

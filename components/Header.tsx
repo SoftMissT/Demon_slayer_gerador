@@ -25,6 +25,7 @@ interface HeaderProps {
     onOpenHowItWorks: () => void;
     user: User | null;
     onLogout: () => void;
+    favoritesCount: number;
 }
 
 const ViewToggleButton: React.FC<{ activeView: AppView, onViewChange: (view: AppView) => void }> = ({ activeView, onViewChange }) => (
@@ -52,7 +53,7 @@ const ViewToggleButton: React.FC<{ activeView: AppView, onViewChange: (view: App
 
 
 export const Header: React.FC<HeaderProps> = ({
-    activeView, onViewChange, onOpenAbout, onOpenApiKeys, onOpenHistory, onOpenFavorites, onOpenHowItWorks, user, onLogout
+    activeView, onViewChange, onOpenAbout, onOpenApiKeys, onOpenHistory, onOpenFavorites, onOpenHowItWorks, user, onLogout, favoritesCount
 }) => {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -71,7 +72,14 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="flex items-center gap-2 md:gap-3">
                 <Tooltip text="Favoritos">
-                    <button onClick={onOpenFavorites} className="p-2 text-gray-400 hover:text-white transition-colors"><StarIcon className="w-6 h-6" /></button>
+                    <button onClick={onOpenFavorites} className="relative p-2 text-gray-400 hover:text-white transition-colors">
+                        <StarIcon className="w-6 h-6" />
+                        {favoritesCount > 0 && (
+                            <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                                {favoritesCount > 99 ? '99+' : favoritesCount}
+                            </span>
+                        )}
+                    </button>
                 </Tooltip>
                 <Tooltip text="Histórico">
                     <button onClick={onOpenHistory} className="p-2 text-gray-400 hover:text-white transition-colors"><HistoryIcon className="w-6 h-6" /></button>

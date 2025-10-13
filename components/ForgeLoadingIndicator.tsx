@@ -1,55 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { AnvilIcon } from './icons/AnvilIcon';
 import { TypingLoader } from './TypingLoader';
-import { GeminiIcon } from './icons/GeminiIcon';
-import { GptIcon } from './icons/GptIcon';
+import type { FilterState } from '../types';
 
-interface ForgeLoadingIndicatorProps {
-    aiFocus: Record<string, string> | null;
-}
-
-const STEPS = [
-    { model: 'DeepSeek', task: 'Conceitualizando ideia base...', icon: <GeminiIcon className="w-5 h-5" /> },
-    { model: 'Gemini', task: 'Estruturando lore e mecânicas...', icon: <GeminiIcon className="w-5 h-5" /> },
-    { model: 'GPT-4o', task: 'Aplicando polimento narrativo final...', icon: <GptIcon className="w-5 h-5" /> },
+const MESSAGES = [
+    'Aquecendo a fornalha com ventos ancestrais...',
+    'Consultando os pergaminhos de aço Nichirin...',
+    'Martelando a realidade em forma de lenda...',
+    'Temperando a criação em águas místicas...',
+    'Aguardando o alinhamento das estrelas...',
+    'Invocando a centelha da inspiração divina...',
+    'Polindo a lâmina da narrativa...',
+    'O eco do martelo ressoa no vazio...',
 ];
 
+interface ForgeLoadingIndicatorProps {
+    aiFocus?: Record<string, string> | null;
+    activeFilters?: FilterState | null;
+}
 
-export const ForgeLoadingIndicator: React.FC<ForgeLoadingIndicatorProps> = ({ aiFocus }) => {
-    const [currentStep, setCurrentStep] = useState(0);
+export const ForgeLoadingIndicator: React.FC<ForgeLoadingIndicatorProps> = ({ aiFocus, activeFilters }) => {
+    const [message, setMessage] = useState(MESSAGES[0]);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentStep(prev => (prev + 1) % STEPS.length);
+        const intervalId = setInterval(() => {
+            setMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
         }, 2500);
-        return () => clearInterval(interval);
+
+        return () => clearInterval(intervalId);
     }, []);
 
+    const category = activeFilters?.category;
+    const tematica = (activeFilters && Object.values(activeFilters).find(v => typeof v === 'string' && v && !['', 'Aleatória', 'Aleatório'].includes(v) && v.length > 3));
+
     return (
-        <div className="flex flex-col items-center justify-center text-center p-8 w-full max-w-md">
-            <div className="relative w-24 h-24 mb-6">
-                <AnvilIcon className="w-24 h-24 text-gray-600 animate-pulse" />
-                <div className="spark-container">
-                    <div className="spark"></div>
-                    <div className="spark"></div>
-                    <div className="spark"></div>
-                    <div className="spark"></div>
-                </div>
+        <div className="flex flex-col items-center justify-center text-center p-6 w-full h-full">
+            <div className="relative w-24 h-24 mb-4">
+                <div className="absolute inset-0 bg-gradient-to-tr from-red-500 via-orange-500 to-yellow-400 blur-2xl opacity-40 animate-pulse"></div>
+                <AnvilIcon className="w-24 h-24 text-gray-400 animate-pulse-slow" />
             </div>
-            <h2 className="text-2xl font-bold font-gangofthree text-white">Forjando...</h2>
-            
-            <div className="mt-4 w-full text-left p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center bg-gray-700 rounded-full flex-shrink-0">
-                        {STEPS[currentStep].icon}
-                    </div>
-                    <TypingLoader
-                        key={currentStep}
-                        text={STEPS[currentStep].task}
-                        className="text-indigo-300"
-                    />
+            <h3 className="text-xl font-bold font-gangofthree text-white">Forjando...</h3>
+            {category && <p className="text-indigo-400">{category}{tematica ? ` • ${tematica}` : ''}</p>}
+            <TypingLoader text={message} className="text-gray-400 mt-2 h-5" />
+
+            {aiFocus && (
+                <div className="text-xs mt-4 space-y-1 font-mono text-gray-500 border-t border-gray-700 pt-3">
+                    {aiFocus.aiFocusGemini && <p>Foco Gemini: {aiFocus.aiFocusGemini}</p>}
+                    {aiFocus.aiFocusGpt && <p>Foco GPT: {aiFocus.aiFocusGpt}</p>}
+                    {aiFocus.aiFocusDeepSeek && <p>Foco DeepSeek: {aiFocus.aiFocusDeepSeek}</p>}
                 </div>
-            </div>
+            )}
         </div>
     );
 };

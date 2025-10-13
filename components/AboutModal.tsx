@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from './ui/Modal';
+// FIX: Corrected import after implementing AboutPanel.
 import { AboutPanel } from './AboutPanel';
 
 interface AboutModalProps {

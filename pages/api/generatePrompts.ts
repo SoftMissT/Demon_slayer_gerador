@@ -1,5 +1,6 @@
 
 
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAiClient } from '../../lib/gemini';
 // FIX: Corrected import path for types.

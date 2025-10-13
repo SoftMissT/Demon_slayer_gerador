@@ -1,13 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
+// FIX: Implemented the Tooltip component to resolve multiple module-not-found and syntax errors.
+// This component provides a hover-activated tooltip with a slight delay for better UX.
 interface TooltipProps {
-  children: React.ReactElement;
+  children: React.ReactNode;
   text: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
+  className?: string;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ children, text, position = 'top' }) => {
-  const [visible, setVisible] = useState(false);
+export const Tooltip: React.FC<TooltipProps> = ({ children, text, position = 'bottom', className = '' }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(true);
+    }, 400);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsVisible(false);
+  };
 
   const positionClasses = {
     top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
@@ -17,11 +35,16 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, text, position = 'to
   };
 
   return (
-    <div className="relative flex items-center" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
+    <div 
+      className={`relative inline-flex items-center ${className}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {children}
-      {visible && (
-        <div
-          className={`absolute ${positionClasses[position]} w-max max-w-xs z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 border border-gray-700 rounded-lg shadow-sm transition-opacity duration-300`}
+      {isVisible && text && (
+        <div 
+          role="tooltip"
+          className={`absolute z-50 px-2 py-1 text-xs font-semibold text-white bg-gray-900 border border-gray-700 rounded-md shadow-lg whitespace-nowrap animate-fade-in-fast ${positionClasses[position]}`}
         >
           {text}
         </div>
