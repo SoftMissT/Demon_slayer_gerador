@@ -41,12 +41,17 @@ export default function App() {
     const handleLoginClick = useCallback(async () => {
         try {
             const res = await fetch('/api/auth/discord/url');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Failed to get auth URL');
+            }
             const { url } = await res.json();
             if (url) {
                 window.location.href = url;
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to get Discord auth URL", error);
+            alert(`Login Error: ${error.message}`);
         }
     }, []);
 
@@ -105,8 +110,8 @@ export default function App() {
     
     return (
         <>
-            <MatrixBackground />
-            <div className="flex flex-col h-screen bg-gray-900 text-white font-sans overflow-hidden">
+            <div className={`app-background ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}></div>
+            <div className="flex flex-col h-screen text-white font-sans overflow-hidden">
                 <Header 
                     activeView={activeView}
                     onViewChange={setActiveView}
@@ -117,9 +122,10 @@ export default function App() {
                     onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
                     user={user}
                     onLogout={handleLogout}
+                    favoritesCount={forgeFavorites.length + alchemyFavorites.length}
                 />
 
-                <main className="flex-grow p-2 overflow-hidden">
+                <main className="flex-grow p-2 overflow-hidden relative">
                     {activeView === 'forge' ? (
                         <ForgeInterface 
                             isAuthenticated={isAuthenticated}
@@ -144,10 +150,8 @@ export default function App() {
                     )}
                 </main>
                 
-                <Footer onAboutClick={() => setIsAboutModalOpen(true)} />
-
-                <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
                 <ApiKeysModal isOpen={isApiKeysModalOpen} onClose={() => setIsApiKeysModalOpen(false)} />
+                <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
                 <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
 
                 <HistoryModal
@@ -171,8 +175,11 @@ export default function App() {
                     favorites={activeView === 'forge' ? forgeFavorites : alchemyFavorites}
                     onSelect={handleSelectFavoriteItem}
                     onToggleFavorite={(item) => {
-                        if (activeView === 'forge') setForgeFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item, ...f]);
-                        else setAlchemyFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item, ...f]);
+                         if ('categoria' in item) {
+                            setForgeFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item, ...f]);
+                        } else {
+                            setAlchemyFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item, ...f]);
+                        }
                     }}
                     activeView={activeView}
                 />

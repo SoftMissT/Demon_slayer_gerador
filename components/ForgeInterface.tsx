@@ -7,7 +7,7 @@ import { ErrorDisplay } from './ui/ErrorDisplay';
 import { Button } from './ui/Button';
 import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
-import type { FilterState, GeneratedItem, User, AIFlags } from '../types';
+import type { FilterState, GeneratedItem, User, AIFlags, Rarity } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
 import { ChevronRightIcon } from './icons/ChevronRightIcon';
@@ -141,9 +141,15 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         
         const filters: Partial<FilterState> = { category: item.categoria };
         if (item.categoria === 'Arma') {
-            filters.weaponRarity = item.raridade;
+            // FIX: Cast `item.raridade` to `Rarity | ''` to resolve a type mismatch.
+            // The `GeneratedItem` type allows `raridade` to be a generic string,
+            // while `FilterState` requires a more specific rarity type.
+            filters.weaponRarity = item.raridade as Rarity | '';
         } else if (item.categoria === 'Acessório') {
-            filters.accessoryRarity = item.raridade;
+            // FIX: Cast `item.raridade` to `Rarity | ''` to resolve a type mismatch.
+            // The `GeneratedItem` type allows `raridade` to be a generic string,
+            // while `FilterState` requires a more specific rarity type.
+            filters.accessoryRarity = item.raridade as Rarity | '';
         }
         
         setIsLoading(true);
