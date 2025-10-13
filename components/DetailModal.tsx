@@ -24,8 +24,8 @@ const DetailModalComponent: React.FC<DetailModalProps> = ({
   if (!item) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
-        <div className="max-h-[80vh] -m-6">
+    <Modal isOpen={isOpen} onClose={onClose} title="" panelClassName="!max-w-4xl w-full">
+        <div className="max-h-[85vh] -m-6">
             <DetailPanel item={item} {...props} />
         </div>
     </Modal>

@@ -1,133 +1,213 @@
-# 🛠️ Kimetsu Forge (Forja de Lendas)
+# 🛠️ Kimetsu Forge — Forja de Lendas / Legend Forge
 
-Kimetsu Forge é uma ferramenta criativa feita de fã para fã, voltada para mestres e jogadores de RPG de mesa, com inspiração no universo sombrio e emocionante de Demon Slayer (Kimetsu no Yaiba).
-Ela auxilia na geração de armas, inimigos, formas de respiração, NPCs e cenários inteiros usando uma orquestração de IAs generativas.
+**PT-BR / EN — Readme bilíngue**
 
-## ✨ Features
-- Geração de elementos de RPG como armas, demônios, técnicas de respiração e ganchos de história.
-- Criação de descrições detalhadas e prontas para uso em prompts de imagem, otimizadas para plataformas como Midjourney e DALL·E.
-- Aceleração do processo de criação de histórias com conteúdo gerado por uma colaboração de IAs.
+---
 
-## 🔐 Acesso via Discord & Whitelist
-O acesso ao Kimetsu Forge é gerenciado através da autenticação com o Discord. Para utilizar as funcionalidades, os usuários devem entrar com sua conta e ter seu ID do Discord na lista de acesso (whitelist) gerenciada pelo administrador.
+## 🇧🇷 Português
 
-### 1. Configuração do Discord
+### Sobre
+**Kimetsu Forge** é uma ferramenta fan-made para mestres e jogadores de RPG de mesa inspirada na estética sombria e épica de animes como *Demon Slayer*. Ela ajuda a gerar itens, inimigos, técnicas, NPCs, quests e prompts de imagem usando uma orquestração de IAs.
 
-Para que o login funcione, você precisa registrar um aplicativo no Portal de Desenvolvedores do Discord.
+> Ferramenta feita por fãs, para fãs — focada em acelerar o fluxo criativo na criação de conteúdo de RPG.
 
-1.  **Acesse o Portal de Desenvolvedores:** Vá para [discord.com/developers/applications](https://discord.com/developers/applications) e clique em **"New Application"**. Dê um nome ao seu aplicativo (ex: "Kimetsu Forge App") e aceite os termos.
+### Principais features
+- Geração de armas, demônios, técnicas de respiração, NPCs e ganchos de história.  
+- Produção de descrições prontas para ficha e prompts de imagem otimizados (Midjourney, DALL·E, etc.).  
+- Pipeline em 3 etapas: **Conceito → Estrutura → Polimento** (DeepSeek → Gemini → GPT).  
+- Presets, filtros e parâmetros para controlar estilo, raridade e mecânicas.
 
-2.  **Obtenha o Client ID e Client Secret:**
-    *   Na página do seu aplicativo, vá para a aba **"OAuth2"**.
-    *   Copie o **CLIENT ID**.
-    *   Clique em **"Reset Secret"** para gerar e copiar o seu **CLIENT SECRET**. Guarde-o em segurança.
+### Aviso Legal (importante)
+Este projeto é **não oficial** e **sem fins lucrativos**, criado em homenagem à obra de Koyoharu Gotouge. *Demon Slayer (Kimetsu no Yaiba)* é propriedade dos respectivos detentores de copyright. O conteúdo gerado é fictício e destinado apenas a uso pessoal/entretenimento em campanhas de RPG.
 
-3.  **Configure a Redirect URI:**
-    *   Ainda na aba **"OAuth2"**, na seção "Redirects", clique em **"Add Redirect"**.
-    *   Cole a URL de desenvolvimento `http://localhost:3000`.
-    *   **Importante:** Adicione também a URL do seu site em produção (quando você fizer o deploy na Vercel). Ex: `https://seu-projeto.vercel.app`.
+### Tecnologias
+- Frontend: Next.js / React  
+- Estilização: Tailwind CSS (configurável)  
+- IA / Orquestração: DeepSeek, Google Gemini, OpenAI (GPT)  
+- Autenticação: Discord OAuth2  
+- Whitelist: Google Sheets (via Service Account)  
 
-### 2. Configuração da Whitelist (Google Sheets)
+---
 
-A whitelist de usuários é lida a partir de uma planilha do Google Sheets. Para configurar, siga os passos:
+### Começando (desenvolvimento local)
 
-1.  **Crie uma Conta de Serviço no Google Cloud:**
-    *   Acesse o [Google Cloud Console](https://console.cloud.google.com/), crie um novo projeto e ative a **API do Google Sheets**.
-    *   Vá para **IAM e Admin > Contas de Serviço**, crie uma nova conta de serviço.
-    *   Dentro da conta de serviço, vá para a aba **Chaves**, clique em **Adicionar Chave > Criar nova chave**, selecione **JSON** e faça o download.
+#### Requisitos
+- Node.js v18+  
+- Git
 
-2.  **Configure sua Planilha:**
-    *   Crie uma nova planilha no Google Sheets.
-    *   Renomeie a primeira aba (página) para `discord_id`.
-    *   Na coluna `A`, coloque os nicks dos usuários (opcional). Na coluna `B`, coloque os **IDs do Discord** dos usuários autorizados.
-    *   Clique em **Compartilhar** e adicione o `client_email` (do arquivo JSON baixado) como **Leitor**.
-
-### 3. Variáveis de Ambiente
-
-Adicione todas as variáveis a seguir no seu provedor de hospedagem (Vercel) ou em um arquivo `.env.local` na raiz do projeto para desenvolvimento local.
-
-```env
-# Credenciais da API do Google para a Whitelist
-GOOGLE_SHEET_ID="ID_DA_SUA_PLANILHA_AQUI"
-GOOGLE_SERVICE_ACCOUNT_EMAIL="client_email_do_seu_json@..."
-GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nSUA_CHAVE_PRIVADA_AQUI\n-----END PRIVATE KEY-----\n"
-
-# Credenciais da Aplicação Discord para Autenticação
-DISCORD_CLIENT_ID="SEU_CLIENT_ID_DO_DISCORD_AQUI"
-DISCORD_CLIENT_SECRET="SEU_CLIENT_SECRET_DO_DISCORD_AQUI"
-DISCORD_REDIRECT_URI="http://localhost:3000" # Em produção, use a URL do seu site
-
-# Chaves de API para os modelos de IA
-# Chave para Google Gemini (https://aistudio.google.com/app/apikey)
-DEV_GEMINI_KEY="SUA_CHAVE_GEMINI_AQUI"
-# Chave para OpenAI (https://platform.openai.com/api-keys)
-DEV_OPENAI_KEY="SUA_CHAVE_OPENAI_AQUI"
-# Chave para DeepSeek (https://platform.deepseek.com/api_keys)
-DEV_DEEPSEEK_KEY="SUA_CHAVE_DEEPSEEK_AQUI"
-```
-*   **`GOOGLE_PRIVATE_KEY`**: Copie o valor da `private_key` do arquivo JSON. Na Vercel, você pode colar o valor de múltiplas linhas diretamente no campo.
-*   **`DISCORD_REDIRECT_URI`**: Para rodar localmente, use `http://localhost:3000`. Quando for para produção, mude para a URL do seu site na Vercel.
-
-## 🧠 Como Funciona: A Orquestração de IAs
-O Kimetsu Forge utiliza um fluxo de três etapas que para garantir resultados ricos e detalhados:
-
-1.  **DeepSeek (O Conceitualizador):** A primeira IA gera a ideia base, o conceito bruto e fundamental do item, personagem ou técnica solicitada.
-2.  **Google Gemini (O Arquiteto):** Em seguida, o Gemini recebe esse conceito e o enriquece, adicionando lore, estrutura, detalhes mecânicos para RPG e um prototipo de descrição visual.
-3.  **OpenAI GPT-4o (O Artista Final):** Por fim, o modelo da OpenAI realiza o polimento final, aprimorando a narrativa para um tom de roleplay mais forte e refinando a descrição visual para que ela se torne um prompt de imagem pronto para ser usado.
-
-## 🚀 Como Começar (Guia de Instalação)
-
-Siga estes passos para executar o Kimetsu Forge em sua máquina local.
-
-### 1. Pré-requisitos
-- [Node.js](https://nodejs.org/) (versão 18 ou superior)
-- [Git](https://git-scm.com/)
-
-### 2. Clone o Repositório
-Abra seu terminal e execute o seguinte comando:
+#### 1. Clone
 ```bash
 git clone https://github.com/SoftMissT/Demon_slayer_gerador.git
 cd Demon_slayer_gerador
 ```
 
-### 3. Instale as Dependências
-Use o npm para instalar todos os pacotes necessários:
+#### 2. Instale dependências
 ```bash
 npm install
 ```
 
-### 4. Configure as Variáveis de Ambiente
-Crie um arquivo `.env.local` na raiz do projeto e adicione as chaves de API conforme as instruções na seção "Variáveis de Ambiente".
+#### 3. Variáveis de ambiente
 
-### 5. Execute o Servidor de Desenvolvimento
-Com tudo configurado, inicie a aplicação:
+Crie um arquivo `.env.local` (NUNCA commite este arquivo). 
+
+**Importante:** não coloque chaves/IDs sensíveis no README público nem em commits. Use variáveis de ambiente e/ou o secret manager do seu host (Vercel, Netlify, etc).
+
+Um arquivo `.env.example` pode ser criado para referência, com placeholders.
+
+```env
+# Discord OAuth2 (obtenha no portal de desenvolvedores Discord)
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+DISCORD_REDIRECT_URI=http://localhost:3000
+
+# Google Sheets (whitelist)
+GOOGLE_SHEET_ID=your_google_sheet_id
+GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+
+# Chaves das APIs de IA (cole no ambiente, não no repositório)
+DEV_GEMINI_KEY=your_gemini_api_key
+DEV_OPENAI_KEY=your_openai_api_key
+DEV_DEEPSEEK_KEY=your_deepseek_api_key
+```
+
+⚠️ **Segurança:** Nunca exponha `GOOGLE_PRIVATE_KEY`, `DISCORD_CLIENT_SECRET`, `DEV_OPENAI_KEY`, etc. no repositório público. Use variáveis de ambiente no host ou secret manager.
+
+#### 4. Rodar em dev
 ```bash
 npm run dev
 ```
-Abra [http://localhost:3000](http://localhost:3000) em seu navegador para ver o resultado.
+Abra http://localhost:3000
 
-## 🧩 Tecnologias
-- **Orquestração de IAs:** DeepSeek, Google Gemini e OpenAI (GPT-4o).
-- **Frontend:** Next.js & React para uma arquitetura moderna e de alta performance.
-- **Autenticação:** Discord OAuth2
-- **Whitelist:** Google Sheets API.
-- **Estilização:** Tailwind CSS para um design rápido, responsivo e customizável.
+### Configuração (resumo)
 
+- **Discord OAuth2:** Registre um App no portal do Discord, configure Redirect URI(s) (ex.: `http://localhost:3000`) e adicione `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` ao `.env.local`.
 
-## ❤️ Apoie a Obra Original
-Kimetsu Forge é um projeto de fã, feito com carinho para a comunidade. A melhor forma de apoiar é consumindo a obra original de Koyoharu Gotouge.
-- **Leia o Mangá:** [Compre na Panini Comics Brasil](https://panini.com.br/catalogsearch/result/index/referer/aHR0cHM6Ly9wYW5pbmkuY29tLmJyL2NhdGFsb2dzZWFyY2gvcmVzdWx0Lz9xPURlbW9uK1NsYXllcg~~/?collection=DEMON+SLAYER+-+KIMETSU+NO+YAIBA&q=Demon+Slayer)
-- **Assista ao Anime:** [Disponível na Crunchyroll](https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba)
+- **Whitelist (Google Sheets):** Crie uma planilha, adicione uma aba chamada `discord_id` com IDs autorizados na coluna B. Crie uma Service Account no Google Cloud, gere a chave JSON e compartilhe a planilha com o `client_email` da Service Account (com permissão de leitura). Configure `GOOGLE_SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_EMAIL` e `GOOGLE_PRIVATE_KEY`.
 
-## ⚠️ Aviso Legal
-Este é um projeto de fã não oficial, criado em homenagem à incrível obra de Koyoharu Gotouge, apenas para fins educacionais e de entretenimento.
-Demon Slayer: Kimetsu no Yaiba é uma propriedade de Koyoharu Gotouge, Shueisha e Ufotable.
-Todos os direitos do universo original e dos personagens pertencem aos seus respectivos proprietários.
+- **Chaves das IAs:** obtenha as chaves nas plataformas correspondentes e configure via env.
 
-## 👥 Créditos
-- **Criadores:** SoftMisst & Mathzin
+### Deploy
+
+Recomendado: Vercel / Netlify.
+
+- Configure as mesmas variáveis de ambiente no painel do provedor (não commit).
+- Atualize a `DISCORD_REDIRECT_URI` para a URL de produção.
+
+### Contribuição
+
+Quer ajudar? Abra issues e PRs. Mantenha commits pequenos e documentados. Use o padrão de branches: `feature/x`, `fix/x`.
+
+### Créditos & Licença
+
+- **Criadores:** SoftMissT & Mathzin
 - **Colaboradores:** ZeratulBr, Cardhial, VK, Dan, Akira
 
-## 💬 Sobre Este Projeto
-O Kimetsu Forge foi projetado para auxiliar Mestres de Jogo, acelerando a geração de ideias e a construção de mundos.
-O conteúdo gerado é fictício e deve ser personalizado para se adequar à história ou ao estilo de campanha de cada jogador.
+Este projeto é fan-made. Consulte a licença no repositório (MIT recomendado se quiser abrir contribuição).
+
+---
+## 🇺🇸 English
+
+### About
+
+**Kimetsu Forge** is a fan-made creative tool for tabletop RPG GMs and players, inspired by the dark and epic aesthetic of animes like *Demon Slayer*. It helps generate items, enemies, techniques, NPCs, quests, and image prompts using an AI orchestration pipeline.
+
+> A tool made by fans, for fans—focused on speeding up the creative workflow for RPG content creation.
+
+### Key features
+
+- Generate weapons, demons, breathing techniques, NPCs, and story hooks.
+- Produce ready-to-use descriptions and optimized image prompts (Midjourney, DALL·E, etc.).
+- 3-step pipeline: **Concept → Structure → Polish** (DeepSeek → Gemini → GPT).
+- Presets, filters, and parameters to control style, rarity, and mechanics.
+
+### Legal Notice (Important)
+This is an **unofficial**, **non-commercial** fan project created in homage to the original work. *Demon Slayer (Kimetsu no Yaiba)* and its IP belong to their respective copyright holders. Generated content is fictional and intended for personal/entertainment use in RPGs only.
+
+### Tech stack
+
+- **Frontend:** Next.js / React
+- **Styling:** Tailwind CSS
+- **AI Orchestration:** DeepSeek, Google Gemini, OpenAI (GPT)
+- **Auth:** Discord OAuth2
+- **Whitelist:** Google Sheets (via Service Account)
+
+---
+
+### Getting Started (Local Development)
+
+#### Prerequisites
+- Node.js v18+
+- Git
+
+#### 1. Clone
+```bash
+git clone https://github.com/YOUR_USER/YOUR_REPO.git
+cd YOUR_REPO
+```
+
+#### 2. Install Dependencies
+```bash
+npm install
+```
+
+#### 3. Environment Variables
+
+Create a `.env.local` file (NEVER commit this file). Use the following as a template.
+
+**Important:** Do not commit sensitive keys/IDs to the public repository. Use environment variables and/or your host's secret manager (Vercel, Netlify, etc.).
+
+```env
+# Discord OAuth2 (get from Discord Developer Portal)
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+DISCORD_REDIRECT_URI=http://localhost:3000
+
+# Google Sheets (for whitelist)
+GOOGLE_SHEET_ID=your_google_sheet_id
+GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+
+# AI API Keys (set in environment, not in the repository)
+DEV_GEMINI_KEY=your_gemini_api_key
+DEV_OPENAI_KEY=your_openai_api_key
+DEV_DEEPSEEK_KEY=your_deepseek_api_key
+```
+
+⚠️ **Security:** Never expose `GOOGLE_PRIVATE_KEY`, `DISCORD_CLIENT_SECRET`, `DEV_OPENAI_KEY`, etc., in the public repository. Use your host's environment variables or secret manager.
+
+#### 4. Run in Development
+```bash
+npm run dev
+```
+Open http://localhost:3000
+
+### Setup Summary
+
+- **Discord OAuth2:** Register an app in the Discord Developer Portal, configure Redirect URI(s) (e.g., `http://localhost:3000`), and add `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` to `.env.local`.
+- **Whitelist (Google Sheets):** Create a spreadsheet, add a sheet named `discord_id` with authorized user IDs in column B. Create a Service Account in Google Cloud, generate the JSON key, and share the sheet with the Service Account's `client_email` (with viewer permissions). Configure `GOOGLE_SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_EMAIL`, and `GOOGLE_PRIVATE_KEY`.
+- **AI Keys:** Obtain keys from the respective platforms and set them in your environment.
+
+### Deployment
+
+- **Recommended:** Vercel / Netlify.
+- Configure the same environment variables in your provider's dashboard (do not commit them).
+- Update `DISCORD_REDIRECT_URI` to your production URL.
+
+### Contributing
+
+Want to help? Open issues and PRs. Keep commits small and documented. Use the branch naming convention: `feature/x`, `fix/x`.
+
+### Credits & License
+
+- **Authors:** SoftMissT & Mathzin
+- **Contributors:** ZeratulBr, Cardhial, VK, Dan, Akira
+
+This is a fan-made project. Please refer to the license file in the repository (MIT is recommended for open contributions).
+
+---
+### ⚠️ IMPORTANT — Security / Privacy (READ)
+
+- **NEVER** publish API keys, `GOOGLE_PRIVATE_KEY`, `DISCORD_CLIENT_SECRET`, or your personal Discord ID/username in the public repository.
+- Use `.gitignore` to protect `.env.local`.
+- Prefer using your hosting provider's Secret Manager (Vercel/Netlify/GCP) for production variables.

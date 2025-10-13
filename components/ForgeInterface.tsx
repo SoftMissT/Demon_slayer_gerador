@@ -9,9 +9,9 @@ import { FilterIcon } from './icons/FilterIcon';
 import { Modal } from './ui/Modal';
 import type { FilterState, GeneratedItem, User } from '../types';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
-import { DiscordIcon } from './icons/DiscordIcon';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
 import { ChevronRightIcon } from './icons/ChevronRightIcon';
+import { AuthOverlay } from './AuthOverlay';
 
 interface ForgeInterfaceProps {
     isAuthenticated: boolean;
@@ -38,18 +38,6 @@ const useWindowSize = () => {
     }, []);
     return size;
 };
-
-const AuthOverlay: React.FC<{ onLoginClick: () => void }> = ({ onLoginClick }) => (
-    <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center text-center p-8 rounded-lg">
-        <h3 className="text-2xl font-bold font-gangofthree text-white mb-4">Acesso Restrito</h3>
-        <p className="text-gray-300 mb-6">Por favor, entre com sua conta do Discord para usar a Forja.</p>
-        <Button onClick={onLoginClick} className="!w-auto !flex-row !gap-2 !px-6 !py-3 !text-base">
-            <DiscordIcon className="w-6 h-6" />
-            Entrar com Discord
-        </Button>
-    </div>
-);
-
 
 export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({ 
     isAuthenticated, onLoginClick,

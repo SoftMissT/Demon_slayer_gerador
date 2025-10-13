@@ -1,122 +1,45 @@
 
 import React from 'react';
-import type { GeminiParameters as GeminiParametersType } from '../types';
+import type { GeminiParameters } from '../types';
+import { Card } from './ui/Card';
 import { Select } from './ui/Select';
-import { Switch } from './ui/Switch';
-import { AnimatePresence, motion } from 'framer-motion';
 
 interface GeminiParametersProps {
-    params: GeminiParametersType;
-    onParamsChange: (params: GeminiParametersType) => void;
-    enabled: boolean;
-    onEnabledChange: (enabled: boolean) => void;
+  params: GeminiParameters;
+  setParams: React.Dispatch<React.SetStateAction<GeminiParameters>>;
 }
 
-export const GeminiParameters: React.FC<GeminiParametersProps> = ({ params, onParamsChange, enabled, onEnabledChange }) => {
-    const handleChange = (field: keyof GeminiParametersType, value: any) => {
-        onParamsChange({ ...params, [field]: value });
-    };
+export const GeminiParametersComponent: React.FC<GeminiParametersProps> = ({ params, setParams }) => {
+  const handleParamChange = (key: keyof GeminiParameters, value: string) => {
+    setParams(prev => ({ ...prev, [key]: value }));
+  };
 
-    return (
-        <div className="space-y-4">
-             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold text-white font-gangofthree">Parâmetros de Alquimia (Gemini)</h3>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-gray-300">Ativar</span>
-                    <Switch
-                        checked={enabled}
-                        onChange={(e) => onEnabledChange(e.target.checked)}
-                        aria-label="Ativar parâmetros do Gemini"
-                    />
-                </div>
-            </div>
-            <p className="text-sm text-gray-400">
-                Diretrizes para criar um prompt narrativo e visual para o Gemini (Nano Banana).
-            </p>
-            <AnimatePresence initial={false}>
-                {enabled && (
-                    <motion.div
-                        key="content"
-                        initial="collapsed"
-                        animate="open"
-                        exit="collapsed"
-                        variants={{
-                            open: { opacity: 1, maxHeight: '500px', marginTop: '16px' },
-                            collapsed: { opacity: 0, maxHeight: 0, marginTop: '0px' }
-                        }}
-                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                        className="overflow-hidden"
-                    >
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                            <Select
-                                label="Estilo de Arte"
-                                value={params.artStyle}
-                                onChange={(e) => handleChange('artStyle', e.target.value)}
-                                disabled={!enabled}
-                            >
-                                <option value="fotografia">Fotografia</option>
-                                <option value="pintura_oleo">Pintura a Óleo</option>
-                                <option value="anime_manga">Anime/Mangá</option>
-                                <option value="arte_conceitual">Arte Conceitual</option>
-                                <option value="aquarela">Aquarela</option>
-                                <option value="pixel_art">Pixel Art</option>
-                            </Select>
-                            <Select
-                                label="Iluminação"
-                                value={params.lighting}
-                                onChange={(e) => handleChange('lighting', e.target.value)}
-                                disabled={!enabled}
-                            >
-                                <option value="cinematica">Cinemática</option>
-                                <option value="luz_suave">Luz Suave</option>
-                                <option value="neon">Neon</option>
-                                <option value="por_do_sol">Pôr do Sol</option>
-                                <option value="dramatica">Dramática</option>
-                                <option value="ambiente">Ambiente</option>
-                            </Select>
+  const artStyles = ["Anime/Manga", "Photorealistic", "Concept Art", "Digital Painting", "3D Render", "Pixel Art", "Fantasy Art"];
+  const lightings = ["Cinematic Lighting", "Dramatic Lighting", "Soft Lighting", "Studio Lighting", "Natural Light", "Neon Glow"];
+  const colorPalettes = ["Vibrant", "Monochromatic", "Pastel", "Dark & Moody", "Warm Tones", "Cool Tones"];
+  const compositions = ["Dynamic Angle", "Close-up Shot", "Wide Angle", "Symmetrical", "Rule of Thirds", "Top-down view"];
+  const detailLevels = ["Detailed", "Hyper-detailed", "Minimalist", "Stylized"];
 
-                            <Select
-                                label="Paleta de Cores"
-                                value={params.colorPalette}
-                                onChange={(e) => handleChange('colorPalette', e.target.value)}
-                                disabled={!enabled}
-                            >
-                                <option value="vibrante">Vibrante</option>
-                                <option value="monocromatica">Monocromática</option>
-                                <option value="tons_pastel">Tons Pastel</option>
-                                <option value="sombria">Sombria</option>
-                                <option value="quente">Quente</option>
-                                <option value="fria">Fria</option>
-                            </Select>
-
-                            <Select
-                                label="Composição"
-                                value={params.composition}
-                                onChange={(e) => handleChange('composition', e.target.value)}
-                                disabled={!enabled}
-                            >
-                                <option value="close_up">Close-up</option>
-                                <option value="retrato">Retrato</option>
-                                <option value="plano_medio">Plano Médio</option>
-                                <option value="plano_aberto">Plano Aberto</option>
-                                <option value="paisagem">Paisagem</option>
-                            </Select>
-                            
-                            <Select
-                                label="Nível de Detalhe"
-                                value={params.detailLevel}
-                                onChange={(e) => handleChange('detailLevel', e.target.value)}
-                                disabled={!enabled}
-                            >
-                                <option value="detalhado">Detalhado</option>
-                                <option value="hiper_realista">Hiper-realista</option>
-                                <option value="simplista">Simplista</option>
-                                <option value="esbocado">Esboçado</option>
-                            </Select>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
+  return (
+    <Card className="!p-4 model-gemini">
+      <h3 className="text-lg font-bold text-white font-gangofthree mb-4">Parâmetros de Alquimia (Gemini)</h3>
+      <div className="space-y-4">
+        <Select label="Estilo de Arte" value={params.artStyle} onChange={(e) => handleParamChange('artStyle', e.target.value)}>
+          {artStyles.map(s => <option key={s} value={s}>{s}</option>)}
+        </Select>
+        <Select label="Iluminação" value={params.lighting} onChange={(e) => handleParamChange('lighting', e.target.value)}>
+          {lightings.map(l => <option key={l} value={l}>{l}</option>)}
+        </Select>
+        <Select label="Paleta de Cores" value={params.colorPalette} onChange={(e) => handleParamChange('colorPalette', e.target.value)}>
+          {colorPalettes.map(c => <option key={c} value={c}>{c}</option>)}
+        </Select>
+        <Select label="Composição" value={params.composition} onChange={(e) => handleParamChange('composition', e.target.value)}>
+          {compositions.map(c => <option key={c} value={c}>{c}</option>)}
+        </Select>
+        <Select label="Nível de Detalhe" value={params.detailLevel} onChange={(e) => handleParamChange('detailLevel', e.target.value)}>
+          {detailLevels.map(d => <option key={d} value={d}>{d}</option>)}
+        </Select>
+      </div>
+    </Card>
+  );
 };

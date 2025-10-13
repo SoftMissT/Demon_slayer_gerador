@@ -1,108 +1,73 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Modal } from './ui/Modal';
-import type { GeneratedItem, AlchemyHistoryItem, HistoryItem } from '../types';
-import { buildPlainTextForItem } from '../lib/textFormatters';
+import type { HistoryItem, GeneratedItem, AlchemyHistoryItem } from '../types';
 import { Button } from './ui/Button';
-import { ClipboardIcon } from './icons/ClipboardIcon';
-import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { TrashIcon } from './icons/TrashIcon';
-import { Tooltip } from './ui/Tooltip';
 
 interface HistoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  history: HistoryItem[];
-  onSelect: (item: HistoryItem) => void;
-  onDelete: (itemId: string) => void;
-  onClear: () => void;
-  activeView: 'forge' | 'prompt';
+    isOpen: boolean;
+    onClose: () => void;
+    history: HistoryItem[];
+    onSelect: (item: HistoryItem) => void;
+    onDelete: (id: string) => void;
+    onClear: () => void;
+    activeView: 'forge' | 'prompt';
 }
 
-const ITEMS_PER_PAGE = 10;
+export const HistoryModal: React.FC<HistoryModalProps> = ({
+    isOpen,
+    onClose,
+    history,
+    onSelect,
+    onDelete,
+    onClear,
+    activeView
+}) => {
+    const renderHistoryItem = (item: HistoryItem) => {
+        const isForgeItem = 'categoria' in item;
+        const name = isForgeItem ? (item as GeneratedItem).nome : `Prompt de ${new Date((item as AlchemyHistoryItem).createdAt).toLocaleTimeString()}`;
+        const description = isForgeItem ? (item as GeneratedItem).descricao_curta : (item as AlchemyHistoryItem).inputs.basePrompt;
 
-const ForgeHistoryItem: React.FC<{
-    item: GeneratedItem;
-    onSelect: (item: HistoryItem) => void;
-    onDelete: (itemId: string) => void;
-}> = ({ item, onSelect, onDelete }) => {
-    const [copied, setCopied] = useState(false);
-    const handleCopy = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const textToCopy = buildPlainTextForItem(item);
-        navigator.clipboard.writeText(textToCopy);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-    const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); onDelete(item.id); };
-    const formattedDate = new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        return (
+            <li key={item.id} className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg group">
+                <button onClick={() => onSelect(item)} className="text-left flex-grow min-w-0">
+                    <p className="font-semibold text-white truncate">{name}</p>
+                    <p className="text-sm text-gray-400 truncate mt-1">{description}</p>
+                </button>
+                <Button variant="ghost" onClick={() => onDelete(item.id)} className="!p-2 flex-shrink-0 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <TrashIcon className="w-5 h-5 text-red-500" />
+                </Button>
+            </li>
+        );
+    }
+    
     return (
-        <div className="bg-gray-900/50 p-3 rounded-lg flex items-center justify-between gap-4 transition-all hover:bg-gray-800/70 border border-gray-700 hover:border-indigo-500 cursor-pointer" onClick={() => onSelect(item)}>
-            <div className="flex-grow overflow-hidden">
-                <p className="font-bold truncate text-white">{('title' in item && item.title) || item.nome || 'Item Sem Nome'}</p>
-                <p className="text-xs text-indigo-400">{item.categoria} <span className="text-gray-500">• {formattedDate}</span></p>
-            </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-                <Tooltip text={copied ? "Copiado!" : "Copiar Texto"}><Button variant="ghost" onClick={handleCopy} className="!p-2">{copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}</Button></Tooltip>
-                <Tooltip text="Deletar"><Button variant="ghost" onClick={handleDelete} className="!p-2 text-gray-400 hover:!text-red-500"><TrashIcon className="w-5 h-5" /></Button></Tooltip>
-            </div>
-        </div>
+        <Modal 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title={`Histórico - ${activeView === 'forge' ? 'Forja' : 'Alquimia'}`}
+            variant="drawer-left"
+        >
+           <div className="p-4 h-full flex flex-col">
+                {history.length > 0 ? (
+                    <>
+                        <ul className="space-y-2 flex-grow overflow-y-auto pr-2 -mr-2">
+                            {history.map(renderHistoryItem)}
+                        </ul>
+                        <div className="mt-4 flex-shrink-0">
+                            <Button variant="danger" size="sm" onClick={onClear} className="w-full">
+                                Limpar Histórico
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex-grow flex flex-col items-center justify-center text-center text-gray-500">
+                        <p className="font-semibold">Histórico vazio.</p>
+                        <p className="text-sm mt-1">Suas gerações recentes aparecerão aqui.</p>
+                    </div>
+                )}
+           </div>
+        </Modal>
     );
 };
-
-const AlchemyHistoryItem: React.FC<{
-    item: AlchemyHistoryItem;
-    onSelect: (item: HistoryItem) => void;
-    onDelete: (itemId: string) => void;
-}> = ({ item, onSelect, onDelete }) => {
-    const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); onDelete(item.id); };
-    const formattedDate = new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-    return (
-        <div className="bg-gray-900/50 p-3 rounded-lg flex items-center justify-between gap-4 transition-all hover:bg-gray-800/70 border border-gray-700 hover:border-indigo-500 cursor-pointer" onClick={() => onSelect(item)}>
-            <div className="flex-grow overflow-hidden">
-                <p className="font-bold truncate text-white">{item.inputs.basePrompt || 'Geração de Prompt Vazia'}</p>
-                <p className="text-xs text-purple-400">Alquimia <span className="text-gray-500">• {formattedDate}</span></p>
-            </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-                <Tooltip text="Deletar"><Button variant="ghost" onClick={handleDelete} className="!p-2 text-gray-400 hover:!text-red-500"><TrashIcon className="w-5 h-5" /></Button></Tooltip>
-            </div>
-        </div>
-    );
-};
-
-const HistoryModalComponent: React.FC<HistoryModalProps> = ({ isOpen, onClose, history, onSelect, onDelete, onClear, activeView }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const reversedHistory = React.useMemo(() => [...history].reverse(), [history]);
-  const pageCount = Math.ceil(reversedHistory.length / ITEMS_PER_PAGE);
-  const paginatedHistory = reversedHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  
-  React.useEffect(() => { if (!isOpen) { setCurrentPage(1); } }, [isOpen]);
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Histórico de Gerações">
-        <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-gray-400">Salvo localmente neste navegador.</p>
-            <Button variant="danger" onClick={onClear} disabled={history.length === 0}>Limpar Histórico</Button>
-        </div>
-      <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
-        {history.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">Nenhum item no histórico ainda.</p>
-        ) : (
-          paginatedHistory.map(item => (
-            'categoria' in item
-                ? <ForgeHistoryItem key={item.id} item={item} onSelect={onSelect} onDelete={onDelete} />
-                : <AlchemyHistoryItem key={item.id} item={item} onSelect={onSelect} onDelete={onDelete} />
-          ))
-        )}
-      </div>
-      {pageCount > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-4 pt-4 border-t border-gray-700">
-              <Button onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1} size="sm">Anterior</Button>
-              <span className="text-sm text-gray-400">Página {currentPage} de {pageCount}</span>
-              <Button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === pageCount} size="sm">Próxima</Button>
-          </div>
-      )}
-    </Modal>
-  );
-};
-
-export const HistoryModal = React.memo(HistoryModalComponent);
