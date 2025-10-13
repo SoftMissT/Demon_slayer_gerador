@@ -1,131 +1,81 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDownIcon } from '../icons/ChevronDownIcon';
-import { InfoTooltip } from './InfoTooltip';
 
-interface SearchableSelectProps {
-    label: string;
-    options: readonly string[] | string[];
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    tooltip?: string;
+interface Option {
+  value: string;
+  label: string;
 }
 
-export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, options, value, onChange, placeholder, tooltip }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const selectRef = useRef<HTMLButtonElement>(null);
-    const [theme, setTheme] = useState('');
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+interface SearchableSelectProps {
+  label: string;
+  options: Option[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
 
-    useEffect(() => {
-        if (isOpen && selectRef.current) {
-            const currentTheme = selectRef.current.closest('.theme-forge') ? 'theme-forge' : 'theme-alchemist';
-            setTheme(currentTheme);
-        }
-    }, [isOpen]);
-    
-    useEffect(() => {
-        const updatePosition = () => {
-            if (isOpen && selectRef.current) {
-                const rect = selectRef.current.getBoundingClientRect();
-                setDropdownPosition({
-                    top: rect.bottom + window.scrollY,
-                    left: rect.left + window.scrollX,
-                    width: rect.width,
-                });
-            }
-        };
+export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, options, value, onChange, placeholder = 'Search...' }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const selectRef = useRef<HTMLDivElement>(null);
 
-        if (isOpen) {
-            updatePosition();
-            window.addEventListener('resize', updatePosition);
-            window.addEventListener('scroll', updatePosition);
-        }
+  const filteredOptions = options.filter(option =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-        return () => {
-            window.removeEventListener('resize', updatePosition);
-            window.removeEventListener('scroll', updatePosition);
-        };
-    }, [isOpen]);
+  const selectedLabel = options.find(opt => opt.value === value)?.label || value;
 
-    const filteredOptions = options.filter(option =>
-        option.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const handleSelect = (option: string) => {
-        onChange(option);
-        setSearchTerm('');
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+      }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  const handleSelect = (optionValue: string) => {
+      onChange(optionValue);
+      setIsOpen(false);
+      setSearchTerm('');
+  }
 
-    const DropdownMenu = () => (
-        <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: 'circOut' }}
-            className="custom-dropdown"
-            style={{
-                position: 'absolute',
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                width: `${dropdownPosition.width}px`,
-            }}
-             onClick={(e) => e.stopPropagation()}
+  return (
+    <div ref={selectRef}>
+      <span className="block text-sm font-medium text-gray-400 mb-1">{label}</span>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left flex items-center justify-between"
         >
-            <div className="p-2">
-                <input
-                    type="text"
-                    placeholder="Buscar..."
-                    className="dropdown-search-input"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    autoFocus
-                />
-            </div>
-            <ul className="max-h-52 overflow-y-auto">
-                {filteredOptions.map((option) => (
-                    <li
-                        key={option || 'placeholder-key'}
-                        className={`dropdown-option ${value === option ? 'selected' : ''}`}
-                        onClick={() => handleSelect(option)}
-                    >
-                        {option === '' ? (placeholder || 'Selecione...') : option}
-                    </li>
-                ))}
+          <span className="truncate">{selectedLabel}</span>
+          <ChevronDownIcon className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {isOpen && (
+          <div className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-hidden flex flex-col">
+            <input
+              type="text"
+              placeholder={placeholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-gray-900 py-2 px-3 text-white border-b border-gray-700 focus:outline-none"
+            />
+            <ul className="overflow-y-auto">
+              {filteredOptions.map(option => (
+                <li
+                  key={option.value}
+                  onClick={() => handleSelect(option.value)}
+                  className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer"
+                >
+                  {option.label}
+                </li>
+              ))}
             </ul>
-        </motion.div>
-    );
-
-    return (
-        <div className="w-full">
-            <div className="flex items-center gap-1.5 mb-1">
-                <label className="text-sm font-medium">{label}</label>
-                {tooltip && <InfoTooltip text={tooltip} />}
-            </div>
-            <button
-                ref={selectRef}
-                type="button"
-                className="custom-select-trigger"
-                onClick={() => setIsOpen(!isOpen)}
-                aria-haspopup="listbox"
-                aria-expanded={isOpen}
-            >
-                <span className="truncate">{value || placeholder || 'Selecione...'}</span>
-                <ChevronDownIcon className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-                {isOpen && createPortal(
-                    <div className={`fixed inset-0 z-[1000] ${theme}`} onClick={() => setIsOpen(false)}>
-                        <DropdownMenu />
-                    </div>,
-                    document.body
-                )}
-            </AnimatePresence>
-        </div>
-    );
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };

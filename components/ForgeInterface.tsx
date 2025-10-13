@@ -1,13 +1,36 @@
-import React, { useState, useCallback } from 'react';
-import type { User, GeneratedItem, FilterState, AIFlags } from '../types';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FilterPanel } from './FilterPanel';
 import { ResultsPanel } from './ResultsPanel';
 import { DetailPanel } from './DetailPanel';
-import { DetailModal } from './DetailModal';
-import { AuthOverlay } from './AuthOverlay';
 import { orchestrateGeneration } from '../lib/client/orchestrationService';
-import { INITIAL_FILTERS } from '../constants';
+import type { GeneratedItem, FilterState, User, AIFlags, Category, Rarity } from '../types';
+import { AuthOverlay } from './AuthOverlay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
+import { DetailModal } from './DetailModal';
+
+const INITIAL_FILTERS: FilterState = {
+    category: 'Aleatório',
+    subCategory: 'Aleatório',
+    quantity: 1,
+    tematica: 'Aleatória',
+    origins: [],
+    breathingStyles: [],
+    professions: [],
+    rarity: 'Aleatória',
+    level: 10,
+    promptModifier: '',
+    styleReferences: '',
+    aiFocusGemini: '',
+    aiFocusGpt: '',
+    aiFocusDeepSeek: '',
+};
+
+const INITIAL_AI_FLAGS: AIFlags = {
+    useGemini: true,
+    useGpt: true,
+    useDeepSeek: true,
+};
+
 
 interface ForgeInterfaceProps {
     isAuthenticated: boolean;
@@ -30,91 +53,76 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     setFavorites,
     selectedItem,
     setSelectedItem,
-    user
+    user,
 }) => {
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
+    const [aiFlags, setAIFlags] = useState<AIFlags>(INITIAL_AI_FLAGS);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [aiFlags, setAiFlags] = useState<AIFlags>({ useDeepSeek: true, useGemini: true, useGpt: true });
-
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
-
-    const handleAiFlagChange = useCallback((key: keyof AIFlags, value: boolean) => {
-        setAiFlags(prev => ({...prev, [key]: value}));
+    
+    const handleAIFlagChange = useCallback((key: keyof AIFlags, value: boolean) => {
+        setAIFlags(prev => ({ ...prev, [key]: value }));
     }, []);
 
+    const handleGenerate = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const results: GeneratedItem[] = [];
+            for (let i = 0; i < filters.quantity; i++) {
+                const result = await orchestrateGeneration(filters, filters.promptModifier, aiFlags, user);
+                results.push(result);
+            }
+            setHistory(prev => [...results, ...prev]);
+            setSelectedItem(results[0]);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [filters, aiFlags, user, setHistory, setSelectedItem]);
+    
     const handleResetFilters = useCallback(() => {
         setFilters(INITIAL_FILTERS);
+        setAIFlags(INITIAL_AI_FLAGS);
     }, []);
 
-    const handleGenerate = useCallback(async (promptModifier: string = '') => {
-        if (!isAuthenticated) {
-            onLoginClick();
-            return;
-        }
-        
-        setIsLoading(true);
-        setError(null);
-        try {
-            const newItem = await orchestrateGeneration(filters, promptModifier, aiFlags, user);
-            setHistory(prev => [newItem, ...prev]);
-            setSelectedItem(newItem);
-        } catch (err: any) {
-            console.error("Generation failed:", err);
-            setError(`ERRO NA GERAÇÃO|A combinação de filtros atual pode ter causado um problema. Tente simplificar a sua seleção ou alterar o tipo de geração.|${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [filters, user, isAuthenticated, onLoginClick, setHistory, setSelectedItem, aiFlags]);
-
-    const handleGenerateVariant = useCallback(async (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => {
-        const modifier = `Gere uma variação **${variantType}** do seguinte item: ${item.nome}.`;
-        const baseFilters = { ...INITIAL_FILTERS, category: item.categoria, styleReferences: filters.styleReferences };
-        
-        setIsLoading(true);
-        setError(null);
-        try {
-            const newItem = await orchestrateGeneration(baseFilters, modifier, aiFlags, user);
-            newItem.nome = `${item.nome} (Variante ${variantType})`;
-            setHistory(prev => [newItem, ...prev]);
-            setSelectedItem(newItem);
-        } catch (err: any) {
-             console.error("Variant generation failed:", err);
-            setError(`ERRO NA GERAÇÃO DA VARIANTE|Não foi possível gerar a variante.|${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [user, setHistory, setSelectedItem, filters.styleReferences, aiFlags]);
-
     const handleToggleFavorite = useCallback((item: GeneratedItem) => {
-        setFavorites(prev =>
-            prev.some(fav => fav.id === item.id)
-                ? prev.filter(fav => fav.id !== item.id)
-                : [item, ...prev]
-        );
+        setFavorites(prev => {
+            const isFav = prev.some(fav => fav.id === item.id);
+            if (isFav) {
+                return prev.filter(fav => fav.id !== item.id);
+            }
+            return [item, ...prev];
+        });
     }, [setFavorites]);
     
-    const handleSelectItem = useCallback((item: GeneratedItem) => {
-        setSelectedItem(item);
-        if (window.innerWidth < 1024) { // lg breakpoint
-            setIsDetailModalOpen(true);
-        }
-    }, [setSelectedItem]);
-    
-     const handleUpdateItem = (updatedItem: GeneratedItem) => {
-        setHistory(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
-        if (favorites.some(fav => fav.id === updatedItem.id)) {
-            setFavorites(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
-        }
+    const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
+        const updateList = (list: GeneratedItem[]) => list.map(item => item.id === updatedItem.id ? updatedItem : item);
+        setHistory(updateList);
+        setFavorites(updateList);
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
+    }, [setHistory, setFavorites, selectedItem, setSelectedItem]);
+    
+    const handleSelect = (item: GeneratedItem) => {
+        setSelectedItem(item);
+        // On smaller screens, open a modal for the detail view
+        if (window.innerWidth < 1024) {
+            setIsDetailModalOpen(true);
+        }
     };
 
+    const isFavorite = useMemo(() => {
+        if (!selectedItem) return false;
+        return favorites.some(fav => fav.id === selectedItem.id);
+    }, [selectedItem, favorites]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full relative">
@@ -124,48 +132,43 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 <FilterPanel
                     filters={filters}
                     onFilterChange={handleFilterChange}
-                    onGenerate={() => handleGenerate()}
+                    onGenerate={handleGenerate}
                     onReset={handleResetFilters}
                     isLoading={isLoading}
                     aiFlags={aiFlags}
-                    onAiFlagChange={handleAiFlagChange}
-                    setError={setError}
+                    onAIFlagChange={handleAIFlagChange}
                 />
             </div>
-            
             <div className="lg:col-span-5 h-full">
                 <ResultsPanel
                     history={history}
                     selectedItem={selectedItem}
-                    onSelect={handleSelectItem}
+                    onSelect={handleSelect}
                     favorites={favorites}
                     onToggleFavorite={handleToggleFavorite}
-                    onGenerateVariant={handleGenerateVariant}
+                    onGenerateVariant={() => {}} // Placeholder for now
                     isLoading={isLoading}
                     activeFilters={filters}
                 />
             </div>
-
             <div className="hidden lg:block lg:col-span-4 h-full">
-                 <DetailPanel
+                <DetailPanel
                     item={selectedItem}
-                    onGenerateVariant={handleGenerateVariant}
-                    isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
+                    onGenerateVariant={() => {}} // Placeholder for now
+                    isFavorite={isFavorite}
                     onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                     onUpdate={handleUpdateItem}
                 />
             </div>
-            
-             <DetailModal
+            <DetailModal
                 isOpen={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}
                 item={selectedItem}
-                onGenerateVariant={handleGenerateVariant}
-                isFavorite={selectedItem ? favorites.some(fav => fav.id === selectedItem.id) : false}
+                isFavorite={isFavorite}
                 onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                 onUpdate={handleUpdateItem}
+                onGenerateVariant={() => {}}
             />
-
             <ErrorDisplay message={error} onDismiss={() => setError(null)} activeView="forge" />
         </div>
     );
