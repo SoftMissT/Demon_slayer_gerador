@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip } from './ui/Tooltip';
-import { HelpIcon } from './icons/HelpIcon';
+import { InfoIcon } from './icons/InfoIcon';
 
 interface AboutTooltipProps {
   onClick: () => void;
@@ -8,13 +8,13 @@ interface AboutTooltipProps {
 
 export const AboutTooltip: React.FC<AboutTooltipProps> = ({ onClick }) => {
   return (
-    <Tooltip text="Sobre & Ajuda">
+    <Tooltip text="Sobre">
       <button 
         onClick={onClick}
-        className="text-gray-400 hover:text-white transition-colors"
-        aria-label="Sobre e Ajuda"
+        className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-700"
+        aria-label="Sobre"
       >
-        <HelpIcon className="w-6 h-6" />
+        <InfoIcon className="w-6 h-6" />
       </button>
     </Tooltip>
   );

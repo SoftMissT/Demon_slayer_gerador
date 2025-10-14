@@ -27,29 +27,30 @@ export const AboutPanel: React.FC<AboutPanelProps> = ({ onClose }) => {
       </header>
       <div className="p-6 max-h-[70vh] overflow-y-auto inner-scroll">
         <div className="prose prose-sm prose-invert max-w-none prose-p:my-2 prose-headings:font-gangofthree">
-            <p>Kimetsu Forge é uma ferramenta criativa feita de fã para fã, voltada para mestres e jogadores de RPG de mesa, com inspiração no universo sombrio e emocionante de Demon Slayer (Kimetsu no Yaiba).</p>
+            <h4>Forje lendas. Crie universos.</h4>
+            <p>
+                Kimetsu Forge é o seu arsenal criativo para RPGs de mesa, inspirado no universo de Demon Slayer. Use o poder de uma orquestra de IAs para gerar itens, inimigos, técnicas e prompts de imagem épicos em segundos.
+            </p>
             
-            <h3>Features</h3>
-            <ul>
-              <li>Geração de elementos de RPG como armas, demônios, técnicas de respiração e ganchos de história.</li>
-              <li>Criação de descrições detalhadas e prontas para uso em prompts de imagem.</li>
-              <li>Aceleração do processo de criação de histórias com conteúdo gerado por uma colaboração de IAs.</li>
-            </ul>
+            <h3>A Orquestra de IAs: A Alma da Forja</h3>
+            <p>Cada criação passa por um processo de 3 etapas para garantir profundidade e qualidade:</p>
+            <ol>
+              <li><strong>A Faísca (DeepSeek):</strong> Gera o conceito bruto, a ideia inicial.</li>
+              <li><strong>A Estrutura (Google Gemini):</strong> Expande o conceito com lore, mecânicas de RPG e detalhes visuais.</li>
+              <li><strong>O Polimento (GPT-4o):</strong> Refina a narrativa e otimiza o prompt de imagem para resultados espetaculares.</li>
+            </ol>
 
-            <h3>Como Funciona</h3>
-            <p><strong>DeepSeek (O Conceitualizador):</strong> A primeira IA gera a ideia base.</p>
-            <p><strong>Google Gemini (O Arquiteto):</strong> O Gemini enriquece o conceito com lore e mecânicas.</p>
-            <p><strong>OpenAI GPT-4o (O Artista Final):</strong> O GPT-4o realiza o polimento final da narrativa.</p>
-            
-            <h3>Aviso Legal</h3>
-            <p>Este é um projeto de fã não oficial. Demon Slayer: Kimetsu no Yaiba é uma propriedade de Koyoharu Gotouge, Shueisha e Ufotable.</p>
+            <h3>Aviso Legal e Agradecimentos</h3>
+            <p>
+                Este é um projeto de fã, <strong>não oficial</strong> e sem fins lucrativos. Demon Slayer: Kimetsu no Yaiba © Koyoharu Gotouge, Shueisha, Ufotable. Todos os direitos reservados.
+            </p>
             
             <div className="my-6 space-y-3 not-prose">
                 <ActionButton href="https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba" className="crunchyroll-button">
-                    <PlayIcon className="w-5 h-5" /> Assista ao anime legalmente na Crunchyroll
+                    <PlayIcon className="w-5 h-5" /> Assista ao anime na Crunchyroll
                 </ActionButton>
                 <ActionButton href="https://discord.gg/invite/seuservidor" className="discord-button">
-                    <DiscordIcon className="w-5 h-5" /> Entre na nossa comunidade do Discord
+                    <DiscordIcon className="w-5 h-5" /> Junte-se à nossa comunidade
                 </ActionButton>
                  <ActionButton href="https://www.panini.com.br/shp_brp_pt/demon-slayer-kimetsu-no-yaiba.html" className="panini-button">
                     <BookIcon className="w-5 h-5" /> Compre o mangá oficial (Panini)

@@ -18,7 +18,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
     <Modal isOpen={isOpen} onClose={onClose} title="Como Funciona" panelClassName="!max-w-3xl">
       <div className="p-6 space-y-6 text-gray-300">
         <p className="text-center italic">
-          Kimetsu Forge usa uma orquestração de IAs para criar conteúdo rico e detalhado para suas aventuras de RPG.
+          Aprenda a dominar as duas faces da criação no Kimetsu Forge.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -26,47 +26,53 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
           <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
             <h3 className="flex items-center gap-2 font-bold text-white text-lg mb-2">
               <AnvilIcon className="w-6 h-6 text-indigo-400" />
-              Modo Forja
+              Modo Forja: Crie o Conteúdo
             </h3>
             <p className="text-sm">
-              Use a Bigorna para gerar itens, personagens, missões e mais. Selecione uma categoria, ajuste os filtros e clique em "Forjar". Suas criações aparecerão no painel de Resultados.
+              A Forja é onde suas ideias de RPG ganham vida.
+              <br/><strong>1.</strong> Selecione uma Categoria.
+              <br/><strong>2.</strong> Molde sua criação com Filtros detalhados.
+              <br/><strong>3.</strong> Clique em <strong>Forjar</strong> e receba um item completo.
             </p>
           </div>
           
           <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
             <h3 className="flex items-center gap-2 font-bold text-white text-lg mb-2">
               <MagicWandIcon className="w-6 h-6 text-purple-400" />
-              Modo Alquimia
+              Modo Alquimia: Crie a Imagem
             </h3>
             <p className="text-sm">
-              O Alquimista de Prompts ajuda a criar descrições perfeitas para IAs de imagem. Escreva uma ideia base, ajuste os parâmetros e a IA irá gerar prompts otimizados para Midjourney, DALL-E e Gemini.
+              A Alquimia transforma palavras em arte visual.
+              <br/><strong>1.</strong> Descreva uma cena ou personagem.
+              <br/><strong>2.</strong> Ajuste os Parâmetros para seu modelo de IA preferido.
+              <br/><strong>3.</strong> Clique em <strong>Destilar</strong> para gerar prompts otimizados.
             </p>
           </div>
         </div>
 
         <div>
-          <h3 className="font-bold text-white text-lg mb-3 text-center">O Processo Criativo da IA</h3>
+          <h3 className="font-bold text-white text-lg mb-3 text-center">A Orquestra de IAs por Trás da Magia</h3>
           <ol className="relative border-l border-gray-700 ml-4">                  
             <li className="mb-6 ml-6">            
               <span className="absolute flex items-center justify-center w-8 h-8 bg-indigo-900 rounded-full -left-4 ring-4 ring-gray-800">
                 <LightbulbIcon className="w-5 h-5 text-indigo-300" />
               </span>
-              <h4 className="font-semibold text-white">1. Conceito (DeepSeek)</h4>
-              <p className="text-sm">Uma IA gera a ideia inicial, o conceito bruto. É a faísca da criação.</p>
+              <h4 className="font-semibold text-white">1. A Faísca (DeepSeek)</h4>
+              <p className="text-sm">Gera o conceito bruto, a ideia inicial.</p>
             </li>
             <li className="mb-6 ml-6">
               <span className="absolute flex items-center justify-center w-8 h-8 bg-indigo-900 rounded-full -left-4 ring-4 ring-gray-800">
                 <BrainIcon className="w-5 h-5 text-indigo-300" />
               </span>
-              <h4 className="font-semibold text-white">2. Estrutura (Gemini)</h4>
-              <p className="text-sm">O Gemini recebe o conceito e o expande, adicionando lore, detalhes, mecânicas de RPG e uma descrição visual.</p>
+              <h4 className="font-semibold text-white">2. A Estrutura (Gemini)</h4>
+              <p className="text-sm">Expande o conceito com lore, mecânicas de RPG e detalhes visuais.</p>
             </li>
             <li className="ml-6">
               <span className="absolute flex items-center justify-center w-8 h-8 bg-indigo-900 rounded-full -left-4 ring-4 ring-gray-800">
                 <UsersIcon className="w-5 h-5 text-indigo-300" />
               </span>
-              <h4 className="font-semibold text-white">3. Polimento (GPT-4o)</h4>
-              <p className="text-sm">O GPT-4o refina a narrativa para um tom de roleplay mais forte e otimiza a descrição para geração de imagem.</p>
+              <h4 className="font-semibold text-white">3. O Polimento (GPT-4o)</h4>
+              <p className="text-sm">Refina a narrativa e otimiza o prompt de imagem para resultados espetaculares.</p>
             </li>
           </ol>
         </div>

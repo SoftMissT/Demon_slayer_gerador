@@ -1,282 +1,324 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;600;700&family=Philosopher:wght@400;700&family=Poppins:wght@400;600&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=M+PLUS+1p:wght@700;900&family=Sawarabi+Mincho&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-gray-900 text-gray-200 font-sans;
+  }
+}
+
 :root {
-  --font-body-forge: 'Inter', sans-serif;
-  --font-title-forge: 'Cinzel Decorative', serif;
-  --font-body-alchemist: 'Poppins', sans-serif;
-  --font-title-alchemist: 'Philosopher', serif;
+  --background-start: #0a0a0c;
+  --background-end: #1a1a1f;
+  --accent-primary: #8b5cf6; /* default purple */
+  --accent-secondary: #38bdf8; /* default cyan */
+  --accent-glow: rgba(139, 92, 246, 0.4);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --card-bg: rgba(26, 26, 31, 0.7);
+  --border-color: rgba(55, 65, 81, 0.6);
 }
 
-body {
-  @apply bg-gray-900 text-gray-200 antialiased;
-}
-
-.app-container {
-  transition: background-color 0.5s ease-in-out;
-}
-
-/* --- THEME: FORGE --- */
+/* === THEME FORGE (MYTHIC FORGE) === */
 .theme-forge {
-  --bg-dark: #0F0A07;
-  --bg-gradient: linear-gradient(180deg, #1E0D0A 0%, #3C1A0E 100%);
-  --accent-primary: #FF4500;
-  --accent-secondary: #FF8C00;
-  --accent-glow: rgba(255, 85, 0, 0.6);
-  --text-primary: #FFD9B3;
-  --text-secondary: #B36B00;
-  --border-color: rgba(255, 140, 0, 0.3);
-  --card-bg: rgba(15, 10, 7, 0.7);
-  --dropdown-bg: #1E0D0A;
-  --font-body: var(--font-body-forge);
-  --font-title: var(--font-title-forge);
+  --background-start: #1a1a1d; /* Dark Charcoal */
+  --background-end: #0f0f11;   /* Deeper Charcoal */
+  --accent-primary: #c53030;   /* Fire Red */
+  --accent-secondary: #d69e2e; /* Molten Gold */
+  --accent-glow: rgba(214, 158, 46, 0.4); /* Gold Glow */
+  --text-primary: #f7fafc;
+  --text-secondary: #a0aec0;
+  --card-bg: rgba(26, 26, 29, 0.7);
+  --border-color: rgba(74, 74, 79, 0.6);
 }
 
-/* --- THEME: ALCHEMIST --- */
+/* === THEME ALCHEMIST === */
 .theme-alchemist {
-  --bg-dark: #0B0A15;
-  --bg-gradient: linear-gradient(180deg, #0D0A1A 0%, #24113B 100%);
-  --accent-primary: #8A2BE2;
-  --accent-secondary: #00FFB2;
-  --accent-glow: rgba(180, 80, 255, 0.5);
-  --text-primary: #D6D6FF;
-  --text-secondary: #9FE8C4;
-  --border-color: rgba(138, 43, 226, 0.4);
-  --card-bg: rgba(11, 10, 21, 0.7);
-  --dropdown-bg: #0D0A1A;
-  --font-body: var(--font-body-alchemist);
-  --font-title: var(--font-title-alchemist);
+  --background-start: #1a112a; /* Deep Purple */
+  --background-end: #0e091a;
+  --accent-primary: #8b5cf6;   /* Purple */
+  --accent-secondary: #38bdf8; /* Cyan */
+  --accent-glow: rgba(139, 92, 246, 0.4);
+  --text-primary: #f0f0f8;
+  --text-secondary: #a8a2c2;
+  --card-bg: rgba(26, 17, 42, 0.7);
+  --border-color: rgba(139, 92, 246, 0.3);
 }
 
 .app-container {
-  background-color: var(--bg-dark);
+  background: linear-gradient(145deg, var(--background-start), var(--background-end));
+  transition: background 0.5s ease-in-out;
 }
 
-.app-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-    background: var(--bg-gradient);
-    overflow: hidden;
-}
-
-/* General component styles using theme variables */
-.font-gangofthree {
-  font-family: var(--font-title);
-}
-
-body, .font-sans {
-  font-family: var(--font-body);
-}
-
-/* Buttons */
-.forge-button {
-  background: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
-  color: white;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 0 10px var(--accent-glow);
-  transition: all 0.2s ease-in-out;
-}
-.forge-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 15px var(--accent-glow);
-}
-
-.alchemist-button {
-  background: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
-  color: var(--bg-dark);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 0 10px var(--accent-glow);
-  transition: all 0.2s ease-in-out;
-}
-.alchemist-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 15px var(--accent-glow);
-}
-
-/* Custom Select Dropdowns */
-.custom-select-trigger {
-    @apply w-full flex items-center justify-between text-left bg-gray-700/50 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50;
-    border-color: var(--border-color);
-    background-color: var(--card-bg);
-}
-.custom-select-trigger:hover {
-    border-color: var(--accent-primary);
-}
-
-.custom-dropdown {
-    @apply mt-1 rounded-md shadow-lg overflow-hidden;
-    background-color: var(--dropdown-bg);
-    border: 1px solid var(--border-color);
-    z-index: 1000;
-}
-
-.dropdown-search-input {
-    @apply w-full bg-gray-900/50 border border-gray-700 rounded-md py-1.5 px-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500;
-}
-
-.dropdown-option {
-    @apply px-3 py-2 text-sm cursor-pointer whitespace-nowrap;
-    color: var(--text-primary);
-}
-.dropdown-option:hover, .dropdown-option.selected {
-    background-color: var(--accent-primary);
-    color: white;
-}
-.theme-alchemist .dropdown-option:hover, .theme-alchemist .dropdown-option.selected {
-    color: var(--bg-dark);
-}
-.dropdown-option.disabled {
-    @apply opacity-50 cursor-not-allowed;
-    color: var(--text-secondary);
-}
-
-
-/* Inner Scrollbar */
+/* ===== SHARED STYLES ===== */
 .inner-scroll::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .inner-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 .inner-scroll::-webkit-scrollbar-thumb {
-  background-color: rgba(128, 128, 128, 0.4);
-  border-radius: 3px;
+  background-color: rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
 }
 .inner-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(128, 128, 128, 0.6);
+  background-color: rgba(128, 128, 128, 0.5);
 }
 
-/* Result Card */
-.result-card {
-  border-color: var(--border-color) !important;
-  background-color: var(--card-bg) !important;
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-}
-.result-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 0 15px var(--accent-glow);
-  border-color: var(--accent-primary) !important;
-}
-.result-card.selected-card {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 0 20px var(--accent-glow), 0 0 0 2px var(--accent-primary);
-  border-color: var(--accent-primary) !important;
-}
-
-/* Prompt Card Specifics */
-.theme-alchemist .prompt-card.model-midjourney { --accent-primary: #DAA520; }
-.theme-alchemist .prompt-card.model-gpt { --accent-primary: #74AA9C; }
-.theme-alchemist .prompt-card.model-gemini { --accent-primary: #4285F4; }
-
-/* Ingredient Flask style for collapsible sections */
-.ingredient-flask {
-    background: rgba(10, 10, 15, 0.5);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    position: relative;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
-}
-.ingredient-flask::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 12px;
-    background: #6b4f3a;
-    border-radius: 4px 4px 0 0;
-    border: 1px solid #4a3728;
-}
-
-/* Number Input Buttons */
-.number-input-button {
-  @apply w-10 h-10 flex items-center justify-center rounded-md font-bold text-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
+/* ===== BUTTONS ===== */
+.forge-button {
+  background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+  border: 1px solid var(--accent-secondary);
   color: var(--text-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
 }
-.number-input-button:not(:disabled):hover {
-  background-color: var(--accent-primary);
-  color: white;
-}
-.theme-alchemist .number-input-button:not(:disabled):hover {
-    color: var(--bg-dark);
-}
-
-/* Error Display */
-.error-display-forge {
-  background-color: rgba(123, 29, 29, 0.8);
-  border: 1px solid #ff4500;
-  box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
-}
-.error-display-alchemist {
-    background-color: rgba(76, 17, 126, 0.8);
-    border: 1px solid #8a2be2;
-    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+.forge-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-/* --- ANIMATED BACKGROUNDS --- */
+.alchemist-button {
+  background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+  border: 1px solid var(--accent-secondary);
+  color: var(--text-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+.alchemist-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
 
-/* Sparks (Forge) */
+/* ===== Custom Select Components ===== */
+.custom-select-trigger {
+  @apply w-full flex items-center justify-between bg-[var(--card-bg)] border border-[var(--border-color)] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)];
+}
+
+.custom-dropdown {
+  @apply bg-gray-900 border border-[var(--border-color)] rounded-md shadow-lg;
+}
+
+.dropdown-option {
+  @apply px-3 py-2 cursor-pointer hover:bg-[var(--accent-primary)]/20 text-white;
+}
+
+/* ===== Other Components ===== */
+.number-input-button {
+    @apply w-10 h-10 flex-shrink-0 bg-gray-700 text-white rounded-md text-lg font-bold disabled:opacity-50 hover:bg-gray-600 transition-colors;
+}
+
+.result-card.selected-card {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* === Collapsible Section === */
+.collapsible-section {
+  @apply border border-[var(--border-color)] rounded-lg p-3 transition-colors;
+}
+.collapsible-section.open {
+  @apply border-[var(--accent-primary)];
+}
+.collapsible-header {
+  @apply w-full flex justify-between items-center text-left;
+}
+.collapsible-section.ingredient-flask {
+  @apply bg-gray-900/50;
+}
+
+
+/* ===== ANIMATIONS & BACKGROUNDS ===== */
+
+/* --- Forge Sparks --- */
 .sparks-container {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     overflow: hidden;
 }
 .spark {
     position: absolute;
-    bottom: -10px;
-    background-color: var(--spark);
+    bottom: 0;
+    background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary));
     border-radius: 50%;
     opacity: 0;
-    animation: rise 8s infinite linear;
-}
-@keyframes rise {
-    0% { transform: translateY(0); opacity: 1; }
-    50% { transform: translateY(-50vh) translateX(20px); opacity: 0.8; }
-    100% { transform: translateY(-100vh) translateX(-20px); opacity: 0; }
+    animation: rise 8s infinite ease-in;
 }
 
-/* Smoke (Alchemist) */
+@keyframes rise {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* --- Alchemist Smoke --- */
 .smoke-container {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     overflow: hidden;
 }
+
 .smoke-puff {
     position: absolute;
-    bottom: -150px;
-    background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, rgba(11, 10, 21, 0) 70%);
+    bottom: -200px;
+    background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
     border-radius: 50%;
-    opacity: 0;
-    animation: drift 25s infinite linear;
-    --x-drift: 0;
+    opacity: 0.1;
+    animation: drift 25s infinite ease-in-out;
 }
+
 @keyframes drift {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    20%, 80% { opacity: 1; }
-    100% { transform: translateY(-110vh) translateX(calc(var(--x-drift) * 1px)); opacity: 0; }
+    0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.1;
+    }
+    50% {
+        transform: translateY(-50vh) translateX(var(--x-drift, 0) * 1px) scale(1.5);
+        opacity: 0.05;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(var(--x-drift, 0) * 2px) scale(1);
+        opacity: 0;
+    }
 }
 
-/* About Modal Buttons */
-.crunchyroll-button { background: #f47521; color: white; }
-.discord-button { background: #5865f2; color: white; }
-.panini-button { background: #e62429; color: white; }
 
-/* Filter Panel Subheader */
-.filter-subheader {
-    @apply text-xs font-bold uppercase tracking-wider mb-2 mt-6 first:mt-0;
-    color: var(--text-secondary);
+/* --- Typing Loader --- */
+.typing-cursor {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --- Error Display --- */
+.error-display-forge {
+  background-color: rgba(197, 48, 48, 0.2);
+  border: 1px solid #c53030;
+}
+.error-display-alchemist {
+  background-color: rgba(139, 92, 246, 0.2);
+  border: 1px solid #8b5cf6;
+}
+
+/* --- About & HowItWorks Modal Buttons --- */
+.crunchyroll-button {
+  background-color: #f47521 !important;
+  color: white !important;
+}
+.discord-button {
+  background-color: #5865f2 !important;
+  color: white !important;
+}
+.panini-button {
+  background-color: #e21e25 !important;
+  color: white !important;
+}
+
+
+/* --- Alchemy Loader --- */
+.cauldron-bubbles {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 50%;
+}
+.cauldron-bubbles span {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--accent-secondary);
+  border-radius: 50%;
+  opacity: 0;
+  animation: bubble-rise 4s infinite ease-in;
+}
+.cauldron-bubbles span:nth-child(1) { left: 10%; animation-delay: 0.5s; }
+.cauldron-bubbles span:nth-child(2) { left: 30%; animation-delay: 1.2s; width: 10px; height: 10px; }
+.cauldron-bubbles span:nth-child(3) { left: 60%; animation-delay: 0.2s; }
+.cauldron-bubbles span:nth-child(4) { left: 85%; animation-delay: 2s; width: 6px; height: 6px; }
+
+@keyframes bubble-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+
+/* --- Discord Login Button --- */
+.tooltip-container {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.borde-back {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(145deg, #373b44, #42464d);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.borde-back::before {
+    content: '';
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    background: #3c3f44;
+    border-radius: 50%;
+}
+
+.icon {
+    position: relative;
+    z-index: 1;
+    color: #aeb2b7;
+}
+
+.tooltip {
+    position: absolute;
+    top: 50%;
+    right: 50px;
+    transform: translateY(-50%);
+    padding: 5px 10px;
+    background: #2a2d31;
+    border-radius: 5px;
+    color: white;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.tooltip-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+.tooltip-container:hover .icon {
+    color: #5865f2;
+}
+
+@keyframes fade-in-fast {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in-fast {
+  animation: fade-in-fast 0.2s ease-out;
 }

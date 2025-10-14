@@ -78,7 +78,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         <CollapsibleSection title="Detalhes da Criação">
             <div className="space-y-4 pt-2">
                 <SearchableSelect label="Temática / Era" options={THEME_OPTIONS} value={filters.tematica} onChange={(v) => onFilterChange('tematica', v)} />
-                <SearchableSelect label="País / Cultura de Inspiração" options={PAIS_OPTIONS} value={filters.pais} onChange={(v) => onFilterChange('pais', v)} />
+                <SearchableSelect label="Inspiração Cultural e Regional" options={PAIS_OPTIONS} value={filters.pais} onChange={(v) => onFilterChange('pais', v)} />
                 <SearchableMultiSelect label="Origens" options={ORIGIN_OPTIONS} selected={filters.origins} onChange={(v) => onFilterChange('origins', v)} />
                 <SearchableMultiSelect label="Respirações" options={BREATHING_STYLE_OPTIONS} selected={filters.breathingStyles} onChange={(v) => onFilterChange('breathingStyles', v)} />
                 <SearchableMultiSelect label="Profissões" options={PROFESSION_OPTIONS} selected={filters.professions} onChange={(v) => onFilterChange('professions', v)} />

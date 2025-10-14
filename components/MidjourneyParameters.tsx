@@ -20,7 +20,7 @@ export const MidjourneyParametersComponent: React.FC<MidjourneyParametersProps> 
     }));
   };
 
-  const versions = ["6.0", "5.2", "5.1", "Niji 6", "Niji 5"];
+  const versions = ["7", "6.1", "6.0", "5.2", "5.1", "Niji 6", "Niji 5"];
 
   return (
     <div className="space-y-4">
