@@ -13,11 +13,14 @@ import { TagIcon } from './icons/TagIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { TextArea } from './ui/TextArea';
 import { TextInput } from './ui/TextInput';
+import { ClipboardIcon } from './icons/ClipboardIcon';
 import { KatanaIcon } from './icons/KatanaIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
 
 interface DetailPanelProps {
     item: GeneratedItem | null;
     onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
+    onGenerateImage: (item: GeneratedItem) => void;
     isFavorite: boolean;
     onToggleFavorite: (item: GeneratedItem) => void;
     onUpdate: (item: GeneratedItem) => void;
@@ -46,10 +49,11 @@ const ProvenanceItem: React.FC<{ entry: ProvenanceEntry }> = ({ entry }) => {
     );
 };
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, onGenerateImage, isFavorite, onToggleFavorite, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
     const [copied, setCopied] = useState(false);
+    const [copiedPrompt, setCopiedPrompt] = useState(false);
 
     useEffect(() => {
         setEditableItem(item);
@@ -98,6 +102,14 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+
+    const handleCopyPrompt = () => {
+        if (item.imagePromptDescription) {
+            navigator.clipboard.writeText(item.imagePromptDescription);
+            setCopiedPrompt(true);
+            setTimeout(() => setCopiedPrompt(false), 2000);
+        }
+    }
 
     const currentName = ('title' in editableItem && editableItem.title) || editableItem.nome;
     
@@ -163,7 +175,23 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                 )}
             </div>
              <footer className="p-4 border-t border-gray-700 flex-shrink-0">
+                {item.imagePromptDescription && (
+                    <div className="mb-4">
+                        <label className="text-xs font-semibold text-gray-400 uppercase">PROMPT DE IMAGEM</label>
+                        <div className="relative">
+                             <p className="text-sm font-mono p-2 pr-10 bg-gray-900 rounded text-gray-300 mt-1">{item.imagePromptDescription}</p>
+                             <Button variant="ghost" className="!p-1.5 absolute top-1/2 right-1.5 -translate-y-1/2" onClick={handleCopyPrompt}>
+                                {copiedPrompt ? <ClipboardCheckIcon className="w-4 h-4 text-green-400" /> : <ClipboardIcon className="w-4 h-4" />}
+                             </Button>
+                        </div>
+                    </div>
+                )}
                 <div className="flex justify-end items-center gap-2">
+                    {item.imagePromptDescription && (
+                        <Button variant="primary" className="forge-button" onClick={() => onGenerateImage(item)}>
+                            <SparklesIcon className="w-5 h-5"/> Gerar Imagem
+                        </Button>
+                    )}
                     <Button variant="secondary" onClick={handleDownload}><DownloadIcon className="w-5 h-5"/> Baixar TXT</Button>
                     <Button variant="secondary" onClick={handleCopy}>
                         {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5"/>}

@@ -6,6 +6,8 @@ import { Button } from './ui/Button';
 import { StarIcon } from './icons/StarIcon';
 import { DotsVerticalIcon } from './icons/DotsVerticalIcon';
 import { Tooltip } from './ui/Tooltip';
+import { ClipboardIcon } from './icons/ClipboardIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
 
 interface ResultCardProps {
   item: GeneratedItem;
@@ -14,6 +16,7 @@ interface ResultCardProps {
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
+  onGenerateImage: (item: GeneratedItem) => void;
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({
@@ -23,8 +26,10 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   isFavorite,
   onToggleFavorite,
   onGenerateVariant,
+  onGenerateImage,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const currentName = ('title' in item && item.title) || item.nome;
 
@@ -42,6 +47,22 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       onGenerateVariant(item, variantType);
       setMenuOpen(false);
   };
+  
+  const handleCopyPrompt = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (item.imagePromptDescription) {
+        navigator.clipboard.writeText(item.imagePromptDescription);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }
+    setMenuOpen(false);
+  };
+
+  const handleGenerateImageClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onGenerateImage(item);
+      setMenuOpen(false);
+  }
   
   const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento' && item.categoria !== 'Local/Cenário';
 
@@ -79,7 +100,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                 Lvl {item.nivel_sugerido}
             </span>
             <div className="relative" ref={menuRef}>
-                {canGenerateVariant && (
+                {(canGenerateVariant || item.imagePromptDescription) && (
                     <Tooltip text="Mais Opções">
                         <Button 
                             variant="ghost" 
@@ -107,6 +128,17 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                                 <button onClick={(e) => {e.stopPropagation(); handleVariantClick('agressiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Variação: Agressiva</button>
                                 <button onClick={(e) => {e.stopPropagation(); handleVariantClick('técnica')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Variação: Técnica</button>
                                 <button onClick={(e) => {e.stopPropagation(); handleVariantClick('defensiva')}} className="block w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">Variação: Defensiva</button>
+                            </>
+                        )}
+                        {(canGenerateVariant && item.imagePromptDescription) && <div className="my-1 border-t border-gray-700" />}
+                        {item.imagePromptDescription && (
+                            <>
+                                <button onClick={handleCopyPrompt} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
+                                    <ClipboardIcon className="w-4 h-4" /> {copied ? 'Copiado!' : 'Copiar Prompt'}
+                                </button>
+                                <button onClick={handleGenerateImageClick} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
+                                    <SparklesIcon className="w-4 h-4" /> Gerar Imagem
+                                </button>
                             </>
                         )}
                     </motion.div>

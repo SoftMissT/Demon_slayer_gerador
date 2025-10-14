@@ -1,5 +1,7 @@
 import React from 'react';
-import type { User } from '../types';
+import type { User, AppView } from '../types';
+import { ForgeIcon } from './icons/ForgeIcon';
+import { MagicWandIcon } from './icons/MagicWandIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
 import { StarIcon } from './icons/StarIcon';
 import { HelpIcon } from './icons/HelpIcon';
@@ -8,6 +10,8 @@ import { AboutTooltip } from './AboutTooltip';
 import { Tooltip } from './ui/Tooltip';
 
 interface HeaderProps {
+    activeView: AppView;
+    onViewChange: (view: AppView) => void;
     onOpenAbout: () => void;
     onOpenHistory: () => void;
     onOpenFavorites: () => void;
@@ -19,6 +23,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+    activeView,
+    onViewChange,
     onOpenAbout,
     onOpenHistory,
     onOpenFavorites,
@@ -32,9 +38,32 @@ export const Header: React.FC<HeaderProps> = ({
         <header className="flex items-center justify-between p-2 sm:p-4 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-4">
                 <img src="https://i.imgur.com/M9BDKmO.png" alt="Kimetsu Forge Logo" className="w-10 h-10" />
-                <h1 className="text-xl sm:text-2xl font-bold font-gangofthree text-white">
+                <h1 className="text-xl sm:text-2xl font-bold font-gangofthree text-white hidden sm:block">
                     Kimetsu Forge
                 </h1>
+            </div>
+
+            <div className="flex-grow flex items-center justify-center">
+                <div className="p-1 bg-gray-800 rounded-lg flex items-center gap-1">
+                    <Tooltip text="Modo Forja">
+                        <button
+                            onClick={() => onViewChange('forge')}
+                            className={`px-3 py-1.5 rounded-md text-sm font-semibold flex items-center gap-2 transition-colors ${activeView === 'forge' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-gray-700'}`}
+                        >
+                            <ForgeIcon className="w-5 h-5" />
+                            <span className="hidden sm:inline">Forja</span>
+                        </button>
+                    </Tooltip>
+                     <Tooltip text="Modo Alquimia">
+                        <button
+                            onClick={() => onViewChange('alchemist')}
+                            className={`px-3 py-1.5 rounded-md text-sm font-semibold flex items-center gap-2 transition-colors ${activeView === 'alchemist' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:bg-gray-700'}`}
+                        >
+                            <MagicWandIcon className="w-5 h-5" />
+                            <span className="hidden sm:inline">Alquimia</span>
+                        </button>
+                    </Tooltip>
+                </div>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">

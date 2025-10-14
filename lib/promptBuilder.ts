@@ -11,6 +11,7 @@ export const buildResponseSchema = (filters: FilterState, step: number) => {
         descricao_curta: { type: Type.STRING, description: "Uma descrição de 2-3 frases que captura a essência." },
         descricao: { type: Type.STRING, description: "Descrição detalhada, incluindo aparência, história e poderes." },
         nivel_sugerido: { type: Type.INTEGER, description: "Nível de poder ou desafio sugerido para um RPG." },
+        imagePromptDescription: { type: Type.STRING, description: "Descrição visual detalhada para um gerador de imagens. Ex: 'dynamic angle, cinematic lighting, a demon slayer with a fox mask, bamboo forest, epic, detailed'." },
         ganchos_narrativos: {
             type: Type.ARRAY,
             items: { type: Type.STRING },
@@ -85,6 +86,7 @@ ${(filters.category === 'Arma' || filters.category === 'Acessório') ? `- Consid
 ${(filters.category === 'Caçador' && filters.hunterWeapon && filters.hunterWeapon !== 'Aleatório') ? `- O caçador deve ser proficiente com sua Arma Principal: '${filters.hunterWeapon}'. Sua história, aparência e estilo de combate devem refletir o uso desta arma.\n` : ''}
 - Seja criativo, detalhado e fiel ao tom sombrio e épico de Demon Slayer.
 - Forneça uma resposta rica em lore e com ganchos para aventuras.
+- O 'imagePromptDescription' deve ser em inglês, focado em detalhes visuais.
 
 **Contexto da Etapa Anterior (se houver):**
 ${context ? JSON.stringify(context, null, 2) : 'Nenhum. Comece do zero.'}

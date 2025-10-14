@@ -11,6 +11,7 @@ interface ResultsPanelProps {
   favorites: GeneratedItem[];
   onToggleFavorite: (item: GeneratedItem) => void;
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
+  onGenerateImage: (item: GeneratedItem) => void;
   isLoading: boolean;
   activeFilters: FilterState;
 }
@@ -22,6 +23,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   favorites,
   onToggleFavorite,
   onGenerateVariant,
+  onGenerateImage,
   isLoading,
   activeFilters
 }) => {
@@ -61,6 +63,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
                 isFavorite={favorites.some(fav => fav.id === item.id)}
                 onToggleFavorite={onToggleFavorite}
                 onGenerateVariant={onGenerateVariant}
+                onGenerateImage={onGenerateImage}
               />
             ))}
           </div>

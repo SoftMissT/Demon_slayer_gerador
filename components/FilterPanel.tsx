@@ -100,6 +100,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         <CollapsibleSection title="Diretivas Avançadas de IA">
             <div className="space-y-4 pt-2">
                 <TextArea label="Modificador de Prompt" placeholder="Ex: 'Com foco em furtividade' ou 'inspirado em mitologia nórdica'" rows={3} value={filters.promptModifier} onChange={(e) => onFilterChange('promptModifier', e.target.value)} />
+                <TextArea label="Referências de Estilo Visual" placeholder="Ex: 'arte de Yoshitaka Amano, Ufotable, dark fantasy'" rows={2} value={filters.styleReferences} onChange={(e) => onFilterChange('styleReferences', e.target.value)} />
                 <div className="p-2 bg-gray-900/50 rounded-md space-y-3">
                     <h4 className="text-sm font-semibold text-gray-300">Motores de IA</h4>
                     <Switch label="Gemini (Enriquecimento)" checked={aiFlags.useGemini} onChange={e => onAIFlagChange('useGemini', e.target.checked)} />
