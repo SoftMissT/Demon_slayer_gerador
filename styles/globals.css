@@ -21,6 +21,7 @@
   --text-secondary: #cbd5e1;
   --card-bg: rgba(26, 26, 31, 0.7);
   --border-color: rgba(55, 65, 81, 0.6);
+  --dropdown-hover-bg: rgba(139, 92, 246, 0.2);
 }
 
 /* === THEME FORGE (MYTHIC FORGE) === */
@@ -34,6 +35,7 @@
   --text-secondary: #a0aec0;
   --card-bg: rgba(26, 26, 29, 0.7);
   --border-color: rgba(74, 74, 79, 0.6);
+  --dropdown-hover-bg: rgba(197, 48, 48, 0.2);
 }
 
 /* === THEME ALCHEMIST === */
@@ -47,6 +49,7 @@
   --text-secondary: #a8a2c2;
   --card-bg: rgba(26, 17, 42, 0.7);
   --border-color: rgba(139, 92, 246, 0.3);
+  --dropdown-hover-bg: rgba(139, 92, 246, 0.2);
 }
 
 .app-container {
@@ -104,7 +107,7 @@
 }
 
 .dropdown-option {
-  @apply px-3 py-2 cursor-pointer hover:bg-[var(--accent-primary)]/20 text-white;
+  @apply px-3 py-2 cursor-pointer hover:bg-[var(--dropdown-hover-bg)] text-white transition-colors duration-150;
 }
 
 /* ===== Other Components ===== */
