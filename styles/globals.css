@@ -192,7 +192,7 @@
 
 @keyframes drift {
     0% {
-        transform: translateY(0) translateX(0) scale(1);
+        transform: translateY(0) translateX(var(--x-drift, 0) * 1px) scale(1);
         opacity: 0.1;
     }
     50% {

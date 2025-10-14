@@ -124,8 +124,18 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
     }, [setHistory, selectedItem]);
 
-    const handleClearHistory = useCallback(() => setHistory([]), [setHistory]);
-    const handleClearFavorites = useCallback(() => setFavorites([]), [setFavorites]);
+    const handleClearHistory = useCallback(() => {
+        if (window.confirm('Tem certeza de que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
+            setHistory([]);
+            setSelectedItem(null);
+        }
+    }, [setHistory, setSelectedItem]);
+
+    const handleClearFavorites = useCallback(() => {
+        if (window.confirm('Tem certeza de que deseja limpar todos os seus favoritos?')) {
+            setFavorites([]);
+        }
+    }, [setFavorites]);
     
     const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
         const updateList = (list: GeneratedItem[]) => list.map(item => item.id === updatedItem.id ? updatedItem : item);
@@ -142,6 +152,13 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             setIsDetailModalOpen(true);
         }
     };
+    
+    const handleTabChange = useCallback((tab: 'history' | 'favorites') => {
+        if (activeResultsTab !== tab) {
+            setSelectedItem(null); // Clear selection for a smoother UX when switching lists
+        }
+        setActiveResultsTab(tab);
+    }, [activeResultsTab, setSelectedItem]);
 
     const activeList = useMemo(() => 
         activeResultsTab === 'favorites' ? favorites : history
@@ -217,7 +234,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     currentIndex={currentIndex}
                     totalItems={activeList.length}
                     activeTab={activeResultsTab}
-                    onTabChange={setActiveResultsTab}
+                    onTabChange={handleTabChange}
                 />
             </div>
             
