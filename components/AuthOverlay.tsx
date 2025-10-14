@@ -18,7 +18,7 @@ export const AuthOverlay: React.FC<AuthOverlayProps> = ({ onLoginClick, view }) 
             <Button 
                 onClick={onLoginClick} 
                 size="lg"
-                className={buttonClass}
+                className="bg-[#5865F2] text-white hover:bg-[#4752C4] focus:ring-[#5865F2]"
             >
                 <DiscordIcon className="w-6 h-6" />
                 Entrar com Discord

@@ -66,6 +66,14 @@ export interface FilterState {
   aiFocusGemini: string;
   aiFocusGpt: string;
   aiFocusDeepSeek: string;
+  missionType: string;
+  eventType: string;
+  terrainType: string;
+  kekkijutsuInspirations: string[];
+  weaponDamage: string;
+  weaponEffects: string;
+  characterClass: string;
+  characterBackground: string;
 }
 
 export interface AIFlags {

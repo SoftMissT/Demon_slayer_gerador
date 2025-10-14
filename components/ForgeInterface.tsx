@@ -7,6 +7,7 @@ import type { GeneratedItem, FilterState, User, AIFlags, Category, Rarity } from
 import { AuthOverlay } from './AuthOverlay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { DetailModal } from './DetailModal';
+import { CollapsibleColumn } from './CollapsibleColumn';
 
 const INITIAL_FILTERS: FilterState = {
     category: 'Aleatório',
@@ -26,6 +27,14 @@ const INITIAL_FILTERS: FilterState = {
     aiFocusGemini: '',
     aiFocusGpt: '',
     aiFocusDeepSeek: '',
+    missionType: 'Aleatório',
+    eventType: 'Aleatório',
+    terrainType: 'Aleatório',
+    kekkijutsuInspirations: [],
+    weaponDamage: '',
+    weaponEffects: '',
+    characterClass: '',
+    characterBackground: '',
 };
 
 const INITIAL_AI_FLAGS: AIFlags = {
@@ -63,6 +72,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [collapsedColumns, setCollapsedColumns] = useState({ left: false, right: false });
+    const [activeResultsTab, setActiveResultsTab] = useState<'history' | 'favorites'>('history');
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -75,6 +86,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const handleGenerate = useCallback(async () => {
         setIsLoading(true);
         setError(null);
+        setActiveResultsTab('history'); // Switch to history tab on new generation
         try {
             const results: GeneratedItem[] = [];
             for (let i = 0; i < filters.quantity; i++) {
@@ -104,11 +116,21 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             return [item, ...prev];
         });
     }, [setFavorites]);
+
+    const handleDeleteItem = useCallback((id: string) => {
+        setHistory(prev => prev.filter(item => item.id !== id));
+        if (selectedItem?.id === id) {
+            setSelectedItem(null);
+        }
+    }, [setHistory, selectedItem]);
+
+    const handleClearHistory = useCallback(() => setHistory([]), [setHistory]);
+    const handleClearFavorites = useCallback(() => setFavorites([]), [setFavorites]);
     
     const handleUpdateItem = useCallback((updatedItem: GeneratedItem) => {
         const updateList = (list: GeneratedItem[]) => list.map(item => item.id === updatedItem.id ? updatedItem : item);
-        setHistory(updateList);
-        setFavorites(updateList);
+        setHistory(prev => updateList(prev));
+        setFavorites(prev => updateList(prev));
         if (selectedItem?.id === updatedItem.id) {
             setSelectedItem(updatedItem);
         }
@@ -121,18 +143,22 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
     };
 
+    const activeList = useMemo(() => 
+        activeResultsTab === 'favorites' ? favorites : history
+    , [activeResultsTab, favorites, history]);
+
     const isFavorite = useMemo(() => {
         if (!selectedItem) return false;
         return favorites.some(fav => fav.id === selectedItem.id);
     }, [selectedItem, favorites]);
 
     const currentIndex = useMemo(() => 
-        selectedItem ? history.findIndex(h => h.id === selectedItem.id) : -1
-    , [selectedItem, history]);
+        selectedItem ? activeList.findIndex(h => h.id === selectedItem.id) : -1
+    , [selectedItem, activeList]);
 
     const hasNext = useMemo(() => 
-        currentIndex !== -1 && currentIndex < history.length - 1
-    , [currentIndex, history]);
+        currentIndex !== -1 && currentIndex < activeList.length - 1
+    , [currentIndex, activeList]);
     
     const hasPrevious = useMemo(() => 
         currentIndex > 0
@@ -140,21 +166,26 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
 
     const handleNavigateNext = useCallback(() => {
         if (hasNext) {
-            setSelectedItem(history[currentIndex + 1]);
+            setSelectedItem(activeList[currentIndex + 1]);
         }
-    }, [hasNext, currentIndex, history, setSelectedItem]);
+    }, [hasNext, currentIndex, activeList, setSelectedItem]);
 
     const handleNavigatePrevious = useCallback(() => {
         if (hasPrevious) {
-            setSelectedItem(history[currentIndex - 1]);
+            setSelectedItem(activeList[currentIndex - 1]);
         }
-    }, [hasPrevious, currentIndex, history, setSelectedItem]);
+    }, [hasPrevious, currentIndex, activeList, setSelectedItem]);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full relative">
+        <div className="flex gap-4 h-full relative">
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="forge" />}
 
-            <div className="lg:col-span-3 h-full">
+            <CollapsibleColumn
+                isCollapsed={collapsedColumns.left}
+                onToggle={() => setCollapsedColumns(p => ({ ...p, left: !p.left }))}
+                position="left"
+                className="w-[22rem]"
+            >
                 <FilterPanel
                     filters={filters}
                     onFilterChange={handleFilterChange}
@@ -164,14 +195,18 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     aiFlags={aiFlags}
                     onAIFlagChange={handleAIFlagChange}
                 />
-            </div>
-            <div className="lg:col-span-5 h-full">
+            </CollapsibleColumn>
+
+            <div className="flex-grow h-full min-w-0">
                 <ResultsPanel
                     history={history}
                     selectedItem={selectedItem}
                     onSelect={handleSelect}
                     favorites={favorites}
                     onToggleFavorite={handleToggleFavorite}
+                    onDeleteItem={handleDeleteItem}
+                    onClearHistory={handleClearHistory}
+                    onClearFavorites={handleClearFavorites}
                     onGenerateVariant={() => {}} // Placeholder for now
                     isLoading={isLoading}
                     activeFilters={filters}
@@ -180,10 +215,18 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     hasNext={hasNext}
                     hasPrevious={hasPrevious}
                     currentIndex={currentIndex}
-                    totalItems={history.length}
+                    totalItems={activeList.length}
+                    activeTab={activeResultsTab}
+                    onTabChange={setActiveResultsTab}
                 />
             </div>
-            <div className="hidden lg:block lg:col-span-4 h-full">
+            
+            <CollapsibleColumn
+                isCollapsed={collapsedColumns.right}
+                onToggle={() => setCollapsedColumns(p => ({ ...p, right: !p.right }))}
+                position="right"
+                className="w-[28rem] hidden lg:block"
+            >
                 <DetailPanel
                     item={selectedItem}
                     onGenerateVariant={() => {}} // Placeholder for now
@@ -195,7 +238,8 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     hasNext={hasNext}
                     hasPrevious={hasPrevious}
                 />
-            </div>
+            </CollapsibleColumn>
+            
             <DetailModal
                 isOpen={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}

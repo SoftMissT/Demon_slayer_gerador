@@ -1,5 +1,6 @@
 // FIX: Implemented the FilterPanel component to resolve module not found errors. This component provides the UI for filtering and configuring the item generation process.
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { FilterState, AIFlags, Category, Rarity } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -22,9 +23,13 @@ import {
     ORIGIN_OPTIONS,
     BREATHING_STYLE_OPTIONS,
     WEAPON_TYPE_OPTIONS,
-    PROFESSION_OPTIONS
+    KEKKIJUTSU_INSPIRATION_OPTIONS,
+    TERRAIN_TYPE_OPTIONS,
+    MISSION_TYPE_OPTIONS,
+    EVENT_TYPE_OPTIONS
 } from '../constants';
 import { CATEGORIES, RARITIES } from '../types';
+import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -45,8 +50,38 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   aiFlags,
   onAIFlagChange,
 }) => {
-    const isHunterCategory = filters.category === 'Caçador' || filters.category === 'NPC';
+    // Category-based flags for conditional rendering
+    const isHunterCategory = filters.category === 'Caçador';
+    const isNpcCategory = filters.category === 'NPC';
     const isWeaponCategory = filters.category === 'Arma' || filters.category === 'Acessório';
+    const isKekkijutsuCategory = filters.category === 'Kekkijutsu';
+    const isLocationCategory = filters.category === 'Local/Cenário';
+    const isMissionCategory = filters.category === 'Missões';
+    const isEventCategory = filters.category === 'Evento';
+    
+    // Flag for categories that have Rarity and Level
+    const hasGameParams = ['Arma', 'Acessório', 'Caçador', 'Inimigo/Oni', 'Kekkijutsu', 'Respiração', 'NPC'].includes(filters.category);
+    
+    const professionOptionsForTheme = useMemo(() => {
+        const professions = PROFESSIONS_BY_TEMATICA[filters.tematica] || PROFESSIONS_BY_TEMATICA.all;
+        return professions.map(p => ({ value: p, label: p }));
+    }, [filters.tematica]);
+
+    useEffect(() => {
+        const validProfessions = (PROFESSIONS_BY_TEMATICA[filters.tematica] || PROFESSIONS_BY_TEMATICA.all);
+        const currentProfessions = filters.professions;
+
+        const updatedProfessions = currentProfessions.filter(p => validProfessions.includes(p));
+
+        if (updatedProfessions.length !== currentProfessions.length) {
+            onFilterChange('professions', updatedProfessions);
+        }
+    }, [filters.tematica, filters.professions, onFilterChange]);
+
+    const categorySpecificFilterVariants = {
+        hidden: { opacity: 0, y: -15, transition: { duration: 0.2 } },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    };
 
   return (
     <Card className="h-full flex flex-col">
@@ -75,7 +110,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 min={1} max={5}
             />
         </div>
-
+        
         <SearchableSelect 
             label="Temática Principal"
             options={THEME_OPTIONS}
@@ -83,6 +118,136 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             onChange={value => onFilterChange('tematica', value)}
         />
         
+        <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+                key={filters.category}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                variants={categorySpecificFilterVariants}
+                className="space-y-4"
+            >
+                {isMissionCategory && (
+                    <SearchableSelect 
+                        label="Tipo de Missão"
+                        options={MISSION_TYPE_OPTIONS}
+                        value={filters.missionType}
+                        onChange={value => onFilterChange('missionType', value)}
+                    />
+                )}
+                {isEventCategory && (
+                    <SearchableSelect 
+                        label="Tipo de Evento"
+                        options={EVENT_TYPE_OPTIONS}
+                        value={filters.eventType}
+                        onChange={value => onFilterChange('eventType', value)}
+                    />
+                )}
+                {isLocationCategory && (
+                     <SearchableSelect 
+                        label="Tipo de Terreno"
+                        options={TERRAIN_TYPE_OPTIONS}
+                        value={filters.terrainType}
+                        onChange={value => onFilterChange('terrainType', value)}
+                    />
+                )}
+                {isKekkijutsuCategory && (
+                    <SearchableMultiSelect
+                        label="Inspirações Elementais/Conceituais"
+                        options={KEKKIJUTSU_INSPIRATION_OPTIONS}
+                        selected={filters.kekkijutsuInspirations}
+                        onChange={value => onFilterChange('kekkijutsuInspirations', value)}
+                    />
+                )}
+                {isWeaponCategory && (
+                    <CollapsibleSection title="Detalhes da Arma/Acessório" defaultOpen>
+                        <div className="space-y-4 pt-2">
+                            <TextInput
+                                label="Dano Sugerido"
+                                value={filters.weaponDamage}
+                                onChange={e => onFilterChange('weaponDamage', e.target.value)}
+                                placeholder="Ex: '2d8 Corte', 'Variável'"
+                            />
+                            <TextArea
+                                label="Efeitos Secundários"
+                                value={filters.weaponEffects}
+                                onChange={e => onFilterChange('weaponEffects', e.target.value)}
+                                rows={2}
+                                placeholder="Ex: 'Aplica Lentidão no acerto crítico.'"
+                            />
+                        </div>
+                    </CollapsibleSection>
+                )}
+                {(isHunterCategory || isNpcCategory) && (
+                    <CollapsibleSection title={isHunterCategory ? "Detalhes do Caçador" : "Detalhes do NPC"} defaultOpen>
+                         <div className="space-y-4 pt-2">
+                            {isHunterCategory && (
+                                <>
+                                    <SearchableMultiSelect
+                                        label="Estilos de Respiração"
+                                        options={BREATHING_STYLE_OPTIONS}
+                                        selected={filters.breathingStyles}
+                                        onChange={value => onFilterChange('breathingStyles', value)}
+                                    />
+                                     <SearchableSelect
+                                        label="Arma Principal"
+                                        options={WEAPON_TYPE_OPTIONS}
+                                        value={filters.hunterWeapon}
+                                        onChange={value => onFilterChange('hunterWeapon', value)}
+                                    />
+                                </>
+                            )}
+                             <TextInput
+                                label="Classe/Arquétipo"
+                                value={filters.characterClass}
+                                onChange={e => onFilterChange('characterClass', e.target.value)}
+                                placeholder="Ex: 'Duelista Ágil', 'Especialista em Suporte'"
+                            />
+                             <TextArea
+                                label="Background/História"
+                                value={filters.characterBackground}
+                                onChange={e => onFilterChange('characterBackground', e.target.value)}
+                                rows={3}
+                                placeholder="Ex: 'Órfão de uma vila destruída por um Oni.'"
+                            />
+                            <SearchableMultiSelect
+                                label="Profissões / Papel Social"
+                                options={professionOptionsForTheme}
+                                selected={filters.professions}
+                                onChange={value => onFilterChange('professions', value)}
+                            />
+                        </div>
+                    </CollapsibleSection>
+                )}
+                 {hasGameParams && (
+                    <CollapsibleSection title="Parâmetros de Jogo">
+                         <div className="space-y-4 pt-2">
+                            <Select 
+                                label="Raridade"
+                                options={RARITIES}
+                                value={filters.rarity}
+                                onChange={value => onFilterChange('rarity', value as Rarity)}
+                            />
+                             <Slider
+                                label="Nível/Poder Sugerido"
+                                value={filters.level}
+                                onChange={e => onFilterChange('level', parseInt(e.target.value, 10))}
+                                min={1} max={100} step={1}
+                            />
+                            {isWeaponCategory && (
+                                <Slider
+                                    label="Preço Sugerido (Ryo)"
+                                    value={filters.suggestedPrice}
+                                    onChange={e => onFilterChange('suggestedPrice', parseInt(e.target.value, 10))}
+                                    min={10} max={100000} step={10}
+                                />
+                            )}
+                        </div>
+                    </CollapsibleSection>
+                )}
+            </motion.div>
+        </AnimatePresence>
+
         <CollapsibleSection title="Detalhes do Mundo">
             <div className="space-y-4 pt-2">
                 <SearchableSelect 
@@ -99,57 +264,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 />
             </div>
         </CollapsibleSection>
-
-        {isHunterCategory && (
-            <CollapsibleSection title="Detalhes do Caçador" defaultOpen>
-                 <div className="space-y-4 pt-2">
-                    <SearchableMultiSelect
-                        label="Estilos de Respiração"
-                        options={BREATHING_STYLE_OPTIONS}
-                        selected={filters.breathingStyles}
-                        onChange={value => onFilterChange('breathingStyles', value)}
-                    />
-                     <SearchableSelect
-                        label="Arma Principal"
-                        options={WEAPON_TYPE_OPTIONS}
-                        value={filters.hunterWeapon}
-                        onChange={value => onFilterChange('hunterWeapon', value)}
-                    />
-                    <SearchableMultiSelect
-                        label="Profissões"
-                        options={PROFESSION_OPTIONS}
-                        selected={filters.professions}
-                        onChange={value => onFilterChange('professions', value)}
-                    />
-                </div>
-            </CollapsibleSection>
-        )}
         
-        <CollapsibleSection title="Parâmetros de Jogo">
-             <div className="space-y-4 pt-2">
-                <Select 
-                    label="Raridade"
-                    options={RARITIES}
-                    value={filters.rarity}
-                    onChange={value => onFilterChange('rarity', value as Rarity)}
-                />
-                 <Slider
-                    label="Nível/Poder Sugerido"
-                    value={filters.level}
-                    onChange={e => onFilterChange('level', parseInt(e.target.value, 10))}
-                    min={1} max={100} step={1}
-                />
-                {isWeaponCategory && (
-                    <Slider
-                        label="Preço Sugerido (Ryo)"
-                        value={filters.suggestedPrice}
-                        onChange={e => onFilterChange('suggestedPrice', parseInt(e.target.value, 10))}
-                        min={10} max={100000} step={10}
-                    />
-                )}
-            </div>
-        </CollapsibleSection>
-
         <CollapsibleSection title="Instruções para a IA">
             <div className="space-y-4 pt-2">
                 <TextArea

@@ -49,7 +49,7 @@ export const AboutPanel: React.FC<AboutPanelProps> = ({ onClose }) => {
                 <ActionButton href="https://www.crunchyroll.com/pt-br/series/GY5P48XEY/demon-slayer-kimetsu-no-yaiba?srsltid=AfmBOoqkRSmBRMMGsksUh4lSY4sKW4P9m1x8l9qusunS6KgbVpX4Zjm7" className="crunchyroll-button">
                     <PlayIcon className="w-5 h-5 relative top-[1px]" /> Assista ao anime na Crunchyroll
                 </ActionButton>
-                <ActionButton href="https://discord.gg/Xp4XnWQQHr" className="discord-button">
+                <ActionButton href="https://discord.gg/Xp4XnWQQHr" className="bg-[#5865F2] text-white hover:bg-[#4752C4]">
                     <DiscordIcon className="w-5 h-5 relative top-[1px]" /> Junte-se à nossa comunidade
                 </ActionButton>
                  <ActionButton href="https://panini.com.br/catalogsearch/result/?q=Demon+Slayer" className="panini-button">

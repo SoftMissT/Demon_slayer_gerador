@@ -4,13 +4,12 @@ import { Header } from './components/Header';
 import { ForgeInterface } from './components/ForgeInterface';
 import { PromptEngineeringPanel } from './components/PromptEngineeringPanel';
 import { AboutModal } from './components/AboutModal';
-import { HistoryModal } from './components/HistoryModal';
-import { FavoritesModal } from './components/FavoritesModal';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import useLocalStorage from './hooks/useLocalStorage';
-import type { User, GeneratedItem, AlchemyHistoryItem, HistoryItem, FavoriteItem } from './types';
+import type { User, GeneratedItem, AlchemyHistoryItem } from './types';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { AnimatedThemedBackground } from './components/AnimatedThemedBackground';
+import { AppSidebar } from './components/AppSidebar';
 
 type AppView = 'forge' | 'alchemist';
 
@@ -33,8 +32,6 @@ export default function App() {
 
     // Modal States
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [isHowItWorksModalOpen, setIsHowItWorksModalOpen] = useState(false);
     const [appError, setAppError] = useState<string | null>(null);
     
@@ -91,30 +88,6 @@ export default function App() {
             authenticate();
         }
     }, [isAuthenticated, setIsAuthenticated, setUser]);
-
-    const handleSelectHistoryItem = useCallback((item: HistoryItem) => {
-        if ('categoria' in item) { // It's a GeneratedItem
-            setSelectedItem(item as GeneratedItem);
-            setSelectedAlchemyItem(null);
-            setActiveView('forge');
-        } else { // It's an AlchemyHistoryItem
-            setSelectedAlchemyItem(item as AlchemyHistoryItem);
-            setSelectedItem(null);
-            setActiveView('alchemist');
-        }
-        setIsHistoryModalOpen(false);
-    }, [setSelectedItem, setActiveView, setSelectedAlchemyItem]);
-
-    const handleSelectFavoriteItem = useCallback((item: FavoriteItem) => {
-        if ('categoria' in item) { // It's a GeneratedItem
-            setSelectedItem(item as GeneratedItem);
-            setActiveView('forge');
-        } else { // It's an AlchemyHistoryItem
-            setSelectedAlchemyItem(item as AlchemyHistoryItem);
-            setActiveView('alchemist');
-        }
-        setIsFavoritesModalOpen(false);
-    }, [setSelectedItem, setActiveView, setSelectedAlchemyItem]);
     
     const viewVariants = {
         hidden: { opacity: 0, transition: { duration: 0.2 } },
@@ -122,21 +95,20 @@ export default function App() {
     };
 
     return (
-        <div className={`app-container h-screen overflow-hidden ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
+        <div className={`app-container h-screen overflow-hidden flex ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
             <AnimatedThemedBackground view={activeView} />
-            <div className="relative z-10 flex flex-col h-full">
-                <Header 
-                    activeView={activeView}
-                    onViewChange={setActiveView}
-                    onOpenAbout={() => setIsAboutModalOpen(true)}
-                    onOpenHistory={() => setIsHistoryModalOpen(true)}
-                    onOpenFavorites={() => setIsFavoritesModalOpen(true)}
-                    onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
-                    user={user}
-                    onLoginClick={handleLoginClick}
-                    onLogout={handleLogout}
-                    favoritesCount={forgeFavorites.length + alchemyFavorites.length}
-                />
+             <AppSidebar
+                activeView={activeView}
+                onViewChange={setActiveView}
+                onOpenAbout={() => setIsAboutModalOpen(true)}
+                onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
+                user={user}
+                onLoginClick={handleLoginClick}
+                onLogout={handleLogout}
+                favoritesCount={forgeFavorites.length}
+            />
+            <div className="relative z-10 flex flex-col h-full flex-grow">
+                <Header />
 
                 <main className="flex-grow p-2 overflow-hidden relative backdrop-blur-[2px]">
                     <AnimatePresence mode="wait">
@@ -178,35 +150,6 @@ export default function App() {
                 <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
                 <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
 
-                <HistoryModal
-                    isOpen={isHistoryModalOpen}
-                    onClose={() => setIsHistoryModalOpen(false)}
-                    history={activeView === 'forge' ? forgeHistory : alchemyHistory}
-                    onSelect={handleSelectHistoryItem}
-                    onDelete={(id) => {
-                        if (activeView === 'forge') setForgeHistory(h => h.filter(i => i.id !== id));
-                        else setAlchemyHistory(h => h.filter(i => i.id !== id));
-                    }}
-                    onClear={() => {
-                        if (activeView === 'forge') setForgeHistory([]);
-                        else setAlchemyHistory([]);
-                    }}
-                    activeView={activeView}
-                />
-                <FavoritesModal
-                    isOpen={isFavoritesModalOpen}
-                    onClose={() => setIsFavoritesModalOpen(false)}
-                    favorites={activeView === 'forge' ? forgeFavorites : alchemyFavorites}
-                    onSelect={handleSelectFavoriteItem}
-                    onToggleFavorite={(item) => {
-                         if ('categoria' in item) {
-                            setForgeFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item as GeneratedItem, ...f]);
-                        } else {
-                            setAlchemyFavorites(f => f.some(i => i.id === item.id) ? f.filter(i => i.id !== item.id) : [item as AlchemyHistoryItem, ...f]);
-                        }
-                    }}
-                    activeView={activeView}
-                />
                 <ErrorDisplay message={appError} onDismiss={() => setAppError(null)} />
             </div>
         </div>

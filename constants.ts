@@ -6,6 +6,10 @@ import { BREATHING_STYLES_DATA } from './lib/breathingStylesData';
 import { WEAPON_TYPES, GRIP_TYPES } from './lib/weaponData';
 import { TEMATICAS_DATA } from './lib/tematicasData';
 import { PAISES_DATA } from './lib/paisesData';
+import { KEKKIJUTSU_INSPIRATIONS_DATA } from './lib/kekkijutsuInspirationsData';
+import { TERRAIN_TYPES_DATA } from './lib/terrainTypesData';
+import { MISSION_TYPES_DATA } from './lib/missionTypesData';
+import { EVENT_TYPES_DATA } from './lib/eventTypesData';
 
 export const APP_NAME = 'Kimetsu Forge';
 
@@ -20,3 +24,8 @@ export const BREATHING_STYLE_OPTIONS = BREATHING_STYLES_DATA.map(b => ({ value: 
 export const WEAPON_TYPE_OPTIONS = WEAPON_TYPES.map(w => ({ value: w.name, label: w.name }));
 export const GRIP_TYPE_OPTIONS = GRIP_TYPES.map(g => ({ value: g.name, label: g.name }));
 export const PROFESSION_OPTIONS = PROFESSIONS_BY_TEMATICA.all.map(p => ({ value: p, label: p }));
+
+export const KEKKIJUTSU_INSPIRATION_OPTIONS = KEKKIJUTSU_INSPIRATIONS_DATA;
+export const TERRAIN_TYPE_OPTIONS = TERRAIN_TYPES_DATA;
+export const MISSION_TYPE_OPTIONS = MISSION_TYPES_DATA;
+export const EVENT_TYPE_OPTIONS = EVENT_TYPES_DATA;

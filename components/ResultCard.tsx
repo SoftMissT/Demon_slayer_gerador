@@ -7,6 +7,7 @@ import { StarIcon } from './icons/StarIcon';
 import { DotsVerticalIcon } from './icons/DotsVerticalIcon';
 import { Tooltip } from './ui/Tooltip';
 import { ClipboardIcon } from './icons/ClipboardIcon';
+import { TrashIcon } from './icons/TrashIcon';
 
 interface ResultCardProps {
   item: GeneratedItem;
@@ -15,6 +16,7 @@ interface ResultCardProps {
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
+  onDelete?: (id: string) => void;
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({
@@ -24,6 +26,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   isFavorite,
   onToggleFavorite,
   onGenerateVariant,
+  onDelete,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -55,7 +58,16 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     setMenuOpen(false);
   };
   
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+        onDelete(item.id);
+    }
+    setMenuOpen(false);
+  }
+  
   const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento' && item.categoria !== 'Local/Cenário';
+  const hasMenuOptions = canGenerateVariant || item.imagePromptDescription || onDelete;
 
   return (
     <Card 
@@ -91,7 +103,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                 Lvl {item.nivel_sugerido}
             </span>
             <div className="relative" ref={menuRef}>
-                {(canGenerateVariant || item.imagePromptDescription) && (
+                {hasMenuOptions && (
                     <Tooltip text="Mais Opções">
                         <Button 
                             variant="ghost" 
@@ -112,7 +124,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute bottom-full right-0 mb-2 w-40 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 py-1 origin-bottom-right"
+                        className="absolute bottom-full right-0 mb-2 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 py-1 origin-bottom-right"
                     >
                         {canGenerateVariant && (
                             <>
@@ -123,11 +135,17 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                         )}
                         {(canGenerateVariant && item.imagePromptDescription) && <div className="my-1 border-t border-gray-700" />}
                         {item.imagePromptDescription && (
-                            <>
-                                <button onClick={handleCopyPrompt} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
-                                    <ClipboardIcon className="w-4 h-4" /> {copied ? 'Copiado!' : 'Copiar Prompt'}
-                                </button>
-                            </>
+                            <button onClick={handleCopyPrompt} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
+                                <ClipboardIcon className="w-4 h-4" /> {copied ? 'Copiado!' : 'Copiar Prompt'}
+                            </button>
+                        )}
+                        {onDelete && (
+                           <>
+                            {(canGenerateVariant || item.imagePromptDescription) && <div className="my-1 border-t border-gray-700" />}
+                            <button onClick={handleDeleteClick} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-red-900/50">
+                                <TrashIcon className="w-4 h-4" /> Deletar
+                            </button>
+                           </>
                         )}
                     </motion.div>
                 )}
