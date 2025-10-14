@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const MidjourneyIcon: React.FC<{ className?: string }> = ({ className }) => (
+export const ShareIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg
         className={className}
         viewBox="0 0 24 24"
@@ -13,8 +13,10 @@ export const MidjourneyIcon: React.FC<{ className?: string }> = ({ className }) 
         width="100%"
         height="100%"
     >
-        <path d="M12 2L3 22h18L12 2z" />
-        <path d="M12 12l8 10" />
-        <path d="M12 12L4 22" />
+        <circle cx="18" cy="5" r="3"/>
+        <circle cx="6" cy="12" r="3"/>
+        <circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
     </svg>
 );

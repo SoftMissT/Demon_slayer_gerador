@@ -5,6 +5,7 @@ import type { HistoryItem, GeneratedItem, AlchemyHistoryItem, AppView } from '..
 import { TrashIcon } from './icons/TrashIcon';
 import { ForgeIcon } from './icons/ForgeIcon';
 import { MagicWandIcon } from './icons/MagicWandIcon';
+import { VirtualizedList } from './ui/VirtualizedList';
 
 interface HistoryModalProps {
     isOpen: boolean;
@@ -22,15 +23,14 @@ const HistoryListItem: React.FC<{ item: HistoryItem; onSelect: (item: HistoryIte
     const name = isForgeItem 
         ? (item as GeneratedItem).nome || (item as GeneratedItem).title 
         : (alchemyItem.inputs ? alchemyItem.inputs.basePrompt : 'Item de Alquimia Antigo');
-    // FIX: Added defensive check for alchemyItem.outputs to prevent crashes with old localStorage data.
     const description = isForgeItem 
         ? (item as GeneratedItem).descricao_curta 
         : (alchemyItem.outputs ? Object.values(alchemyItem.outputs).filter(Boolean).join(' | ') : 'Prompt não gerado');
     const createdAt = new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
     return (
-        <li className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg transition-colors group">
-            <button onClick={() => onSelect(item)} className="flex-grow text-left flex items-start gap-4 min-w-0">
+        <div className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg transition-colors group h-full">
+            <button onClick={() => onSelect(item)} className="flex-grow text-left flex items-start gap-4 min-w-0 h-full">
                  <div className="flex-shrink-0 mt-1">
                     {isForgeItem ? <ForgeIcon className="w-5 h-5 text-indigo-400"/> : <MagicWandIcon className="w-5 h-5 text-purple-400"/>}
                 </div>
@@ -45,7 +45,7 @@ const HistoryListItem: React.FC<{ item: HistoryItem; onSelect: (item: HistoryIte
                     <TrashIcon className="w-5 h-5 text-red-500" />
                 </Button>
             </div>
-        </li>
+        </div>
     );
 }
 
@@ -58,11 +58,13 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
                         <p>Nenhum item no histórico.</p>
                     </div>
                 ) : (
-                    <ul className="flex-grow overflow-y-auto p-2">
-                        {history.map(item => (
-                            <HistoryListItem key={item.id} item={item} onSelect={onSelect} onDelete={onDelete} />
-                        ))}
-                    </ul>
+                    <div className="flex-grow p-2">
+                        <VirtualizedList
+                            items={history}
+                            renderItem={(item) => <HistoryListItem item={item} onSelect={onSelect} onDelete={onDelete} />}
+                            itemHeight={76}
+                        />
+                    </div>
                 )}
                  <div className="p-4 border-t border-gray-700">
                     <Button variant="danger" onClick={onClear} disabled={history.length === 0} className="w-full">

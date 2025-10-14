@@ -5,6 +5,7 @@ import type { FavoriteItem, GeneratedItem, AlchemyHistoryItem } from '../types';
 import { StarIcon } from './icons/StarIcon';
 import { ForgeIcon } from './icons/ForgeIcon';
 import { MagicWandIcon } from './icons/MagicWandIcon';
+import { VirtualizedList } from './ui/VirtualizedList';
 
 interface FavoritesModalProps {
     isOpen: boolean;
@@ -21,15 +22,14 @@ const FavoriteListItem: React.FC<{ item: FavoriteItem; onSelect: (item: Favorite
     const name = isForgeItem 
         ? (item as GeneratedItem).nome || (item as GeneratedItem).title 
         : (alchemyItem.inputs ? alchemyItem.inputs.basePrompt : 'Item de Alquimia Antigo');
-    // FIX: Added defensive check for alchemyItem.outputs to prevent crashes with old localStorage data.
     const description = isForgeItem 
         ? (item as GeneratedItem).descricao_curta 
         : (alchemyItem.outputs ? Object.values(alchemyItem.outputs).filter(Boolean).join(' | ') : 'Prompt não gerado');
 
 
     return (
-        <li className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg transition-colors">
-            <button onClick={() => onSelect(item)} className="flex-grow text-left flex items-start gap-4 min-w-0">
+        <div className="flex items-center justify-between p-3 hover:bg-gray-700/50 rounded-lg transition-colors h-full">
+            <button onClick={() => onSelect(item)} className="flex-grow text-left flex items-start gap-4 min-w-0 h-full">
                 <div className="flex-shrink-0 mt-1">
                     {isForgeItem ? <ForgeIcon className="w-5 h-5 text-indigo-400"/> : <MagicWandIcon className="w-5 h-5 text-purple-400"/>}
                 </div>
@@ -43,7 +43,7 @@ const FavoriteListItem: React.FC<{ item: FavoriteItem; onSelect: (item: Favorite
                     <StarIcon className="w-5 h-5 text-yellow-400" filled />
                 </Button>
             </div>
-        </li>
+        </div>
     );
 }
 
@@ -58,11 +58,15 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({ isOpen, onClose,
                         <p className="text-sm">Clique na estrela em um item para adicioná-lo aqui.</p>
                     </div>
                 ) : (
-                    <ul className="p-2 flex-grow overflow-y-auto">
-                        {favorites.map(item => (
-                            <FavoriteListItem key={item.id} item={item} onSelect={onSelect} onToggleFavorite={onToggleFavorite} />
-                        ))}
-                    </ul>
+                    <div className="p-2 flex-grow">
+                         <VirtualizedList
+                            items={favorites}
+                            renderItem={(item) => (
+                                <FavoriteListItem item={item} onSelect={onSelect} onToggleFavorite={onToggleFavorite} />
+                            )}
+                            itemHeight={76}
+                        />
+                    </div>
                 )}
             </div>
         </Modal>

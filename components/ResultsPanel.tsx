@@ -3,6 +3,9 @@ import type { GeneratedItem, FilterState } from '../types';
 import { LazyResultCard } from './LazyResultCard';
 import { ForgeLoadingIndicator } from './ForgeLoadingIndicator';
 import { AnvilIcon } from './icons/AnvilIcon';
+import { Button } from './ui/Button';
+import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
+import { ChevronRightIcon } from './icons/ChevronRightIcon';
 
 interface ResultsPanelProps {
   history: GeneratedItem[];
@@ -13,6 +16,12 @@ interface ResultsPanelProps {
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
   isLoading: boolean;
   activeFilters: FilterState;
+  onNavigateNext: () => void;
+  onNavigatePrevious: () => void;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  currentIndex: number;
+  totalItems: number;
 }
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({
@@ -23,13 +32,34 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   onToggleFavorite,
   onGenerateVariant,
   isLoading,
-  activeFilters
+  activeFilters,
+  onNavigateNext,
+  onNavigatePrevious,
+  hasNext,
+  hasPrevious,
+  currentIndex,
+  totalItems,
 }) => {
   return (
     <div className="h-full flex flex-col bg-gray-800/30 rounded-lg">
-      <div className="p-4 border-b border-gray-700 flex-shrink-0">
-        <h2 className="text-lg font-bold text-white font-gangofthree">Resultados da Forja</h2>
-        <p className="text-sm text-gray-400">Aqui estão suas criações. Clique para ver detalhes.</p>
+      <div className="p-4 border-b border-gray-700 flex-shrink-0 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold text-white font-gangofthree">Resultados da Forja</h2>
+          <p className="text-sm text-gray-400">Aqui estão suas criações. Clique para ver detalhes.</p>
+        </div>
+        {history.length > 0 && !isLoading && (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" className="!p-2" onClick={onNavigatePrevious} disabled={!hasPrevious} aria-label="Item Anterior">
+              <ChevronLeftIcon className="w-6 h-6" />
+            </Button>
+            <span className="font-mono text-sm text-gray-400">
+              {currentIndex + 1} / {totalItems}
+            </span>
+            <Button variant="ghost" className="!p-2" onClick={onNavigateNext} disabled={!hasNext} aria-label="Próximo Item">
+              <ChevronRightIcon className="w-6 h-6" />
+            </Button>
+          </div>
+        )}
       </div>
       <div className="flex-grow overflow-y-auto p-4 inner-scroll relative">
         {isLoading ? (

@@ -116,7 +116,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     
     const handleSelect = (item: GeneratedItem) => {
         setSelectedItem(item);
-        // On smaller screens, open a modal for the detail view
         if (window.innerWidth < 1024) {
             setIsDetailModalOpen(true);
         }
@@ -126,6 +125,30 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         if (!selectedItem) return false;
         return favorites.some(fav => fav.id === selectedItem.id);
     }, [selectedItem, favorites]);
+
+    const currentIndex = useMemo(() => 
+        selectedItem ? history.findIndex(h => h.id === selectedItem.id) : -1
+    , [selectedItem, history]);
+
+    const hasNext = useMemo(() => 
+        currentIndex !== -1 && currentIndex < history.length - 1
+    , [currentIndex, history]);
+    
+    const hasPrevious = useMemo(() => 
+        currentIndex > 0
+    , [currentIndex]);
+
+    const handleNavigateNext = useCallback(() => {
+        if (hasNext) {
+            setSelectedItem(history[currentIndex + 1]);
+        }
+    }, [hasNext, currentIndex, history, setSelectedItem]);
+
+    const handleNavigatePrevious = useCallback(() => {
+        if (hasPrevious) {
+            setSelectedItem(history[currentIndex - 1]);
+        }
+    }, [hasPrevious, currentIndex, history, setSelectedItem]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full relative">
@@ -152,6 +175,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     onGenerateVariant={() => {}} // Placeholder for now
                     isLoading={isLoading}
                     activeFilters={filters}
+                    onNavigateNext={handleNavigateNext}
+                    onNavigatePrevious={handleNavigatePrevious}
+                    hasNext={hasNext}
+                    hasPrevious={hasPrevious}
+                    currentIndex={currentIndex}
+                    totalItems={history.length}
                 />
             </div>
             <div className="hidden lg:block lg:col-span-4 h-full">
@@ -161,6 +190,10 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     isFavorite={isFavorite}
                     onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                     onUpdate={handleUpdateItem}
+                    onNavigateNext={handleNavigateNext}
+                    onNavigatePrevious={handleNavigatePrevious}
+                    hasNext={hasNext}
+                    hasPrevious={hasPrevious}
                 />
             </div>
             <DetailModal
@@ -171,6 +204,10 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                 onUpdate={handleUpdateItem}
                 onGenerateVariant={() => {}}
+                onNavigateNext={handleNavigateNext}
+                onNavigatePrevious={handleNavigatePrevious}
+                hasNext={hasNext}
+                hasPrevious={hasPrevious}
             />
             <ErrorDisplay message={error} onDismiss={() => setError(null)} activeView="forge" />
         </div>

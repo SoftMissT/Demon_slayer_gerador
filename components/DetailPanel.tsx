@@ -15,6 +15,8 @@ import { TextArea } from './ui/TextArea';
 import { TextInput } from './ui/TextInput';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { KatanaIcon } from './icons/KatanaIcon';
+import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
+import { ChevronRightIcon } from './icons/ChevronRightIcon';
 
 interface DetailPanelProps {
     item: GeneratedItem | null;
@@ -22,6 +24,10 @@ interface DetailPanelProps {
     isFavorite: boolean;
     onToggleFavorite: (item: GeneratedItem) => void;
     onUpdate: (item: GeneratedItem) => void;
+    onNavigateNext: () => void;
+    onNavigatePrevious: () => void;
+    hasNext: boolean;
+    hasPrevious: boolean;
 }
 
 const DetailSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -47,7 +53,7 @@ const ProvenanceItem: React.FC<{ entry: ProvenanceEntry }> = ({ entry }) => {
     );
 };
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate, onNavigateNext, onNavigatePrevious, hasNext, hasPrevious }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
     const [copied, setCopied] = useState(false);
@@ -113,14 +119,22 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     
     return (
         <Card className="h-full flex flex-col bg-gray-800/30">
-            <header className="p-4 border-b border-gray-700 flex justify-between items-start gap-4 flex-shrink-0">
-                <div className="flex-grow">
+            <header className="p-4 border-b border-gray-700 flex justify-between items-center gap-2 flex-shrink-0">
+                 <Tooltip text="Item Anterior">
+                    <div className="flex-shrink-0">
+                        <Button variant="ghost" className="!p-2" onClick={onNavigatePrevious} disabled={!hasPrevious} aria-label="Item Anterior">
+                            <ChevronLeftIcon className="w-6 h-6" />
+                        </Button>
+                    </div>
+                </Tooltip>
+
+                <div className="flex-grow text-center min-w-0">
                     {isEditing ? (
                          <TextInput label="" value={currentName} onChange={e => handleFieldChange('nome', e.target.value)} />
                     ) : (
-                        <h2 className="text-2xl font-bold text-white font-gangofthree">{currentName}</h2>
+                        <h2 className="text-2xl font-bold text-white font-gangofthree truncate" title={currentName}>{currentName}</h2>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mt-1 flex-wrap">
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-400 mt-1 flex-wrap">
                         <TagIcon className="w-4 h-4" />
                         <span>{item.categoria}</span>
                         {item.raridade && <><span>•</span><span>{item.raridade}</span></>}
@@ -128,6 +142,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                         {item.preco_sugerido && <><span>•</span><span>{new Intl.NumberFormat('pt-BR').format(item.preco_sugerido)} ryo</span></>}
                     </div>
                 </div>
+                
                 <div className="flex items-center gap-1 flex-shrink-0">
                     {isEditing ? (
                         <Tooltip text="Salvar Alterações">
@@ -146,6 +161,13 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                         <Button variant="ghost" className="!p-2" onClick={() => onToggleFavorite(item)}>
                             <StarIcon className={`w-5 h-5 ${isFavorite ? 'text-yellow-400' : ''}`} filled={isFavorite} />
                         </Button>
+                    </Tooltip>
+                     <Tooltip text="Próximo Item">
+                        <div className="flex-shrink-0">
+                            <Button variant="ghost" className="!p-2" onClick={onNavigateNext} disabled={!hasNext} aria-label="Próximo Item">
+                                <ChevronRightIcon className="w-6 h-6" />
+                            </Button>
+                        </div>
                     </Tooltip>
                 </div>
             </header>

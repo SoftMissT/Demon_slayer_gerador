@@ -11,6 +11,10 @@ interface DetailModalProps {
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onUpdate: (item: GeneratedItem) => void;
+  onNavigateNext: () => void;
+  onNavigatePrevious: () => void;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 const DetailModalComponent: React.FC<DetailModalProps> = ({

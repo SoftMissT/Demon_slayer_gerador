@@ -8,6 +8,7 @@ import { HelpIcon } from './icons/HelpIcon';
 import { DiscordLoginButton } from './DiscordLoginButton';
 import { AboutTooltip } from './AboutTooltip';
 import { Tooltip } from './ui/Tooltip';
+import { ShareButton } from './ShareButton';
 
 interface HeaderProps {
     activeView: AppView;
@@ -87,6 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <HelpIcon className="w-6 h-6" />
                     </button>
                 </Tooltip>
+                <ShareButton />
                  <AboutTooltip onClick={onOpenAbout} />
 
                 {user ? (
