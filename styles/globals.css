@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Yuji+Syuku&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Yuji+Syuku&family=Montserrat:wght@600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -268,61 +268,82 @@
 
 /* --- Discord Login Button --- */
 .tooltip-container {
-    position: relative;
-    cursor: pointer;
-    transition: all 0.2s;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.5s linear;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tooltip-container:hover {
+  transform: translateX(-50px);
 }
 
-.borde-back {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(145deg, #373b44, #42464d);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.borde-back::before {
-    content: '';
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    background: #3c3f44;
-    border-radius: 50%;
-}
-
-.icon {
-    position: relative;
-    z-index: 1;
-    color: #aeb2b7;
+.tooltip-container .icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background-color: #5865f2;
+  cursor: pointer;
+  fill: #fff;
+  color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 25px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .tooltip {
-    position: absolute;
-    top: 50%;
-    right: 50px;
-    transform: translateY(-50%);
-    padding: 5px 10px;
-    background: #2a2d31;
-    border-radius: 5px;
-    color: white;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s;
+  position: absolute;
+  top: 50%;
+  left: -45px;
+  transform: translateY(-50%) translateX(-32%);
+  width: 160px;
+  height: 52px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.6s;
+  border-radius: 50px;
+  background-image: linear-gradient(
+    -90deg,
+    #f47fff 0%,
+    #5865f2 75%,
+    #5865f2 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  padding-right: 16px;
+  color: #fff;
+  font-size: 18px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tooltip::before {
+  position: absolute;
+  content: "";
+  height: 0.6em;
+  width: 0.6em;
+  right: -0.2em;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  background: #5865f2;
 }
 
 .tooltip-container:hover .tooltip {
-    opacity: 1;
-    visibility: visible;
+  left: 100%;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 5;
 }
-.tooltip-container:hover .icon {
-    color: #5865f2;
-}
+
 
 @keyframes fade-in-fast {
   from { opacity: 0; }
