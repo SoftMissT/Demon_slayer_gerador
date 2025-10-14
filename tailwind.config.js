@@ -8,8 +8,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', '"Noto Sans JP"', 'system-ui', 'sans-serif'],
-        kimetsu: ['"Sawarabi Mincho"', 'serif'], // Para logo/display
-        gangofthree: ['"M PLUS 1p"', '"Sawarabi Mincho"', 'serif'], // Para headings
+        gangofthree: ['"Yuji Syuku"', 'serif'],
       },
     },
   },

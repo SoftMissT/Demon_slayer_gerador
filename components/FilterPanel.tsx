@@ -1,30 +1,30 @@
+// FIX: Implemented the FilterPanel component to resolve module not found errors. This component provides the UI for filtering and configuring the item generation process.
 import React from 'react';
-// FIX: Added Rarity to type imports to be used in the onChange handler type assertion.
-import type { FilterState, Category, Rarity } from '../types';
+import type { FilterState, AIFlags, Category, Rarity } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { TextArea } from './ui/TextArea';
+import { Select } from './ui/Select';
 import { SearchableSelect } from './ui/SearchableSelect';
 import { SearchableMultiSelect } from './ui/SearchableMultiSelect';
 import { NumberInput } from './ui/NumberInput';
 import { Slider } from './ui/Slider';
+import { TextArea } from './ui/TextArea';
+import { TextInput } from './ui/TextInput';
 import { Switch } from './ui/Switch';
 import { CollapsibleSection } from './ui/CollapsibleSection';
-import { RefreshIcon } from './icons/RefreshIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
-import { HammerIcon } from './icons/HammerIcon';
+import { RefreshIcon } from './icons/RefreshIcon';
+import { FilterIcon } from './icons/FilterIcon';
 import {
-    CATEGORY_OPTIONS,
+    RARITY_OPTIONS,
+    PAIS_OPTIONS,
     THEME_OPTIONS,
     ORIGIN_OPTIONS,
     BREATHING_STYLE_OPTIONS,
-    PROFESSION_OPTIONS,
     WEAPON_TYPE_OPTIONS,
-    GRIP_TYPE_OPTIONS,
-    RARITY_OPTIONS,
-    PAIS_OPTIONS
+    PROFESSION_OPTIONS
 } from '../constants';
-import { AIFlags } from '../types';
+import { CATEGORIES, RARITIES } from '../types';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -45,81 +45,159 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   aiFlags,
   onAIFlagChange,
 }) => {
-  const handleCategoryChange = (value: string) => {
-    onFilterChange('category', value as Category);
-    onFilterChange('subCategory', ''); // Reset subcategory on category change
-  };
-
-  const isWeaponOrAccessory = filters.category === 'Arma' || filters.category === 'Acessório';
-  const isHunter = filters.category === 'Caçador';
+    const isHunterCategory = filters.category === 'Caçador' || filters.category === 'NPC';
+    const isWeaponCategory = filters.category === 'Arma' || filters.category === 'Acessório';
 
   return (
-    <Card className="h-full flex flex-col bg-gray-800/30">
-      <div className="p-4 border-b border-gray-700 flex-shrink-0">
-        <h2 className="text-lg font-bold text-white font-gangofthree">Filtros da Forja</h2>
-        <p className="text-sm text-gray-400">Molde sua criação com precisão.</p>
+    <Card className="h-full flex flex-col">
+      <div className="p-4 border-b border-gray-700 flex-shrink-0 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+            <FilterIcon className="w-6 h-6" />
+            <h2 className="text-lg font-bold text-white font-gangofthree">Filtros da Forja</h2>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onReset} disabled={isLoading}>
+            <RefreshIcon className="w-4 h-4" /> Resetar
+        </Button>
       </div>
-      <div className="flex-grow p-4 overflow-y-auto space-y-4 inner-scroll">
-        <SearchableSelect label="Categoria" options={CATEGORY_OPTIONS} value={filters.category} onChange={handleCategoryChange} />
-        
-        {isWeaponOrAccessory && (
-            <SearchableSelect label="Tipo de Arma" options={WEAPON_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
-        )}
-        
-        {isHunter && (
-          <>
-            <SearchableSelect label="Arma Principal" options={WEAPON_TYPE_OPTIONS} value={filters.hunterWeapon} onChange={(v) => onFilterChange('hunterWeapon', v)} />
-            <SearchableSelect label="Estilo de Empunhadura" options={GRIP_TYPE_OPTIONS} value={filters.subCategory} onChange={(v) => onFilterChange('subCategory', v)} />
-          </>
-        )}
 
-        <NumberInput label="Quantidade" value={filters.quantity} onChange={(v) => onFilterChange('quantity', v)} min={1} max={5} />
+      <div className="flex-grow p-4 space-y-4 overflow-y-auto inner-scroll">
+        <div className="grid grid-cols-2 gap-4">
+            <Select 
+                label="Categoria"
+                options={CATEGORIES}
+                value={filters.category}
+                onChange={value => onFilterChange('category', value as Category)}
+            />
+            <NumberInput 
+                label="Quantidade"
+                value={filters.quantity}
+                onChange={value => onFilterChange('quantity', value)}
+                min={1} max={5}
+            />
+        </div>
+
+        <SearchableSelect 
+            label="Temática Principal"
+            options={THEME_OPTIONS}
+            value={filters.tematica}
+            onChange={value => onFilterChange('tematica', value)}
+        />
         
-        <CollapsibleSection title="Detalhes da Criação">
+        <CollapsibleSection title="Detalhes do Mundo">
             <div className="space-y-4 pt-2">
-                <SearchableSelect label="Temática / Era" options={THEME_OPTIONS} value={filters.tematica} onChange={(v) => onFilterChange('tematica', v)} />
-                <SearchableSelect label="Inspiração Cultural e Regional" options={PAIS_OPTIONS} value={filters.pais} onChange={(v) => onFilterChange('pais', v)} />
-                <SearchableMultiSelect label="Origens" options={ORIGIN_OPTIONS} selected={filters.origins} onChange={(v) => onFilterChange('origins', v)} />
-                <SearchableMultiSelect label="Respirações" options={BREATHING_STYLE_OPTIONS} selected={filters.breathingStyles} onChange={(v) => onFilterChange('breathingStyles', v)} />
-                <SearchableMultiSelect label="Profissões" options={PROFESSION_OPTIONS} selected={filters.professions} onChange={(v) => onFilterChange('professions', v)} />
-                {/* FIX: Removed incorrect .map() on RARITY_OPTIONS which was already formatted, and corrected the type assertion in onChange to use the Rarity type. */}
-                <SearchableSelect label="Raridade" options={RARITY_OPTIONS} value={filters.rarity} onChange={(v) => onFilterChange('rarity', v as Rarity)} />
-                <Slider label="Nível/Poder Sugerido" value={filters.level} onChange={(e) => onFilterChange('level', parseInt(e.target.value, 10))} min={1} max={20} step={1} />
-                {isWeaponOrAccessory && (
-                    <Slider 
-                        label="Preço Sugerido (ryo)" 
-                        value={filters.suggestedPrice} 
-                        onChange={(e) => onFilterChange('suggestedPrice', parseInt(e.target.value, 10))} 
-                        min={1} 
-                        max={10000} 
-                        step={50} 
-                        tooltip="Influencia a qualidade dos materiais e a raridade percebida."
+                <SearchableSelect 
+                    label="País/Cultura de Inspiração"
+                    options={PAIS_OPTIONS}
+                    value={filters.pais}
+                    onChange={value => onFilterChange('pais', value)}
+                />
+                <SearchableMultiSelect
+                    label="Origens"
+                    options={ORIGIN_OPTIONS}
+                    selected={filters.origins}
+                    onChange={value => onFilterChange('origins', value)}
+                />
+            </div>
+        </CollapsibleSection>
+
+        {isHunterCategory && (
+            <CollapsibleSection title="Detalhes do Caçador" defaultOpen>
+                 <div className="space-y-4 pt-2">
+                    <SearchableMultiSelect
+                        label="Estilos de Respiração"
+                        options={BREATHING_STYLE_OPTIONS}
+                        selected={filters.breathingStyles}
+                        onChange={value => onFilterChange('breathingStyles', value)}
+                    />
+                     <SearchableSelect
+                        label="Arma Principal"
+                        options={WEAPON_TYPE_OPTIONS}
+                        value={filters.hunterWeapon}
+                        onChange={value => onFilterChange('hunterWeapon', value)}
+                    />
+                    <SearchableMultiSelect
+                        label="Profissões"
+                        options={PROFESSION_OPTIONS}
+                        selected={filters.professions}
+                        onChange={value => onFilterChange('professions', value)}
+                    />
+                </div>
+            </CollapsibleSection>
+        )}
+        
+        <CollapsibleSection title="Parâmetros de Jogo">
+             <div className="space-y-4 pt-2">
+                <Select 
+                    label="Raridade"
+                    options={RARITIES}
+                    value={filters.rarity}
+                    onChange={value => onFilterChange('rarity', value as Rarity)}
+                />
+                 <Slider
+                    label="Nível/Poder Sugerido"
+                    value={filters.level}
+                    onChange={e => onFilterChange('level', parseInt(e.target.value, 10))}
+                    min={1} max={100} step={1}
+                />
+                {isWeaponCategory && (
+                    <Slider
+                        label="Preço Sugerido (Ryo)"
+                        value={filters.suggestedPrice}
+                        onChange={e => onFilterChange('suggestedPrice', parseInt(e.target.value, 10))}
+                        min={10} max={100000} step={10}
                     />
                 )}
             </div>
         </CollapsibleSection>
-        
-        <CollapsibleSection title="Diretivas Avançadas de IA">
+
+        <CollapsibleSection title="Instruções para a IA">
             <div className="space-y-4 pt-2">
-                <TextArea label="Modificador de Prompt" placeholder="Ex: 'Com foco em furtividade' ou 'inspirado em mitologia nórdica'" rows={3} value={filters.promptModifier} onChange={(e) => onFilterChange('promptModifier', e.target.value)} />
-                <TextArea label="Referências de Estilo Visual" placeholder="Ex: 'arte de Yoshitaka Amano, Ufotable, dark fantasy'" rows={2} value={filters.styleReferences} onChange={(e) => onFilterChange('styleReferences', e.target.value)} />
-                <div className="p-2 bg-gray-900/50 rounded-md space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-300">Motores de IA</h4>
-                    <Switch label="Gemini (Enriquecimento)" checked={aiFlags.useGemini} onChange={e => onAIFlagChange('useGemini', e.target.checked)} />
-                    <Switch label="GPT-4o (Polimento)" checked={aiFlags.useGpt} onChange={e => onAIFlagChange('useGpt', e.target.checked)} />
-                    <Switch label="DeepSeek (Conceito)" checked={aiFlags.useDeepSeek} onChange={e => onAIFlagChange('useDeepSeek', e.target.checked)} />
+                <TextArea
+                    label="Modificador de Prompt"
+                    value={filters.promptModifier}
+                    onChange={e => onFilterChange('promptModifier', e.target.value)}
+                    rows={3}
+                    placeholder="Ex: 'Foque em um design sombrio e gótico' ou 'Crie algo cômico e inesperado'."
+                />
+                 <TextInput
+                    label="Referências de Estilo (Visual)"
+                    value={filters.styleReferences}
+                    onChange={e => onFilterChange('styleReferences', e.target.value)}
+                    placeholder="Ex: 'art by yoshitaka amano, final fantasy'"
+                />
+            </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Configurações de IA">
+            <div className="space-y-3 pt-2">
+                <p className="text-xs text-gray-400">Selecione quais modelos de IA usar no processo de geração em 3 etapas.</p>
+                <div className="space-y-2">
+                    <Switch label="1. DeepSeek (Conceito)" checked={aiFlags.useDeepSeek} onChange={e => onAIFlagChange('useDeepSeek', e.target.checked)} />
+                    <Switch label="2. Gemini (Estrutura)" checked={aiFlags.useGemini} onChange={e => onAIFlagChange('useGemini', e.target.checked)} />
+                    <Switch label="3. GPT-4o (Polimento)" checked={aiFlags.useGpt} onChange={e => onAIFlagChange('useGpt', e.target.checked)} />
+                </div>
+                <div className="pt-2 space-y-2">
+                     <TextInput
+                        label="Foco para Gemini"
+                        value={filters.aiFocusGemini}
+                        onChange={e => onFilterChange('aiFocusGemini', e.target.value)}
+                        placeholder="Ex: 'desenvolver a lore'"
+                    />
+                     <TextInput
+                        label="Foco para GPT-4o"
+                        value={filters.aiFocusGpt}
+                        onChange={e => onFilterChange('aiFocusGpt', e.target.value)}
+                        placeholder="Ex: 'tornar o texto mais poético'"
+                    />
                 </div>
             </div>
         </CollapsibleSection>
       </div>
-      <div className="p-4 border-t border-gray-700 flex-shrink-0 space-y-2">
+
+      <div className="p-4 border-t border-gray-700 flex-shrink-0">
         <Button onClick={onGenerate} disabled={isLoading} className="w-full forge-button">
-            {isLoading ? <SparklesIcon className="w-5 h-5 animate-pulse" /> : <HammerIcon className="w-5 h-5" />}
-            {isLoading ? 'Forjando...' : 'Forjar'}
-        </Button>
-        <Button variant="secondary" onClick={onReset} disabled={isLoading} className="w-full">
-            <RefreshIcon className="w-5 h-5" />
-            Resetar Filtros
+          <SparklesIcon className="w-5 h-5" />
+          {isLoading ? 'Forjando...' : 'Forjar'}
         </Button>
       </div>
     </Card>

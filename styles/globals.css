@@ -1,5 +1,4 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=M+PLUS+1p:wght@700;900&family=Sawarabi+Mincho&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Yuji+Syuku&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,6 +8,13 @@
   body {
     @apply bg-gray-900 text-gray-200 font-sans;
   }
+}
+
+@layer utilities {
+    .font-gangofthree {
+        text-shadow: 0px 2px 5px var(--accent-glow);
+        letter-spacing: 0.05em;
+    }
 }
 
 :root {

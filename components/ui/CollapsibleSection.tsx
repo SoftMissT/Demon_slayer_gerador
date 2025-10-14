@@ -7,10 +7,13 @@ interface CollapsibleSectionProps {
   children: React.ReactNode;
   wrapperClassName?: string;
   forceOpen?: boolean;
+  // FIX: Added `defaultOpen` prop to allow parent component to control the initial open state.
+  defaultOpen?: boolean;
 }
 
-export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, wrapperClassName = '', forceOpen }) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, wrapperClassName = '', forceOpen, defaultOpen = false }) => {
+  // FIX: Initialize the open state using the `defaultOpen` prop.
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   useEffect(() => {
     if (forceOpen !== undefined) {
