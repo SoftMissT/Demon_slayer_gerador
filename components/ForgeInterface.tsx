@@ -7,7 +7,6 @@ import type { GeneratedItem, FilterState, User, AIFlags, Category, Rarity } from
 import { AuthOverlay } from './AuthOverlay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { DetailModal } from './DetailModal';
-import { ImageGenerationModal } from './ImageGenerationModal';
 
 const INITIAL_FILTERS: FilterState = {
     category: 'Aleatório',
@@ -15,6 +14,7 @@ const INITIAL_FILTERS: FilterState = {
     hunterWeapon: 'Aleatório',
     quantity: 1,
     tematica: 'Aleatória',
+    pais: 'Aleatório',
     origins: [],
     breathingStyles: [],
     professions: [],
@@ -63,7 +63,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [imageGenerationItem, setImageGenerationItem] = useState<GeneratedItem | null>(null);
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -123,10 +122,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
     };
 
-    const handleGenerateImage = useCallback((item: GeneratedItem) => {
-        setImageGenerationItem(item);
-    }, []);
-
     const isFavorite = useMemo(() => {
         if (!selectedItem) return false;
         return favorites.some(fav => fav.id === selectedItem.id);
@@ -157,7 +152,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     onGenerateVariant={() => {}} // Placeholder for now
                     isLoading={isLoading}
                     activeFilters={filters}
-                    onGenerateImage={handleGenerateImage}
                 />
             </div>
             <div className="hidden lg:block lg:col-span-4 h-full">
@@ -167,7 +161,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     isFavorite={isFavorite}
                     onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                     onUpdate={handleUpdateItem}
-                    onGenerateImage={handleGenerateImage}
                 />
             </div>
             <DetailModal
@@ -178,12 +171,6 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                 onUpdate={handleUpdateItem}
                 onGenerateVariant={() => {}}
-                onGenerateImage={handleGenerateImage}
-            />
-            <ImageGenerationModal
-                isOpen={!!imageGenerationItem}
-                onClose={() => setImageGenerationItem(null)}
-                prompt={imageGenerationItem?.imagePromptDescription || ''}
             />
             <ErrorDisplay message={error} onDismiss={() => setError(null)} activeView="forge" />
         </div>

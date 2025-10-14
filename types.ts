@@ -54,6 +54,7 @@ export interface FilterState {
   hunterWeapon: string;
   quantity: number;
   tematica: string;
+  pais: string;
   origins: string[];
   breathingStyles: string[];
   professions: string[];

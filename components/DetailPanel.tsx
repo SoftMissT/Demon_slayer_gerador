@@ -15,12 +15,10 @@ import { TextArea } from './ui/TextArea';
 import { TextInput } from './ui/TextInput';
 import { ClipboardIcon } from './icons/ClipboardIcon';
 import { KatanaIcon } from './icons/KatanaIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
 
 interface DetailPanelProps {
     item: GeneratedItem | null;
     onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-    onGenerateImage: (item: GeneratedItem) => void;
     isFavorite: boolean;
     onToggleFavorite: (item: GeneratedItem) => void;
     onUpdate: (item: GeneratedItem) => void;
@@ -49,7 +47,7 @@ const ProvenanceItem: React.FC<{ entry: ProvenanceEntry }> = ({ entry }) => {
     );
 };
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, onGenerateImage, isFavorite, onToggleFavorite, onUpdate }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
     const [copied, setCopied] = useState(false);
@@ -187,11 +185,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                     </div>
                 )}
                 <div className="flex justify-end items-center gap-2">
-                    {item.imagePromptDescription && (
-                        <Button variant="primary" className="forge-button" onClick={() => onGenerateImage(item)}>
-                            <SparklesIcon className="w-5 h-5"/> Gerar Imagem
-                        </Button>
-                    )}
                     <Button variant="secondary" onClick={handleDownload}><DownloadIcon className="w-5 h-5"/> Baixar TXT</Button>
                     <Button variant="secondary" onClick={handleCopy}>
                         {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <CopyIcon className="w-5 h-5"/>}

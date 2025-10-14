@@ -82,6 +82,7 @@ ${Object.entries(filters)
 
 **Instruções Adicionais:**
 ${promptModifier ? `- Prioridade: ${promptModifier}\n` : ''}
+${filters.pais && filters.pais !== 'Aleatório' ? `- Incorpore fortemente elementos culturais e estéticos do seguinte país/região: '${filters.pais}'.\n` : ''}
 ${(filters.category === 'Arma' || filters.category === 'Acessório') ? `- Considere o 'suggestedPrice' (${filters.suggestedPrice} ryo) ao descrever os materiais, a qualidade e a raridade geral do item. Um preço mais alto deve refletir materiais mais raros, artesanato superior e uma história mais rica.\n` : ''}
 ${(filters.category === 'Caçador' && filters.hunterWeapon && filters.hunterWeapon !== 'Aleatório') ? `- O caçador deve ser proficiente com sua Arma Principal: '${filters.hunterWeapon}'. Sua história, aparência e estilo de combate devem refletir o uso desta arma.\n` : ''}
 - Seja criativo, detalhado e fiel ao tom sombrio e épico de Demon Slayer.

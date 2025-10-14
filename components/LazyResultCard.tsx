@@ -10,7 +10,6 @@ interface LazyResultCardProps {
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onGenerateImage: (item: GeneratedItem) => void;
 }
 
 export const LazyResultCard: React.FC<LazyResultCardProps> = (props) => {

@@ -48,26 +48,28 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, optio
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white text-left flex items-center justify-between"
+          className="custom-select-trigger"
         >
           <span className="truncate">{selectedLabel}</span>
           <ChevronDownIcon className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
         {isOpen && (
-          <div className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-hidden flex flex-col">
-            <input
-              type="text"
-              placeholder={placeholder}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-900 py-2 px-3 text-white border-b border-gray-700 focus:outline-none"
-            />
+          <div className="absolute z-10 mt-1 w-full custom-dropdown max-h-60 overflow-hidden flex flex-col">
+            <div className="p-2">
+                <input
+                  type="text"
+                  placeholder={placeholder}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                   className="w-full bg-black/20 py-1.5 px-3 text-white border border-[var(--border-color)] rounded-md focus:outline-none focus:border-[var(--accent-primary)]"
+                />
+            </div>
             <ul className="overflow-y-auto">
               {filteredOptions.map(option => (
                 <li
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
-                  className="px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer"
+                  className="dropdown-option"
                 >
                   {option.label}
                 </li>

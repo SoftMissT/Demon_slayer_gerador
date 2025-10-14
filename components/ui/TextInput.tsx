@@ -18,7 +18,7 @@ export const TextInput: React.FC<TextInputProps> = ({ label, tooltip, ...props }
       )}
       <input
         type="text"
-        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
+        className="w-full bg-[var(--card-bg)] border border-[var(--border-color)] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] disabled:opacity-50"
         {...props}
       />
     </div>

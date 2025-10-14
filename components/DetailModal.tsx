@@ -8,7 +8,6 @@ interface DetailModalProps {
   onClose: () => void;
   item: GeneratedItem | null;
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onGenerateImage: (item: GeneratedItem) => void;
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onUpdate: (item: GeneratedItem) => void;

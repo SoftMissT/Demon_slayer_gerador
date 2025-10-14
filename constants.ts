@@ -5,11 +5,13 @@ import { ORIGINS_DATA } from './lib/originsData';
 import { BREATHING_STYLES_DATA } from './lib/breathingStylesData';
 import { WEAPON_TYPES, GRIP_TYPES } from './lib/weaponData';
 import { TEMATICAS_DATA } from './lib/tematicasData';
+import { PAISES_DATA } from './lib/paisesData';
 
 export const APP_NAME = 'Kimetsu Forge';
 
 export const CATEGORY_OPTIONS = CATEGORIES.map(c => ({ value: c, label: c }));
 export const RARITY_OPTIONS = RARITIES.map(r => ({ value: r, label: r }));
+export const PAIS_OPTIONS = PAISES_DATA;
 
 export const THEME_OPTIONS = TEMATICAS_DATA;
 

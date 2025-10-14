@@ -7,7 +7,6 @@ import { StarIcon } from './icons/StarIcon';
 import { DotsVerticalIcon } from './icons/DotsVerticalIcon';
 import { Tooltip } from './ui/Tooltip';
 import { ClipboardIcon } from './icons/ClipboardIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
 
 interface ResultCardProps {
   item: GeneratedItem;
@@ -16,7 +15,6 @@ interface ResultCardProps {
   isFavorite: boolean;
   onToggleFavorite: (item: GeneratedItem) => void;
   onGenerateVariant: (item: GeneratedItem, variantType: 'agressiva' | 'técnica' | 'defensiva') => void;
-  onGenerateImage: (item: GeneratedItem) => void;
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({
@@ -26,7 +24,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   isFavorite,
   onToggleFavorite,
   onGenerateVariant,
-  onGenerateImage,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -57,12 +54,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     }
     setMenuOpen(false);
   };
-
-  const handleGenerateImageClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onGenerateImage(item);
-      setMenuOpen(false);
-  }
   
   const canGenerateVariant = item.categoria !== 'Missões' && item.categoria !== 'NPC' && item.categoria !== 'Evento' && item.categoria !== 'Local/Cenário';
 
@@ -135,9 +126,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                             <>
                                 <button onClick={handleCopyPrompt} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
                                     <ClipboardIcon className="w-4 h-4" /> {copied ? 'Copiado!' : 'Copiar Prompt'}
-                                </button>
-                                <button onClick={handleGenerateImageClick} className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
-                                    <SparklesIcon className="w-4 h-4" /> Gerar Imagem
                                 </button>
                             </>
                         )}

@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -8,6 +6,8 @@ import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { MidjourneyIcon } from './icons/MidjourneyIcon';
 import { GptIcon } from './icons/GptIcon';
 import { GeminiIcon } from './icons/GeminiIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
+import { cleanImagePrompt } from '../lib/client/promptUtils';
 
 interface PromptCardProps {
     model: 'midjourney' | 'gpt' | 'gemini';
@@ -16,31 +16,36 @@ interface PromptCardProps {
 
 export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
     const [copied, setCopied] = useState(false);
+    const [currentPrompt, setCurrentPrompt] = useState(prompt);
 
     const modelConfig = {
         midjourney: {
             title: "Prompt para Midjourney",
             className: "model-midjourney",
-            icon: <MidjourneyIcon className="w-6 h-6 text-alchemy-gold" />
+            icon: <MidjourneyIcon className="w-6 h-6" />
         },
         gpt: {
             title: "Prompt para DALL-E / GPT",
             className: "model-gpt",
-            icon: <GptIcon className="w-6 h-6 text-crystal-blue" />
+            icon: <GptIcon className="w-6 h-6" />
         },
         gemini: {
             title: "Prompt para Gemini",
             className: "model-gemini",
-            icon: <GeminiIcon className="w-6 h-6 text-elixir-green" />
+            icon: <GeminiIcon className="w-6 h-6" />
         }
     };
 
     const config = modelConfig[model];
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(prompt);
+        navigator.clipboard.writeText(currentPrompt);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleClean = () => {
+        setCurrentPrompt(cleanImagePrompt(currentPrompt));
     };
     
     return (
@@ -51,6 +56,10 @@ export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
                     <h3 className="text-lg font-bold text-white font-gangofthree">{config.title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button variant="ghost" onClick={handleClean}>
+                        <SparklesIcon className="w-5 h-5" />
+                        Otimizar
+                    </Button>
                     <Button variant="ghost" onClick={handleCopy}>
                         {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
                         {copied ? 'Copiado!' : 'Copiar'}
@@ -58,7 +67,7 @@ export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
                 </div>
             </div>
             <div className="bg-gray-900/50 p-4 rounded-md text-sm text-gray-300 whitespace-pre-wrap overflow-auto flex-grow font-mono">
-                <code>{prompt}</code>
+                <code>{currentPrompt}</code>
             </div>
         </Card>
     );

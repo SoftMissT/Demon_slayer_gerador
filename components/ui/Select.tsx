@@ -16,7 +16,7 @@ export const Select: React.FC<SelectProps> = ({ label, value, onChange, options 
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none"
+          className="w-full bg-[var(--card-bg)] border border-[var(--border-color)] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] appearance-none"
         >
           {options.map((option) => (
             <option key={option} value={option}>

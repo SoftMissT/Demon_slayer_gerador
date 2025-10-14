@@ -26,7 +26,7 @@ export const Slider: React.FC<SliderProps> = ({ label, value, min, max, step, to
         max={max}
         step={step}
         value={value}
-        className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+        className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
         {...props}
       />
     </div>

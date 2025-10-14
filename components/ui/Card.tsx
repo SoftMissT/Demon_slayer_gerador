@@ -25,8 +25,8 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick })
     return () => card.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const baseClasses = "relative bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4 transition-all duration-300 overflow-hidden";
-  const clickableClasses = onClick ? "cursor-pointer hover:border-indigo-500 hover:shadow-indigo-500/20" : "";
+  const baseClasses = "relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg shadow-lg p-4 transition-all duration-300 overflow-hidden";
+  const clickableClasses = onClick ? "cursor-pointer hover:border-[var(--accent-primary)] hover:shadow-[0_0_15px_var(--accent-glow)]" : "";
   
   return (
     <div ref={cardRef} className={`${baseClasses} ${clickableClasses} ${className}`} onClick={onClick}>
