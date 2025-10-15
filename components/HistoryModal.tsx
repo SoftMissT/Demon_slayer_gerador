@@ -9,6 +9,7 @@ import { VirtualizedList } from './ui/VirtualizedList';
 import { MidjourneyIcon } from './icons/MidjourneyIcon';
 import { GptIcon } from './icons/GptIcon';
 import { GeminiIcon } from './icons/GeminiIcon';
+import { Tooltip } from './ui/Tooltip';
 
 interface HistoryModalProps {
     isOpen: boolean;
@@ -64,9 +65,21 @@ const HistoryListItem: React.FC<{ item: HistoryItem; onSelect: (item: HistoryIte
                     ) : (
                         <div className="flex items-center gap-3 mt-1.5">
                             <span className="text-xs text-gray-500">Prompts para:</span>
-                            {(item as AlchemyHistoryItem).inputs?.generateFor?.midjourney && <MidjourneyIcon className="w-4 h-4 text-gray-400" title="Midjourney" />}
-                            {(item as AlchemyHistoryItem).inputs?.generateFor?.gpt && <GptIcon className="w-4 h-4 text-gray-400" title="GPT/DALL-E" />}
-                            {(item as AlchemyHistoryItem).inputs?.generateFor?.gemini && <GeminiIcon className="w-4 h-4 text-gray-400" title="Gemini" />}
+                            {(item as AlchemyHistoryItem).inputs?.generateFor?.midjourney && (
+                                <Tooltip text="Midjourney" position="top">
+                                    <MidjourneyIcon className="w-4 h-4 text-gray-400" />
+                                </Tooltip>
+                            )}
+                            {(item as AlchemyHistoryItem).inputs?.generateFor?.gpt && (
+                                <Tooltip text="GPT/DALL-E" position="top">
+                                    <GptIcon className="w-4 h-4 text-gray-400" />
+                                </Tooltip>
+                            )}
+                            {(item as AlchemyHistoryItem).inputs?.generateFor?.gemini && (
+                                <Tooltip text="Gemini" position="top">
+                                    <GeminiIcon className="w-4 h-4 text-gray-400" />
+                                </Tooltip>
+                            )}
                         </div>
                     )}
 
