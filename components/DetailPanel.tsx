@@ -28,6 +28,8 @@ interface DetailPanelProps {
     onNavigatePrevious: () => void;
     hasNext: boolean;
     hasPrevious: boolean;
+    isMobile?: boolean;
+    onBackToResults?: () => void;
 }
 
 const DetailSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -75,7 +77,7 @@ const EditableField: React.FC<{
 );
 
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate, onNavigateNext, onNavigatePrevious, hasNext, hasPrevious }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate, onNavigateNext, onNavigatePrevious, hasNext, hasPrevious, isMobile, onBackToResults }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
     const [copied, setCopied] = useState(false);
@@ -97,8 +99,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         );
     }
     
-    // FIX: Widened the type of 'field' from 'keyof GeneratedItem' to 'string' to allow updates to properties specific to item subtypes (e.g., 'dano' for GeneratedWeapon).
-    // The component's logic ensures only valid properties are updated for the given item type.
     const handleFieldChange = (field: string, value: any) => {
         setEditableItem(prev => {
             if (!prev) return null;
@@ -108,7 +108,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         });
     };
     
-    // FIX: Widened the type of 'parentField' to 'string' to allow updates on nested objects within specific item subtypes (e.g., 'kekkijutsu' for GeneratedOni).
     const handleNestedFieldChange = (parentField: string, childField: string, value: any) => {
         setEditableItem(prev => {
             if (!prev) return null;
@@ -166,13 +165,20 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     return (
         <Card className="h-full flex flex-col bg-gray-800/30">
             <header className="p-4 border-b border-gray-700 flex justify-between items-center gap-2 flex-shrink-0">
-                 <Tooltip text="Item Anterior">
-                    <div className="flex-shrink-0">
-                        <Button variant="ghost" className="!p-2" onClick={onNavigatePrevious} disabled={!hasPrevious} aria-label="Item Anterior">
-                            <ChevronLeftIcon className="w-6 h-6" />
-                        </Button>
-                    </div>
-                </Tooltip>
+                 {isMobile ? (
+                    <Button variant="ghost" className="!p-2 -ml-2" onClick={onBackToResults} aria-label="Voltar para Resultados">
+                        <ChevronLeftIcon className="w-6 h-6" />
+                    </Button>
+                 ) : (
+                    <Tooltip text="Item Anterior">
+                        <div className="flex-shrink-0">
+                            <Button variant="ghost" className="!p-2" onClick={onNavigatePrevious} disabled={!hasPrevious} aria-label="Item Anterior">
+                                <ChevronLeftIcon className="w-6 h-6" />
+                            </Button>
+                        </div>
+                    </Tooltip>
+                 )}
+
 
                 <div className="flex-grow text-center min-w-0">
                     {isEditing ? (
@@ -208,13 +214,15 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                             <StarIcon className={`w-5 h-5 ${isFavorite ? 'text-yellow-400' : ''}`} filled={isFavorite} />
                         </Button>
                     </Tooltip>
-                     <Tooltip text="Próximo Item">
-                        <div className="flex-shrink-0">
-                            <Button variant="ghost" className="!p-2" onClick={onNavigateNext} disabled={!hasNext} aria-label="Próximo Item">
-                                <ChevronRightIcon className="w-6 h-6" />
-                            </Button>
-                        </div>
-                    </Tooltip>
+                    {!isMobile && (
+                        <Tooltip text="Próximo Item">
+                            <div className="flex-shrink-0">
+                                <Button variant="ghost" className="!p-2" onClick={onNavigateNext} disabled={!hasNext} aria-label="Próximo Item">
+                                    <ChevronRightIcon className="w-6 h-6" />
+                                </Button>
+                            </div>
+                        </Tooltip>
+                    )}
                 </div>
             </header>
             <div className="flex-grow p-4 overflow-y-auto space-y-6 inner-scroll">

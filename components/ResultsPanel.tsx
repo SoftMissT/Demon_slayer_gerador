@@ -34,6 +34,8 @@ interface ResultsPanelProps {
   totalItems: number;
   activeTab: ResultsTab;
   onTabChange: (tab: ResultsTab) => void;
+  isMobile?: boolean;
+  onBackToFilters?: () => void;
 }
 
 const TabButton: React.FC<{
@@ -78,6 +80,8 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   totalItems,
   activeTab,
   onTabChange,
+  isMobile,
+  onBackToFilters,
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const activeList = activeTab === 'favorites' ? favorites : history;
@@ -113,9 +117,16 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
     return (
         <div className="h-full flex flex-col bg-gray-800/30 rounded-lg">
             <div className="px-4 pt-4 border-b border-gray-700 flex-shrink-0 flex justify-between items-center flex-wrap gap-y-2">
-                <div>
-                    <h2 className="text-lg font-bold text-white font-gangofthree">Resultados da Forja</h2>
-                    <p className="text-sm text-gray-400">Suas criações, histórico e favoritos.</p>
+                <div className="flex items-center gap-2">
+                    {isMobile && (
+                        <Button variant="ghost" className="!p-2 -ml-2" onClick={onBackToFilters} aria-label="Voltar para Filtros">
+                            <ChevronLeftIcon className="w-6 h-6" />
+                        </Button>
+                    )}
+                    <div>
+                        <h2 className="text-lg font-bold text-white font-gangofthree">Resultados da Forja</h2>
+                        <p className="text-sm text-gray-400">Suas criações, histórico e favoritos.</p>
+                    </div>
                 </div>
                 {totalItems > 0 && !isLoading && (
                     <div className="flex items-center gap-2">

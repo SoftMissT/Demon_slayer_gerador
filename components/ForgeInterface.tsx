@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FilterPanel } from './FilterPanel';
 import { ResultsPanel } from './ResultsPanel';
 import { DetailPanel } from './DetailPanel';
@@ -6,7 +7,6 @@ import { orchestrateGeneration } from '../lib/client/orchestrationService';
 import type { GeneratedItem, FilterState, User, AIFlags, Category, Rarity } from '../types';
 import { AuthOverlay } from './AuthOverlay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
-import { DetailModal } from './DetailModal';
 import { CollapsibleColumn } from './CollapsibleColumn';
 
 const INITIAL_FILTERS: FilterState = {
@@ -43,6 +43,19 @@ const INITIAL_AI_FLAGS: AIFlags = {
     useDeepSeek: true,
 };
 
+const useIsMobile = (query: string = '(max-width: 1023px)') => {
+    const [matches, setMatches] = useState(false);
+    useEffect(() => {
+        const media = window.matchMedia(query);
+        const listener = () => setMatches(media.matches);
+        // Set initial state
+        listener();
+        window.addEventListener('resize', listener);
+        return () => window.removeEventListener('resize', listener);
+    }, [query]);
+    return matches;
+};
+
 
 interface ForgeInterfaceProps {
     isAuthenticated: boolean;
@@ -71,9 +84,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const [aiFlags, setAIFlags] = useState<AIFlags>(INITIAL_AI_FLAGS);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [collapsedColumns, setCollapsedColumns] = useState({ left: false, middle: false, right: false });
     const [activeResultsTab, setActiveResultsTab] = useState<'history' | 'favorites'>('history');
+    
+    const isMobile = useIsMobile();
+    const [mobileView, setMobileView] = useState<'filters' | 'results' | 'details'>('filters');
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -86,7 +101,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const handleGenerate = useCallback(async () => {
         setIsLoading(true);
         setError(null);
-        setActiveResultsTab('history'); // Switch to history tab on new generation
+        setActiveResultsTab('history');
         try {
             const results: GeneratedItem[] = [];
             for (let i = 0; i < filters.quantity; i++) {
@@ -95,12 +110,15 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
             }
             setHistory(prev => [...results, ...prev]);
             setSelectedItem(results[0]);
+            if (isMobile) {
+                setMobileView('results');
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
             setIsLoading(false);
         }
-    }, [filters, aiFlags, user, setHistory, setSelectedItem]);
+    }, [filters, aiFlags, user, setHistory, setSelectedItem, isMobile]);
     
     const handleResetFilters = useCallback(() => {
         if (window.confirm('Tem certeza de que deseja resetar todos os filtros? Isso restaurará todas as opções para seus valores padrão.')) {
@@ -150,14 +168,14 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     
     const handleSelect = (item: GeneratedItem) => {
         setSelectedItem(item);
-        if (window.innerWidth < 1024) {
-            setIsDetailModalOpen(true);
+        if (isMobile) {
+            setMobileView('details');
         }
     };
     
     const handleTabChange = useCallback((tab: 'history' | 'favorites') => {
         if (activeResultsTab !== tab) {
-            setSelectedItem(null); // Clear selection for a smoother UX when switching lists
+            setSelectedItem(null); 
         }
         setActiveResultsTab(tab);
     }, [activeResultsTab, setSelectedItem]);
@@ -195,21 +213,19 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
     }, [hasPrevious, currentIndex, activeList, setSelectedItem]);
 
-    const { left, middle, right } = collapsedColumns;
+    const motionVariants = {
+        hidden: { opacity: 0, x: -20, transition: { duration: 0.25 } },
+        visible: { opacity: 1, x: 0, transition: { duration: 0.25 } },
+        exit: { opacity: 0, x: 20, transition: { duration: 0.25 } },
+    };
 
-    const leftPanelClass = `w-[22rem] ${!left && middle ? 'flex-grow' : ''}`;
-    const middlePanelClass = `min-w-0 ${!middle ? 'flex-grow' : ''}`;
-    const rightPanelClass = `w-[28rem] hidden lg:block ${!right && middle ? 'flex-grow' : ''}`;
-
-    return (
-        <div className="flex gap-4 h-full relative">
-            {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="forge" />}
-
+    const desktopLayout = (
+        <div className="flex gap-4 h-full">
             <CollapsibleColumn
                 isCollapsed={collapsedColumns.left}
                 onToggle={() => setCollapsedColumns(p => ({ ...p, left: !p.left }))}
                 position="left"
-                className={leftPanelClass}
+                className="basis-[22rem] flex-grow max-w-sm"
             >
                 <FilterPanel
                     filters={filters}
@@ -226,7 +242,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 isCollapsed={collapsedColumns.middle}
                 onToggle={() => setCollapsedColumns(p => ({ ...p, middle: !p.middle }))}
                 position="middle"
-                className={middlePanelClass}
+                className="basis-1/2 flex-grow-[3] min-w-0"
             >
                 <ResultsPanel
                     history={history}
@@ -237,7 +253,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     onDeleteItem={handleDeleteItem}
                     onClearHistory={handleClearHistory}
                     onClearFavorites={handleClearFavorites}
-                    onGenerateVariant={() => {}} // Placeholder for now
+                    onGenerateVariant={() => {}}
                     isLoading={isLoading}
                     activeFilters={filters}
                     onNavigateNext={handleNavigateNext}
@@ -255,11 +271,11 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 isCollapsed={collapsedColumns.right}
                 onToggle={() => setCollapsedColumns(p => ({ ...p, right: !p.right }))}
                 position="right"
-                className={rightPanelClass}
+                className="hidden lg:block basis-[28rem] flex-grow max-w-lg"
             >
                 <DetailPanel
                     item={selectedItem}
-                    onGenerateVariant={() => {}} // Placeholder for now
+                    onGenerateVariant={() => {}}
                     isFavorite={isFavorite}
                     onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
                     onUpdate={handleUpdateItem}
@@ -269,20 +285,80 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     hasPrevious={hasPrevious}
                 />
             </CollapsibleColumn>
-            
-            <DetailModal
-                isOpen={isDetailModalOpen}
-                onClose={() => setIsDetailModalOpen(false)}
-                item={selectedItem}
-                isFavorite={isFavorite}
-                onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
-                onUpdate={handleUpdateItem}
-                onGenerateVariant={() => {}}
-                onNavigateNext={handleNavigateNext}
-                onNavigatePrevious={handleNavigatePrevious}
-                hasNext={hasNext}
-                hasPrevious={hasPrevious}
-            />
+        </div>
+    );
+
+    const mobileLayout = (
+        <div className="h-full w-full overflow-hidden relative">
+            <AnimatePresence mode="wait">
+                {mobileView === 'filters' && (
+                    <motion.div key="filters" variants={motionVariants} initial="hidden" animate="visible" exit="exit" className="h-full">
+                        <FilterPanel
+                            filters={filters}
+                            onFilterChange={handleFilterChange}
+                            onGenerate={handleGenerate}
+                            onReset={handleResetFilters}
+                            isLoading={isLoading}
+                            aiFlags={aiFlags}
+                            onAIFlagChange={handleAIFlagChange}
+                            isMobile={true}
+                            onViewResults={() => setMobileView('results')}
+                            historyCount={history.length}
+                        />
+                    </motion.div>
+                )}
+                {mobileView === 'results' && (
+                    <motion.div key="results" variants={motionVariants} initial="hidden" animate="visible" exit="exit" className="h-full">
+                        <ResultsPanel
+                            history={history}
+                            selectedItem={selectedItem}
+                            onSelect={handleSelect}
+                            favorites={favorites}
+                            onToggleFavorite={handleToggleFavorite}
+                            onDeleteItem={handleDeleteItem}
+                            onClearHistory={handleClearHistory}
+                            onClearFavorites={handleClearFavorites}
+                            onGenerateVariant={() => {}}
+                            isLoading={isLoading}
+                            activeFilters={filters}
+                            onNavigateNext={handleNavigateNext}
+                            onNavigatePrevious={handleNavigatePrevious}
+                            hasNext={hasNext}
+                            hasPrevious={hasPrevious}
+                            currentIndex={currentIndex}
+                            totalItems={activeList.length}
+                            activeTab={activeResultsTab}
+                            onTabChange={handleTabChange}
+                            isMobile={true}
+                            onBackToFilters={() => setMobileView('filters')}
+                        />
+                    </motion.div>
+                )}
+                {mobileView === 'details' && selectedItem && (
+                     <motion.div key="details" variants={motionVariants} initial="hidden" animate="visible" exit="exit" className="h-full">
+                        <DetailPanel
+                            item={selectedItem}
+                            onGenerateVariant={() => {}}
+                            isFavorite={isFavorite}
+                            onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
+                            onUpdate={handleUpdateItem}
+                            onNavigateNext={handleNavigateNext}
+                            onNavigatePrevious={handleNavigatePrevious}
+                            hasNext={hasNext}
+                            hasPrevious={hasPrevious}
+                            isMobile={true}
+                            onBackToResults={() => setMobileView('results')}
+                        />
+                     </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+
+    return (
+        <div className="h-full relative">
+            {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="forge" />}
+            {isMobile ? mobileLayout : desktopLayout}
             <ErrorDisplay message={error} onDismiss={() => setError(null)} activeView="forge" />
         </div>
     );

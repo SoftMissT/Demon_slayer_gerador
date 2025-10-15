@@ -31,6 +31,7 @@ import {
 import { CATEGORIES, RARITIES } from '../types';
 import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
 import { Tooltip } from './ui/Tooltip';
+import { ChevronRightIcon } from './icons/ChevronRightIcon';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -40,6 +41,9 @@ interface FilterPanelProps {
   isLoading: boolean;
   aiFlags: AIFlags;
   onAIFlagChange: (key: keyof AIFlags, value: boolean) => void;
+  isMobile?: boolean;
+  onViewResults?: () => void;
+  historyCount?: number;
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({
@@ -50,6 +54,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   isLoading,
   aiFlags,
   onAIFlagChange,
+  isMobile,
+  onViewResults,
+  historyCount = 0
 }) => {
     // Category-based flags for conditional rendering
     const isHunterCategory = filters.category === 'Caçador';
@@ -313,10 +320,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </div>
 
       <div className="p-4 border-t border-gray-700 flex-shrink-0">
-        <Button onClick={onGenerate} disabled={isLoading} className="w-full forge-button">
-          <SparklesIcon className="w-5 h-5" />
-          {isLoading ? 'Forjando...' : 'Forjar'}
-        </Button>
+        <div className={`flex items-center gap-2 ${isMobile && historyCount > 0 ? 'grid grid-cols-2' : ''}`}>
+            <Button onClick={onGenerate} disabled={isLoading} className="w-full forge-button">
+              <SparklesIcon className="w-5 h-5" />
+              {isLoading ? 'Forjando...' : 'Forjar'}
+            </Button>
+            {isMobile && historyCount > 0 && (
+                <Button onClick={onViewResults} variant="secondary" className="w-full">
+                   Ver Resultados ({historyCount}) <ChevronRightIcon className="w-5 h-5" />
+                </Button>
+            )}
+        </div>
       </div>
     </Card>
   );
