@@ -18,7 +18,7 @@ export default function App() {
     const [user, setUser] = useLocalStorage<User | null>('kimetsu-forge-user', null);
     
     const [activeView, setActiveView] = useLocalStorage<AppView>('kimetsu-forge-view', 'forge');
-    
+
     // Forge State
     const [forgeHistory, setForgeHistory] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-history', []);
     const [forgeFavorites, setForgeFavorites] = useLocalStorage<GeneratedItem[]>('kimetsu-forge-favorites', []);
@@ -89,38 +89,35 @@ export default function App() {
         }
     }, [isAuthenticated, setIsAuthenticated, setUser]);
     
-    const viewVariants = {
-        hidden: { opacity: 0, transition: { duration: 0.2 } },
-        visible: { opacity: 1, transition: { duration: 0.3 } },
-    };
+    const handleViewChange = useCallback((view: AppView) => {
+        setActiveView(view);
+    }, [setActiveView]);
 
     return (
         <div className={`app-container h-screen overflow-hidden flex ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
             <AnimatedThemedBackground view={activeView} />
              <AppSidebar
                 activeView={activeView}
-                onViewChange={setActiveView}
+                onViewChange={handleViewChange}
                 onOpenAbout={() => setIsAboutModalOpen(true)}
                 onOpenHowItWorks={() => setIsHowItWorksModalOpen(true)}
                 user={user}
                 onLoginClick={handleLoginClick}
                 onLogout={handleLogout}
-                favoritesCount={forgeFavorites.length}
             />
             <div className="relative z-10 flex flex-col h-full flex-grow">
                 <Header />
 
                 <main className="flex-grow p-2 overflow-hidden relative backdrop-blur-[2px]">
                     <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeView}
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            variants={viewVariants}
-                            className="h-full w-full"
-                        >
-                            {activeView === 'forge' ? (
+                        {activeView === 'forge' ? (
+                            <motion.div
+                                key="forge"
+                                className="h-full"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1, transition: { duration: 0.4, delay: 0.4 } }}
+                                exit={{ clipPath: 'circle(0% at 50% 50%)', transition: { duration: 0.5 } }}
+                            >
                                 <ForgeInterface 
                                     isAuthenticated={isAuthenticated}
                                     onLoginClick={handleLoginClick}
@@ -132,18 +129,27 @@ export default function App() {
                                     setSelectedItem={setSelectedItem}
                                     user={user}
                                 />
-                            ) : (
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="alchemist"
+                                className="h-full"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1, transition: { duration: 0.4, delay: 0.4 } }}
+                                exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.4 } }}
+                            >
                                 <PromptEngineeringPanel 
-                                     isAuthenticated={isAuthenticated}
-                                     onLoginClick={handleLoginClick}
-                                     history={alchemyHistory}
-                                     setHistory={setAlchemyHistory}
-                                     favorites={alchemyFavorites}
-                                     setFavorites={setAlchemyFavorites}
-                                     selectedItem={selectedAlchemyItem}
+                                        isAuthenticated={isAuthenticated}
+                                        onLoginClick={handleLoginClick}
+                                        history={alchemyHistory}
+                                        setHistory={setAlchemyHistory}
+                                        favorites={alchemyFavorites}
+                                        setFavorites={setAlchemyFavorites}
+                                        selectedItem={selectedAlchemyItem}
+                                        setSelectedItem={setSelectedAlchemyItem}
                                 />
-                            )}
-                        </motion.div>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
                 </main>
                 

@@ -6,6 +6,9 @@ import { TrashIcon } from './icons/TrashIcon';
 import { ForgeIcon } from './icons/ForgeIcon';
 import { MagicWandIcon } from './icons/MagicWandIcon';
 import { VirtualizedList } from './ui/VirtualizedList';
+import { MidjourneyIcon } from './icons/MidjourneyIcon';
+import { GptIcon } from './icons/GptIcon';
+import { GeminiIcon } from './icons/GeminiIcon';
 
 interface HistoryModalProps {
     isOpen: boolean;
@@ -17,15 +20,24 @@ interface HistoryModalProps {
     activeView: AppView;
 }
 
+const getRarityStyles = (rarity: string) => {
+    switch (rarity?.toLowerCase()) {
+        case 'comum': return { color: '#9CA3AF', backgroundColor: 'rgba(107, 114, 128, 0.2)' }; // gray-400
+        case 'incomum': return { color: '#4ADE80', backgroundColor: 'rgba(74, 222, 128, 0.2)' }; // green-400
+        case 'rara': return { color: '#60A5FA', backgroundColor: 'rgba(96, 165, 250, 0.2)' }; // blue-400
+        case 'épica': return { color: '#C084FC', backgroundColor: 'rgba(192, 132, 252, 0.2)' }; // purple-400
+        case 'lendária': return { color: '#FBBF24', backgroundColor: 'rgba(251, 191, 36, 0.2)' }; // amber-400
+        default: return { color: '#9CA3AF', backgroundColor: 'rgba(107, 114, 128, 0.2)' };
+    }
+};
+
 const HistoryListItem: React.FC<{ item: HistoryItem; onSelect: (item: HistoryItem) => void; onDelete: (id: string) => void; }> = ({ item, onSelect, onDelete }) => {
     const isForgeItem = 'categoria' in item;
-    const alchemyItem = item as AlchemyHistoryItem;
+    
     const name = isForgeItem 
         ? (item as GeneratedItem).nome || (item as GeneratedItem).title 
-        : (alchemyItem.inputs ? alchemyItem.inputs.basePrompt : 'Item de Alquimia Antigo');
-    const description = isForgeItem 
-        ? (item as GeneratedItem).descricao_curta 
-        : (alchemyItem.outputs ? Object.values(alchemyItem.outputs).filter(Boolean).join(' | ') : 'Prompt não gerado');
+        : (item as AlchemyHistoryItem).inputs?.basePrompt || 'Item de Alquimia Antigo';
+
     const createdAt = new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
     return (
@@ -36,7 +48,28 @@ const HistoryListItem: React.FC<{ item: HistoryItem; onSelect: (item: HistoryIte
                 </div>
                 <div className="min-w-0">
                     <p className="font-semibold text-white truncate">{name}</p>
-                    <p className="text-sm text-gray-400 truncate">{description}</p>
+                    
+                    {isForgeItem ? (
+                        <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
+                            {(item as GeneratedItem).categoria && <span className="bg-gray-700/80 text-gray-300 px-1.5 py-0.5 rounded-md">{(item as GeneratedItem).categoria}</span>}
+                            {(item as GeneratedItem).raridade && 
+                                <span 
+                                    className="font-medium px-1.5 py-0.5 rounded-md" 
+                                    style={getRarityStyles((item as GeneratedItem).raridade)}
+                                >
+                                    {(item as GeneratedItem).raridade}
+                                </span>}
+                            {(item as GeneratedItem).nivel_sugerido && <span className="text-gray-400">Nível {(item as GeneratedItem).nivel_sugerido}</span>}
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3 mt-1.5">
+                            <span className="text-xs text-gray-500">Prompts para:</span>
+                            {(item as AlchemyHistoryItem).inputs?.generateFor?.midjourney && <MidjourneyIcon className="w-4 h-4 text-gray-400" title="Midjourney" />}
+                            {(item as AlchemyHistoryItem).inputs?.generateFor?.gpt && <GptIcon className="w-4 h-4 text-gray-400" title="GPT/DALL-E" />}
+                            {(item as AlchemyHistoryItem).inputs?.generateFor?.gemini && <GeminiIcon className="w-4 h-4 text-gray-400" title="Gemini" />}
+                        </div>
+                    )}
+
                 </div>
             </button>
             <div className="flex-shrink-0 ml-4 flex items-center gap-2">

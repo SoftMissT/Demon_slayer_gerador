@@ -30,6 +30,7 @@ import {
 } from '../constants';
 import { CATEGORIES, RARITIES } from '../types';
 import { PROFESSIONS_BY_TEMATICA } from '../lib/professionsData';
+import { Tooltip } from './ui/Tooltip';
 
 interface FilterPanelProps {
   filters: FilterState;
@@ -90,9 +91,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             <FilterIcon className="w-6 h-6" />
             <h2 className="text-lg font-bold text-white font-gangofthree">Filtros da Forja</h2>
         </div>
-        <Button variant="ghost" size="sm" onClick={onReset} disabled={isLoading}>
-            <RefreshIcon className="w-4 h-4" /> Resetar
-        </Button>
+        <Tooltip text="Resetar Filtros">
+            <Button variant="ghost" size="sm" onClick={onReset} disabled={isLoading} className="!p-2" aria-label="Resetar filtros">
+                <RefreshIcon className="w-5 h-5" />
+            </Button>
+        </Tooltip>
       </div>
 
       <div className="flex-grow p-4 space-y-4 overflow-y-auto inner-scroll">

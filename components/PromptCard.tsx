@@ -6,8 +6,6 @@ import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { MidjourneyIcon } from './icons/MidjourneyIcon';
 import { GptIcon } from './icons/GptIcon';
 import { GeminiIcon } from './icons/GeminiIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
-import { cleanImagePrompt } from '../lib/client/promptUtils';
 
 interface PromptCardProps {
     model: 'midjourney' | 'gpt' | 'gemini';
@@ -16,7 +14,6 @@ interface PromptCardProps {
 
 export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
     const [copied, setCopied] = useState(false);
-    const [currentPrompt, setCurrentPrompt] = useState(prompt);
 
     const modelConfig = {
         midjourney: {
@@ -39,13 +36,9 @@ export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
     const config = modelConfig[model];
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(currentPrompt);
+        navigator.clipboard.writeText(prompt);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-    };
-
-    const handleCleanPrompt = () => {
-        setCurrentPrompt(cleanImagePrompt(currentPrompt));
     };
     
     return (
@@ -56,10 +49,6 @@ export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
                     <h3 className="text-lg font-bold text-white font-gangofthree">{config.title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" onClick={handleCleanPrompt}>
-                        <SparklesIcon className="w-5 h-5" />
-                        Otimizar
-                    </Button>
                     <Button variant="ghost" onClick={handleCopy}>
                         {copied ? <ClipboardCheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5" />}
                         {copied ? 'Copiado!' : 'Copiar'}
@@ -67,7 +56,7 @@ export const PromptCard: React.FC<PromptCardProps> = ({ model, prompt }) => {
                 </div>
             </div>
             <div className="bg-gray-900/50 p-4 rounded-md text-sm text-gray-300 whitespace-pre-wrap overflow-auto flex-grow font-mono">
-                <code>{currentPrompt}</code>
+                <code>{prompt}</code>
             </div>
         </Card>
     );

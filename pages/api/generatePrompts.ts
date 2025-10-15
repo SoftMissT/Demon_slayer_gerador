@@ -67,6 +67,16 @@ export default async function handler(
         if (generateGemini) requestedPrompts.push('"geminiPrompt"');
         
         let systemInstruction = `Você é um especialista em engenharia de prompts para IAs generativas de imagem. Sua tarefa é expandir um prompt base do usuário em prompts otimizados para os modelos solicitados. O resultado deve ser um objeto JSON contendo APENAS as seguintes chaves: ${requestedPrompts.join(', ')}.\n\n`;
+        
+        systemInstruction += `**Regras de Segurança de Conteúdo (MUITO IMPORTANTE):**
+- Você DEVE evitar palavras que possam acionar filtros de segurança de conteúdo.
+- Substitua termos gráficos ou violentos por alternativas seguras e artísticas.
+- Exemplos:
+  - Em vez de 'sangue', use 'líquido vermelho', 'tinta carmesim', ou 'seiva vermelha'.
+  - Em vez de 'matar' ou 'assassinar', use 'derrotar', 'vencer', ou 'superar'.
+  - Em vez de 'morte', use 'desaparecimento', 'queda', 'destruição', ou 'fim'.
+- Garanta que todos os prompts gerados sejam artísticos e evitem retratar violência realista ou gore.\n\n`;
+        
         let userPrompt = `**Prompt Base do Usuário:**\n"${basePrompt}"\n\n`;
         
         // FIX: Included the negative prompt in the user prompt sent to the AI to refine the generated prompts.

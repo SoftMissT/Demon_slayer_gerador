@@ -10,11 +10,14 @@ import { GeminiParametersComponent } from './GeminiParameters';
 import { PromptResultDisplay } from './PromptResultDisplay';
 import { AlchemyLoadingIndicator } from './AlchemyLoadingIndicator';
 import { generatePrompts } from '../lib/client/orchestrationService';
-import type { AlchemyHistoryItem, MidjourneyParameters as MJParams, GptParameters, GeminiParameters, PromptGenerationResult } from '../types';
+import type { AlchemyHistoryItem, MidjourneyParameters as MJParams, GptParameters, GeminiParameters, PromptGenerationResult, HistoryItem } from '../types';
 import { PotionIcon } from './icons/PotionIcon';
 import { AuthOverlay } from './AuthOverlay';
 import { ErrorDisplay } from './ui/ErrorDisplay';
 import { CauldronIcon } from './icons/CauldronIcon';
+import { Tooltip } from './ui/Tooltip';
+import { HistoryIcon } from './icons/HistoryIcon';
+import { HistoryModal } from './HistoryModal';
 
 interface PromptEngineeringPanelProps {
     isAuthenticated: boolean;
@@ -24,6 +27,7 @@ interface PromptEngineeringPanelProps {
     favorites: AlchemyHistoryItem[];
     setFavorites: React.Dispatch<React.SetStateAction<AlchemyHistoryItem[]>>;
     selectedItem: AlchemyHistoryItem | null;
+    setSelectedItem: React.Dispatch<React.SetStateAction<AlchemyHistoryItem | null>>;
 }
 
 const INITIAL_MJ_PARAMS: MJParams = {
@@ -45,7 +49,7 @@ const INITIAL_GEMINI_PARAMS: GeminiParameters = {
 };
 
 export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
-    isAuthenticated, onLoginClick, history, setHistory, selectedItem
+    isAuthenticated, onLoginClick, history, setHistory, selectedItem, setSelectedItem
 }) => {
     const [basePrompt, setBasePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
@@ -57,6 +61,7 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [results, setResults] = useState<PromptGenerationResult | null>(null);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
     useEffect(() => {
         if (selectedItem && selectedItem.inputs) {
@@ -102,15 +107,45 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
             setIsLoading(false);
         }
     };
+    
+    const handleSelectHistoryItem = (item: HistoryItem) => {
+        if (!('categoria' in item)) { // Type guard for AlchemyHistoryItem
+            setSelectedItem(item as AlchemyHistoryItem);
+        }
+        setIsHistoryModalOpen(false);
+    };
+
+    const handleDeleteHistoryItem = (id: string) => {
+        setHistory(prev => prev.filter(item => item.id !== id));
+        if (selectedItem?.id === id) {
+            setSelectedItem(null);
+        }
+    };
+
+    const handleClearHistory = () => {
+        if (window.confirm('Tem certeza de que deseja limpar todo o histórico de alquimia? Esta ação não pode ser desfeita.')) {
+            setHistory([]);
+            setSelectedItem(null);
+        }
+    };
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full relative">
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="alchemist" />}
             
             <Card className="flex flex-col">
-                <div className="p-4 flex-shrink-0">
-                    <h2 className="text-xl font-bold font-gangofthree text-white">Alquimista de Prompts</h2>
-                    <p className="text-sm text-gray-400">Transforme ideias simples em prompts poderosos para IAs de imagem.</p>
+                <div className="p-4 flex-shrink-0 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-xl font-bold font-gangofthree text-white">Alquimista de Prompts</h2>
+                        <p className="text-sm text-gray-400">Transforme ideias simples em prompts poderosos para IAs de imagem.</p>
+                    </div>
+                    <Tooltip text="Ver Histórico" position="left">
+                        <Button variant="secondary" onClick={() => setIsHistoryModalOpen(true)}>
+                           <HistoryIcon className="w-5 h-5" />
+                           <span className="hidden md:inline ml-2">Histórico</span>
+                        </Button>
+                    </Tooltip>
                 </div>
 
                 <div className="flex-grow p-4 overflow-y-auto space-y-4 inner-scroll">
@@ -158,6 +193,15 @@ export const PromptEngineeringPanel: React.FC<PromptEngineeringPanelProps> = ({
                 )}
             </div>
              <ErrorDisplay message={error} onDismiss={() => setError(null)} activeView="alchemist"/>
+              <HistoryModal
+                isOpen={isHistoryModalOpen}
+                onClose={() => setIsHistoryModalOpen(false)}
+                history={history}
+                onSelect={handleSelectHistoryItem}
+                onDelete={handleDeleteHistoryItem}
+                onClear={handleClearHistory}
+                activeView="alchemist"
+            />
         </div>
     );
 };

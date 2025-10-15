@@ -67,7 +67,7 @@ export const CollapsibleColumn: React.FC<CollapsibleColumnProps> = ({
             <Tooltip text={isCollapsed ? `Expandir ${columnTitle}` : `Recolher ${columnTitle}`}>
                 <button
                     onClick={onToggle}
-                    className={`absolute top-1/2 -translate-y-1/2 w-6 h-12 bg-gray-800 hover:bg-[var(--accent-primary)] text-white flex items-center justify-center transition-colors
+                    className={`absolute top-5 w-6 h-12 bg-gray-800 hover:bg-[var(--accent-primary)] text-white flex items-center justify-center transition-colors
                     ${position === 'left' ? 'right-0 translate-x-1/2 rounded-r-md' : 'left-0 -translate-x-1/2 rounded-l-md'}`}
                     style={{ zIndex: 10 }}
                 >

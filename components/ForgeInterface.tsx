@@ -103,8 +103,10 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     }, [filters, aiFlags, user, setHistory, setSelectedItem]);
     
     const handleResetFilters = useCallback(() => {
-        setFilters(INITIAL_FILTERS);
-        setAIFlags(INITIAL_AI_FLAGS);
+        if (window.confirm('Tem certeza de que deseja resetar todos os filtros? Isso restaurará todas as opções para seus valores padrão.')) {
+            setFilters(INITIAL_FILTERS);
+            setAIFlags(INITIAL_AI_FLAGS);
+        }
     }, []);
 
     const handleToggleFavorite = useCallback((item: GeneratedItem) => {
