@@ -114,9 +114,14 @@ export default function App() {
                             <motion.div
                                 key="forge"
                                 className="h-full"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1, transition: { duration: 0.4, delay: 0.4 } }}
-                                exit={{ clipPath: 'circle(0% at 50% 50%)', transition: { duration: 0.5 } }}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
+                                exit={{ 
+                                    opacity: 0, 
+                                    filter: 'blur(5px) brightness(1.2)', 
+                                    scale: 1.02,
+                                    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } 
+                                }}
                             >
                                 <ForgeInterface 
                                     isAuthenticated={isAuthenticated}
@@ -134,9 +139,14 @@ export default function App() {
                             <motion.div
                                 key="alchemist"
                                 className="h-full"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1, transition: { duration: 0.4, delay: 0.4 } }}
-                                exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.4 } }}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
+                                exit={{ 
+                                    opacity: 0, 
+                                    scale: 0.95,
+                                    rotate: -5,
+                                    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] }
+                                }}
                             >
                                 <PromptEngineeringPanel 
                                         isAuthenticated={isAuthenticated}
