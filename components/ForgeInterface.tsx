@@ -72,7 +72,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [collapsedColumns, setCollapsedColumns] = useState({ left: false, right: false });
+    const [collapsedColumns, setCollapsedColumns] = useState({ left: false, middle: false, right: false });
     const [activeResultsTab, setActiveResultsTab] = useState<'history' | 'favorites'>('history');
 
     const handleFilterChange = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -195,6 +195,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
         }
     }, [hasPrevious, currentIndex, activeList, setSelectedItem]);
 
+    const { left, middle, right } = collapsedColumns;
+
+    const leftPanelClass = `w-[22rem] ${!left && middle ? 'flex-grow' : ''}`;
+    const middlePanelClass = `min-w-0 ${!middle ? 'flex-grow' : ''}`;
+    const rightPanelClass = `w-[28rem] hidden lg:block ${!right && middle ? 'flex-grow' : ''}`;
+
     return (
         <div className="flex gap-4 h-full relative">
             {!isAuthenticated && <AuthOverlay onLoginClick={onLoginClick} view="forge" />}
@@ -203,7 +209,7 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 isCollapsed={collapsedColumns.left}
                 onToggle={() => setCollapsedColumns(p => ({ ...p, left: !p.left }))}
                 position="left"
-                className="w-[22rem]"
+                className={leftPanelClass}
             >
                 <FilterPanel
                     filters={filters}
@@ -216,7 +222,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                 />
             </CollapsibleColumn>
 
-            <div className="flex-grow h-full min-w-0">
+            <CollapsibleColumn
+                isCollapsed={collapsedColumns.middle}
+                onToggle={() => setCollapsedColumns(p => ({ ...p, middle: !p.middle }))}
+                position="middle"
+                className={middlePanelClass}
+            >
                 <ResultsPanel
                     history={history}
                     selectedItem={selectedItem}
@@ -238,13 +249,13 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     activeTab={activeResultsTab}
                     onTabChange={handleTabChange}
                 />
-            </div>
+            </CollapsibleColumn>
             
             <CollapsibleColumn
                 isCollapsed={collapsedColumns.right}
                 onToggle={() => setCollapsedColumns(p => ({ ...p, right: !p.right }))}
                 position="right"
-                className="w-[28rem] hidden lg:block"
+                className={rightPanelClass}
             >
                 <DetailPanel
                     item={selectedItem}

@@ -9,7 +9,6 @@ import useLocalStorage from './hooks/useLocalStorage';
 import type { User, GeneratedItem, AlchemyHistoryItem } from './types';
 import { ErrorDisplay } from './components/ui/ErrorDisplay';
 import { AnimatedThemedBackground } from './components/AnimatedThemedBackground';
-import { AppSidebar } from './components/AppSidebar';
 
 type AppView = 'forge' | 'alchemist';
 
@@ -94,9 +93,9 @@ export default function App() {
     }, [setActiveView]);
 
     return (
-        <div className={`app-container h-screen overflow-hidden flex ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
+        <div className={`app-container h-screen overflow-hidden flex flex-col ${activeView === 'forge' ? 'theme-forge' : 'theme-alchemist'}`}>
             <AnimatedThemedBackground view={activeView} />
-             <AppSidebar
+            <Header
                 activeView={activeView}
                 onViewChange={handleViewChange}
                 onOpenAbout={() => setIsAboutModalOpen(true)}
@@ -105,69 +104,65 @@ export default function App() {
                 onLoginClick={handleLoginClick}
                 onLogout={handleLogout}
             />
-            <div className="relative z-10 flex flex-col h-full flex-grow">
-                <Header />
-
-                <main className="flex-grow p-2 overflow-hidden relative backdrop-blur-[2px]">
-                    <AnimatePresence mode="wait">
-                        {activeView === 'forge' ? (
-                            <motion.div
-                                key="forge"
-                                className="h-full"
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
-                                exit={{ 
-                                    opacity: 0, 
-                                    filter: 'blur(5px) brightness(1.2)', 
-                                    scale: 1.02,
-                                    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } 
-                                }}
-                            >
-                                <ForgeInterface 
+            <main className="relative z-10 flex-grow p-4 overflow-hidden backdrop-blur-[2px]">
+                <AnimatePresence mode="wait">
+                    {activeView === 'forge' ? (
+                        <motion.div
+                            key="forge"
+                            className="h-full"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
+                            exit={{ 
+                                opacity: 0, 
+                                filter: 'blur(5px) brightness(1.2)', 
+                                scale: 1.02,
+                                transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } 
+                            }}
+                        >
+                            <ForgeInterface 
+                                isAuthenticated={isAuthenticated}
+                                onLoginClick={handleLoginClick}
+                                history={forgeHistory}
+                                setHistory={setForgeHistory}
+                                favorites={forgeFavorites}
+                                setFavorites={setForgeFavorites}
+                                selectedItem={selectedItem}
+                                setSelectedItem={setSelectedItem}
+                                user={user}
+                            />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="alchemist"
+                            className="h-full"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
+                            exit={{ 
+                                opacity: 0, 
+                                scale: 0.95,
+                                rotate: -5,
+                                transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] }
+                            }}
+                        >
+                            <PromptEngineeringPanel 
                                     isAuthenticated={isAuthenticated}
                                     onLoginClick={handleLoginClick}
-                                    history={forgeHistory}
-                                    setHistory={setForgeHistory}
-                                    favorites={forgeFavorites}
-                                    setFavorites={setForgeFavorites}
-                                    selectedItem={selectedItem}
-                                    setSelectedItem={setSelectedItem}
-                                    user={user}
-                                />
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="alchemist"
-                                className="h-full"
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
-                                exit={{ 
-                                    opacity: 0, 
-                                    scale: 0.95,
-                                    rotate: -5,
-                                    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] }
-                                }}
-                            >
-                                <PromptEngineeringPanel 
-                                        isAuthenticated={isAuthenticated}
-                                        onLoginClick={handleLoginClick}
-                                        history={alchemyHistory}
-                                        setHistory={setAlchemyHistory}
-                                        favorites={alchemyFavorites}
-                                        setFavorites={setAlchemyFavorites}
-                                        selectedItem={selectedAlchemyItem}
-                                        setSelectedItem={setSelectedAlchemyItem}
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </main>
-                
-                <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
-                <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
+                                    history={alchemyHistory}
+                                    setHistory={setAlchemyHistory}
+                                    favorites={alchemyFavorites}
+                                    setFavorites={setAlchemyFavorites}
+                                    selectedItem={selectedAlchemyItem}
+                                    setSelectedItem={setSelectedAlchemyItem}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
+            
+            <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+            <HowItWorksModal isOpen={isHowItWorksModalOpen} onClose={() => setIsHowItWorksModalOpen(false)} />
 
-                <ErrorDisplay message={appError} onDismiss={() => setAppError(null)} />
-            </div>
+            <ErrorDisplay message={appError} onDismiss={() => setAppError(null)} />
         </div>
     );
 }

@@ -43,7 +43,7 @@ export const LazyResultCard: React.FC<LazyResultCardProps> = (props) => {
     }, []);
 
     return (
-        <div ref={cardRef} className="min-h-[140px]">
+        <div ref={cardRef} className="min-h-[240px]">
             {isVisible ? <ResultCard {...props} /> : <ResultCardSkeleton />}
         </div>
     );

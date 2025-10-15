@@ -5,9 +5,12 @@ import { InfoTooltip } from './InfoTooltip';
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   tooltip?: string;
+  className?: string;
 }
 
-export const TextInput: React.FC<TextInputProps> = ({ label, tooltip, ...props }) => {
+export const TextInput: React.FC<TextInputProps> = ({ label, tooltip, className = '', ...props }) => {
+  const baseClasses = "w-full bg-[var(--card-bg)] border border-[var(--border-color)] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] disabled:opacity-50";
+
   return (
     <div>
       {label && (
@@ -18,7 +21,7 @@ export const TextInput: React.FC<TextInputProps> = ({ label, tooltip, ...props }
       )}
       <input
         type="text"
-        className="w-full bg-[var(--card-bg)] border border-[var(--border-color)] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] disabled:opacity-50"
+        className={`${baseClasses} ${className}`}
         {...props}
       />
     </div>

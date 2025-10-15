@@ -5,12 +5,13 @@ import { ChevronRightIcon } from './icons/ChevronRightIcon';
 import { FilterIcon } from './icons/FilterIcon';
 import { KatanaIcon } from './icons/KatanaIcon';
 import { Tooltip } from './ui/Tooltip';
+import { AnvilIcon } from './icons/AnvilIcon';
 
 interface CollapsibleColumnProps {
     children: React.ReactNode;
     isCollapsed: boolean;
     onToggle: () => void;
-    position: 'left' | 'right';
+    position: 'left' | 'middle' | 'right';
     className?: string;
 }
 
@@ -21,8 +22,12 @@ export const CollapsibleColumn: React.FC<CollapsibleColumnProps> = ({
     position,
     className = ''
 }) => {
-    const columnTitle = position === 'left' ? 'Filtros' : 'Detalhes';
-    const Icon = position === 'left' ? FilterIcon : KatanaIcon;
+    const columnConfig = {
+        left: { title: 'Filtros', Icon: FilterIcon, ButtonIcon: ChevronLeftIcon },
+        middle: { title: 'Resultados', Icon: AnvilIcon, ButtonIcon: ChevronRightIcon },
+        right: { title: 'Detalhes', Icon: KatanaIcon, ButtonIcon: ChevronRightIcon }
+    };
+    const { title: columnTitle, Icon, ButtonIcon: IconComponent } = columnConfig[position];
 
     const variants = {
         open: { width: 'auto', opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 30 } },
@@ -33,6 +38,10 @@ export const CollapsibleColumn: React.FC<CollapsibleColumnProps> = ({
         open: { rotate: 0 },
         collapsed: { rotate: 180 },
     };
+
+    const buttonPositionClass = position === 'left' 
+        ? 'right-0 translate-x-1/2 rounded-r-md' 
+        : 'left-0 -translate-x-1/2 rounded-l-md';
 
     return (
         <motion.div
@@ -68,11 +77,11 @@ export const CollapsibleColumn: React.FC<CollapsibleColumnProps> = ({
                 <button
                     onClick={onToggle}
                     className={`absolute top-5 w-6 h-12 bg-gray-800 hover:bg-[var(--accent-primary)] text-white flex items-center justify-center transition-colors
-                    ${position === 'left' ? 'right-0 translate-x-1/2 rounded-r-md' : 'left-0 -translate-x-1/2 rounded-l-md'}`}
+                    ${buttonPositionClass}`}
                     style={{ zIndex: 10 }}
                 >
                     <motion.div initial={false} animate={isCollapsed ? 'collapsed' : 'open'} variants={buttonVariants}>
-                        {position === 'left' ? <ChevronLeftIcon className="w-5 h-5" /> : <ChevronRightIcon className="w-5 h-5" />}
+                        <IconComponent className="w-5 h-5" />
                     </motion.div>
                 </button>
             </Tooltip>

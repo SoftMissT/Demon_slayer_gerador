@@ -53,6 +53,28 @@ const ProvenanceItem: React.FC<{ entry: ProvenanceEntry }> = ({ entry }) => {
     );
 };
 
+const EditableField: React.FC<{
+    isEditing: boolean;
+    label: string;
+    value: string | undefined;
+    onChange: (value: string) => void;
+    as?: 'input' | 'textarea';
+}> = ({ isEditing, label, value, onChange, as = 'input' }) => (
+    <div className="prose-p:!my-1">
+        <p>
+            <strong className="text-gray-400">{label}: </strong>
+            {!isEditing ? (
+                 <span className="text-white">{value || 'N/A'}</span>
+            ) : as === 'input' ? (
+                 <TextInput label="" value={value || ''} onChange={e => onChange(e.target.value)} className="!py-1 !px-2 !text-sm mt-1" />
+            ) : (
+                 <TextArea value={value || ''} onChange={e => onChange(e.target.value)} rows={3} className="!py-1 !px-2 !text-sm mt-1" />
+            )}
+        </p>
+    </div>
+);
+
+
 export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVariant, isFavorite, onToggleFavorite, onUpdate, onNavigateNext, onNavigatePrevious, hasNext, hasPrevious }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableItem, setEditableItem] = useState<GeneratedItem | null>(item);
@@ -75,8 +97,29 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
         );
     }
     
-    const handleFieldChange = (field: keyof GeneratedItem, value: any) => {
-        setEditableItem(prev => prev ? { ...prev, [field]: value } : null);
+    // FIX: Widened the type of 'field' from 'keyof GeneratedItem' to 'string' to allow updates to properties specific to item subtypes (e.g., 'dano' for GeneratedWeapon).
+    // The component's logic ensures only valid properties are updated for the given item type.
+    const handleFieldChange = (field: string, value: any) => {
+        setEditableItem(prev => {
+            if (!prev) return null;
+            const updatedItem = { ...prev } as any;
+            updatedItem[field] = value;
+            return updatedItem;
+        });
+    };
+    
+    // FIX: Widened the type of 'parentField' to 'string' to allow updates on nested objects within specific item subtypes (e.g., 'kekkijutsu' for GeneratedOni).
+    const handleNestedFieldChange = (parentField: string, childField: string, value: any) => {
+        setEditableItem(prev => {
+            if (!prev) return null;
+            const updatedItem = { ...prev } as any;
+            const parentObject = updatedItem[parentField] || {};
+            updatedItem[parentField] = {
+                ...parentObject,
+                [childField]: value,
+            };
+            return updatedItem;
+        });
     };
 
     const handleSave = () => {
@@ -116,6 +159,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
     }
 
     const currentName = ('title' in editableItem && editableItem.title) || editableItem.nome;
+    const weaponItem = editableItem as GeneratedWeapon;
+    const hunterItem = editableItem as GeneratedHunter;
+    const oniItem = editableItem as GeneratedOni;
     
     return (
         <Card className="h-full flex flex-col bg-gray-800/30">
@@ -179,11 +225,80 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ item, onGenerateVarian
                     {isEditing ? <TextArea value={editableItem.descricao || ''} onChange={e => handleFieldChange('descricao', e.target.value)} rows={8}/> : <p>{item.descricao}</p>}
                 </DetailSection>
 
+                {/* --- CATEGORY SPECIFIC SECTIONS --- */}
+                {(item.categoria === 'Arma' || item.categoria === 'Acessório') && (
+                    <DetailSection title="Mecânicas de Jogo">
+                        <div className="space-y-2">
+                           <EditableField isEditing={isEditing} label="Dano" value={weaponItem.dano} onChange={v => handleFieldChange('dano', v)} />
+                           <EditableField isEditing={isEditing} label="Dados" value={weaponItem.dados} onChange={v => handleFieldChange('dados', v)} />
+                           <EditableField isEditing={isEditing} label="Tipo de Dano" value={weaponItem.tipo_de_dano} onChange={v => handleFieldChange('tipo_de_dano', v)} />
+                           <EditableField isEditing={isEditing} label="Status Aplicado" value={weaponItem.status_aplicado} onChange={v => handleFieldChange('status_aplicado', v)} />
+                           <EditableField isEditing={isEditing} label="Efeitos Secundários" value={weaponItem.efeitos_secundarios} onChange={v => handleFieldChange('efeitos_secundarios', v)} as="textarea" />
+                        </div>
+                    </DetailSection>
+                )}
+                
+                {(item.categoria === 'Caçador' || item.categoria === 'NPC') && (
+                    <DetailSection title="Detalhes do Personagem">
+                        <div className="space-y-2">
+                            <EditableField isEditing={isEditing} label="Classe/Arquétipo" value={hunterItem.classe} onChange={v => handleFieldChange('classe', v)} />
+                            <EditableField isEditing={isEditing} label="Personalidade" value={hunterItem.personalidade} onChange={v => handleFieldChange('personalidade', v)} as="textarea" />
+                            <EditableField isEditing={isEditing} label="Background" value={hunterItem.background} onChange={v => handleFieldChange('background', v)} as="textarea" />
+                        </div>
+                    </DetailSection>
+                )}
+
+                {item.categoria === 'Inimigo/Oni' && (
+                    <DetailSection title="Detalhes do Oni">
+                        <div className="space-y-2">
+                            <EditableField isEditing={isEditing} label="Nível de Poder" value={oniItem.power_level} onChange={v => handleFieldChange('power_level', v)} />
+                            {oniItem.kekkijutsu && (
+                                <div className="p-2 border border-gray-700 rounded-md">
+                                    <h5 className="font-semibold text-sm text-indigo-300 mb-1">Kekkijutsu</h5>
+                                    <EditableField isEditing={isEditing} label="Nome" value={oniItem.kekkijutsu.nome} onChange={v => handleNestedFieldChange('kekkijutsu', 'nome', v)} />
+                                    <EditableField isEditing={isEditing} label="Descrição" value={oniItem.kekkijutsu.descricao} onChange={v => handleNestedFieldChange('kekkijutsu', 'descricao', v)} as="textarea" />
+                                </div>
+                            )}
+                             {oniItem.comportamento_combate && (
+                                <div>
+                                    <strong className="text-gray-400">Comportamento em Combate:</strong>
+                                    {isEditing ? (
+                                        <TextArea
+                                            value={Array.isArray(oniItem.comportamento_combate) ? oniItem.comportamento_combate.join('\n') : (oniItem.comportamento_combate || '')}
+                                            onChange={e => handleFieldChange('comportamento_combate', e.target.value.split('\n'))}
+                                            rows={4}
+                                            className="!py-1 !px-2 !text-sm mt-1"
+                                            placeholder="Um comportamento por linha"
+                                        />
+                                    ) : (
+                                        Array.isArray(oniItem.comportamento_combate) ? (
+                                            <ul className="list-disc list-inside mt-1">
+                                                {oniItem.comportamento_combate.map((b, i) => <li key={i}>{b}</li>)}
+                                            </ul>
+                                        ) : <p>{oniItem.comportamento_combate}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </DetailSection>
+                )}
+                {/* --- END OF CATEGORY SPECIFIC SECTIONS --- */}
+
+
                 {item.ganchos_narrativos && (
                      <DetailSection title="Ganchos Narrativos">
-                        {Array.isArray(item.ganchos_narrativos) ? (
-                            <ul className="list-disc list-inside">{item.ganchos_narrativos.map((g, i) => <li key={i}>{g}</li>)}</ul>
-                        ) : <p>{item.ganchos_narrativos}</p>}
+                        {isEditing ? (
+                             <TextArea
+                                value={Array.isArray(editableItem.ganchos_narrativos) ? editableItem.ganchos_narrativos.join('\n') : (editableItem.ganchos_narrativos || '')}
+                                onChange={e => handleFieldChange('ganchos_narrativos', e.target.value.split('\n'))}
+                                rows={4}
+                                placeholder="Um gancho por linha"
+                            />
+                        ) : (
+                            Array.isArray(item.ganchos_narrativos) ? (
+                                <ul className="list-disc list-inside">{item.ganchos_narrativos.map((g, i) => <li key={i}>{g}</li>)}</ul>
+                            ) : <p>{item.ganchos_narrativos}</p>
+                        )}
                     </DetailSection>
                 )}
                  {item.provenance && (
