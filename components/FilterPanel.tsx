@@ -1,3 +1,4 @@
+
 // FIX: Implemented the FilterPanel component to resolve module not found errors. This component provides the UI for filtering and configuring the item generation process.
 import React, { useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -230,7 +231,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                     </CollapsibleSection>
                 )}
                  {hasGameParams && (
-                    <CollapsibleSection title="Parâmetros de Jogo">
+                    <CollapsibleSection title="Parâmetros de Jogo" defaultOpen>
                          <div className="space-y-4 pt-2">
                             <Select 
                                 label="Raridade"
@@ -258,7 +259,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             </motion.div>
         </AnimatePresence>
 
-        <CollapsibleSection title="Detalhes do Mundo">
+        <CollapsibleSection title="Detalhes do Mundo" defaultOpen>
             <div className="space-y-4 pt-2">
                 <SearchableSelect 
                     label="País/Cultura de Inspiração"
@@ -275,7 +276,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             </div>
         </CollapsibleSection>
         
-        <CollapsibleSection title="Instruções para a IA">
+        <CollapsibleSection title="Instruções para a IA" defaultOpen>
             <div className="space-y-4 pt-2">
                 <TextArea
                     label="Modificador de Prompt"
@@ -293,7 +294,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Configurações de IA">
+        <CollapsibleSection title="Configurações de IA" defaultOpen>
             <div className="space-y-3 pt-2">
                 <p className="text-xs text-gray-400">Selecione quais modelos de IA usar no processo de geração em 3 etapas.</p>
                 <div className="space-y-2">

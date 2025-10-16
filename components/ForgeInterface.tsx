@@ -220,76 +220,74 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
     };
 
     const desktopLayout = (
-        <div className="w-full h-full flex justify-center">
-            <div className="flex gap-4 h-full max-w-6xl w-full">
-                {/* Left Column */}
-                <CollapsibleColumn
-                    isCollapsed={collapsedColumns.left}
-                    onToggle={() => setCollapsedColumns(p => ({ ...p, left: !p.left }))}
-                    position="left"
-                    className="basis-72 flex-shrink-0"
-                >
-                    <FilterPanel
-                        filters={filters}
-                        onFilterChange={handleFilterChange}
-                        onGenerate={handleGenerate}
-                        onReset={handleResetFilters}
-                        isLoading={isLoading}
-                        aiFlags={aiFlags}
-                        onAIFlagChange={handleAIFlagChange}
-                    />
-                </CollapsibleColumn>
+        <div className="w-full h-full flex gap-4">
+            {/* Left Column */}
+            <CollapsibleColumn
+                isCollapsed={collapsedColumns.left}
+                onToggle={() => setCollapsedColumns(p => ({ ...p, left: !p.left }))}
+                position="left"
+                className="basis-96 flex-shrink-0"
+            >
+                <FilterPanel
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onGenerate={handleGenerate}
+                    onReset={handleResetFilters}
+                    isLoading={isLoading}
+                    aiFlags={aiFlags}
+                    onAIFlagChange={handleAIFlagChange}
+                />
+            </CollapsibleColumn>
 
-                {/* Middle Column */}
-                <CollapsibleColumn
-                    isCollapsed={collapsedColumns.middle}
-                    onToggle={() => setCollapsedColumns(p => ({ ...p, middle: !p.middle }))}
-                    position="middle"
-                    className="flex-grow basis-0"
-                >
-                    <ResultsPanel
-                        history={history}
-                        selectedItem={selectedItem}
-                        onSelect={handleSelect}
-                        favorites={favorites}
-                        onToggleFavorite={handleToggleFavorite}
-                        onDeleteItem={handleDeleteItem}
-                        onClearHistory={handleClearHistory}
-                        onClearFavorites={handleClearFavorites}
-                        onGenerateVariant={() => {}}
-                        isLoading={isLoading}
-                        activeFilters={filters}
-                        onNavigateNext={handleNavigateNext}
-                        onNavigatePrevious={handleNavigatePrevious}
-                        hasNext={hasNext}
-                        hasPrevious={hasPrevious}
-                        currentIndex={currentIndex}
-                        totalItems={activeList.length}
-                        activeTab={activeResultsTab}
-                        onTabChange={handleTabChange}
-                    />
-                </CollapsibleColumn>
-                
-                {/* Right Column */}
-                <CollapsibleColumn
-                    isCollapsed={collapsedColumns.right}
-                    onToggle={() => setCollapsedColumns(p => ({ ...p, right: !p.right }))}
-                    position="right"
-                    className="hidden lg:block basis-[24rem] flex-shrink-0"
-                >
-                    <DetailPanel
-                        item={selectedItem}
-                        onGenerateVariant={() => {}}
-                        isFavorite={isFavorite}
-                        onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
-                        onUpdate={handleUpdateItem}
-                        onNavigateNext={handleNavigateNext}
-                        onNavigatePrevious={handleNavigatePrevious}
-                        hasNext={hasNext}
-                        hasPrevious={hasPrevious}
-                    />
-                </CollapsibleColumn>
-            </div>
+            {/* Middle Column */}
+            <CollapsibleColumn
+                isCollapsed={collapsedColumns.middle}
+                onToggle={() => setCollapsedColumns(p => ({ ...p, middle: !p.middle }))}
+                position="middle"
+                className="flex-grow basis-0 min-w-0"
+            >
+                <ResultsPanel
+                    history={history}
+                    selectedItem={selectedItem}
+                    onSelect={handleSelect}
+                    favorites={favorites}
+                    onToggleFavorite={handleToggleFavorite}
+                    onDeleteItem={handleDeleteItem}
+                    onClearHistory={handleClearHistory}
+                    onClearFavorites={handleClearFavorites}
+                    onGenerateVariant={() => {}}
+                    isLoading={isLoading}
+                    activeFilters={filters}
+                    onNavigateNext={handleNavigateNext}
+                    onNavigatePrevious={handleNavigatePrevious}
+                    hasNext={hasNext}
+                    hasPrevious={hasPrevious}
+                    currentIndex={currentIndex}
+                    totalItems={activeList.length}
+                    activeTab={activeResultsTab}
+                    onTabChange={handleTabChange}
+                />
+            </CollapsibleColumn>
+            
+            {/* Right Column */}
+            <CollapsibleColumn
+                isCollapsed={collapsedColumns.right}
+                onToggle={() => setCollapsedColumns(p => ({ ...p, right: !p.right }))}
+                position="right"
+                className="hidden lg:block basis-[28rem] flex-shrink-0"
+            >
+                <DetailPanel
+                    item={selectedItem}
+                    onGenerateVariant={() => {}}
+                    isFavorite={isFavorite}
+                    onToggleFavorite={selectedItem ? () => handleToggleFavorite(selectedItem) : () => {}}
+                    onUpdate={handleUpdateItem}
+                    onNavigateNext={handleNavigateNext}
+                    onNavigatePrevious={handleNavigatePrevious}
+                    hasNext={hasNext}
+                    hasPrevious={hasPrevious}
+                />
+            </CollapsibleColumn>
         </div>
     );
 
