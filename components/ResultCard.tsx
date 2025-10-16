@@ -116,7 +116,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
         className={`result-card !p-0 flex flex-col justify-between group relative overflow-hidden h-full ${isSelected ? 'selected-card' : ''}`}
         onClick={() => onSelect(item)}
     >
-        <div className="relative aspect-video w-full bg-gray-900/50 flex items-center justify-center border-b border-gray-700/50">
+        <div className="relative aspect-[4/3] w-full bg-gray-900/50 flex items-center justify-center border-b border-gray-700/50">
             <CategoryIcon category={item.categoria} className="w-12 h-12 text-gray-600 group-hover:text-[var(--accent-primary)] transition-colors duration-300" />
             <div className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm" style={getRarityStyles(item.raridade)}>
                 {item.raridade}
