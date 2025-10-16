@@ -93,41 +93,51 @@ export default async function handler(
 
         // Step 3: OpenAI for final polish (optional)
         if (aiFlags.useGpt) {
-            try {
-                const openAiClient = getOpenAiClient();
-                if (openAiClient) {
-                    const itemForPolish = {
-                        nome: ('title' in accumulatedData && accumulatedData.title) || accumulatedData.nome,
-                        categoria: accumulatedData.categoria,
-                        descricao: accumulatedData.descricao,
-                        ganchos_narrativos: accumulatedData.ganchos_narrativos,
-                        imagePromptProto: accumulatedData.imagePromptDescription,
-                    };
-                    const polishPrompt = `Você é um mestre de narrativa e um especialista em prompts visuais. Sua tarefa é fazer o polimento final no item a seguir.
-                    1.  **gameText**: Reescreva a 'descricao' e os 'ganchos_narrativos' para ter um tom de roleplay mais forte.
-                    2.  **imagePromptDescription**: Refine o 'imagePromptProto' em um prompt final e conciso para um gerador de imagens. Incorpore as seguintes referências de estilo: "${filters.styleReferences || 'nenhum'}".
-                    Retorne um objeto JSON com duas chaves: "gameText" e "imagePromptDescription".
-                    Item para polir: ${JSON.stringify(itemForPolish)}`;
-                    
-                    const response = await openAiClient.chat.completions.create({
-                        model: 'gpt-4o',
-                        response_format: { type: "json_object" },
-                        messages: [{ role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' }, { role: 'user', content: polishPrompt }]
-                    });
-                    const polishedData = safeJsonParse(response.choices[0].message.content);
+            if (!accumulatedData.nome || !accumulatedData.descricao) {
+                allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'No base content generated in previous steps.' });
+            } else {
+                try {
+                    const openAiClient = getOpenAiClient();
+                    if (openAiClient) {
+                        const itemForPolish = {
+                            nome: ('title' in accumulatedData && accumulatedData.title) || accumulatedData.nome,
+                            categoria: accumulatedData.categoria,
+                            descricao: accumulatedData.descricao,
+                            ganchos_narrativos: accumulatedData.ganchos_narrativos,
+                            imagePromptProto: accumulatedData.imagePromptDescription,
+                        };
+                        const polishPrompt = `Você é um mestre de narrativa e um especialista em prompts visuais. Sua tarefa é fazer o polimento final no item a seguir.
+1.  **descricao**: Reescreva a 'descricao' para ter um tom de roleplay mais forte, mais imersivo e poético.
+2.  **ganchos_narrativos**: Reescreva os 'ganchos_narrativos' para serem mais intrigantes e convidativos à aventura. Mantenha o formato de array de strings.
+3.  **imagePromptDescription**: Refine o 'imagePromptProto' em um prompt final e conciso para um gerador de imagens. Incorpore as seguintes referências de estilo: "${filters.styleReferences || 'nenhum'}".
+Retorne um objeto JSON com três chaves: "descricao", "ganchos_narrativos", e "imagePromptDescription".
+Item para polir: ${JSON.stringify(itemForPolish)}`;
+                        
+                        const response = await openAiClient.chat.completions.create({
+                            model: 'gpt-4o',
+                            response_format: { type: "json_object" },
+                            messages: [{ role: 'system', content: 'You are a helpful assistant designed to output valid JSON.' }, { role: 'user', content: polishPrompt }]
+                        });
+                        const polishedData = safeJsonParse(response.choices[0].message.content);
 
-                    if (polishedData && polishedData.gameText && polishedData.imagePromptDescription) {
-                        accumulatedData = { ...accumulatedData, descricao: polishedData.gameText, imagePromptDescription: polishedData.imagePromptDescription };
-                        allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'success' });
+                        if (polishedData && polishedData.descricao && polishedData.ganchos_narrativos && polishedData.imagePromptDescription) {
+                            accumulatedData = { 
+                                ...accumulatedData, 
+                                descricao: polishedData.descricao,
+                                ganchos_narrativos: polishedData.ganchos_narrativos,
+                                imagePromptDescription: polishedData.imagePromptDescription 
+                            };
+                            allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'success' });
+                        } else {
+                            allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Invalid or incomplete data from GPT.' });
+                        }
                     } else {
-                        allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Invalid data' });
+                        allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Client not configured' });
                     }
-                } else {
-                    allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Client not configured' });
+                } catch (error: any) {
+                    console.error("Error in Step 3 (OpenAI):", error);
+                    allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'failed', error: error.message });
                 }
-            } catch (error: any) {
-                console.error("Error in Step 3 (OpenAI):", error);
-                allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'failed', error: error.message });
             }
         } else {
             allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped' });
