@@ -93,8 +93,8 @@ export default async function handler(
 
         // Step 3: OpenAI for final polish (optional)
         if (aiFlags.useGpt) {
-            if (!accumulatedData.nome || !accumulatedData.descricao) {
-                allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'No base content generated in previous steps.' });
+            if (!accumulatedData.nome || (!accumulatedData.descricao && !accumulatedData.descricao_curta)) {
+                allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'No base content generated in previous steps to polish.' });
             } else {
                 try {
                     const openAiClient = getOpenAiClient();
@@ -102,12 +102,12 @@ export default async function handler(
                         const itemForPolish = {
                             nome: ('title' in accumulatedData && accumulatedData.title) || accumulatedData.nome,
                             categoria: accumulatedData.categoria,
-                            descricao: accumulatedData.descricao,
+                            descricao: accumulatedData.descricao || accumulatedData.descricao_curta,
                             ganchos_narrativos: accumulatedData.ganchos_narrativos,
                             imagePromptProto: accumulatedData.imagePromptDescription,
                         };
                         const polishPrompt = `Você é um mestre de narrativa e um especialista em prompts visuais. Sua tarefa é fazer o polimento final no item a seguir.
-1.  **descricao**: Reescreva a 'descricao' para ter um tom de roleplay mais forte, mais imersivo e poético.
+1.  **descricao**: Reescreva a 'descricao' para ter um tom de roleplay mais forte, mais imersivo e poético. Se a descrição for curta, expanda-a.
 2.  **ganchos_narrativos**: Reescreva os 'ganchos_narrativos' para serem mais intrigantes e convidativos à aventura. Mantenha o formato de array de strings.
 3.  **imagePromptDescription**: Refine o 'imagePromptProto' em um prompt final e conciso para um gerador de imagens. Incorpore as seguintes referências de estilo: "${filters.styleReferences || 'nenhum'}".
 Retorne um objeto JSON com três chaves: "descricao", "ganchos_narrativos", e "imagePromptDescription".
@@ -120,16 +120,28 @@ Item para polir: ${JSON.stringify(itemForPolish)}`;
                         });
                         const polishedData = safeJsonParse(response.choices[0].message.content);
 
-                        if (polishedData && polishedData.descricao && polishedData.ganchos_narrativos && polishedData.imagePromptDescription) {
-                            accumulatedData = { 
-                                ...accumulatedData, 
-                                descricao: polishedData.descricao,
-                                ganchos_narrativos: polishedData.ganchos_narrativos,
-                                imagePromptDescription: polishedData.imagePromptDescription 
-                            };
-                            allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'success' });
+                        if (polishedData) {
+                            let wasPolished = false;
+                            if (polishedData.descricao) {
+                                accumulatedData.descricao = polishedData.descricao;
+                                wasPolished = true;
+                            }
+                            if (polishedData.ganchos_narrativos) {
+                                accumulatedData.ganchos_narrativos = polishedData.ganchos_narrativos;
+                                wasPolished = true;
+                            }
+                            if (polishedData.imagePromptDescription) {
+                                accumulatedData.imagePromptDescription = polishedData.imagePromptDescription;
+                                wasPolished = true;
+                            }
+                            
+                            if (wasPolished) {
+                                allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'success' });
+                            } else {
+                                allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'GPT returned empty or invalid fields.' });
+                            }
                         } else {
-                            allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Invalid or incomplete data from GPT.' });
+                            allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Invalid JSON data from GPT.' });
                         }
                     } else {
                         allProvenance.push({ step: '3/3 - Final Polish', model: 'OpenAI (GPT-4o)', status: 'skipped', reason: 'Client not configured' });

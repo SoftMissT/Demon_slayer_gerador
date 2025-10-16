@@ -218,7 +218,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
                         {filteredList.map(item => (
                             <LazyResultCard
                                 key={item.id}
