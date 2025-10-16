@@ -221,12 +221,13 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
 
     const desktopLayout = (
         <div className="w-full h-full flex justify-center">
-            <div className="w-full max-w-6xl flex gap-4 h-full">
+            <div className="flex gap-4 h-full max-w-6xl w-full">
+                {/* Left Column */}
                 <CollapsibleColumn
                     isCollapsed={collapsedColumns.left}
                     onToggle={() => setCollapsedColumns(p => ({ ...p, left: !p.left }))}
                     position="left"
-                    className="basis-[20rem]"
+                    className="basis-72 flex-shrink-0"
                 >
                     <FilterPanel
                         filters={filters}
@@ -239,11 +240,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     />
                 </CollapsibleColumn>
 
+                {/* Middle Column */}
                 <CollapsibleColumn
                     isCollapsed={collapsedColumns.middle}
                     onToggle={() => setCollapsedColumns(p => ({ ...p, middle: !p.middle }))}
                     position="middle"
-                    className="flex-grow min-w-0"
+                    className="flex-grow basis-0"
                 >
                     <ResultsPanel
                         history={history}
@@ -268,11 +270,12 @@ export const ForgeInterface: React.FC<ForgeInterfaceProps> = ({
                     />
                 </CollapsibleColumn>
                 
+                {/* Right Column */}
                 <CollapsibleColumn
                     isCollapsed={collapsedColumns.right}
                     onToggle={() => setCollapsedColumns(p => ({ ...p, right: !p.right }))}
                     position="right"
-                    className="hidden lg:block basis-[24rem]"
+                    className="hidden lg:block basis-[24rem] flex-shrink-0"
                 >
                     <DetailPanel
                         item={selectedItem}
